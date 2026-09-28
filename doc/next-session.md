@@ -12,7 +12,7 @@
 - 마지막 검증(2026-09-28): cargo fmt·clippy 0, cargo test lib 375·통합 49 전부 통과 / vitest 801 / tsc·lint 0 / `yarn tauri build` exit 0.
 - 사용자 앱 데이터 백업: `%USERPROFILE%\kuro-appdata-backup-20260928`(0.4.0 세대 5로 이 PC 데이터가 초기화되기 전 상태).
 - **0.4.0 release exe 실행 확인 안 함** — 실행하면 이 PC 앱 데이터가 초기화된다. 실행 직전 사용자 재확인.
-- **미커밋**: 첫 커밋(ee5ab8b) 이후 변경 전부(64+ 파일, `data_reset/`·`ResetAllCard` 등 신규 포함). 원격 `https://DdaaaaaatG@github.com/DdaaaaaatG/Shigoto_Kuro.git`.
+- **Git**: 2026-09-28 공개 저장소를 사용자가 삭제·재생성 → 옛 기록 없는 새 첫 커밋 `99fe564`(orphan)를 `main`으로 푸시(작성자 DdaaaaaatG noreply, 파일 471개). **주의: 커밋 메시지는 「0.3.0」이지만 실제 내용은 위 0.4.0 작업 트리 전체**(병행 세션의 0.4.0 변경이 커밋 시점에 작업 트리에 있었음 — verify-manager 미실행 상태 그대로). 메시지 정정은 force push가 막혀 있어 다음 커밋 메시지에 적어 둠. 원격 `https://DdaaaaaatG@github.com/DdaaaaaatG/Shigoto_Kuro.git`. 옛 커밋 ee5ab8b는 로컬 `old-main` 브랜치에만 남음 — **절대 푸시하지 않는다**(지운 agent-memory 파일 포함). 필요 없으면 사용자가 `git branch -D old-main`.
 - 2026-09-28: `doc/100_요구조건/parts-spec.md`를 현재 규격으로 재작성, 확정사항 §1·§3·§4·§5·§6·§7 옛 문장 정리(메인 세션 직접 수정).
 - 2026-09-28: 앱 데이터 경로 `%APPDATA%\com.kuro.keyviewer`로 전면 정정 — CLAUDE.md, `.claude`(deploy 명령·rules·core 스킬 §6·§7), 화면 테스트 문서 4개(18곳), `core/data_reset.md` C-5. `/deploy` README 양식 「첫 실행」 문구 갱신, settings manual-checklist 준비 2번 옛 「등록 UI 없음」 문장 정정. **사용자 지시로 메인 세션 직접 수정(이번 1회 예외).** 옛 폴더 `%APPDATA%\kuro_keyviewer`는 원래 없었음.
 - 2026-09-28: 떠돌이 `src-tauri/.claude/agent-memory/`(bridge-designer·ui-designer·ui-implementer — `cd src-tauri` 뒤 상대 경로로 쓴 것) 정리. 앞 둘은 `.claude/agent-memory/`로 합치고, ui-implementer의 `?raw` 메모는 해결된 내용이라 삭제. 이 중 4개 파일이 첫 커밋에 들어가 있어 `git rm --cached`(다음 커밋에서 원격에서도 빠짐), `.gitignore`에 `**/.claude/agent-memory/` 추가.
@@ -21,8 +21,10 @@
 ## 2. 남은 일
 
 ### 2-1. 우선
-1. release exe 실행·캡처 확인(사용자 OK 후) → 커밋(`/sync`).
-2. ja·en 문구 검수 — CR-057, 초기화 카드(`needs review` 주석 정리는 ui 위임).
+1. **verify-manager**(0.4.0 통합 검증 — 이미 원격에 올라간 상태라 결과 이슈는 후속 커밋으로) → release exe 실행·캡처 확인(사용자 OK 후, 실행 시 이 PC 데이터 초기화).
+2. `CLAUDE.md` §9 제품 규격 요약이 옛 규격(마우스 파츠 ≤256·키연타 쾅·팔 곡선·한국어 UI) — 확정사항 §3~§6에 맞춰 정정(메인 세션 소관).
+3. 병행 세션 주의: 한 작업 트리를 두 세션이 동시에 쓰면 커밋에 상대 세션의 미검증 변경이 섞인다. 커밋 전 `git status`로 내 변경만인지 확인하고, 병행 중이면 파일 단위로 `git add`.
+4. ja·en 문구 검수 — CR-057, 초기화 카드(`needs review` 주석 정리는 ui 위임).
 
 ### 2-2. 수동 확인 대기 (기록상 미확인 — 이미 봤으면 CR 「검증됨」 처리)
 - 오버레이: MC-24(뒷머리), MC-27~30(뽀모도·알림음 자동 재생·타이머), M-40a(알파 기준 끌기, dev·release), 펜 모드 특수 키, 트레이 「새로고침」·타이머 메뉴.
