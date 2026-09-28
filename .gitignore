@@ -1,0 +1,36 @@
+# 의존성·빌드 산출물
+node_modules/
+dist/
+dist-ssr/
+src-tauri/target/
+src-tauri/gen/
+
+# 배포 패키지 (deploy 명령 산출물, 외부 전달용)
+deploy/
+
+# 로그·환경
+*.log
+.dev-tauri.log
+.env
+.env.*
+!.env.example
+
+# 안단테 원본 참조본 (커밋하지 않는다)
+_reference/
+
+# Claude 에이전트 개인 메모리 (세션별, 공유 안 함)
+.claude/agent-memory/
+# 에이전트가 하위 폴더(src-tauri 등) 기준 상대 경로로 잘못 쓴 메모리도 제외
+**/.claude/agent-memory/
+# .claude/reports/*.md 는 분석 기록물이므로 커밋 대상이다 (제외하지 않음)
+
+# 스크린샷 (run-app 산출물, 리포트에 인용된 것만 별도 보관)
+doc/300_검증/screenshots/
+
+# 편집기·OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp

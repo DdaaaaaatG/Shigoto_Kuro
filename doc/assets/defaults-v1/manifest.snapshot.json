@@ -1,0 +1,134 @@
+{
+  "canvas": {
+    "width": 900,
+    "height": 700
+  },
+  "entries": [
+    {
+      "slot": "idle",
+      "fileName": "idle.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 2522,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%5Ccom.kuro.keyviewer%5Cassets%5Cidle.png"
+    },
+    {
+      "slot": "rest",
+      "fileName": "rest.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 4143,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%5Ccom.kuro.keyviewer%5Cassets%5Crest.png"
+    },
+    {
+      "slot": "background",
+      "fileName": "background.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 22696,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Cbackground.png"
+    },
+    {
+      "slot": "kb_up",
+      "fileName": "kb_up.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 63472,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckb_up.png"
+    },
+    {
+      "slot": {
+        "kind": "kb_down",
+        "index": 0
+      },
+      "fileName": "kb_down_0.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 62013,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckb_down_0.png"
+    },
+    {
+      "slot": "key_space",
+      "fileName": "key_space.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 67767,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_space.png"
+    },
+    {
+      "slot": "key_z",
+      "fileName": "key_z.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 61269,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_z.png"
+    },
+    {
+      "slot": "key_question",
+      "fileName": "key_question.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 61772,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_question.png"
+    },
+    {
+      "slot": "key_exclamation",
+      "fileName": "key_exclamation.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 60451,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_exclamation.png"
+    },
+    {
+      "slot": "key_enter",
+      "fileName": "key_enter.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 62979,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_enter.png"
+    },
+    {
+      "slot": "key_backspace",
+      "fileName": "key_backspace.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 67141,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_backspace.png"
+    },
+    {
+      "slot": "key_undo",
+      "fileName": "key_undo.png",
+      "width": 900,
+      "height": 700,
+      "bytes": 64670,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Ckey_undo.png"
+    },
+    {
+      "slot": "mouse_base",
+      "fileName": "mouse_base.png",
+      "width": 202,
+      "height": 154,
+      "bytes": 8375,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Cmouse_base.png"
+    },
+    {
+      "slot": "pen_up",
+      "fileName": "pen_up.png",
+      "width": 90,
+      "height": 154,
+      "bytes": 11262,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Cpen_up.png"
+    },
+    {
+      "slot": {
+        "kind": "pen_down",
+        "index": 0
+      },
+      "fileName": "pen_down_0.png",
+      "width": 90,
+      "height": 154,
+      "bytes": 11494,
+      "url": "http://asset.localhost/C%3A%5CUsers%5Cuser%5CAppData%5CRoaming%2Fcom.kuro.keyviewer%5Cassets%5Cpen_down_0.png"
+    }
+  ]
+}

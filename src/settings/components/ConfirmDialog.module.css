@@ -1,0 +1,77 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.45);
+  z-index: 100;
+}
+
+.dialog {
+  width: 360px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--st-ink);
+}
+
+.message {
+  margin: 0 0 16px;
+  color: var(--st-muted);
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.danger {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--st-danger);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.outline {
+  padding: 8px 16px;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--st-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* (CR-033) 파괴 조작이 아닌 확인창(펜 손 사용 켜기 등)의 확인 버튼 색조 */
+.accent {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--st-accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.accent:hover {
+  background: var(--st-accent-hover);
+}
+
+.danger:focus-visible,
+.accent:focus-visible,
+.outline:focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: 2px;
+}

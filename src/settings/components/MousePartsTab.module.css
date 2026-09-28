@@ -1,0 +1,97 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #e8f0fe;
+  color: #1a3d7c;
+  font-weight: 600;
+}
+
+.preview {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #c9ced6;
+  border-radius: 6px;
+  background: repeating-conic-gradient(#e6e8ec 0 25%, #f7f8fa 0 50%) 0 0 / 16px 16px;
+  user-select: none;
+}
+
+.previewPicking {
+  cursor: crosshair;
+  outline: 2px solid #3b82f6;
+}
+
+.layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: #666;
+}
+
+.part {
+  position: absolute;
+  pointer-events: none;
+}
+
+.marker {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.markerShoulder {
+  background: #e53935;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actions button {
+  padding: 6px 12px;
+  border: 1px solid #b8bec8;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.values {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+  color: #444;
+}
+
+.values dd {
+  margin: 0;
+}

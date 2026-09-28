@@ -1,0 +1,89 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.root:focus {
+  outline: none;
+}
+
+.note {
+  margin: 0;
+  color: var(--st-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.groupTitle {
+  margin: var(--st-gap-xl) 0 var(--st-gap-md);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--st-ink);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-auto-rows: var(--st-slot-card-h);
+  gap: var(--st-gap-md);
+}
+
+/* (CR-033) 손 그룹 제목과 카드 격자 사이 — 격자 밖이라 R-28 카드 고정 높이와 무관 */
+.penPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-gap-sm);
+  margin-bottom: var(--st-gap-md);
+}
+
+.penNote {
+  padding: var(--st-gap-md);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-card-radius);
+  background: var(--st-nav-active);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.penNote p {
+  margin: 0;
+}
+
+.penNote p + p {
+  margin-top: var(--st-gap-xs);
+}
+
+/* (CR-035) 「기본 이미지 다운로드」 패널 — p.note 바로 아래, 카드 격자 밖(§10.3) */
+.download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--st-gap-sm) var(--st-gap-md);
+  margin-top: var(--st-gap-md);
+  padding: var(--st-gap-md);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-card-radius);
+  background: var(--st-card);
+}
+
+.downloadDesc {
+  flex: 1 1 240px;
+  min-width: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--st-muted);
+}
+
+.downloadResult {
+  flex: 1 0 100%;
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.downloadResult[data-tone='error'] {
+  color: var(--st-danger);
+}

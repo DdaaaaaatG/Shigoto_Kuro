@@ -1,0 +1,164 @@
+/* 오버레이 창은 투명 배경. 전역 리셋은 여기서만 한다(설정 창은 자체 CSS). */
+:global(html),
+:global(body[data-window='overlay']),
+:global(body[data-window='overlay'] #root) {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* 창 전체가 조작 영역(드래그 R-12·Ctrl+휠 R-04) — 배율 > 100%에서도 어디를 잡아도 .root가 받는다 (CR-012) */
+.root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  cursor: move;
+}
+
+/* 캔버스 원본 크기로 두고 transform: scale 로 상자에 맞춘다 (좌상단 기준) */
+.canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+
+.hand {
+  position: absolute;
+}
+
+/* 마우스 파츠 컨테이너 — 캔버스와 같은 크기·원점. 애니메이션 없음(젤리는 밖의 .jellyWrap 이 받는다, CR-022).
+   안쪽 img.hand 의 커서 추종(회전·늘어나기)만 여기 담는다(변환 충돌 방지, design/functions.md §5.4). */
+.armWrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 뽀모도 자리(CR-045, R-33) — .canvas 안 BackgroundLayer 다음·.jellyWrap 앞. 캔버스와 같은 크기·원점이지만
+   .jellyWrap 밖이라 젤리·부르르를 받지 않는다(배경처럼 고정) — 애니메이션·transform 선언 없음. */
+.pomodoro {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 키 누름 젤리 래퍼(CR-022, R-23) — 캔버스와 같은 크기·원점. 배경을 뺀 레이어(팔·몸통·상태·키보드) 전부를
+   감싸 한 덩어리로 출렁이게 한다. 기준점은 아래 가운데(50% 100%) — 젤리를 바닥에 놓은 것처럼 아랫부분은
+   붙박이고 위쪽이 출렁인다. */
+.jellyWrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+}
+
+/* 뒷머리 래퍼(CR-051) — .canvas 첫 자식(배경보다 아래). 기하·기준점은 .jellyWrap과 똑같이 두고, 같은 motion
+   클래스(.jelly/.jellyAlt/.shiver)를 받아 본체와 함께 출렁인다. */
+.hairWrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+}
+
+.jelly {
+  animation: jelly 350ms ease-in-out;
+}
+
+.jellyAlt {
+  animation: jellyAlt 350ms ease-in-out;
+}
+
+@keyframes jelly {
+  0% {
+    transform: scale(1, 1);
+  }
+  15% {
+    transform: scale(1.06, 0.92);
+  }
+  35% {
+    transform: scale(0.97, 1.04);
+  }
+  55% {
+    transform: scale(1.02, 0.98);
+  }
+  75% {
+    transform: scale(0.99, 1.01);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* jellyAlt: jelly 와 완전히 같은 구간·값(이름만 다르다) — 재생 신호가 바뀌면 클래스가 서로 교대돼
+   animation-name 변경으로 처음부터 다시 재생된다. */
+@keyframes jellyAlt {
+  0% {
+    transform: scale(1, 1);
+  }
+  15% {
+    transform: scale(1.06, 0.92);
+  }
+  35% {
+    transform: scale(0.97, 1.04);
+  }
+  55% {
+    transform: scale(1.02, 0.98);
+  }
+  75% {
+    transform: scale(0.99, 1.01);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* 부르르(CR-023, R-24) — 키 꾹 누름(자동 반복). 젤리보다 진폭이 작고 끊김 없이 반복된다.
+   .jelly/.jellyAlt와 동시에 붙지 않는다(design.md §10.3 우선순위 — 부르르가 우선). */
+.shiver {
+  animation: shiver 80ms ease-in-out infinite;
+}
+
+@keyframes shiver {
+  0% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1.02, 0.97);
+  }
+  50% {
+    transform: scale(1, 1);
+  }
+  75% {
+    transform: scale(0.99, 1.02);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}

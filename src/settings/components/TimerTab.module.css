@@ -1,0 +1,253 @@
+.tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-gap-md); /* CR-052 — 일반·마우스 탭과 같은 카드 간격 */
+}
+
+/* CR-052 — 카드 안 묶음 구분(모드 토글 | 시작 시간·조작, 알림음 등록 | 음량) */
+.group {
+  margin-top: var(--st-gap-sm);
+  padding-top: var(--st-gap-md);
+  border-top: 1px solid var(--st-border);
+}
+
+/* 슬라이더 값 — 등폭 숫자·고정 폭으로 값이 바뀌어도 줄이 흔들리지 않게 */
+.value {
+  min-width: 56px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink);
+}
+
+.desc {
+  margin: 0 0 var(--st-gap-md);
+  color: var(--st-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--st-gap-sm);
+  margin: var(--st-gap-sm) 0 var(--st-gap-xs);
+}
+
+.btn {
+  min-width: 88px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+  background: var(--st-card);
+  color: var(--st-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--st-accent);
+  border-color: var(--st-accent);
+  color: #fff;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--st-accent-hover);
+}
+
+.btn:hover:not(:disabled):not(.primary) {
+  background: var(--st-nav-hover);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--st-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  box-sizing: content-box;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+  background: var(--st-page);
+  margin: 0 0 var(--st-gap-md);
+}
+
+.canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: var(--st-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.colorInput {
+  width: 44px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--st-border);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+/* CR-050(타이머 모드) — 시작 시간 입력·알림음 카드도 이 파일을 쓴다 */
+
+.durationRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+/* 라벨 폭은 일반 탭 .field label(72px·600)과 맞춘다 */
+.durationLabel {
+  flex: 0 0 auto;
+  min-width: 72px;
+  font-weight: 600;
+  color: var(--st-ink);
+}
+
+/* 시·분·초 한 줄 — 칸을 하나의 입력 상자처럼 묶고 콜론으로 구분 */
+.hms {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+  height: 36px;
+  box-sizing: border-box;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+  background: var(--st-card);
+}
+
+.hms:focus-within {
+  border-color: var(--st-accent);
+}
+
+.hmsField {
+  width: 30px;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--st-ink);
+  text-align: center;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.hmsField:disabled {
+  color: var(--st-muted);
+  cursor: not-allowed;
+}
+
+/* CR-052 — 비활성(타이머 모드 아님 · 흐르는 중 잠김) 같은 회색 표시: 라벨·상자·숫자 모두 */
+.durationOff .durationLabel,
+.durationOff .hmsSep {
+  color: var(--st-muted);
+}
+
+.durationOff .hms {
+  background: var(--st-page);
+  border-color: var(--st-border);
+  opacity: 0.6;
+}
+
+.durationOff .hint {
+  opacity: 0.6;
+}
+
+.hmsField:focus-visible {
+  outline: none;
+  background: var(--st-nav-active);
+}
+
+.hms:has(.hmsField[aria-invalid='true']) {
+  border-color: var(--st-danger);
+}
+
+.hmsSep {
+  color: var(--st-muted);
+  font-weight: 600;
+}
+
+.msg {
+  margin: 0 0 var(--st-gap-xs);
+  font-size: 12px;
+  color: var(--st-muted);
+}
+
+/* 시작 시간 안내 줄 — 라벨 72px + 간격 12px 만큼 들여 입력 상자 아래에 맞추고, 빈 줄도 높이를 지켜 흔들림 방지 */
+.durationMsg {
+  min-height: 18px;
+  margin-top: 2px;
+  margin-left: 84px;
+}
+
+.msgError {
+  color: var(--st-danger);
+}
+
+.soundStatus {
+  margin: 0 0 var(--st-gap-sm);
+  font-size: 13px;
+  color: var(--st-ink);
+}
+
+/* 끝남(finished) 깜빡임 — overlay TimerText.module.css 와 같은 값(공용화 후보, timer-tab.md §14.15) */
+.blink {
+  animation: timerBlink 1s infinite;
+}
+
+@keyframes timerBlink {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}

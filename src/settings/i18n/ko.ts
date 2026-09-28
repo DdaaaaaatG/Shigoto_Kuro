@@ -1,0 +1,232 @@
+/**
+ * settings 한국어 사전 — design/i18n.md §4(ko 열). 기본 언어(`Settings.language` 기본 `'ko'`).
+ * 옛 `src/settings/labels.ts`(CR-005·CR-016·CR-018·CR-026 반영분)를 이 파일로 전사했다(design.md §3 문구 출처 문단).
+ */
+import type { Messages } from './types'
+
+const SAME_KEY = '이 키를 칠 때(없으면 타자 입력 그림)'
+
+export const ko: Messages = {
+  // 공통·창
+  windowTitle: 'kuro_keyviewer 설정',
+  pickTitle: 'PNG 이미지 선택',
+  tabsAria: '설정 탭',
+  tabGeneral: '기본 설정',
+  tabImages: '이미지 설정',
+  tabMouse: '어깨축·손 위치',
+  errorPrefix: '오류:',
+  // 기본 설정 탭
+  cardLanguage: '언어 / Language',
+  languageAria: '표시 언어',
+  cardScale: '크기 · 반응',
+  scaleLabel: '배율',
+  scaleDesc:
+    '캐릭터 표시 크기({min}%~{max}%). 오버레이에서 Ctrl+휠로도 바꿀 수 있습니다(위치 잠금 중에는 여기서만).',
+  idleLabel: '유휴 시간',
+  idleUnit: '분',
+  idleDesc: '이 시간 동안 입력이 없으면 쉬는중 그림으로 바뀝니다({min}~{max}분).',
+  idleRangeHint: '{min}~{max} 사이의 정수(분)를 입력하세요. 저장되지 않았습니다.',
+  cardWindow: '창',
+  resetPosition: '위치 초기화',
+  lockLabel: '위치 잠금 (마우스 클릭 통과)',
+  lockDesc:
+    '켜면 마우스 클릭이 캐릭터를 통과하고, 끌어서 옮길 수 없습니다. 잠금은 이 설정 창에서만 풀 수 있습니다.',
+  cardStartup: '작업표시줄 · 시작',
+  taskbarLabel: '작업표시줄에 표시',
+  taskbarDesc: '켜면 작업표시줄에 캐릭터 창 버튼이 생깁니다. 트레이 아이콘은 그대로 있습니다.',
+  autostartLabel: '컴퓨터 시작 시 자동 실행',
+  autostartDesc:
+    '켜면 Windows에 로그인할 때 자동으로 실행됩니다. 관리자 권한으로 실행한 게임 안에서도 입력을 인식하려면 이 앱을 직접 관리자 권한으로 실행하세요.',
+  autostartPending: '자동 실행 설정을 바꾸는 중입니다…',
+  // 전체 초기화(CR-054)
+  cardReset: '초기화',
+  resetAll: '전체 초기화',
+  resetAllDesc:
+    '등록한 그림·알림음과 모든 설정을 처음 설치한 상태(기본 그림)로 되돌립니다. 언어와 자동 실행 설정은 그대로 둡니다.',
+  confirmResetAllTitle: '전체 초기화',
+  confirmResetAllMessage:
+    '등록한 그림·알림음과 설정을 지우고 처음 설치한 상태로 되돌릴까요? 언어와 자동 실행 설정은 그대로이고, 오버레이는 기본 위치로 돌아갑니다. 되돌릴 수 없습니다.',
+  confirmResetAllOk: '초기화',
+  resetAllPending: '초기화하는 중입니다…',
+  resetAllDone: '초기화했습니다.',
+  // 이미지 설정 탭
+  imagesNote:
+    'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 {w}×{h}·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.', // CR-045: 「뽀모도」 추가
+  groupBackground: '배경',
+  groupKeyboard: '키보드 (본체)',
+  groupArm: '팔 (마우스)',
+  groupHand: '손 (펜)',
+  badgeRequired: '필수',
+  badgeOptional: '선택',
+  emptyOptional: '등록된 그림 없음',
+  emptyRequired: '필수 · 미등록',
+  changeImage: '이미지 변경',
+  changeImageAria: '{name} 이미지 변경',
+  clearImage: '기본값',
+  clearImageAria: '{name} 그림 지우기',
+  clearLastOnly: '마지막 장부터 지울 수 있습니다.',
+  addKbDown: '+ 타자 입력 그림 추가',
+  // addPenDown: CR-042 삭제(펜 입력 추가 카드 없음)
+  confirmClearTitle: '그림 지우기',
+  confirmClearMessage: '‘{name}’ 그림을 지울까요? 되돌릴 수 없습니다.',
+  confirmClearOk: '지우기',
+  confirmCancel: '취소',
+  // 펜 손 사용 토글(CR-033)
+  penModeLabel: '펜 손 사용',
+  penModeDesc: '「손 기본」 그림을 등록해야 켤 수 있습니다.',
+  penModeNoteOn:
+    'ON: 팔 끝에 붙은 손 그림이 키보드 입력과 클릭 때마다 바뀌고, 키보드 그림은 기본 그림에 고정되며 특수 키를 누를 때만 특수 키 그림으로 바뀝니다.', // CR-042
+  penModeNoteOff: 'OFF: 손 그림은 팔 끝에 붙어 따라다니기만 하고, 키보드 입력은 키보드 그림으로 보여 줍니다.',
+  penEnableTitle: '펜 손 사용 켜기',
+  penEnableMessage:
+    '켜면 팔 끝에 붙은 손 그림이 키보드 입력과 클릭 때마다 바뀌고, 키보드 그림은 기본 그림에 고정되며 특수 키를 누를 때만 특수 키 그림으로 바뀝니다. 켤까요?', // CR-042
+  penEnableOk: '켜기',
+  penFirstTitle: '펜 손 모드',
+  penFirstMessage:
+    '펜 손 모드를 켤까요? 켜면 팔 끝에 붙은 손 그림이 키보드 입력과 클릭 때마다 바뀌고, 키보드 그림은 기본 그림에 고정되며 특수 키를 누를 때만 특수 키 그림으로 바뀝니다.', // CR-042
+  penFirstYes: '예',
+  penFirstNo: '아니요',
+  // 기본 이미지 세트(CR-035)
+  restoreImageAria: '{name} 기본 그림으로 되돌리기',
+  confirmRestoreTitle: '기본 그림으로 되돌리기',
+  confirmRestoreMessage: '‘{name}’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
+  confirmRestoreOk: '기본 그림으로',
+  downloadDefaults: '기본 이미지 다운로드',
+  downloadDefaultsDesc: '내장 기본 그림 {n}장을 원본 크기 그대로 폴더에 저장합니다. 따라 그리거나 고쳐 쓸 때 쓰세요.',
+  pickFolderTitle: '기본 이미지를 저장할 폴더 선택',
+  exportConflictTitle: '같은 이름의 파일이 있습니다',
+  exportConflictMessage:
+    '이 폴더에 같은 이름의 파일이 {n}개 있습니다. 모두 덮어쓸까요? 덮어쓴 파일은 되돌릴 수 없습니다.',
+  exportConflictOk: '덮어쓰기',
+  exportDone: '기본 이미지 {n}장을 저장했습니다.',
+  exportPartial: '{ok}장 저장, {fail}장 실패: {files}',
+  // 뒷머리 비우기(CR-038 R-35)
+  emptyImage: '비우기',
+  emptyImageAria: '{name} 그림 비우기',
+  // 뽀모도 타이머(CR-045) + 타이머 모드·알림음(CR-050)
+  tabTimer: '타이머',
+  timerCardTitle: '뽀모도 타이머',
+  timerStopwatchEnabled: '스톱워치 사용',
+  timerStopwatchDesc:
+    '말풍선 안에 0부터 올라가는 시간을 보여 줍니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 흐릅니다.', // CR-052
+  timerCountdownEnabled: '타이머 사용',
+  timerCountdownDesc: '정한 시간부터 0까지 내려갑니다. 쉬는중에도 계속 줄어듭니다',
+  timerDuration: '시작 시간',
+  timerDurationHint: '최대 99:59:59',
+  timerDurationInvalid: '00:00:01 ~ 99:59:59 사이로 입력해 주세요',
+  timerDurationLocked: '멈춤 상태에서 바꿀 수 있습니다',
+  timerHoursAria: '시',
+  timerMinutesAria: '분',
+  timerSecondsAria: '초',
+  timerStart: '시작',
+  timerPause: '일시정지',
+  timerStop: '멈춤',
+  timerStopHint: '멈춤을 누르면 처음 시간으로 돌아갑니다', // CR-050 변경(옛 「00:00:00으로」)
+  timerControlsAria: '타이머 조작',
+  alarmCardTitle: '알림음',
+  alarmCardDesc: '타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다', // CR-052
+  alarmCurrentDefault: '지금: 기본 알림음',
+  alarmCurrentCustom: '지금: 등록한 알림음 ({format} · {size} KB)',
+  alarmImport: '파일 등록',
+  alarmPreview: '미리 듣기',
+  alarmReset: '기본값',
+  alarmFileHint: 'wav·mp3·ogg, 1MB 이하',
+  alarmVolume: '음량',
+  alarmPickTitle: '소리 파일 선택',
+  alarmPreviewFailed: '이 파일을 재생하지 못했습니다',
+  timerTextTitle: '시간 글자',
+  timerTextDesc:
+    '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
+  timerPreviewAria: '시간 글자 위치 미리보기',
+  timerTextDragAria: '시간 글자 — 끌어서 옮기기',
+  timerRotation: '회전',
+  timerSize: '크기',
+  timerColor: '글자 색',
+  // 어깨축·손 위치 탭
+  previewNoBody: '캐릭터 이미지(kb_up)가 등록되지 않았습니다.',
+  wizardIdle: '어깨축을 설정하면 팔 파츠가 그 점을 축으로 회전합니다.',
+  wizardStart: '어깨축 설정하기',
+  wizardPickShoulder: '축이 될 부분을 마우스로 클릭해주세요.',
+  wizardReview: '축 위치를 확인하고 저장하세요.',
+  wizardSave: '저장',
+  wizardCancel: '취소',
+  resetDefault: '기본값으로 리셋',
+  markerShoulder: '축(어깨)',
+  markerPart: '파츠 위치',
+  markerPen: '손 위치',
+  // CR-057: 이동 영역 설명(대기 상태, 버튼 위)
+  areaDesc:
+    '마우스를 움직이면 손이 이 사각형 안에서 따라 움직입니다. 그림 위에서 네 꼭짓점을 차례로 클릭해 사각형을 만드세요.',
+  areaStart: '사각형 이동 영역 설정',
+  areaPick1: '1/4 사각형의 왼쪽 위 꼭짓점을 클릭해주세요.',
+  areaPick2: '2/4 이제 오른쪽 위 꼭짓점을 클릭해주세요.',
+  areaPick3: '3/4 이제 오른쪽 아래 꼭짓점을 클릭해주세요.',
+  areaPick4: '4/4 마지막으로 왼쪽 아래 꼭짓점을 클릭해주세요.',
+  areaReview: '사각형이 맞는지 확인하고 저장하세요.',
+  markerArea: '이동 영역',
+  areaCorner1: '왼쪽 위',
+  areaCorner2: '오른쪽 위',
+  areaCorner3: '오른쪽 아래',
+  areaCorner4: '왼쪽 아래',
+  slots: {
+    background: { title: '배경', desc: '맨 아래에 늘 그대로 있는 그림' },
+    // CR-037 · R-34
+    hair: { title: '뒷머리', desc: '장발의 뒷머리처럼 팔 뒤에 보일 부분. 본체와 함께 흔들립니다' },
+    // CR-045 · R-42
+    pomo_char: { title: '뽀모도 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' },
+    pomo_bubble: { title: '뽀모도 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' },
+    kb_up: { title: '기본', desc: '가만히 있을 때. 캐릭터 전체를 그려도 됩니다' },
+    // CR-043(R-40): 「펜 손 사용」이 꺼져 있을 때(키보드만 쓸 때) 동작임을 명시(design/i18n.md §4.4 CR-043)
+    kb_down: { title: '타자 입력 {n}', desc: '「펜 손 사용」이 꺼져 있을 때(키보드만 쓸 때) 타자를 치면 나오는 그림(여러 장이면 차례로 바뀜)' },
+    idle: { title: '대기', desc: '없으면 기본 그림만 보입니다' },
+    rest: { title: '쉬는중', desc: '한동안 입력이 없을 때. 없으면 기본 그림만 보입니다' },
+    key_space: { title: '스페이스', desc: SAME_KEY },
+    key_z: { title: 'ㅋ·Z', desc: SAME_KEY },
+    key_question: { title: '?', desc: SAME_KEY },
+    key_exclamation: { title: '!', desc: SAME_KEY },
+    key_enter: { title: 'Enter', desc: SAME_KEY },
+    key_backspace: { title: 'Backspace', desc: SAME_KEY },
+    key_undo: { title: 'Ctrl+Z', desc: SAME_KEY },
+    mouse_base: { title: '팔 기본', desc: '마우스를 따라 움직이는 팔' },
+    mouse_left: { title: '왼클릭', desc: '왼쪽 버튼을 누르는 동안' },
+    mouse_right: { title: '오른클릭', desc: '오른쪽 버튼을 누르는 동안' },
+    // (CR-042, R-39) 손(펜) 그룹 두 칸 — 펜 특수 키 7종 삭제, 새 동작(본체 특수 키 + pen_down_0)을 설명
+    pen_up: {
+      title: '손 기본',
+      desc: '팔 끝에 붙는 펜 쥔 손. 「펜 손 사용」을 켜면 아무것도 누르지 않을 때 이 그림',
+    },
+    pen_down: {
+      title: '펜 입력 {n}',
+      desc: '키·클릭을 누르는 동안의 손. 특수 키는 키보드의 특수 키 그림도 함께 바뀜',
+    },
+  },
+  errors: {
+    'asset.not_png': 'PNG 파일이 아닙니다.',
+    'asset.bad_header': 'PNG 헤더가 손상되었습니다.',
+    'asset.not_rgba': '32비트 RGBA PNG만 쓸 수 있습니다(투명 배경 필요).',
+    'asset.too_large': '이미지가 너무 큽니다. 최대 900×700입니다.',
+    'asset.too_many_bytes': '파일 용량이 1MB를 넘습니다.',
+    'asset.canvas_mismatch': '배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기여야 합니다.', // CR-045: 「뽀모도」 추가
+    'asset.not_found': '등록되지 않은 그림입니다.',
+    'asset.io': '파일을 처리하지 못했습니다.',
+    'asset.manifest': '그림 목록 파일을 읽거나 쓰지 못했습니다.',
+    'asset.no_default': '이 칸에는 내장 기본 그림이 없습니다.',
+    'asset.export_dir': '저장할 폴더를 찾을 수 없습니다.',
+    'settings.invalid': '설정값이 올바르지 않습니다.',
+    'settings.io': '설정 파일을 읽거나 쓰지 못했습니다.',
+    'settings.format': '설정 파일 형식이 올바르지 않습니다.',
+    'io.error': '파일을 처리하지 못했습니다.',
+    'window.not_found': '캐릭터 창을 찾을 수 없습니다.',
+    'window.no_monitor': '모니터 정보를 읽을 수 없습니다.',
+    'tauri.error': '창을 제어하지 못했습니다.',
+    'state.poisoned': '설정 상태가 손상되었습니다. 앱을 다시 시작하세요.',
+    'autostart.error': '자동 실행 설정을 바꾸지 못했습니다.',
+    'timer.disabled': '스톱워치나 타이머가 꺼져 있습니다. 먼저 둘 중 하나를 켜 주세요.', // CR-050 변경
+    'sound.not_audio': 'wav·mp3·ogg 소리 파일이 아닙니다.',
+    'sound.too_many_bytes': '알림음 파일은 1MB 이하여야 합니다.',
+    'sound.io': '알림음 파일을 읽거나 쓰지 못했습니다.',
+    'reset.io': '데이터를 모두 초기화하지 못했습니다(일부만 초기화됐을 수 있습니다). 앱을 다음에 시작할 때 다시 시도합니다.',
+    'reset.seed': '기본 그림을 다시 채우지 못했습니다. 앱을 다음에 시작할 때 다시 시도합니다.',
+    unknown: '알 수 없는 오류가 발생했습니다.',
+  },
+}

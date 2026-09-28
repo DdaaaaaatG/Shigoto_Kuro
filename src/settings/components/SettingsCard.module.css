@@ -1,0 +1,24 @@
+.card {
+  box-sizing: border-box;
+  background: var(--st-card);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-card-radius);
+  padding: var(--st-card-pad);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--st-gap-sm);
+  min-height: 28px;
+  margin-bottom: var(--st-gap-md);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--st-ink);
+}

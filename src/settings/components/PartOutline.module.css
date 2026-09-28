@@ -1,0 +1,15 @@
+.outline {
+  position: absolute;
+  box-sizing: border-box;
+  border-width: 1px;
+  border-style: dashed;
+  pointer-events: none;
+}
+
+.arm {
+  border-color: var(--st-outline-arm);
+}
+
+.pen {
+  border-color: var(--st-outline-pen);
+}

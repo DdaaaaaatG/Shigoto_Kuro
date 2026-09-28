@@ -1,0 +1,223 @@
+.card {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-gap-sm);
+  padding: var(--st-card-pad);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-card-radius);
+  background: var(--st-card);
+  overflow: hidden;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--st-gap-sm);
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--st-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badgeRequired,
+.badgeOptional {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.badgeRequired {
+  background: #fef3c7;
+  color: var(--st-warn);
+}
+
+.badgeOptional {
+  background: #f3f4f6;
+  color: var(--st-muted);
+}
+
+.desc {
+  margin: 0;
+  color: var(--st-muted);
+  font-size: 12px;
+  line-height: 16px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.preview {
+  position: relative;
+  height: 140px;
+  flex: 0 0 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  overflow: hidden;
+  background: repeating-conic-gradient(#e5e7eb 0 25%, #ffffff 0 50%) 0 0 / 16px 16px;
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.empty {
+  margin: 0;
+  padding: 0 8px;
+  color: var(--st-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.emptyRequired {
+  margin: 0;
+  padding: 0 8px;
+  color: var(--st-warn);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  gap: var(--st-gap-sm);
+  height: 30px;
+  flex: 0 0 30px;
+  margin-top: auto;
+}
+
+/* (CR-038, R-35) 뒷머리 카드만 미리보기를 줄여 버튼 두 줄 자리를 만든다 */
+.cardEmptyable .preview {
+  height: 106px;
+  flex: 0 0 106px;
+}
+
+/* (CR-038, R-35) 버튼 3개(이미지 변경 전체 폭 / 기본값·비우기 반반) — 두 줄 */
+.actions2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 30px 30px;
+  gap: 4px var(--st-gap-sm);
+  height: 64px;
+  flex: 0 0 64px;
+  margin-top: auto;
+}
+
+.actions2 .primary {
+  grid-column: 1 / -1;
+}
+
+.actions2 .outline {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.primary {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--st-accent);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--st-accent-hover);
+}
+
+.outline {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--st-ink);
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.primary:disabled,
+.outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary:focus-visible,
+.outline:focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: 2px;
+}
+
+.cardError {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 4px 8px;
+  background: #fde8e8;
+  color: var(--st-danger);
+  font-size: 12px;
+  line-height: 16px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.addCard {
+  height: 100%;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--st-border);
+  background: transparent;
+}
+
+.addError {
+  margin: 0;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--st-danger);
+  text-align: center;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

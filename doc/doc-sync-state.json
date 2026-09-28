@@ -1,0 +1,7 @@
+{
+  "lastSyncedSha": null,
+  "syncedAt": null,
+  "note": "초기 상태. 첫 /doc-sync 실행 시 HEAD로 채워진다.",
+  "syncedTargets": [],
+  "openItems": {}
+}

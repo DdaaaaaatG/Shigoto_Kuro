@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "settings",
+  "description": "설정 창 권한. PNG 파일 선택 대화상자와 창 제목 번역(계약 v0.14 §7, settings-v2 D-6)만 추가로 허용한다.",
+  "windows": ["settings"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "core:window:allow-set-title"
+  ]
+}

@@ -1,0 +1,152 @@
+/* 설정 창 전용 전역 규칙 — CR-028. main.tsx 가 body[data-window] 를 창 라벨로 채우므로
+   오버레이 창(투명 배경)에는 절대 적용되지 않는다. */
+:global(html) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+:global(body[data-window='settings']),
+:global(body[data-window='settings'] #root) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--st-page);
+  color: var(--st-ink);
+  font-family: 'Malgun Gothic', '맑은 고딕', system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* design/i18n.md §6 — 언어별 글꼴(오버레이 CSS 는 건드리지 않는다) */
+:global(html[lang='ja'] body[data-window='settings']) {
+  font-family: 'Yu Gothic UI', Meiryo, system-ui, sans-serif;
+}
+
+:global(html[lang='en'] body[data-window='settings']) {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* design.md §11 D-4(🔒 D-10, CR-031 추가) — 설정 창 한정 초록 강조 토큰·세로 메뉴 토큰·간격 체계 */
+:global(body[data-window='settings']) {
+  --st-accent: #BE72AD;
+  --st-accent-hover: #A85A97;
+  --st-ink: #111827;
+  --st-muted: #6b7280;
+  --st-border: #e5e7eb;
+  --st-card: #ffffff;
+  --st-page: #f4f5f7;
+  --st-track-off: #d1d5db;
+  --st-warn: #b45309;
+  --st-danger: #dc2626;
+  --st-nav-active: #F8EBF5;
+  --st-nav-hover: #f3f4f6;
+  --st-outline-arm: #1d4ed8;
+  --st-outline-pen: #e11d48;
+  --st-gap-xs: 4px;
+  --st-gap-sm: 8px;
+  --st-gap-md: 12px;
+  --st-gap-lg: 16px;
+  --st-gap-xl: 24px;
+  --st-card-radius: 12px;
+  --st-card-pad: 16px;
+  --st-slot-card-h: 280px;
+}
+
+.root {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.sidebar {
+  flex: 0 0 200px;
+  width: 200px;
+  box-sizing: border-box;
+  padding: 16px 8px;
+  background: var(--st-card);
+  border-right: 1px solid var(--st-border);
+  overflow-y: auto;
+}
+
+.tablist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--st-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--st-nav-hover);
+}
+
+.tabActive {
+  background: var(--st-nav-active);
+  font-weight: 700;
+}
+
+.tabIcon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--st-muted);
+}
+
+.tabActive .tabIcon {
+  color: var(--st-accent);
+}
+
+.tabLabel {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: -2px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+.sectionTitle {
+  margin: 0 0 16px;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--st-ink);
+}
+
+.error {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  background: #fde8e8;
+  color: var(--st-danger);
+  border-radius: 8px;
+  font-size: 13px;
+}

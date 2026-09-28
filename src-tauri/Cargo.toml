@@ -1,0 +1,45 @@
+[package]
+name = "kuro-keyviewer"
+version = "0.4.0"
+description = "봉고캣류 키뷰어 — 키보드·마우스 입력에 반응하는 투명 오버레이"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+# Tauri 관례: bin 이름과 충돌하지 않도록 `_lib` 접미사
+name = "kuro_keyviewer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset", "tray-icon", "image-png"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+log = "0.4"
+env_logger = "0.11"
+
+# Microsoft 공식 Win32 바인딩. 전역 후킹(SetWindowsHookExW)은 src/hook/ 에서만 쓴다.
+# Win32_System_Threading 은 GetCurrentThreadId(훅 스레드 종료용)에 필요하다.
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_System_Threading",
+    "Win32_System_LibraryLoader",
+    "Win32_Graphics_Gdi",
+] }
+tauri-plugin-single-instance = "2"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
