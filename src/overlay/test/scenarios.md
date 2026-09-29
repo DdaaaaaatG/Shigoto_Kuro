@@ -2942,7 +2942,7 @@ CR ↔ TC(추가)
   - 시계: 새 스펙 3개는 `vi.useFakeTimers({ toFake: [setTimeout·clearTimeout·setInterval·clearInterval·Date·**performance**] })` — `nowMs()` = `performance.now()`(design.md 14.4)가 가짜 시계로 움직인다. `receivedAt` 기대값은 그 시점 `performance.now()`를 읽어 비교한다(절대값 가정 없음). 실제 sleep 없음.
   - bridge mock: `bridge/commands`에 `getTimer`·`setResting`, `bridge/events`에 `onTimerChanged`(+ `EVENTS.timerChanged = 'timer://changed'`). core 타이머의 판정(자동 일시정지·재개·사용자 일시정지 유지)은 흉내 내지 않는다 — 테스트가 core가 보냈을 `timer://changed` 페이로드를 직접 넣고, 오버레이 쪽 책임(보고 호출·받은 값 표시)만 단언한다.
   - 렌더 대리 관찰: `findEntry`(`../components/LayerStack`)를 실제 구현을 감싼 spy로 부분 mock — 두 번째 인자가 `'pomo_char'`인 호출 수 = `PomodoroLayer`(와 `isTimerTextVisible`) 실행 횟수. `LayerStack`은 `pomo_*`를 찾지 않으므로 섞이지 않는다.
-  - 픽스처: 항목 url = `u:{key}`, 캔버스 900×700, 뽀모도 항목은 매니페스트 **뒤쪽·역순**(`pomo_bubble` → `pomo_char`)에 둔다 — DOM 순서가 설계로 정해지는지 본다. 타이머 설정 `TIMER_OFF` = {enabled false, textPos 268,403, rotation 5, fontSize 36, color `#333333`}(설계 기본값과 같은 **지역 상수** — bridge 상수에 기대지 않음, 상수 자체는 TC-286 ②에서 대조), `TIMER_ON` = 같은 값 + enabled true, `T2` = {true, 100,200, −10, 48, `#ff0000`}. 화면 스펙 `SETTINGS` = `{...DEFAULT_SETTINGS, scale 1, idleSeconds 300, mouse null, timer}`(마우스 파츠 없음 — 레이어·타이머만 본다), 스냅숏 `STOPPED` = {stopped, 0}.
+  - 픽스처: 항목 url = `u:{key}`, 캔버스 900×700, 뽀모도 항목은 매니페스트 **뒤쪽·역순**(`pomo_bubble` → `pomo_char`)에 둔다 — DOM 순서가 설계로 정해지는지 본다. 타이머 설정 `TIMER_OFF` = {enabled false, textPos 268,403, rotation 5, fontSize 36, color `#333333`}(**지역 상수** — CR-045 당시 설계 기본값 리터럴. v2.4(CR-058) 기준으로는 현행 기본값 (268,402)·7°와 다른 「사용자 저장 값 예」일 뿐이며 기대값은 이 픽스처에서 나온다. bridge 상수에 기대지 않음, 상수 자체는 TC-286 ②에서 대조), `TIMER_ON` = 같은 값 + enabled true, `T2` = {true, 100,200, −10, 48, `#ff0000`}. 화면 스펙 `SETTINGS` = `{...DEFAULT_SETTINGS, scale 1, idleSeconds 300, mouse null, timer}`(마우스 파츠 없음 — 레이어·타이머만 본다), 스냅숏 `STOPPED` = {stopped, 0}.
   - jsdom 스타일 표기: `left 268` → `'268px'`, `fontSize 36` → `'36px'`, `color '#333333'` → `'rgb(51, 51, 51)'`, `fontWeight 700` → `'700'`. 전체 필드(`fontFamily`·`fontVariantNumeric`·`userSelect` 등 jsdom이 버릴 수 있는 속성)는 순수 함수 TC-266에서 객체로 단언한다.
 - **§0.3 보충 — CR-045 red**: `src/components/utils/timerClock.ts`·`src/components/hooks/useTimerSnapshot.ts`·`useElapsedText.ts`·`src/overlay/components/PomodoroLayer.tsx`·`TimerText.tsx`가 없고 `src/bridge/`에 `TimerSettings`·`TimerSnapshot`·`DEFAULT_TIMER_SETTINGS`·`getTimer`·`setResting`·`onTimerChanged`·`AssetSlot` `pomo_*`가 없으므로 새 스펙 3개는 import 단계에서 전부 red가 정상. 기존 14개 스펙은 mock만 보강했으므로 CR-045 적용 전후 모두 Green이 정상(Red면 mock 누락 또는 회귀).
 
@@ -2972,8 +2972,8 @@ CR ↔ TC(추가)
 - Then ⓐ 화면: 해당 없음 ⓑ 반환값: 7 500 / 0 / 5 000 / 5 000(음수 차이 0) / 3상태 모두 61 000(now 무관 — restPaused 멈춤이 R-35의 표시 몫) / `00:01:00` / 동결 입력에 예외 없음·입력 불변 ⓒ bridge: 호출 없음
 - 스펙: `src/overlay/test/timerClock.test.ts`
 
-### TC-266 · `timerTextStyle` — 설계 필드 전부·값 매핑·enabled 무관 · 종류: 자동 · 요구: R-34 · 설계: design.md §10.14 14.4 `timerTextStyle`, requirements R-34(기본 268,403·5°·36px·#333333·Segoe UI 굵게·등폭 숫자) · **신규(CR-045)**
-- Given 동결한 기본값 `DEF` = {false, 268,403, 5, 36, `#333333`}, `other` = {true, 100,200, −10, 48, `#ff0000`}
+### TC-266 · `timerTextStyle` — 설계 필드 전부·값 매핑·enabled 무관 · 종류: 자동 · 요구: R-34 · 설계: design.md §10.14 14.4 `timerTextStyle`, requirements R-34(36px·#333333·Segoe UI 굵게·등폭 숫자 — 글자 기본 위치·회전은 CR-058로 (268,402)·7°, 이 TC는 기본값이 아니라 픽스처 값의 매핑만 본다) · **신규(CR-045)**
+- Given 동결한 픽스처 `DEF` = {false, 268,403, 5, 36, `#333333`}(스펙 지역 상수 — CR-045 당시 기본값 리터럴, 현행 `DEFAULT_TIMER_SETTINGS`와 무관. v2.4 판정: 유지), `other` = {true, 100,200, −10, 48, `#ff0000`}
 - When `timerTextStyle(DEF)`·`timerTextStyle(other)`·`timerTextStyle({...DEF, enabled: true})`
 - Then ⓐ 화면: 해당 없음(DOM 적용은 TC-276·TC-279) ⓑ 반환값: `DEF` → 정확히 {position `absolute`, left 268, top 403, transform `translate(-50%, -50%) rotate(5deg)`, transformOrigin `50% 50%`, fontSize 36, color `#333333`, lineHeight 1, whiteSpace `nowrap`, fontFamily `'Segoe UI', 'Malgun Gothic', sans-serif`, fontWeight 700, fontVariantNumeric `tabular-nums`, pointerEvents `none`, userSelect `none`}(14필드) / `other` → left 100·top 200·transform `… rotate(-10deg)`·fontSize 48·color `#ff0000` / enabled만 다른 입력은 같은 결과 / 입력 불변 ⓒ bridge: 호출 없음
 - 스펙: `src/overlay/test/timerClock.test.ts`
@@ -3096,10 +3096,10 @@ CR ↔ TC(추가)
 - Then ⓐ 화면: `.canvas` 있음, 화면 글자 `''`(오류 문구 없음), 상태 img `u:rest` → `u:idle` ⓑ 상태: 상태기계 전이 정상(보고 실패가 전이를 막지 않음) ⓒ bridge: `setResting` `[false]`(5초 뒤에도 1회 — 재시도 없음) → `[false, true]`(5초 뒤에도 2회) → `[false, true, false]`, 처리되지 않은 rejection 없음
 - 스펙: `src/overlay/test/OverlayApp.pomodoro.test.tsx`
 
-### TC-286 · 설정·이미지 변경 즉시 반영, `timer` 없는 설정 = 기본값 · 종류: 자동 · 요구: R-34, R-33 · 설계: design.md §10.14 14.2·14.3 ②, §4 `timer`(`settings.timer ?? DEFAULT_TIMER_SETTINGS`), §6 P-6·P-8 ⑤, §7 `Settings.timer`·`AssetSlot` `pomo_*` 행 · **신규(CR-045)**
+### TC-286 · 설정·이미지 변경 즉시 반영, `timer` 없는 설정 = 기본값 · 종류: 자동 · 요구: R-34, R-33, R-39(② `alarmVolume` 기본 44) · 설계: design.md §10.14 14.2·14.3 ②, §4 `timer`(`settings.timer ?? DEFAULT_TIMER_SETTINGS` — 초기값 contract v0.27 §3.3), §6 P-6·P-8 ⑤, §7 `Settings.timer`·`AssetSlot` `pomo_*` 행, §10.15 15.7 TC-286 행 · **신규(CR-045)** · **개정(CR-050·CR-053·CR-058 — ② 기본값 리터럴)**
 - Given ① timer OFF·`M_NONE` ② 설정 객체에 `timer` 키 없음·`M_CHAR`
 - When ① `settings://changed`(ON) → (T2) → `assets://changed`(`M_BOTH`) → `settings://changed`(T2 + enabled false) → `assets://changed`(`M_NONE`) ② 마운트 → `assets://changed`(`M_NONE`)
-- Then ⓐ 화면: ① 없음 → [글자 `00:00:00`] → 같은 글자 노드에 left `100px`·top `200px`·`48px`·`rgb(255, 0, 0)`·`rotate(-10deg)` → [`u:pomo_char`, `u:pomo_bubble`, 같은 글자] → 글자 유지 → `.pomodoro` 없음·`.canvas` `[u:background, jellyWrap]` ② 글자 left `268px`·top `403px`·`36px`·`rgb(51, 51, 51)`·`rotate(5deg)` → 그림 비우면 `.pomodoro` 없음(기본 enabled false) ⓑ 상태: ② (v1.9 개정 — CR-050, contract v0.23 8필드) `DEFAULT_TIMER_SETTINGS` = `{ enabled: false, mode: 'stopwatch', countdownSecs: 1500, alarmVolume: 80, textPos: { x: 268, y: 403 }, rotation: 5, fontSize: 36, color: '#333333' }`(전체 객체 `toEqual`) ⓒ bridge: ① `onTimerChanged`·`getTimer` 각 1회, 마지막에 해제 함수 1회, `getSettings`·`getAssetManifest` 각 1회(재조회 없음) ①② `setSettings` 0회(오버레이는 timer를 저장하지 않음)
+- Then ⓐ 화면: ① 없음 → [글자 `00:00:00`] → 같은 글자 노드에 left `100px`·top `200px`·`48px`·`rgb(255, 0, 0)`·`rotate(-10deg)` → [`u:pomo_char`, `u:pomo_bubble`, 같은 글자] → 글자 유지 → `.pomodoro` 없음·`.canvas` `[u:background, jellyWrap]` ② 글자 `00:00:00`·left `268px`·top `402px`·`36px`·`rgb(51, 51, 51)`·transform `translate(-50%, -50%) rotate(7deg)` → 그림 비우면 `.pomodoro` 없음(기본 enabled false) ⓑ 상태: ② (v2.4 개정 — CR-058, contract v0.27 §3.3 8필드) `DEFAULT_TIMER_SETTINGS` = `{ enabled: false, mode: 'stopwatch', countdownSecs: 1500, alarmVolume: 44, textPos: { x: 268, y: 402 }, rotation: 7, fontSize: 36, color: '#333333' }`(전체 객체 `toEqual`. 이력: v1.9 CR-050 80·(268,403)·5 → v2.2 CR-053 80·(142,458)·9 → v2.4 CR-058 44·(268,402)·7) ⓒ bridge: ① `onTimerChanged`·`getTimer` 각 1회, 마지막에 해제 함수 1회, `getSettings`·`getAssetManifest` 각 1회(재조회 없음) ①② `setSettings` 0회(오버레이는 timer를 저장하지 않음)
 - 스펙: `src/overlay/test/OverlayApp.pomodoro.test.tsx`(`TC-286 ①②`)
 
 ### TC-287 · 시간 표시 통합 — 시작 00:00:00 → 흐름 → 쉬는중 멈춤 → 재개 → 사용자 일시정지 유지 → 끔 · 종류: 자동 · 요구: R-34, R-35, R-36 · 설계: design.md §10.14 14.4 `useElapsedText`·쉬는중 보고 효과, §4 끝 문단(core 소유·저장 안 함), §6 P-8 ①~⑤, requirements §1 용어 주(CR-045) · **신규(CR-045)**
@@ -3226,12 +3226,12 @@ CR ↔ TC(추가)
 - **v1.9 상태·수(앞 상태·TC 수 줄을 대체)**: CR-050 증분 — 신규 자동 TC-291~TC-309(19) + TC-313(1 — v1.9a 검증 반영 추가, 번호가 수동 TC-310~TC-312 뒤), 수동 TC-310~TC-312(3 — MC-28~MC-30), TC-FLOW-19(S-19)·TC-FLOW-20(S-20). 개정 TC-286 ②(기본값 리터럴)·TC-268·TC-269·TC-270 ①(상태 단언에 `fromEvent`). mock 보강 16개 스펙(아래 개정표). 범위에 R-37~R-39 추가. TC 수: 313번까지 = 유효 293건(자동 264 + 수동 29) + 폐기 20건. TC-FLOW 유효 19건 + 폐기 1건. 작성: ui-test-designer · 모드: 증분(v1.9), 작업 모드 보강(maintain). 설정 창(시간 입력·알림음 카드·미리 듣기·미리보기 깜빡임)은 이 문서 범위 밖.
 - **공통 전제 보충(v1.9)**
   - Audio: `vi.stubGlobal('Audio', FakeAudio)`(스펙마다 인라인) — 인스턴스별 `src`·`volume`·`loop`·`currentTime` 기록, `play`(모드 resolve / reject(`NotAllowedError`) / pending(나중에 `rejectPlay`) / throw(동기 예외)), `pause`, `addEventListener`·`removeEventListener`(`error`, `once` 준수), `fire('error')`, `new Audio` 예외 플래그. 실제 소리 없음. `afterEach`에서 `vi.unstubAllGlobals()`.
-  - `URL.createObjectURL`: jsdom에 없으므로 `Object.defineProperty`로 stub(`'blob:default'`·`'blob:beep'`)하고 끝나면 원래 값으로 되돌린다. `defaultAlarmUrl` 캐시(TC-298)는 `vi.resetModules()` 뒤 동적 import한 새 모듈로 본다.
-  - `useAlarmOnFinish` 단위(TC-300~TC-305): `renderHook(({ s, g }) => useAlarmOnFinish(s, g))`에 `useTimerSnapshot` 반환 모양 `{ snapshot, receivedAt, fromEvent }`를 직접 넣는다(단계마다 새 스냅숏 객체). `defaultAlarmUrl`은 실제 `alarmSound` 모듈을 감싼 부분 mock(`'blob:default'` 고정, `playSound`는 실제 구현). microtask는 `act` 안에서 `Promise.resolve` 20회로 비운다.
+  - 내장 기본음(v2.4 개정 — CR-058): `defaultAlarmUrl()`은 번들 mp3 자산(`src/assets/sounds/default-alarm.mp3`) import URL 문자열을 그대로 돌려준다(design/functions.md §5.7 ④). TC-298은 스펙이 같은 자산(`@/assets/sounds/default-alarm.mp3`)을 import한 값과 비교하고, 모듈 재적재(`vi.resetModules()`)는 쓰지 않는다.
+  - `useAlarmOnFinish` 단위(TC-300~TC-305): `renderHook(({ s, g }) => useAlarmOnFinish(s, g))`에 `useTimerSnapshot` 반환 모양 `{ snapshot, receivedAt, fromEvent }`를 직접 넣는다(단계마다 새 스냅숏 객체). `defaultAlarmUrl`은 실제 `alarmSound` 모듈을 감싼 부분 mock(`'blob:default'` 고정, `playSound`는 실제 구현). `'blob:default'`는 기본음 경로를 구분하는 mock 반환 식별 문자열일 뿐이다(실제 반환은 번들 mp3 자산 URL — CR-058). 음량 0.8은 `setup`이 넘기는 `gain` 인자(픽스처 — `alarmGain` 기본값과 무관). microtask는 `act` 안에서 `Promise.resolve` 20회로 비운다.
   - CSS Modules: `vi.mock('../components/TimerText.module.css')` → `{ blink: 'blink' }`. CSS 값은 `fs.readFileSync` 원문으로 단언(TC-289와 같은 방식 — 설계 15.7의 `?raw`와 같은 목적).
   - 픽스처: 카운트다운 스냅숏 `cd(status, elapsedMs)` = `{ status, elapsedMs, mode: 'countdown', durationMs: 1 500 000 }`(contract v0.23 §3.9 — core가 늘 보내는 모양), 등록 알림음 `USER` = `{ format 'mp3', bytes 1 000, url 'u:alarm' }`, 설정 `CD_ON` = {enabled true, mode `countdown`, countdownSecs 1 500, alarmVolume 80, 268,403, 5, 36, `#333333`}. 화면 스펙 매니페스트 `M_NONE`(뽀모도 그림 없음 — U-1 `enabled`로 글자만)·`M_BOTH`.
   - core 흉내 없음: 0 도달 판정·10초 뒤 `stopped` 복귀·쉬는중 무시는 core다. 테스트는 core가 보냈을 `timer://changed`(`finished` → `stopped`)를 직접 넣고, 오버레이 책임(표시·깜빡임 클래스·소리 시작/정지·bridge 호출)만 단언한다.
-  - 새 import 경로(설계 이름 그대로 — 구현자가 맞춘다): `src/overlay/hooks/useAlarmOnFinish.ts` named `useAlarmOnFinish`, `src/components/utils/alarmSound.ts` named 상수 8개·`synthBeepWav`·`defaultAlarmUrl`·`alarmGain`·`playSound`, `timerClock.ts` named `snapshotMode`·`timerDisplayMs`·`formatRemaining`·`timerText`·`isTimerBlinking`, 타입 `TimerSnapshotState`(`useTimerSnapshot.ts`).
+  - 새 import 경로(설계 이름 그대로 — 구현자가 맞춘다): `src/overlay/hooks/useAlarmOnFinish.ts` named `useAlarmOnFinish`, `src/components/utils/alarmSound.ts` named `DEFAULT_ALARM_VOLUME`·`defaultAlarmUrl`·`alarmGain`·`playSound`(v2.4 — CR-058로 `BEEP_*` 상수 7개·`synthBeepWav` 삭제), `timerClock.ts` named `snapshotMode`·`timerDisplayMs`·`formatRemaining`·`timerText`·`isTimerBlinking`, 타입 `TimerSnapshotState`(`useTimerSnapshot.ts`).
 - **§0.3 보충 — CR-050 red**: `alarmSound.ts`·`useAlarmOnFinish.ts`·`TimerText.module.css`가 없고 `timerClock.ts`에 CR-050 함수 5개가 없으며 `useTimerSnapshot`이 `fromEvent`를 채우지 않으므로 다음은 red가 정상 — `timerClock.test.ts`(import 실패로 기존 TC-264~TC-267 포함 파일 전체), `useElapsedText.countdown.test.tsx`, `alarmSound.test.ts`, `useAlarmOnFinish.test.ts`, `TimerText.blink.test.tsx`, `OverlayApp.timerMode.test.tsx`, `pomodoro.test.tsx`의 TC-268·TC-269·TC-270 ①·TC-306. TC-286 ②는 bridge가 이미 v0.23이라 **개정 뒤 곧바로 Green**이 정상(개정 전 기대가 실패하던 것을 바로잡음). mock만 보강한 기존 스펙은 CR-050 적용 전후 모두 Green이 정상(Red면 mock 누락 또는 회귀).
 
 ### v1.9 개정표
@@ -3291,22 +3291,23 @@ CR ↔ TC(추가)
 
 #### 공용 유틸 — `src/components/utils/alarmSound.ts` (스펙 `src/overlay/test/alarmSound.test.ts`)
 
-### TC-297 · `synthBeepWav` — 상수·RIFF 머리·길이·결정적·파형 경계 · 종류: 자동 · 요구: R-39 · 설계: §5.7 ④ 상수 8개·`synthBeepWav`, design.md §10.15 15.3(`BEEP_AMPLITUDE = 0.5`) · **신규(CR-050)**
-- Given 순수 함수(Audio 스텁만 설치)
-- When 상수 8개 읽기, `synthBeepWav()` 두 번, `DataView`로 머리·샘플 해석(N 3 308·G 2 205·총 14 334 샘플)
-- Then ⓐ 화면: 해당 없음 ⓑ 반환값: 상수 = [22 050, 880, 150, 100, 3, 10, 0.5, 80], `Uint8Array` 길이 28 712, `RIFF`·uint32 28 704(= 36 + 28 668)·`WAVE`·`fmt `·16·PCM 1·채널 1·22 050·44 100·blockAlign 2·16bit·`data`·dataLen 28 668(= 전체 − 44), 두 번 호출 바이트 동일, 첫 샘플·끝 샘플 0, 최대 절댓값 ≤ 16 384이고 > 16 000(진폭 0.5), 삐 사이 무음 구간 2개 전부 0, `Audio` 생성 0개 ⓒ bridge: 호출 없음
-- 스펙: `src/overlay/test/alarmSound.test.ts`
+### TC-297 · `DEFAULT_ALARM_VOLUME` — 기본 음량 상수 44 · 종류: 자동 · 요구: R-39(「음량 기본 44%」) · 설계: design/functions.md §5.7 ④ 상수(`DEFAULT_ALARM_VOLUME = DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44` — CR-061 단일 소스), design.md §10.15 15.3 「내장 기본음 = 번들 mp3 자산(CR-058)」 행·15.7 TC-297 행 · **신규(CR-050)** · **개정(CR-058 — 옛 `synthBeepWav` WAV 바이트 검증은 합성음 폐기로 대상 없음 → 기본 음량 상수 확인)**
+- Given 순수 상수(Audio 스텁만 설치)
+- When `DEFAULT_ALARM_VOLUME` 읽기
+- Then ⓐ 화면: 해당 없음 ⓑ 값·부작용: `DEFAULT_ALARM_VOLUME` === `44`(옛 80 — CR-058), `Audio` 생성 0개(상수 — 부작용 없음) ⓒ bridge: 호출 없음(`alarmSound`는 bridge의 상수·타입만 import — 런타임 command·event 없음)
+- 참고: 「= `DEFAULT_TIMER_SETTINGS.alarmVolume`」(CR-061 단일 소스) 동일성 자체는 이 스펙이 단언하지 않는다 — 값 44는 TC-286 ② ⓑ(`DEFAULT_TIMER_SETTINGS.alarmVolume` 44)와 이 TC가 각각 확인한다(CR-061 「TC 신규 없음」)
+- 스펙: `src/overlay/test/alarmSound.test.ts`(`TC-297`)
 
-### TC-298 · `defaultAlarmUrl` — 창당 Blob URL 1개(모듈 캐시) · 종류: 자동 · 요구: R-39 · 설계: §5.7 ④ `defaultAlarmUrl`, design.md §10.15 15.4(Blob URL 창당 1개) · **신규(CR-050)**
-- Given `URL.createObjectURL` stub(`'blob:beep'` 반환), `vi.resetModules()` 뒤 새 모듈
+### TC-298 · `defaultAlarmUrl` — 번들 mp3 자산 URL 그대로, 반복 호출 같은 값 · 종류: 자동 · 요구: R-39(「내장 기본음 = 번들 mp3」) · 설계: design/functions.md §5.7 ④ `defaultAlarmUrl`(`() => string` — 번들 자산 `defaultAlarmAsset` 반환, Blob·`URL.createObjectURL` 없음), design.md §10.15 15.4(기본음 = 번들 정적 자산 URL, 런타임 생성물 없음)·15.7 TC-298 행 · **신규(CR-050)** · **개정(CR-058 — 창당 Blob URL 캐시 → 번들 mp3 자산 URL)**
+- Given 스펙이 `@/assets/sounds/default-alarm.mp3`를 import한 값 `defaultAlarmAsset`(vitest 정적 자산 import — URL 문자열), Audio 스텁
 - When `defaultAlarmUrl()` 두 번
-- Then ⓐ 화면: 해당 없음 ⓑ 반환값·부작용: 두 번 모두 `'blob:beep'`, `createObjectURL` 1회·인자 `Blob`(`type` `audio/wav`, `size` 28 712), `Audio` 생성 0개 ⓒ bridge: 호출 없음
-- 스펙: `src/overlay/test/alarmSound.test.ts`
+- Then ⓐ 화면: 해당 없음 ⓑ 반환값·부작용: 첫 반환 = `defaultAlarmAsset`과 같은 문자열, 두 번째 반환 = 첫 반환과 같은 문자열, `Audio` 생성 0개 ⓒ bridge: 호출 없음
+- 스펙: `src/overlay/test/alarmSound.test.ts`(`TC-298`)
 
-### TC-299 · `playSound` 음량 자르기·정지·실패 알림(최대 1회·항상 비동기·정지 뒤 없음) / `alarmGain` · 종류: 자동 · 요구: R-39, R-01 · 설계: §5.7 ④ `playSound`·`alarmGain`, design.md §10.15 15.2 실패 알림 순서 · **신규(CR-050)**
+### TC-299 · `playSound` 음량 자르기·정지·실패 알림(최대 1회·항상 비동기·정지 뒤 없음) / `alarmGain` · 종류: 자동 · 요구: R-39, R-01 · 설계: §5.7 ④ `playSound`·`alarmGain`(예: 없음·NaN → 0.44), design.md §10.15 15.2 실패 알림 순서 · **신규(CR-050)** · **개정(CR-058 — ⑤ 폴백 0.8 → 0.44)**
 - Given Audio 스텁(모드 지정), `onFail` = `vi.fn()`
-- When ① `playSound('u:a', v)` v ∈ {1.5, −0.2, NaN, 0.8}(4번째 인자 `loop` 생략), **CR-052** `playSound('u:loop', 0.8, undefined, true)` → `currentTime` 7.5 → 정지 함수, `playSound('u:once', 0.8, undefined, false)`, `playSound('u:b', 0.5)` → `currentTime` 3.2 → `stop()` 두 번 ② reject 모드 / pending 모드에서 `error` 이벤트 + 거부 / `onFail` 없이 reject ③ pending → `stop()` → 거부·`error` ④ throw 모드 / `new Audio` 예외 / throw 모드 직후 `stop()` ⑤ `alarmGain` — `alarmVolume` 없음·80·0·150·−5·NaN
-- Then ⓐ 화면: 해당 없음(오버레이 문구 없음 — R-01) ⓑ 반환값·부작용: ① `Audio` 1개씩(`src` `u:a`), `volume` 1·0·0·0.8, `play` 각 1회, `loop` false(인자 생략 = 기본 false — 1회 재생, 설정 창 미리 듣기와 같음), **CR-052** `u:loop` → `loop` true·`play` 1회, 반복 중 정지 함수 → `pause` 1회·`currentTime` 0 / `u:once`(명시 false) → `loop` false / 누계 `Audio` 6개 뒤 `u:b`, `stop()` → `pause` 1회·`currentTime` 0, 두 번째 `stop()` 예외 없음 ② 호출 직후 `onFail` 0회 → microtask 뒤 1회 / 겹쳐도 1회 / 예외 없음 ③ `onFail` 0회, `removeEventListener('error', 함수)` 호출 ④ `playSound`가 던지지 않고 정지 함수를 반환, 반환 시점 `onFail` 0회 → microtask 뒤 1회(두 경우 모두), 예외 직후 `stop()`이면 0회 ⑤ 0.8·0.8·0·1·0·0.8 ⓒ bridge: 호출 없음
+- When ① `playSound('u:a', v)` v ∈ {1.5, −0.2, NaN, 0.8}(4번째 인자 `loop` 생략), **CR-052** `playSound('u:loop', 0.8, undefined, true)` → `currentTime` 7.5 → 정지 함수, `playSound('u:once', 0.8, undefined, false)`, `playSound('u:b', 0.5)` → `currentTime` 3.2 → `stop()` 두 번 ② reject 모드 / pending 모드에서 `error` 이벤트 + 거부 / `onFail` 없이 reject ③ pending → `stop()` → 거부·`error` ④ throw 모드 / `new Audio` 예외 / throw 모드 직후 `stop()` ⑤ `alarmGain` — 기준 픽스처 {enabled true, 268,403, 5, 36, `#333333`}(스펙 지역 리터럴 — `alarmVolume` 키 없음)에 `alarmVolume` 없음·80·0·150·−5·NaN
+- Then ⓐ 화면: 해당 없음(오버레이 문구 없음 — R-01) ⓑ 반환값·부작용: ① `Audio` 1개씩(`src` `u:a`), `volume` 1·0·0·0.8, `play` 각 1회, `loop` false(인자 생략 = 기본 false — 1회 재생, 설정 창 미리 듣기와 같음), **CR-052** `u:loop` → `loop` true·`play` 1회, 반복 중 정지 함수 → `pause` 1회·`currentTime` 0 / `u:once`(명시 false) → `loop` false / 누계 `Audio` 6개 뒤 `u:b`, `stop()` → `pause` 1회·`currentTime` 0, 두 번째 `stop()` 예외 없음 ② 호출 직후 `onFail` 0회 → microtask 뒤 1회 / 겹쳐도 1회 / 예외 없음 ③ `onFail` 0회, `removeEventListener('error', 함수)` 호출 ④ `playSound`가 던지지 않고 정지 함수를 반환, 반환 시점 `onFail` 0회 → microtask 뒤 1회(두 경우 모두), 예외 직후 `stop()`이면 0회 ⑤ **0.44**·0.8·0·1·0·**0.44**(소수 10자리 근사 — 없음·NaN은 `DEFAULT_ALARM_VOLUME` 44 폴백, v2.4 CR-058 개정. 옛 0.8), `Audio` 생성 0개 ⓒ bridge: 호출 없음
 - 스펙: `src/overlay/test/alarmSound.test.ts`(`TC-299 ①`~`⑤`)
 
 #### 오버레이 훅 — `src/overlay/hooks/useAlarmOnFinish.ts` (스펙 `src/overlay/test/useAlarmOnFinish.test.ts`)
@@ -3383,22 +3384,22 @@ CR ↔ TC(추가)
 
 #### 수동 — `src/overlay/test/manual-checklist.md` MC-28~MC-30
 
-### TC-310 · 자동 재생 스파이크(패킷 §0) — 창을 클릭하지 않고 기본음이 울리는가 · 종류: 수동(MC-28) · 요구: R-39 · 설계: design.md §10.15 15.5(CSP `media-src`·autoplay 인자)·15.6 · **신규(CR-050)**
+### TC-310 · 자동 재생 스파이크(패킷 §0) — 창을 클릭하지 않고 기본음이 울리는가 · 종류: 수동(MC-28) · 요구: R-39 · 설계: design.md §10.15 15.5(CSP `media-src`·autoplay 인자)·15.6 · **신규(CR-050)** · **개정(CR-058 — ⓐ 기본음 = 번들 mp3)**
 - Given 실제 앱(`/dev-start`, `tauri.conf.json`에 CSP `media-src`·두 창 `additionalBrowserArgs` `--autoplay-policy=no-user-gesture-required` 반영 — 메인 세션 D-8·D-9), 알림음 미등록(기본음), 「타이머 사용」 켬·시작 시간 00:00:05. **두 번 실행으로 나눈다(v1.9 검증 반영 — C1-1)**: ① 판정 실행 = 앱을 새로 실행, 어느 창도 클릭하지 않음, 개발자 도구 콘솔을 열지 않음 ② 진단 실행 = 앱을 종료했다가 새로 실행, 오버레이 개발자 도구 콘솔을 연 상태. **콘솔을 연 실행은 판정에서 제외한다**
 - When ① 트레이 메뉴 「시작」만 누르고 5초 기다림 ② 같은 조작 뒤 콘솔 출력을 봄(①의 결과와 무관하게 수행 — ①이 FAIL이면 원인 기록용으로 반드시)
-- Then ⓐ 화면·소리(① 판정 실행만): 0에 닿는 순간 오버레이 글자 `00:00:00` 깜빡임과 함께 기본음(삐 3번)이 들림 = PASS, 소리 없음 = FAIL — 판정은 소리로만 ⓑ 기록: ①의 울림 / 무음을 확인란에, ②의 콘솔 `NotAllowedError` 유무·울림 여부는 비고에만 적음(판정 제외 — ②가 어떻든 ①의 판정은 바뀌지 않음). ①이 FAIL이면 **구현을 멈추고 아키텍트 세션으로 되돌린다**(D-8 B 재검토) ⓒ core·bridge: 참고 관찰(판정 외 — 트레이 라벨은 core tray 소관, overlay 요구 밖): 흐르는 동안 트레이 라벨이 「일시정지」로, 끝난 뒤 「시작」으로 바뀌는지 비고에 적음
+- Then ⓐ 화면·소리(① 판정 실행만): 0에 닿는 순간 오버레이 글자 `00:00:00` 깜빡임과 함께 내장 기본음(번들 mp3 — CR-058 사용자 지정 음)이 들림 = PASS, 소리 없음 = FAIL — 판정은 소리로만 ⓑ 기록: ①의 울림 / 무음을 확인란에, ②의 콘솔 `NotAllowedError` 유무·울림 여부는 비고에만 적음(판정 제외 — ②가 어떻든 ①의 판정은 바뀌지 않음). ①이 FAIL이면 **구현을 멈추고 아키텍트 세션으로 되돌린다**(D-8 B 재검토) ⓒ core·bridge: 참고 관찰(판정 외 — 트레이 라벨은 core tray 소관, overlay 요구 밖): 흐르는 동안 트레이 라벨이 「일시정지」로, 끝난 뒤 「시작」으로 바뀌는지 비고에 적음
 - 스펙: 수동 — `src/overlay/test/manual-checklist.md` MC-28
 
-### TC-311 · 오버레이를 숨긴 상태에서 0 도달 → 알림음 · 종류: 수동(MC-29) · 요구: R-39(「알림음 1회」) · 설계: design.md §10.15 15.2 1회 재생 규칙(CR-055)·15.7 수동 TC-311(02-design R-5, verify 실측), §10.14 14.5 잔여 위험(숨은 페이지 타이머) · **신규(CR-050)** · **개정(CR-055 — ⓐ 10초 동안 되풀이 → 1회)**
+### TC-311 · 오버레이를 숨긴 상태에서 0 도달 → 알림음 · 종류: 수동(MC-29) · 요구: R-39(「알림음 1회」) · 설계: design.md §10.15 15.2 1회 재생 규칙(CR-055)·15.7 수동 TC-311(02-design R-5, verify 실측), §10.14 14.5 잔여 위험(숨은 페이지 타이머) · **신규(CR-050)** · **개정(CR-055 — ⓐ 10초 동안 되풀이 → 1회)** · **개정(CR-058 — ⓐ 기본음 = 번들 mp3)**
 - Given MC-28 PASS 빌드, 시작 시간 00:00:10, 기본음
 - When 「시작」 → 곧바로 트레이에서 오버레이 숨김 → **20초 넘게 기다림**(0 도달까지 10초 + 끝남 표시 10초 — v1.9 검증 반영 C2-1) → 오버레이 다시 표시. (선택 분기) 같은 전제로 한 번 더 — 숨긴 뒤 0 도달 후 끝남 10초 안에(「시작」 뒤 10~20초 사이) 다시 표시
-- Then ⓐ 소리: 숨긴 채로 0 도달 시각(「시작」 뒤 약 10초)에 기본음(삐 3번)이 **한 번** 들리고 되풀이되지 않으면 PASS(CR-055 — 1회 재생. 늦게 들리면 지연 초를 비고에, 삐 3번이 두 번 이상 되풀이되면 FAIL). (선택 분기) 끝남 중에 다시 표시해도 소리가 다시 울리지 않는다(새 `finished` 진입이 아님) ⓑ 화면: **0 도달 뒤 10초가 지난 뒤 표시**하면 `00:00:10`(지정 시간)·깜빡임 없음. (선택 분기) 끝남 10초 안에 표시하면 `00:00:00` 깜빡임 ⓒ 오류·안내 문구 없음, `.dev-tauri.log` 오류 없음
+- Then ⓐ 소리: 숨긴 채로 0 도달 시각(「시작」 뒤 약 10초)에 내장 기본음(번들 mp3 — CR-058 사용자 지정 음)이 **한 번** 들리고 되풀이되지 않으면 PASS(CR-055 — 1회 재생. 파일이 끝남 10초보다 길면 끝남 종료 때 멈추는 것도 PASS. 늦게 들리면 지연 초를 비고에, 같은 음이 처음부터 다시 시작되면 FAIL). (선택 분기) 끝남 중에 다시 표시해도 소리가 다시 울리지 않는다(새 `finished` 진입이 아님) ⓑ 화면: **0 도달 뒤 10초가 지난 뒤 표시**하면 `00:00:10`(지정 시간)·깜빡임 없음. (선택 분기) 끝남 10초 안에 표시하면 `00:00:00` 깜빡임 ⓒ 오류·안내 문구 없음, `.dev-tauri.log` 오류 없음
 - 스펙: 수동 — `src/overlay/test/manual-checklist.md` MC-29
 
-### TC-312 · 실제 소리·음량·깜빡임 10초 뒤 정지·쉬는중 계속 흐름 · 종류: 수동(MC-30) · 요구: R-37, R-38, R-39(「알림음 1회」·「깜빡임 10초 종료 또는 멈춤·시작·끄기 때 함께 멈춤」), R-35 · 설계: design.md §10.15 15.1·15.2(1회 재생 — CR-055, CR-052 반복 재생 폐기·판정표 6·7행 재생 중 떠나면 정지)·15.7 수동 TC-312, requirements §1 용어 주(카운트다운은 쉬는중 무시) · **신규(CR-050)** · **개정(CR-052 — ⑥~⑧ 정지 절차)** · **개정(CR-055 — 1회 재생 기대, ⑥~⑧은 등록 mp3로)**
+### TC-312 · 실제 소리·음량·깜빡임 10초 뒤 정지·쉬는중 계속 흐름 · 종류: 수동(MC-30) · 요구: R-37, R-38, R-39(「알림음 1회」·「깜빡임 10초 종료 또는 멈춤·시작·끄기 때 함께 멈춤」), R-35 · 설계: design.md §10.15 15.1·15.2(1회 재생 — CR-055, CR-052 반복 재생 폐기·판정표 6·7행 재생 중 떠나면 정지)·15.7 수동 TC-312, requirements §1 용어 주(카운트다운은 쉬는중 무시) · **신규(CR-050)** · **개정(CR-052 — ⑥~⑧ 정지 절차)** · **개정(CR-055 — 1회 재생 기대, ⑥~⑧은 등록 mp3로)** · **개정(CR-058 — ③ 기본음 = 번들 mp3, ⑥ 근거를 기본음 길이와 무관하게)**
 - Given MC-28 PASS 빌드, 1분 넘는 mp3 등록, 유휴 시간 5분(기본)
-- When ① 시작 시간 00:00:10 → 「시작」 → 0 도달 → 10초 관찰 ② 음량 80%·0%·100%로 바꿔 ①을 반복 ③ 기본값(등록 해제) 후 ① 반복 ④ 시작 시간 00:08:00 → 「시작」 → 입력 없이 5분 넘게 기다려 쉬는중 → 1분 더 관찰 → 입력 ⑤ 끝남 깜빡임 중 스크린샷 1장(`/run-app`) ⑥ **(CR-052, CR-055 개정)** 1분 넘는 mp3를 다시 등록하고(③에서 해제했으므로 — 기본음은 1초 안에 끝나 정지를 들을 수 없다) 시작 시간 00:00:10 → 「시작」 → 0 도달 → 깜빡이는 중(0 도달 뒤 3초 안) 설정 창 타이머 탭 「멈춤」 ⑦ 같은 조작 뒤 깜빡이는 중 「시작」 → 새 회차가 다시 0에 닿으면 「멈춤」으로 정리 ⑧ 같은 조작 뒤 깜빡이는 중 「타이머 사용」 스위치 끔
-- Then ⓐ 화면: ① 글자가 1초마다 줄다 `00:00:00`에서 1초 주기로 깜빡이고 10초 뒤 깜빡임이 멈추며 `00:00:10`으로 돌아가 대기 ④ 쉬는중 이미지로 바뀐 뒤에도 글자가 계속 줄어듦(멈추지 않음), 입력해도 튀지 않음 ⑤ 스크린샷 경로 기록 ⑥ 누른 순간 깜빡임이 멈추고 `00:00:10`으로 대기 ⑦ 누른 순간 깜빡임이 멈추고 `00:00:10`부터 다시 줄어듦 ⑧ 끈 순간 깜빡임이 멈춤(글자 값은 비고) ⓑ 소리: ① 0 도달 순간 등록 mp3가 **1회** 재생을 시작해(CR-055 — 1분 넘는 파일이라 깜빡이는 10초 동안 이어짐) **10초 깜빡임이 끝나는 순간 함께 멈춤**(R-39 — `finished`를 떠나면 재생 중인 소리 정지) ② 80%·0%(무음)·100% 크기 차이가 들림 ③ 기본음(삐 3번)이 **한 번만** 울림 — 깜빡이는 10초 동안 되풀이되면 FAIL(CR-055, CR-052 반복 재생 폐기) ⑥ ⑦ ⑧ 누른·끈 순간 재생 중이던 mp3가 **바로** 멈춤(10초를 기다리지 않음), ⑦의 새 회차는 0 도달 때 다시 1회 재생 ⓒ core·bridge: 오류·안내 문구 없음, `settings.json` `timer.alarmVolume`은 마지막 값
+- When ① 시작 시간 00:00:10 → 「시작」 → 0 도달 → 10초 관찰 ② 음량 80%·0%·100%로 바꿔 ①을 반복 ③ 기본값(등록 해제) 후 ① 반복 ④ 시작 시간 00:08:00 → 「시작」 → 입력 없이 5분 넘게 기다려 쉬는중 → 1분 더 관찰 → 입력 ⑤ 끝남 깜빡임 중 스크린샷 1장(`/run-app`) ⑥ **(CR-052, CR-055, CR-058 개정)** 1분 넘는 mp3를 다시 등록하고(③에서 해제했으므로 — 정지 확인은 재생 길이가 깜빡임 10초보다 확실히 긴 파일로 한다. 내장 기본음(번들 mp3, 34 061바이트)은 재생 길이가 설계 문서에 없어 정지 판정에 쓰지 않는다) 시작 시간 00:00:10 → 「시작」 → 0 도달 → 깜빡이는 중(0 도달 뒤 3초 안) 설정 창 타이머 탭 「멈춤」 ⑦ 같은 조작 뒤 깜빡이는 중 「시작」 → 새 회차가 다시 0에 닿으면 「멈춤」으로 정리 ⑧ 같은 조작 뒤 깜빡이는 중 「타이머 사용」 스위치 끔
+- Then ⓐ 화면: ① 글자가 1초마다 줄다 `00:00:00`에서 1초 주기로 깜빡이고 10초 뒤 깜빡임이 멈추며 `00:00:10`으로 돌아가 대기 ④ 쉬는중 이미지로 바뀐 뒤에도 글자가 계속 줄어듦(멈추지 않음), 입력해도 튀지 않음 ⑤ 스크린샷 경로 기록 ⑥ 누른 순간 깜빡임이 멈추고 `00:00:10`으로 대기 ⑦ 누른 순간 깜빡임이 멈추고 `00:00:10`부터 다시 줄어듦 ⑧ 끈 순간 깜빡임이 멈춤(글자 값은 비고) ⓑ 소리: ① 0 도달 순간 등록 mp3가 **1회** 재생을 시작해(CR-055 — 1분 넘는 파일이라 깜빡이는 10초 동안 이어짐) **10초 깜빡임이 끝나는 순간 함께 멈춤**(R-39 — `finished`를 떠나면 재생 중인 소리 정지) ② 80%·0%(무음)·100% 크기 차이가 들림 ③ 내장 기본음(번들 mp3 — CR-058 사용자 지정 음)이 **한 번만** 울림(파일이 10초보다 길면 깜빡임 종료 때 함께 멈춤) — 같은 음이 처음부터 다시 시작되면 FAIL(CR-055, CR-052 반복 재생 폐기) ⑥ ⑦ ⑧ 누른·끈 순간 재생 중이던 mp3가 **바로** 멈춤(10초를 기다리지 않음), ⑦의 새 회차는 0 도달 때 다시 1회 재생 ⓒ core·bridge: 오류·안내 문구 없음, `settings.json` `timer.alarmVolume`은 마지막 값
 - 스펙: 수동 — `src/overlay/test/manual-checklist.md` MC-30
 
 ### TC-FLOW-19 · S-19 25분 집중 시간을 방송하며 남은 시간을 보여 주고, 자리를 비워도 계속 줄어듦(TC-FLOW 목록에 더한다)
@@ -3451,18 +3452,18 @@ Steps: TC-300 ① → TC-303 ③ → TC-302 ① → TC-296 ① → TC-307 → TC
 | 15.1 1행 주(초기 스냅숏 = 스톱워치 `00:00:00`, 설정값으로 미리 채우지 않음) · 「입력은 스냅숏뿐」 | TC-294 ① 1행·TC-295 ⑥ · TC-307(설정 `countdownSecs`가 아니라 스냅숏 `durationMs`로 `00:25:00`) |
 | 15.1 깜빡임 CSS(`timerBlink 1s infinite`·keyframes·transform 없음) / 트리거·해제 / JS 타이머 없음 / `restPaused` 없음·쉬는중 보고 그대로 | TC-296 ④ / TC-296 ①·TC-307 / TC-296 ②·TC-295 ②·TC-307(10초 유지) / TC-284(재확인)·TC-312 ④ |
 | 15.2 표 1·2·5행 / 3·4행 / 6·7행 | TC-301·TC-308 ② / TC-300 / TC-302·TC-308 ① |
-| 15.2 재생 순서(등록 → 실패 시 기본음, 없거나 조회 실패 → 기본음, 음량 = 시작 시점 gain) / 실패 알림 순서 ⓐⓑⓒ / **1회 재생(CR-055 🔒 — CR-052 「10초 동안 반복」 폐기, R-39 「1회 재생(반복 없음)」 복귀: 등록·기본·대체 기본음 모두 `loop` 기본 false, 재생 중 떠나면 정지는 판정표 6·7행)** / 재생은 오버레이 한 곳 | TC-303·TC-304·TC-305 ②·TC-313(화면 수준 음량) / TC-299 ④·TC-303 ③·TC-305 ③ / TC-300 ①(`loop` false)·TC-302 ①(두 회차 `loop` false)·TC-303 ①③④(`loop` false)·TC-304 ①②(`loop` false)·TC-307(`loop` false)·TC-299 ①(공용 `loop` 인자 기본 false·true — 불변)·TC-311 ⓐ(삐 3번 한 번)·TC-312 ①③⑥⑦⑧ / TC-307(`getAlarmSound` 1회) |
-| 15.3 `useAlarmOnFinish` 위치 = `TimerText`(구독·조회 1개, OverlayApp 불변) / 훅 파일 위치 / `useElapsedText` `string` 유지 / `alarmSound` 공용 / 깜빡임 CSS 로컬 / `BEEP_AMPLITUDE` 0.5 | TC-307·TC-296 ①(각 1회)·TC-308 ①(언마운트 정지) / TC-300~TC-305(import 경로) / TC-295 ① / TC-297~TC-299(import 경로) / TC-296 ④ / TC-297 |
+| 15.2 재생 순서(등록 → 실패 시 기본음, 없거나 조회 실패 → 기본음, 음량 = 시작 시점 gain) / 실패 알림 순서 ⓐⓑⓒ / **1회 재생(CR-055 🔒 — CR-052 「10초 동안 반복」 폐기, R-39 「1회 재생(반복 없음)」 복귀: 등록·기본·대체 기본음 모두 `loop` 기본 false, 재생 중 떠나면 정지는 판정표 6·7행)** / 재생은 오버레이 한 곳 | TC-303·TC-304·TC-305 ②·TC-313(화면 수준 음량) / TC-299 ④·TC-303 ③·TC-305 ③ / TC-300 ①(`loop` false)·TC-302 ①(두 회차 `loop` false)·TC-303 ①③④(`loop` false)·TC-304 ①②(`loop` false)·TC-307(`loop` false)·TC-299 ①(공용 `loop` 인자 기본 false·true — 불변)·TC-311 ⓐ(내장 기본음 한 번 — CR-058 번들 mp3)·TC-312 ①③⑥⑦⑧ / TC-307(`getAlarmSound` 1회) |
+| 15.3 `useAlarmOnFinish` 위치 = `TimerText`(구독·조회 1개, OverlayApp 불변) / 훅 파일 위치 / `useElapsedText` `string` 유지 / `alarmSound` 공용 / 깜빡임 CSS 로컬 / (v2.4 — CR-058·CR-061) 내장 기본음 = 번들 mp3 자산·기본 음량 `DEFAULT_ALARM_VOLUME` 44(옛 행 `BEEP_AMPLITUDE` 0.5는 합성음 폐기로 대상 없음) | TC-307·TC-296 ①(각 1회)·TC-308 ①(언마운트 정지) / TC-300~TC-305(import 경로) / TC-295 ① / TC-297~TC-299(import 경로) / TC-296 ④ / TC-298(자산 URL)·TC-297(44)·TC-299 ⑤(폴백 0.44)·TC-310~TC-312(실제 소리 — 수동) |
 | 15.3 잔여 위험(`TimerText` 미마운트면 무음 — 수용) | TC 대상 아님(설계가 수용한 위험 기록 — 동작 정의 없음) |
 | 15.3a 접근성(새 문구·aria-label 없음, `aria-hidden` 유지, `aria-live` 없음) | TC-296 ① |
-| 15.4 성능(새 interval·rAF 없음 / Audio 최대 2개 / Blob URL 창당 1개) | TC-295 ②④ / TC-303 ② / TC-298 |
+| 15.4 성능(새 interval·rAF 없음 / Audio 최대 2개 / 기본음 = 번들 정적 자산 URL, 런타임 생성물 없음 — v2.4 CR-058, 옛 「Blob URL 창당 1개」 대체) | TC-295 ②④ / TC-303 ② / TC-298 |
 | 15.5 계약·선행 조건(contract v0.23 반영, CSP·autoplay 인자) | v1.9 개정표(mock 보강·TC-286 ②), TC-310 |
 | 15.6 자동 재생 스파이크 | TC-310 |
 | 15.7 계획 TC-291~TC-312·TC-286 개정·mock 보강 | 이 절 전체(번호 그대로) |
 | design/functions.md §5.7 ① `snapshotMode` · `timerDisplayMs` · `formatRemaining` · `timerText` · `isTimerBlinking` | TC-291 · TC-292 · TC-293 · TC-294 ① · TC-294 ② |
 | §5.7 ② `useElapsedText` 개정 | TC-295 |
 | §5.7 ③ `useTimerSnapshot` `fromEvent` | TC-306, TC-268·TC-269·TC-270 ①(개정) |
-| §5.7 ④ 상수 · `synthBeepWav` · `defaultAlarmUrl` · `alarmGain` · `playSound` | TC-297 · TC-297 · TC-298 · TC-299 ⑤·TC-313(`TimerText`의 `alarmGain(timer)` 배선) · TC-299 ①~④ |
+| §5.7 ④ 상수 `DEFAULT_ALARM_VOLUME`(v2.4 — CR-058 44·CR-061 단일 소스) · 내장 기본음 자산 import · `defaultAlarmUrl` · `alarmGain` · `playSound` (폐기 — CR-058: `synthBeepWav`·`BEEP_*`·Blob URL 캐시, TC 대상 없음) | TC-297 · TC-298 · TC-298 · TC-299 ⑤·TC-313(`TimerText`의 `alarmGain(timer)` 배선) · TC-299 ①~④ |
 | §5.7 ⑤ 시그니처 · 상태(ref만) · `halt()` · `start()` · 효과 1 · 효과 2 ⓐⓑⓒ · 효과 3 · 예외 | TC-300~TC-305 · TC-300 ①(렌더 없음) · TC-302·TC-305 ①③ · TC-300·TC-303·TC-304 · TC-305 ② · TC-302 / TC-300 / TC-301 · TC-302 ③ · TC-303·TC-304 |
 | §5.7 ⑥ `TimerText` 렌더(`finished`면 `styles.blink`, 아니면 `className` 없음) | TC-296 ①②, TC-307 |
 | design/components.md §3.y 표 6행(`TimerText`·`useAlarmOnFinish`·`alarmSound`·`timerClock`·`useElapsedText`·`useTimerSnapshot`) / `OverlayApp`·`PomodoroLayer` 변경 없음 / 규칙 9 | TC-296·TC-307·TC-313(`useAlarmOnFinish(state, alarmGain(timer))` 인자) / TC-300~TC-305 / TC-297~TC-299 / TC-291~TC-294 / TC-295 / TC-306 // TC-307(구독 1회)·TC-278(재확인) // TC-296 ③·TC-309 |
@@ -3678,11 +3679,239 @@ CR ↔ TC(추가): CR-055 → 개정 TC-300 ①·TC-302 ①·TC-303 ①~④·TC-
 - 수: 변동 없음. 314번까지 = 유효 294건(자동 265 + 수동 29) + 폐기 20건. TC-FLOW 유효 19건 + 폐기 1건.
 - 실행(보강 모드 — 변경에 걸리는 TC만): `yarn test --run src/overlay/test/useAlarmOnFinish.test.ts src/overlay/test/OverlayApp.timerMode.test.tsx src/overlay/test/alarmSound.test.ts`. 수동: MC-29·MC-30(MC-28 PASS 빌드 전제).
 
+## CR-058·CR-061 내장 기본음 번들 mp3·0.4.0 기본값 — 개정 TC (v2.4, 2026-09-29)
+
+- **기준**: `src/overlay/requirements.md` **v3.1**(R-34 글자 기본 (268,402)·7°, R-39 「음량 기본 44%」·「내장 기본음 = 사용자가 지정한 mp3를 앱에 번들한 파일(`src/assets/sounds/default-alarm.mp3`)」 — CR-058 🔒 2026-09-28, 요구ID 증감 없음) · `src/overlay/design.md` §4 `timer` 초기값(contract v0.27 §3.3)·§7 `TimerSettings.alarmVolume?` 행(없으면 44)·§10.15 15.3 「내장 기본음 = 번들 mp3 자산(CR-058)」 행·15.4(기본음 = 번들 정적 자산 URL, 런타임 생성물 없음)·15.7 TC-286·TC-297~TC-299 행 · `design/functions.md` §5.7 ②(CR-061 `const initial = calcNow()` 1회 — 동작 불변)·④(`DEFAULT_ALARM_VOLUME = DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44`·`defaultAlarmUrl` = 번들 자산 반환·`alarmGain` 예 「없음·NaN → 0.44」·폐기 목록) · CR 대장 CR-058(적용·미검증)·CR-061(적용·미검증 — 순수 리팩터, 「TC 신규 없음」).
+- **스펙은 이미 개정·통과**(관리자 전달 — 전건 801 PASS): `alarmSound.test.ts` TC-297·TC-298·TC-299 ⑤, `OverlayApp.pomodoro.test.tsx` TC-286 ②. 이 패스는 문서를 설계·스펙에 맞추는 동기화이며 스펙 로직은 바꾸지 않는다. `alarmSound.test.ts`는 머리 주석의 「design 문서가 옛 합성음 서술(동기화 대기)」·「ui-test-designer 정리 필요」 문구만 정정했다(코드·단언 불변).
+- **신규 TC 없음**(요구 밖 TC 금지 — CR-058은 기존 TC 기대값 개정, CR-061은 동작 불변 리팩터라 기존 TC-297·TC-295가 그대로 커버).
+
+#### v2.4 개정표 — 기존 TC(CR-058·CR-061)
+
+| TC | 종류 | 스펙 | 옛 기대 | 새 기대 |
+|---|---|---|---|---|
+| TC-297 | 자동 | `alarmSound.test.ts` | `synthBeepWav` — 상수 8개 [22 050, 880, 150, 100, 3, 10, 0.5, 80]·RIFF 머리·길이 28 712·결정적·파형 경계·`Audio` 0개 | `DEFAULT_ALARM_VOLUME` === 44·`Audio` 0개(제목·요구·설계 칸 교체) |
+| TC-298 | 자동 | 같음 | `URL.createObjectURL` stub·`vi.resetModules()` → 두 번 `'blob:beep'`·`createObjectURL` 1회·`Blob`(`audio/wav`, 28 712)·`Audio` 0개 | 두 번 모두 `defaultAlarmAsset`(스펙이 import한 번들 mp3 URL)과 같은 문자열·`Audio` 0개 |
+| TC-299 ⑤ | 자동 | 같음 | `alarmVolume` 없음·NaN → 0.8 | 없음·NaN → **0.44**(80·0·150·−5 → 0.8·0·1·0 불변), `Audio` 0개 단언을 본문에 명시 |
+| TC-286 ② | 자동 | `OverlayApp.pomodoro.test.tsx` | (v2.2 CR-053) `DEFAULT_TIMER_SETTINGS` `alarmVolume` 80·`textPos` (142,458)·`rotation` 9, 글자 `142px`·`458px`·`rotate(9deg)` — 본문 ⓐⓑ에는 v1.9 값(80·268,403·5)이 남아 있었음 | `alarmVolume` 44·`textPos` (268,402)·`rotation` 7, 글자 `268px`·`402px`·`rotate(7deg)` — 본문 ⓐⓑ를 새 값으로 고쳐 씀, 요구 칸에 R-39(기본 음량) 추가 |
+| TC-310(MC-28) · TC-311(MC-29) · TC-312(MC-30) | 수동 | `manual-checklist.md` | 「기본음(삐 3번)」 / MC-30 ⑥ 근거 「기본음은 1초 안에 끝나 정지를 들을 수 없다」 | 「내장 기본음(번들 mp3 — 사용자 지정 음)」, 되풀이 FAIL 조건 = 같은 음이 처음부터 다시 시작됨(파일이 10초보다 길면 끝남 종료 때 멈춤도 PASS). MC-30 ⑥ 근거를 기본음 길이와 무관하게 — 정지 확인은 10초보다 확실히 긴 등록 파일로 하고, 기본음(34 061바이트)은 재생 길이가 설계 문서에 없어 정지 판정에 쓰지 않는다 |
+| MC-27 ②(TC-290) | 수동 | `manual-checklist.md` | 기본 268,403 중심·5° | 기본 (268,402) 중심·7°(CR-058 — 타이머 설정을 바꾸지 않은 경우) |
+| 공통 전제(v1.9) | — | — | `URL.createObjectURL` stub·`vi.resetModules()` / import 「상수 8개·`synthBeepWav`」 | 삭제 → 번들 자산 import 값 비교 / import `DEFAULT_ALARM_VOLUME`·`defaultAlarmUrl`·`alarmGain`·`playSound` / `'blob:default'` = mock 식별 문자열·0.8 = `gain` 인자 픽스처 명시 |
+| 추적표 v1.9 설계 행 | — | — | 15.3 `BEEP_AMPLITUDE` → TC-297 · 15.4 「Blob URL 창당 1개」 → TC-298 · §5.7 ④ `synthBeepWav` → TC-297 · 15.2 행 TC-311 「삐 3번」 | 15.3 번들 mp3·44 → TC-298·TC-297·TC-299 ⑤·TC-310~TC-312 · 15.4 번들 자산 URL → TC-298 · §5.7 ④ `DEFAULT_ALARM_VOLUME` → TC-297, 자산 import·`defaultAlarmUrl` → TC-298, 폐기 항목 표기 · TC-311 「내장 기본음 한 번」 |
+
+#### v2.4 유지 판정 — 옛 기본값과 같은 숫자지만 픽스처라 바꾸지 않는 값(스펙 코드로 판정)
+
+| TC | 스펙 | 값 | 판정 | 근거(스펙 코드) |
+|---|---|---|---|---|
+| TC-266 | `timerClock.test.ts` | `DEF` {268,403, 5} → left 268·top 403·`rotate(5deg)` | 유지 | 39~45행 지역 동결 상수 `DEF` — `DEFAULT_TIMER_SETTINGS`를 import하지 않음. 본문은 Given 「동결한 기본값」 → 「동결한 픽스처」, 설계 칸 R-34 인용만 정정 |
+| TC-276 · TC-279 | `pomodoro.test.tsx` | `TIMER_ON`(268,403·5) → `268px`·`403px`·`rotate(5deg)` | 유지 | 75~76행 지역 상수 `TIMER_OFF`·`TIMER_ON` |
+| TC-296 | `TimerText.blink.test.tsx` | `CD_ON`(alarmVolume 80·268,403·5) → `rotate(5deg)` | 유지 | 58행~ 지역 상수 `CD_ON` |
+| TC-299 ⑤ 기준 픽스처 | `alarmSound.test.ts` | `base` {268,403, 5}(`alarmVolume` 키 없음) | 유지 | 201행 지역 리터럴 — 폴백 경로를 보려고 `alarmVolume`을 뺀 것 |
+| TC-300 · TC-302~TC-305 | `useAlarmOnFinish.test.ts` | `volume` 0.8 | 유지 | 87행 `setup(…, gain = 0.8)` — 훅에 gain을 직접 넘김(기본 음량과 무관) |
+| TC-307 · TC-313 | `OverlayApp.timerMode.test.tsx` | `volume` 0.8 / 0.3·0.5 | 유지 | 127행~ `CD_ON.alarmVolume: 80` 명시 / `withTimer({ …CD_ON, alarmVolume: 30·50 })` |
+| TC-282~TC-285 · TC-287 · TC-288 | `OverlayApp.pomodoro.test.tsx` | `TIMER_OFF`·`TIMER_ON`(268,403·5) | 유지 | 116~117행 지역 상수. 이 스펙에서 글자 `left`·`top`·`rotate` 픽셀을 기본값으로 단언하는 곳은 TC-286 ②(현행 기본값으로 개정됨)뿐 |
+
+- 스펙 잔재(판정 영향 없음): `TimerText.blink.test.tsx`(98~111행)·`OverlayApp.timerMode.test.tsx`(머리 주석 8행·183~198행)에 옛 `URL.createObjectURL` stub(`'blob:default'`)이 남아 있으나 CR-058 뒤 어떤 코드도 부르지 않고 어떤 TC도 관찰·단언하지 않는다 — 기대 불변, 전제에서 뺐다. `timerClock.test.ts` 머리 주석의 「requirements R-34(… 기본 268,403·5° …)」도 옛 인용이다. 둘 다 이 패스 자원 경계 밖(코드·주석 미변경) — 스펙 정리 후보로 보고.
+
+요구 ↔ TC(v2.4)
+
+| 요구ID | 자동 TC | 수동 |
+|---|---|---|
+| R-39(「음량 기본 44%」 — CR-058) | TC-297, TC-299 ⑤, TC-286 ② ⓑ(`alarmVolume` 44) | — |
+| R-39(「내장 기본음 = 번들 mp3」 — CR-058) | TC-298, TC-303·TC-304(기본음 경로 — 재확인, mock URL) | TC-310(MC-28), TC-311(MC-29), TC-312 ③(MC-30) |
+| R-34(글자 기본 (268,402)·7° — CR-058) | TC-286 ② | TC-290(MC-27 ②) |
+
+설계 항목 ↔ TC(v2.4)
+
+| 설계 항목 | TC |
+|---|---|
+| design.md §4 `timer` 초기값(`DEFAULT_TIMER_SETTINGS` — contract v0.27 §3.3) | TC-286 ② |
+| design.md §7 `TimerSettings.alarmVolume?`(없으면 44) 행 | TC-299 ⑤, TC-297 |
+| design.md §10.15 15.3 「내장 기본음 = 번들 mp3 자산(CR-058)」 행 — 자산 import·`defaultAlarmUrl` 시그니처 불변·호출부 무변경·기본 음량 단일 소스(CR-061) | TC-298 · TC-298 · TC-300~TC-305(재확인 — 호출부 `useAlarmOnFinish` 불변) · TC-297 |
+| design.md §10.15 15.4 기본음 = 번들 정적 자산 URL(런타임 생성물 없음) | TC-298 |
+| design.md §10.15 15.7 TC-286 · TC-297 · TC-298 · TC-299 행 | TC-286 ② · TC-297 · TC-298 · TC-299 ⑤ |
+| design/functions.md §5.7 ④ import(`DEFAULT_TIMER_SETTINGS`·자산) · 상수 `DEFAULT_ALARM_VOLUME` · `defaultAlarmUrl` · `alarmGain` 예 · 폐기 목록 | TC-297·TC-298 · TC-297 · TC-298 · TC-299 ⑤ · TC 대상 없음(폐기 — 옛 TC-297·TC-298 기대를 교체해 반영) |
+| design/functions.md §5.7 ② CR-061 초기 동기화 `calcNow()` 1회(반환값·리렌더 시점 불변) | TC-295(재확인), TC-276·TC-287(재확인) |
+
+상태 전이표(확정사항 §5) ↔ TC(v2.4): 변경 없음 — `src/state/inputMachine.ts` 불변.
+
+사용자행 ↔ TC-FLOW(v2.4): 새 사용자행 없음. TC-FLOW Steps 불변 — S-20 → TC-FLOW-20 Step 7~9의 「기본음」은 번들 mp3(사용자 지정 음)로 읽는다. S-16 → TC-FLOW-16도 불변(TC-286 ②는 기본값 리터럴만 바뀜).
+
+CR ↔ TC(추가): CR-058 → 개정 TC-286 ②·TC-297·TC-298·TC-299 ⑤·TC-310(MC-28)·TC-311(MC-29)·TC-312(MC-30)·TC-290(MC-27 ②) / 유지 판정 TC-266·TC-276·TC-279·TC-282~TC-285·TC-287·TC-288·TC-296·TC-300·TC-302~TC-305·TC-307·TC-313. CR-061 → 신규·개정 없음, 재확인 TC-297(값 44 불변)·TC-295(`useElapsedText` 동작 불변) — CR 대장 「TC 신규 없음」과 일치. 대기열: CR-058·CR-061 행이 「변경 대기열」 절에 없다(이 패스에서 만들지 않음).
+
+- 수: 변동 없음. 314번까지 = 유효 294건(자동 265 + 수동 29) + 폐기 20건. TC-FLOW 유효 19건 + 폐기 1건.
+- 실행(보강 모드 — 변경에 걸리는 TC만): `yarn test --run src/overlay/test/alarmSound.test.ts src/overlay/test/OverlayApp.pomodoro.test.tsx`. 회귀: `yarn test --run src/overlay/test/useAlarmOnFinish.test.ts src/overlay/test/OverlayApp.timerMode.test.tsx src/overlay/test/useElapsedText.countdown.test.tsx`. 수동: MC-27 ②·MC-28~MC-30(MC-28 PASS 빌드 전제).
+
+## CR-062 오버레이 오른쪽 클릭 메뉴 — 기본 메뉴 억제 TC·회귀 지정·수동 MC-31~MC-45 (v2.5, 2026-09-29)
+
+- **기준**: `src/overlay/requirements.md` **v3.2** R-40(🔒 U-1 누름·뗌 모두 창 사각형 안, 🔒 U-3 전체 화면이면 생략, 🔒 U-5 브라우저 기본 메뉴 없음, U-2 포커스 이동·U-4 잠금 중 아래 창 메뉴 경합 수용)·§1 R-28 용어 주(CR-062)·§2 S-21·§3 창 기능 「오른쪽 클릭 메뉴」 행(계약 없음) / `src/overlay/design.md` §2 ASCII `.root` `onContextMenu` 줄·§6 P-10·§7 창 기능(CR-062) 행·계약 사용표 CR-062 행·§9(`design/a11y.md` 오른쪽 클릭)·§10.9.1 L-7·L-8·**§10.16**(16.1 책임 나눔·「ui가 하지 않는 것」·핸들러 위치, 16.2 상태별 동작 6행·포커스·메뉴 열린 동안 입력 반응, 16.3 불변·잔여 위험, 16.4 검증)·RTM R-28·R-40 / `design/functions.md` §5.1 `preventContextMenu` / `design/components.md` §3 `OverlayApp` 행(CR-062) / 횡단 설계 `doc/200_설계/architecture/overlay-context-menu.md` §7 MC-31~MC-45 원문·§2.10 R1~R7·§2.13 / contract v0.27 유지(새 command·event·래퍼·타입 없음).
+- **범위 규칙**: 메뉴 표시·판정(창 사각형·누름/뗌·숨김·전체 화면)·항목 동작·중복 가드는 core(tray·hook) 몫이라 vitest로 흉내 내지 않는다 → 수동 TC-316~TC-330(MC-31~MC-45). 자동 TC는 ui 몫(WebView2 기본 메뉴 억제) 1건(TC-315, it 2개). 회귀는 기존 TC 번호로 참조만 한다(기대 불변).
+- §0.3 보충 — **CR-062 red**(소스 미적용 — `index.tsx`에 `onContextMenu` 없음): TC-315 ① 반환값 3건(`true`)·`document` 도달 시 `defaultPrevented`(`[false, false, false]`), TC-315 ② contextmenu 반환값 1건만 실패가 정상. 나머지 단언(DOM·상태·포커스·bridge 호출 불변·export 없음·오른쪽 클릭 파츠)은 적용 전후 모두 Green — 회귀 방지. 새 타입·래퍼가 없어 `yarn tsc --noEmit` 영향 없음.
+- **잔여 위험(수용 — design.md §10.16 16.3)**: 앱 시작 직후 `src/main.tsx`의 `./overlay` 지연 로딩 동안(`OverlayApp` 마운트 전)은 `.root`가 없어 WebView2 기본 메뉴가 억제되지 않는다. 동작 정의가 아니라 수용된 위험이라 TC 대상이 아니다. 수동 MC는 오버레이 그림이 보인 뒤에 수행하고, 그 전 구간에서 기본 메뉴를 봤다면 FAIL이 아니라 비고에만 적는다(`manual-checklist.md` CR-062 절 공통 주).
+- **대기열**: CR-062 소스가 아직 적용되지 않아 「변경 대기열」에 행을 만들지 않았다. 적용 뒤 CR 대장 절차로 행이 생기면 TC-315·아래 회귀 TC로 전환한다.
+
+#### 화면 통합 — `OverlayApp` (스펙 `src/overlay/test/OverlayApp.contextMenu.test.tsx`)
+
+### TC-315 · WebView2 기본 메뉴 억제 — `.root` `onContextMenu` = `preventDefault` 하나뿐(투명한 자리·그림 위), 전파·DOM·상태·포커스·bridge 불변, 실제 순서에서 오른쪽 클릭 파츠 그대로 · 종류: 자동 · 요구: R-40(「브라우저 기본 오른쪽 클릭 메뉴(뒤로·새로 고침·검사 등)는 뜨지 않는다(🔒)」), R-09, R-01 · 설계: design.md §10.16 16.1 마지막 행(ui `.root` `onContextMenu={preventContextMenu}`)·「ui가 하지 않는 것」(메뉴 그리기·bridge 호출·`e.stopPropagation()` 없음)·핸들러 위치(`.root` 한 곳 — 그림 위 이벤트도 `.root`에 닿음)·16.3 불변(`data-tauri-drag-region`, `input://mouse-button` 영향 없음)·16.4 vitest 행, §2 ASCII `.root` `onContextMenu -> preventDefault only` 줄, §6 P-10 ①③·오류 칸(예외 없음·문구 없음), §7 창 기능(CR-062) 행·계약 사용표 CR-062 행(bridge와 무관), design/functions.md §5.1 `preventContextMenu`(출력 = `preventDefault` 하나·부작용 없음·export 없음·예외 없음), design/components.md §3 `OverlayApp` 행(CR-062 — 메뉴 컴포넌트 렌더 없음), design/a11y.md 오른쪽 클릭(DOM에 메뉴 요소·role·포커스 대상이 생기지 않음) · **신규(CR-062)**
+- Given 비잠금 `SETTINGS`(`DEFAULT_SETTINGS` 상속 — `positionLock false`, 타이머 꺼짐, `mouse.penMode false`)·`MANIFEST` = `kb_up`·`kb_down_0`·`mouse_base`·`mouse_left`·`mouse_right`(900×700, 펜·헤어·뽀모도 없음)로 마운트(T0), 조회·구독 완료. 기준값 = 그 시점의 `container.innerHTML`·`document.activeElement`·bridge mock 호출 수(`bridge/commands`·`bridge/events`의 **모든** mock 함수 — `getScreenBounds`·`getTimer`·`setResting`·`getAlarmSound`·`onTimerChanged` 포함). ①은 `document`에 `contextmenu` 버블 리스너(도달 시 `defaultPrevented` 기록)를 단다. ②는 새 마운트
+- When ① `fireEvent.contextMenu`를 `.root`(투명한 자리) → 키보드 img(`u:kb_up`) → 팔 img(`.armWrap img`) 순서로 3회 ② `input://mouse-button` 오른쪽 누름 → 오른쪽 뗌 → `.root`에 `fireEvent.contextMenu` → 오른쪽 누름 → 오른쪽 뗌
+- Then ⓐ 화면: ① 세 번 모두 반환값 `false`(= `defaultPrevented`), `.root` class `root`·`data-tauri-drag-region` 속성 유지, `container.innerHTML`이 기준값과 같음, `[role="menu"]`·`[role="menuitem"]` 요소 0개, `textContent` `''` ② 팔 img src `u:mouse_right` → `u:mouse_base` → contextmenu 반환값 `false`·`innerHTML` 직전과 같음·src `u:mouse_base` 그대로 → `u:mouse_right` → `u:mouse_base`, 끝에 키보드 `['u:kb_up']`·`.jellyWrap` class `jellyWrap`(펜 모드 아님 — 클릭 바운스 없음)·`textContent` `''` ⓑ 상태: ① `document` 리스너 수신 `[true, true, true]`(전파 유지 = `stopPropagation` 없음, 도달 시 이미 취소됨), dispatch 없음(팔 `u:mouse_base`·키보드 `['u:kb_up']`·`.jellyWrap` `jellyWrap` 그대로), `document.activeElement` 기준값과 같음, `'preventContextMenu' in (index 모듈)` = `false`(모듈 수준 상수 — export 없음) ② `machine.mouse.button` right → none → (contextmenu로 변화 없음) → right → none ⓒ bridge: ①② 모두 모든 command·event 래퍼 호출 수가 기준값과 같음(증가 0 — `setSettings` 0회, `getScreenBounds` 0회, 구독 재등록 없음). ②의 입력은 기존 `input://mouse-button` 페이로드 `{ button: 'right', pressed, ts }`뿐
+- 비고: 메뉴가 뜨는지·전체 화면 생략·잠금 중 동작은 core 몫이라 이 TC가 단언하지 않는다(TC-316~TC-330). 잠금 중에는 WebView에 `contextmenu`가 오지 않는 것이 설계 전제(§10.9.1 L-8)라 잠금 픽스처로 흘려 넣지 않는다 — 잠금 값과 무관하게 DOM이 같다는 것은 TC-227 ①(재확인). 모듈 수준 상수·react `MouseEvent` 타입·`.root` 한 곳 부착처럼 실행으로 구별되지 않는 구현 형태는 `manual-checklist.md` 코드 리뷰 RV-02
+- 스펙: `src/overlay/test/OverlayApp.contextMenu.test.tsx`(it 2개 — `TC-315 ①`·`TC-315 ②`)
+
+#### 회귀 지정 — 기존 TC 번호로 참조만(design.md §10.16 16.3·16.4 회귀 행, 기대 불변)
+
+| 요구 | 회귀 TC | 확인하는 것 |
+|---|---|---|
+| R-09 | TC-013 · TC-039 · TC-062 | 상태기계 전이표 행6 마우스 클릭(오른쪽 누름 = `button right`, 뗌 = `none`) · `MouseArm` `button right` → `u:mouse_right` · `OverlayApp` P-4 left → none → right(`u:mouse_right`) |
+| R-26 | TC-214 · TC-218 · TC-219 | 펜 모드 오른 클릭 = 손 누름 그림·젤리 + `u:mouse_right`(규칙 1~3) · 좌우 동시 누름에서 한쪽 뗌(규칙 13) · 펜 모드 아님 = 오른 클릭 파츠만(규칙 14). 기대는 각 TC 본문 + v1.6 CR-042 개정표 그대로 |
+| R-04 | TC-071 · TC-073 · TC-077 · 수동 TC-088(MC-06) | Ctrl+휠 한 칸 저장 · Ctrl 없는 휠 무시 · 그림 위 휠도 `.root`가 받음 · 실제 WebView 휠 |
+| R-12 · R-28(재확인) | TC-077 · TC-227 ① | `.root` `data-tauri-drag-region` 유지 · 잠금 값과 무관한 같은 DOM(`onContextMenu`는 DOM 속성이 아니라 `innerHTML` 비교에 영향 없음) |
+
+#### 수동 — `src/overlay/test/manual-checklist.md` 「CR-062」 절 MC-31~MC-45
+
+공통 Given(TC-316~TC-330): 실제 앱 — dev(`/dev-start`)와 release exe **각각**(횡단 설계 §7), CR-062 적용 빌드(core hook `RightClick` 채널·tray 팝업·전체 화면 판정 + ui `preventContextMenu`), 공통 준비 이미지, 오버레이 그림이 화면에 보인 뒤 시작(그 전 로딩 구간은 수용된 잔여 위험 — 판정 제외). 공통 ⓒ: 새 command·event 없음(contract v0.27) — ui의 bridge 호출 증가 0은 TC-315가 증명하므로 수동에서는 오류 줄(dev `.dev-tauri.log`) 없음만 본다. 결과는 core `tray.md` §8.3에도 같이 적는다(횡단 설계 §4.5).
+
+### TC-316 · 비잠금 메뉴 1개·브라우저 메뉴 없음(그림 위·투명한 모서리) · 종류: 수동(MC-31) · 요구: R-40, R-09 · 설계: design.md §10.16 16.1 2행(창 사각형 — 투명 부분 포함)·6행(ui 억제)·16.2 1행, §6 P-10 ①②③, 횡단 설계 §2.13(지연 목표 < 100ms — 관찰) · **신규(CR-062)**
+- Given 공통, 위치 잠금 꺼짐, 오버레이 표시, 타이머 끔
+- When MC-31: 오버레이 그림 위와 투명한 모서리 위에서 각각 오른쪽 클릭
+- Then ⓐ 화면: 두 곳 모두 트레이와 같은 메뉴가 커서 위치에 **1개**, 브라우저 메뉴(뒤로·새로 고침·검사 등) 없음, 체감 지연 없음. (관찰) 누르는 동안 마우스 파츠가 오른클릭 그림으로 바뀌었다가 떼면 돌아온다(R-09 기존대로) ⓑ 상태: 메뉴를 Esc로 닫으면 `settings.json` 변화 없음(오른쪽 클릭 자체는 아무것도 저장하지 않음) ⓒ core·bridge: 오류 줄 없음, 메뉴가 뜬 화면 스크린샷 경로 기록(횡단 설계 §6.3 수용 기준 — 사용자가 앱 실행을 허락할 때만)
+
+### TC-317 · 메뉴 동일성 — 타이머 3상태의 항목·순서·문구·구분선 · 종류: 수동(MC-32) · 요구: R-40 · 설계: design.md §10.16 16.1 5행(`build_menu`·`current_view` 공유), 횡단 설계 §2.5 · **신규(CR-062)**
+- Given 공통, 위치 잠금 꺼짐
+- When MC-32: 타이머 ① 끔 ② 켬·정지 ③ 켬·흐르는 중 상태마다 트레이 메뉴와 오버레이 메뉴를 캡처
+- Then ⓐ 화면: 세 상태 모두 두 메뉴의 항목·순서·문구·구분선이 같다 — ① 4항목(「설정 열기」·「새로고침」·「오버레이 표시/숨김」·「종료」) ② 「시작」·「멈춤」 + 구분선 + 4 ③ 「일시정지」·「멈춤」 + 구분선 + 4 ⓑ 상태: `settings.json` `timer.enabled`는 준비한 값 그대로(캡처는 아무것도 바꾸지 않음) ⓒ core·bridge: 캡처 6장 경로 기록, 오류 줄 없음
+
+### TC-318 · 항목 동작 = 트레이와 같음, 한 번 고른 동작은 1회 · 종류: 수동(MC-33) · 요구: R-40, R-28(용어 주 — 잠금 중에도 메뉴 「설정 열기」로 설정 창) · 설계: design.md §10.16 16.1 5행(기존 전역 `on_menu_event`), §10.9.1 L-7 · **신규(CR-062)**
+- Given 공통, 잠금 여부 무관(TC-FLOW-21 Step 2는 잠금 켬), 타이머 켬·시작 시간 준비
+- When MC-33: 오버레이 메뉴에서 차례로 ① 설정 열기 ② 새로고침 ③ 시작/일시정지 ④ 멈춤 ⑤ 표시/숨김 ⑥ (트레이로 다시 표시) ⑦ 종료
+- Then ⓐ 화면: 트레이에서 고른 것과 같다 — ① 설정 창이 한 개만 앞으로 온다 ② 오버레이가 다시 불러와진다 ③④ 오버레이 글자와 설정 창 타이머가 함께 바뀐다 ⑤⑥ 숨긴 뒤 트레이로 복귀할 수 있다 ⑦ 앱이 종료된다. **한 번 고른 동작이 두 번 실행되지 않는다**(⑤ 뒤 오버레이가 저절로 다시 보이지 않음) ⓑ 상태: `settings.json` `overlay.visible` ⑤ `false` → ⑥ `true`, `positionLock`은 준비값 그대로(메뉴는 잠금을 바꾸지 않음 — 해제는 설정 창에서만) ⓒ core·bridge: 설정 창 타이머 갱신은 기존 `timer://changed`로(새 계약 없음), 오류 줄 없음
+
+### TC-319 · 🔒 잠금 중 메뉴·아래 창 전달 · 종류: 수동(MC-34) · 요구: R-40(「위치 잠금 중에도 뜬다(🔒)」·「아래 창에도 그대로 전달」), R-28 · 설계: design.md §10.16 16.2 2행, §10.9.1 L-8, §6 P-10 ④, 횡단 설계 §2.10 R3(U-4 수용) · **신규(CR-062)**
+- Given 공통, 위치 잠금 켬, 오버레이 아래에 ① 메모장 ② 창 모드 게임 또는 그림판
+- When MC-34: ①② 위 오버레이를 각각 오른쪽 클릭
+- Then ⓐ 화면: 두 경우 모두 오버레이 메뉴(트레이와 같은 메뉴)가 뜬다, 오른쪽 클릭이 아래 창에도 전달된다(아래 창의 오른쪽 클릭 반응으로 확인), 브라우저 기본 메뉴는 없다(잠금 중 WebView는 클릭을 받지 않음 — L-8). ①에서 메모장 자체 메뉴와 경합하는 결과는 **관찰만** 하고 비고에 적는다(U-4 수용 — 판정 외) ⓑ 상태: 오버레이 위치·배율 불변, `positionLock true` 유지 ⓒ core·bridge: 오류 줄 없음
+
+### TC-320 · 숨김이면 메뉴 없음 · 종류: 수동(MC-35) · 요구: R-40(「오버레이가 숨겨져 있으면 뜨지 않는다」) · 설계: design.md §10.16 16.1 3행(`overlay_screen_rect` → `None`)·16.2 5행 · **신규(CR-062)**
+- Given 공통, 트레이로 오버레이를 숨김(잠금 여부 무관)
+- When MC-35: 옛 자리를 오른쪽 클릭
+- Then ⓐ 화면: 오버레이 메뉴가 뜨지 않는다(아래 창 자체 반응만) ⓑ 상태: `overlay.visible false` 그대로 ⓒ core·bridge: 오류 줄 없음
+
+### TC-321 · 🔒 누름/뗌 경계(U-1)·키 누른 채 반복 · 종류: 수동(MC-36) · 요구: R-40(「누른 곳·뗀 곳 모두」 창 사각형 안) · 설계: design.md §10.16 16.1 1·2행·16.2 4행(ui 핸들러 = 관찰 항목), 횡단 설계 §2.4·§3 AC-5·AC-7 · **신규(CR-062)**
+- Given 공통, 위치 잠금 꺼짐(잠금 켬 반복은 선택 — 판정 같음), 오버레이 표시
+- When MC-36: 오른쪽 버튼을 ① 오버레이 안에서 누르고 밖에서 떼기 ② 밖에서 누르고 안에서 떼기 ③ 키를 누른 채 오른쪽 클릭 반복(메뉴가 뜨면 바깥 좌클릭으로 닫고 다음 클릭)
+- Then ⓐ 화면: ①② 오버레이 메뉴 없음 ③ 오른쪽 클릭마다 메뉴 1개, 엉뚱한 때 뜨는 메뉴 없음. (관찰 — 판정 외) ①②에서 브라우저 기본 메뉴가 보였는지를 비고에 적는다(design.md §10.16 16.2 4행 「불릴 수도 있음 — 관찰 항목」. 보였다면 관리자에게 보고) ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-322 · 열린 메뉴 — 두 번째 메뉴 없음·바깥 클릭/Esc로 닫힘(잠금 중 포함) · 종류: 수동(MC-37) · 요구: R-40(「한 번의 클릭에 메뉴가 둘 이상 뜨지 않는다」), R-28 · 설계: design.md §10.16 16.1 5행(중복 팝업 가드 `POPUP_OPEN`)·16.2 6행, design/a11y.md(Esc = OS 메뉴 기본 동작), 횡단 설계 §2.10 R4 · **신규(CR-062)**
+- Given 공통, 오버레이 메뉴를 연 상태 — 위치 잠금 꺼짐으로 한 번, 켬으로 한 번
+- When MC-37: ① 오버레이 위 오른쪽 클릭 ② 바깥 좌클릭 ③ Esc(②③은 메뉴를 다시 연 뒤 수행)
+- Then ⓐ 화면: ① 두 번째 메뉴가 뜨지 않는다 ②③ 메뉴가 닫힌다 — **잠금 중에도 닫힌다**(R4). 잠금 중 닫히지 않으면 FAIL, core 세션으로 되돌린다(횡단 설계 §2.10 R4) ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-323 · 트레이 메뉴와 겹침(관찰) · 종류: 수동(MC-38) · 요구: R-40 · 설계: design.md §10.16 16.2 6행, 횡단 설계 §2.9(관찰 MC-38) · **신규(CR-062)**
+- Given 공통, 트레이 메뉴를 열어 둠
+- When MC-38: 오버레이를 오른쪽 클릭
+- Then ⓐ 화면: 동시에 두 메뉴가 남지 않는다 — **관찰만**(결과를 비고에 적는다. 두 메뉴가 남아도 FAIL로 끝내지 않고 관리자에게 보고) ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-324 · 창 모드 게임·포커스(🔒 U-2 기록) · 종류: 수동(MC-39) · 요구: R-40(「포커스가 메뉴로 옮겨 가고 닫힌 뒤 자동으로 돌아가지 않는다(수용)」), R-28 · 설계: design.md §10.16 16.2 아래 두 줄(포커스 자동 복귀 없음·메뉴 열린 동안 `input://*` 반응), design/a11y.md 오른쪽 클릭, 횡단 설계 §2.10 R1·R5 · **신규(CR-062)**
+- Given 공통, **테두리 있는 창 모드** 게임, 위치 잠금 켬
+- When MC-39: 오버레이 메뉴를 열었다 닫은 뒤 키 입력
+- Then ⓐ 화면: 메뉴가 뜬다(판정). 메뉴가 열린 동안에도 키 입력에 오버레이가 반응하는지(관찰), 닫은 뒤 게임 입력이 돌아오는 데 클릭이 필요한지는 **기록만**(수용된 동작 — 판정 외) ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-325 · 🔒 테두리 없는 전체 화면 — 메뉴 없음 · 종류: 수동(MC-40) · 요구: R-40(「전체 화면이면 띄우지 않는다(🔒)」), R-28 · 설계: design.md §10.16 16.1 4행·16.2 3행, 횡단 설계 §2.14·§3 AC-8 · **신규(CR-062)**
+- Given 공통, 테두리 없는 창 모드 전체 화면 게임이 전경, 위치 잠금 켬
+- When MC-40: 누름·뗌 모두 오버레이 위에서 오른쪽 클릭
+- Then ⓐ 화면: **메뉴가 뜨지 않는다.** 게임 포커스가 유지되고 게임은 오른쪽 클릭을 받는다 ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-326 · 🔒 독점 전체 화면 — 메뉴 없음·최소화 없음 · 종류: 수동(MC-41) · 요구: R-40 · 설계: design.md §10.16 16.1 4행·16.2 3행, 횡단 설계 §2.10 R2·§2.14 · **신규(CR-062)**
+- Given 공통, 독점 전체 화면 게임이 전경
+- When MC-41: 오버레이가 있던 자리를 오른쪽 클릭
+- Then ⓐ 화면: **메뉴가 뜨지 않고, 게임이 최소화되거나 화면이 전환되지 않는다** ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-327 · 최대화 창(테두리 있음) — 메뉴 뜸 · 종류: 수동(MC-42) · 요구: R-40(「테두리가 있는 창 모드(최대화 포함) … 이 전경이면 뜬다」), R-28 · 설계: design.md §10.16 16.2 2행, 횡단 설계 §2.14 D-11 · **신규(CR-062)**
+- Given 공통, 최대화한 브라우저가 전경, 위치 잠금 켬, 작업표시줄 자동 숨김 ① 끔 ② 켬
+- When MC-42: ①② 각각 최대화 브라우저 위 오버레이를 오른쪽 클릭
+- Then ⓐ 화면: ①② 모두 메뉴가 뜬다(클라이언트 영역이 제목 표시줄만큼 모니터보다 작음) ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-328 · 바탕 화면·작업표시줄 전경 — 메뉴 뜸 · 종류: 수동(MC-43) · 요구: R-40(「바탕 화면·작업표시줄이 전경이면 뜬다」), R-28 · 설계: design.md §10.16 16.2 2행, 횡단 설계 §2.14 D-10 ③·§2.10 R7 · **신규(CR-062)**
+- Given 공통, 오버레이 표시
+- When MC-43: ① 바탕 화면 빈 곳을 좌클릭한 뒤 바탕 화면 위 잠금 오버레이를 오른쪽 클릭 ② 작업표시줄을 클릭해 전경으로 만든 뒤 오버레이를 오른쪽 클릭(잠금·비잠금 각각)
+- Then ⓐ 화면: ①② 메뉴가 뜬다. (관찰 — 판정 외) Alt+Tab 전환 화면·작업 보기가 떠 있을 때의 결과는 비고에만(R7) ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-329 · 브라우저·동영상 전체 화면 — 메뉴 없음, 나가면 다시 뜸 · 종류: 수동(MC-44) · 요구: R-40(「브라우저·동영상 전체 화면도 포함」), R-28 · 설계: design.md §10.16 16.2 3행, 횡단 설계 §2.14(결과 — F11도 테두리 없는 전체 화면) · **신규(CR-062)**
+- Given 공통, 위치 잠금 켬, 브라우저 F11 또는 동영상 전체 화면이 전경
+- When MC-44: 전체 화면 위 오버레이를 오른쪽 클릭 → 전체 화면을 나간 뒤 다시 오른쪽 클릭
+- Then ⓐ 화면: 전체 화면 중에는 메뉴가 뜨지 않는다, 나가면 다시 뜬다 ⓑ 상태: `settings.json` 변화 없음 ⓒ core·bridge: 오류 줄 없음
+
+### TC-330 · 경합·다중 모니터(①② 관찰, ③ 판정) · 종류: 수동(MC-45) · 요구: R-40 · 설계: design.md §10.16 16.2 1·3행, 횡단 설계 §2.10 R6·§2.14 좌표계 · **신규(CR-062)**
+- Given 공통, 모니터 2대(③은 배율이 다른 WQHD + 1080p)
+- When MC-45: ① 모니터 A에 테두리 없는 전체 화면 게임(전경), 모니터 B에 잠금 오버레이 → B의 오버레이를 오른쪽 클릭 ② 비잠금 오버레이를 전체 화면 게임 위에서 오른쪽 클릭 ③ 배율이 다른 모니터로 오버레이를 옮겨 MC-31 반복
+- Then ⓐ 화면: ① 오른쪽 누름으로 B의 아래 창이 활성화되면 전경이 바뀌어 메뉴가 뜰 수 있다 — 결과만 기록(R6) ② 클릭이 오버레이를 활성화해 전경이 이 앱이면 메뉴가 뜬다(정의대로) — 결과만 기록 ③ 메뉴가 뜨고 창 가장자리 판정이 맞다(판정 — 가장자리 바로 안쪽은 뜨고 바로 바깥은 안 뜸), 브라우저 기본 메뉴 없음 ⓑ 상태: `settings.json` `overlay.x/y`는 ③에서 옮긴 값만 바뀜 ⓒ core·bridge: 오류 줄 없음
+
+### TC-FLOW-21 · S-21 잠가 둔 채 창 모드 게임 중 캐릭터를 오른쪽 클릭해 트레이와 같은 메뉴로 설정·타이머를 다루고, 전체 화면 게임에서는 메뉴가 뜨지 않음(TC-FLOW 목록에 더한다)
+Steps: TC-319 → TC-318 → TC-325 (v2.5 신규, CR-062)
+
+- 전제: TC-315(자동) Green 빌드 — 행의 사용 기능 끝 「브라우저 기본 메뉴 없음」은 비잠금 WebView 경로라 TC-315·TC-316이 맡고, 이 흐름(잠금 중)에서는 Step 1 ⓐ의 「브라우저 기본 메뉴 없음」으로 함께 본다.
+- 표 규약: TC-FLOW-20과 같다(「환경 전환:」 Step은 그 TC의 Given으로 새로 준비, 접두어 없는 Step은 앞 Step 종료 상태를 이어 쓴다).
+
+| Step | TC | Given(= 앞 Step 종료) | 종료 상태 |
+|---|---|---|---|
+| 1 | TC-319(MC-34) ② | 환경 전환: 실제 앱(CR-062 빌드), 위치 잠금 켬, 타이머 켬·흐르는 중, 오버레이 아래 테두리 있는 창 모드 게임(또는 그림판) | 오버레이 메뉴 1개(「일시정지」·「멈춤」·구분선·4항목 — TC-317 ③과 같은 구성), 오른쪽 클릭은 게임에도 전달, 브라우저 기본 메뉴 없음. 메뉴 열린 상태 |
+| 2 | TC-318(MC-33) ①·④ | Step 1의 열린 메뉴(잠금 유지) | ① 「설정 열기」 → 설정 창 한 개가 앞으로(설정 변경·잠금 해제는 여기서) → 설정 창을 닫고 게임 창 클릭 → 다시 오버레이 오른쪽 클릭 → ④ 「멈춤」 → 오버레이 글자와 설정 창 타이머가 함께 정지 값, 동작 1회. 잠금 켬 유지 |
+| 3 | TC-325(MC-40) | 잠금 유지·앱 실행 중, 게임을 테두리 없는 전체 화면으로 전환(전경) | 누름·뗌 모두 오버레이 위 오른쪽 클릭에 메뉴 없음, 게임 포커스 유지·게임이 오른쪽 클릭을 받음 |
+
+### 추적표 v2.5 추가분(CR-062) — 「## 추적표」의 v2.4 이하 표에 더한다
+
+요구 ↔ TC(추가)
+
+| 요구ID | 자동 TC | 수동 TC |
+|---|---|---|
+| R-40 | TC-315(①·②) / 회귀 TC-013·TC-039·TC-062·TC-214·TC-218·TC-219·TC-071·TC-073·TC-077 | TC-316(MC-31), TC-317(MC-32), TC-318(MC-33), TC-319(MC-34), TC-320(MC-35), TC-321(MC-36), TC-322(MC-37), TC-323(MC-38), TC-324(MC-39), TC-325(MC-40), TC-326(MC-41), TC-327(MC-42), TC-328(MC-43), TC-329(MC-44), TC-330(MC-45) |
+| R-28(용어 주 CR-062 — 잠금 중 오른쪽 클릭은 아래 창 전달 + 메뉴, 전체 화면이면 없음, 해제는 설정 창) | TC-227 ①②(재확인 — `positionLock` 미참조·잠금 DOM 동일) | TC-318(잠금 중 「설정 열기」), TC-319, TC-322, TC-324, TC-325, TC-327, TC-328, TC-329 |
+| R-09(더함 — 같은 오른쪽 클릭의 파츠 교체 불변) | TC-315 ②, 회귀 TC-013·TC-039·TC-062 | TC-316(관찰) |
+| R-26(더함 — 펜 모드 오른 클릭 불변) | 회귀 TC-214·TC-218·TC-219 | — |
+| R-04 · R-12(더함 — `onWheel`·끌기 속성 불변) | TC-315 ①(`data-tauri-drag-region`), 회귀 TC-071·TC-073·TC-077·TC-227 ① | 회귀 TC-088(MC-06) |
+| R-01(더함 — 메뉴·문구를 DOM에 그리지 않음) | TC-315 ①②(`textContent` `''`) | — |
+
+설계 항목 ↔ TC(CR-062)
+
+| 설계 항목 | TC |
+|---|---|
+| design.md §2 ASCII `.root` `onContextMenu -> preventDefault only (R-40)` 줄 | TC-315 ① |
+| design.md §6 P-10 ① WebView `contextmenu` → `.root` `preventDefault` → 기본 메뉴 없음 / ② core 판정·팝업(ui 관여 없음) / ③ 같은 클릭의 `input://mouse-button` → 클릭 파츠·펜 모드 클릭 / ④ 잠금 중 ①없이 ②③ / 오류 칸(예외 없음·core 실패는 ui에 안 알려짐·문구 없음) | TC-315 ①·TC-316 / TC-316~TC-330 / TC-315 ②·회귀 TC-062·TC-214·TC-218·TC-219 / TC-319·TC-227 ②(재확인 — 잠금 중 입력 반응) / TC-315 ①②(`textContent` `''`, 예외 없이 반환) |
+| design.md §7 창 기능(CR-062) 행 · 계약 사용표 CR-062 행(계약 없음, bridge와 무관) | TC-315 ①② ⓒ(모든 래퍼 호출 증가 0) |
+| design.md §9 · design/a11y.md 오른쪽 클릭(네이티브 메뉴 — 방향키·Enter·Esc는 OS 기본, DOM에 메뉴 요소·role·포커스 대상 없음, 포커스 자동 복귀 없음) | TC-315 ①(`[role="menu"]` 0개·`activeElement` 불변) · TC-322 ③(Esc) · TC-324(포커스 기록) |
+| design.md §10.9.1 L-7(잠금 중 메뉴 「설정 열기」로 설정 창) · L-8(잠금 중 오른쪽 클릭 = 아래 창 전달 + core 메뉴, `preventContextMenu` 불리지 않음·ui 분기 없음) | TC-318·TC-FLOW-21 Step 2 · TC-319·TC-227 ①(재확인 — 잠금 값 무관 DOM) |
+| §10.16 16.1 1행(누름·뗌 감지, 잠금 포함) / 2행(창 사각형·투명 포함·누름·뗌 모두 안) / 3행(숨김 생략) / 4행(전체 화면 생략) / 5행(항목·순서·문구·동작·중복 가드) / 6행(ui 기본 메뉴 억제) | TC-319·TC-321 / TC-316·TC-321·TC-330 ③ / TC-320 / TC-325·TC-326·TC-329(생략)·TC-327·TC-328(표시)·TC-330 ①② / TC-317·TC-318·TC-322·TC-323 / TC-315 |
+| §10.16 16.1 「ui가 하지 않는 것」(메뉴 그리기 · 새 bridge 호출 · `positionLock` 읽기 · 전체 화면 판정 · `stopPropagation`) · 핸들러 위치(`.root` 한 곳 — 그림 위도 `.root`에 닿음) | TC-315 ①(`[role="menu"]` 0개) · TC-315 ①② ⓒ · TC-227(재확인) · TC-315(판정 입력 없음 — 잠금·전경 픽스처 없이 같은 결과)·TC-325 · TC-315 ①(`document` 수신 `[true, true, true]`) · TC-315 ①(키보드·팔 img에서 쏜 이벤트도 취소)·RV-02 |
+| §10.16 16.2 1행 / 2행 / 3행 / 4행(한쪽만 창 안 — ui 핸들러는 관찰) / 5행 / 6행 | TC-316·TC-315 / TC-319·TC-327·TC-328 / TC-325·TC-326·TC-329·TC-330 ② / TC-321(①② 판정 = 메뉴 없음, 기본 메뉴 유무 = 관찰) / TC-320 / TC-322 ①·TC-323 |
+| §10.16 16.2 아래 줄: 포커스 이동·자동 복귀 없음(U-2) / 메뉴 열린 동안 `input://*` 반응 그대로 | TC-324 / TC-324(관찰) |
+| §10.16 16.3 불변(`onWheel`·`data-tauri-drag-region`·상태기계·레이어 렌더·타이머 흐름) / `contextmenu`는 뗌 뒤·`input://mouse-button` 무영향 / 잔여 위험(지연 로딩 전 구간) | 회귀 TC-071·TC-073·TC-077·TC-227 ①·TC-315 ①(속성) — 상태기계·레이어·타이머는 소스 변경이 `index.tsx` JSX 속성 1개뿐이라 전건 회귀(`/doc-sync`·verify)로 / TC-315 ②·회귀 TC-062·TC-214·TC-218·TC-219 / TC 대상 아님(수용된 위험 — manual-checklist CR-062 절 공통 주: FAIL 기준 아님) |
+| §10.16 16.4 검증 표 vitest 행 / 회귀 행 / 수동 행 | TC-315 / 「회귀 지정」 표 / TC-316~TC-330 |
+| design/functions.md §5.1 `preventContextMenu` — 시그니처·출력(`preventDefault` 하나) · 붙이는 곳(`.root` 한 곳) · 부작용 없음(상태·dispatch·bridge·`stopPropagation`·`positionLock` 없음) · 다른 동작 영향 없음 · 예외 없음 · export 없음·모듈 수준 상수·react `MouseEvent` 타입 | TC-315 ① · TC-315 ①·RV-02 · TC-315 ①② · TC-315 ②·회귀 표 · TC-315 ①② · TC-315 ①(`in` 검사)·RV-02 |
+| design/components.md §3 `OverlayApp` 행(CR-062 — `.root` `onContextMenu`, 메뉴 컴포넌트 렌더 없음) | TC-315 ① |
+| RTM R-28 · R-40 행 | 위 요구 ↔ TC 표 |
+| requirements §3 창 기능 「오른쪽 클릭 메뉴」 행(core 전용, 계약 없음) | TC-315 ⓒ, TC-316~TC-330 |
+| requirements §2 S-21 | TC-FLOW-21 |
+
+상태 전이표(확정사항 §5) ↔ TC(CR-062): 변경 없음 — `src/state/inputMachine.ts` 불변. `contextmenu`는 상태기계 입력이 아니다(TC-315 ①이 dispatch 없음을 관찰).
+
+사용자행 ↔ TC-FLOW(추가)
+
+| 사용자행 | TC-FLOW |
+|---|---|
+| S-21 | TC-FLOW-21 |
+
+CR ↔ TC(추가): CR-062 → 신규 TC-315(자동, `OverlayApp.contextMenu.test.tsx`), TC-316~TC-330(수동 MC-31~MC-45), TC-FLOW-21, 코드 리뷰 RV-02 / 회귀 참조 TC-013·TC-039·TC-062·TC-214·TC-218·TC-219·TC-071·TC-073·TC-077·TC-088·TC-227(기대 불변).
+
+- 수: 자동 +1(TC-315), 수동 +15(TC-316~TC-330 — MC-31~MC-45). 330번까지 = 유효 310건(자동 266 + 수동 44) + 폐기 20건. TC-FLOW 유효 20건 + 폐기 1건.
+- 실행(보강 모드 — 변경에 걸리는 TC만): `yarn test --run src/overlay/test/OverlayApp.contextMenu.test.tsx`. 회귀: `yarn test --run src/overlay/test/OverlayApp.mouse.test.tsx src/overlay/test/OverlayApp.penClick.test.tsx src/overlay/test/OverlayApp.scale.test.tsx src/overlay/test/OverlayApp.lock.test.tsx` + TC-013·TC-039 스펙 `yarn test --run src/overlay/test/inputMachine.transitions.test.ts src/overlay/test/MouseArm.test.tsx`. 수동: MC-31~MC-45(dev·release 각각), 코드 리뷰 RV-02.
+
 ## 변경이력
 
 | 일자 | 버전 | 내용 | 근거 |
 |---|---|---|---|
-| 2026-09-27 | v2.3 | (최신 행) **CR-055 반영(증분 모드 · 대기열 소진)** — 끝남 알림음 1회 재생 복원(사용자 🔒, CR-052 반복 재생 폐기, R-39 원문 「1회 재생(반복 없음)」 복귀). 「CR-055 알림음 1회 재생 복원 — 개정 TC」 절 신설(개정표·추적 3종·CR), CR-052 절 머리에 폐기 주석(기록 보존). 본문 개정: TC-300 제목·요구·설계 칸·ⓑ(`loop` false), TC-302 설계 칸·ⓑ ①(두 회차 `loop` false), TC-303 요구·설계 칸·ⓑ ①③④(`loop` false), TC-304 요구·설계 칸·ⓑ ①②(`loop` false, ② `volume`·`play` 단언 추가), TC-307 제목·요구·설계 칸·ⓑ(`loop` false), TC-311 요구·설계 칸·Then ⓐ(삐 3번 한 번, 되풀이 FAIL), TC-312 요구·설계 칸·When ⑥(등록 mp3 재등록)·Then ⓑ ①③⑥⑦⑧. 추적표 v1.9 설계 행 15.2 「반복 재생(CR-052)」 → 「1회 재생(CR-055)」. 스펙 개정: `useAlarmOnFinish.test.ts`(TC-300 ①·TC-302 ①·TC-303 ①②·③·④·TC-304 이름 「CR-055 개정」, `loop` 단언 true → false, TC-302 ① 다음 회차·TC-304 ② 단언 추가, 머리 주석), `OverlayApp.timerMode.test.tsx`(TC-307 이름·`loop` false), `alarmSound.test.ts`(TC-299 ① 주석만 — 기대 불변). `TimerText.blink.test.tsx`는 `loop` 단언 없음 — 변경 없음. `manual-checklist.md` MC-29·MC-30 같은 패스 개정. 대기열 Q-07 → `전환됨`. 신규 TC 없음, 수 불변(자동 265 · 수동 29) | requirements.md R-39 🔒 원문 · CR 대장 CR-055 · Q-07 · design.md §10.15 15.2·변경이력 CR-055 행 · `src/overlay/hooks/useAlarmOnFinish.ts` |
+| 2026-09-29 | v2.5 | (최신 행) **CR-062 증분(R-40 오버레이 오른쪽 클릭 메뉴의 ui 몫 = WebView2 기본 메뉴 억제, 증분 모드·보강)**. 「CR-062 오버레이 오른쪽 클릭 메뉴」 절 신설(기준·범위 규칙·§0.3 red 보충·잔여 위험·회귀 지정 표·추적 3종·CR). 신규 자동 TC-315(`OverlayApp.contextMenu.test.tsx` — ① `.root`·키보드 img·팔 img의 `contextmenu` 반환 `false`, `document` 도달 `defaultPrevented` true(전파 유지), DOM·상태·포커스·모든 bridge 래퍼 호출 수 불변, `[role="menu"]` 없음, `preventContextMenu` export 없음 ② 오른쪽 누름·뗌 → contextmenu → 오른쪽 누름·뗌에서 클릭 파츠 `mouse_right` ↔ `mouse_base` 그대로). 신규 수동 TC-316~TC-330(MC-31~MC-45 — 횡단 설계 §7 원문, MC-36 「한쪽만 창 안」의 ui 핸들러·기본 메뉴는 관찰 항목, 시작 직후 로딩 전 기본 메뉴는 수용된 잔여 위험이라 판정 제외). TC-FLOW-21(S-21: TC-319 → TC-318 → TC-325). 회귀는 기존 TC 번호 참조만(R-09 TC-013·TC-039·TC-062, R-26 TC-214·TC-218·TC-219, R-04 TC-071·TC-073·TC-077·TC-088, R-12·R-28 TC-077·TC-227). 기존 TC 개정 없음. `manual-checklist.md` 같은 패스(CR-062 절·RV-02). 자동 265 → 266, 수동 29 → 44, TC-FLOW 19 → 20 | CR-062(사용자 결정 🔒 2026-09-29 U-1·U-3·U-5, U-2·U-4 수용) · requirements.md v3.2 R-40·R-28 용어 주·S-21 · design.md §2·§6 P-10·§7·§9·§10.9.1 L-7·L-8·§10.16·RTM · design/functions.md §5.1 · design/components.md §3 · design/a11y.md · 횡단 설계 overlay-context-menu.md v2 §7 |
+| 2026-09-29 | v2.4 | **CR-058·CR-061 동기화(증분 모드)** — 설계(요구 v3.1·design.md §10.15 15.3·15.4·15.7·design/functions.md §5.7 ④)에 맞춰 문서만 개정, 스펙 로직 불변(이미 개정·통과). 「CR-058·CR-061 … 개정 TC」 절 신설(개정표·유지 판정표·추적 3종·CR). 본문 개정: TC-297 제목·요구·설계·Given/When/Then(`synthBeepWav` 바이트 검증 → `DEFAULT_ALARM_VOLUME` === 44·`Audio` 0개), TC-298 제목·요구·설계·Given/When/Then(Blob URL 캐시 → 번들 mp3 자산 import URL과 같음·반복 호출 동일·`Audio` 0개), TC-299 머리·When ⑤·Then ⑤(없음·NaN → 0.44, `Audio` 0개), TC-286 머리·Then ⓐ②·ⓑ②(44·(268,402)·7 — 본문에 남아 있던 v1.9 값까지 정리), TC-310·TC-311·TC-312(기본음 = 번들 mp3, TC-312 ⑥ 근거를 기본음 길이와 무관하게), TC-266 Given·설계 칸(`DEF` = 픽스처), v1.8 공통 전제 `TIMER_OFF` 설명, v1.9 공통 전제(`URL.createObjectURL` stub 삭제·import 목록·`'blob:default'`·0.8 픽스처 명시), 추적표 v1.9 설계 행 15.2·15.3·15.4·§5.7 ④. `manual-checklist.md` MC-27 ②·MC-28·MC-29·MC-30 같은 패스 개정. `alarmSound.test.ts` 머리 주석(동기화 대기·정리 필요 문구)만 정정. 신규 TC 없음, 수 불변(자동 265 · 수동 29) | requirements.md v3.1 R-34·R-39 · design.md §4·§7·§10.15 15.3·15.4·15.7 · design/functions.md §5.7 ②④ · CR 대장 CR-058·CR-061 · contract v0.27 §3.3 |
+| 2026-09-27 | v2.3 | **CR-055 반영(증분 모드 · 대기열 소진)** — 끝남 알림음 1회 재생 복원(사용자 🔒, CR-052 반복 재생 폐기, R-39 원문 「1회 재생(반복 없음)」 복귀). 「CR-055 알림음 1회 재생 복원 — 개정 TC」 절 신설(개정표·추적 3종·CR), CR-052 절 머리에 폐기 주석(기록 보존). 본문 개정: TC-300 제목·요구·설계 칸·ⓑ(`loop` false), TC-302 설계 칸·ⓑ ①(두 회차 `loop` false), TC-303 요구·설계 칸·ⓑ ①③④(`loop` false), TC-304 요구·설계 칸·ⓑ ①②(`loop` false, ② `volume`·`play` 단언 추가), TC-307 제목·요구·설계 칸·ⓑ(`loop` false), TC-311 요구·설계 칸·Then ⓐ(삐 3번 한 번, 되풀이 FAIL), TC-312 요구·설계 칸·When ⑥(등록 mp3 재등록)·Then ⓑ ①③⑥⑦⑧. 추적표 v1.9 설계 행 15.2 「반복 재생(CR-052)」 → 「1회 재생(CR-055)」. 스펙 개정: `useAlarmOnFinish.test.ts`(TC-300 ①·TC-302 ①·TC-303 ①②·③·④·TC-304 이름 「CR-055 개정」, `loop` 단언 true → false, TC-302 ① 다음 회차·TC-304 ② 단언 추가, 머리 주석), `OverlayApp.timerMode.test.tsx`(TC-307 이름·`loop` false), `alarmSound.test.ts`(TC-299 ① 주석만 — 기대 불변). `TimerText.blink.test.tsx`는 `loop` 단언 없음 — 변경 없음. `manual-checklist.md` MC-29·MC-30 같은 패스 개정. 대기열 Q-07 → `전환됨`. 신규 TC 없음, 수 불변(자동 265 · 수동 29) | requirements.md R-39 🔒 원문 · CR 대장 CR-055 · Q-07 · design.md §10.15 15.2·변경이력 CR-055 행 · `src/overlay/hooks/useAlarmOnFinish.ts` |
 | 2026-09-27 | v2.2 | **CR-053 반영(증분 모드)** — 「CR-053 배포용 기본 세트 3차 — 개정 TC」 절 신설. TC-286 ② 기대값 개정: `DEFAULT_TIMER_SETTINGS` `textPos` (268,403) → (142,458)·`rotation` 5 → 9, 글자 `left`/`top` `'142px'`/`'458px'`, `transform` `rotate(9deg)`, 제목 갱신(스펙 `OverlayApp.pomodoro.test.tsx` 개정 완료). 신규 TC 없음, 오버레이 소스 변경 없음. 대기열 Q-06 상태 불변(관리자 지시). 수 변동 없음 | 확정사항 CR-053 줄 🔒 · contract v0.24 · overlay CR 대장 CR-053 · design.md 변경이력 CR-053 행 |
 | 2026-09-27 | v2.1 | (최신 행) CR-052 증분(알림음 반복 재생 🔒 — 깜빡이는 10초 동안 `loop` true, 정지 경로 불변). 대기열 Q-05 → `TC 전환(검증 대기)`. 본문 개정: TC-299 When·ⓑ(`loop` 인자 생략 false·true·명시 false), TC-300 제목·설계 칸·ⓑ(`loop` true), TC-302 ⓑ ①, TC-303 ⓑ ①③④, TC-304 ⓑ ①, TC-311 Then ⓐ(10초 동안 되풀이 → 종료 때 정지), TC-312 설계 칸·When ⑥~⑧(깜빡이는 중 「멈춤」·「시작」·타이머 끄기)·Then. 추적표 v1.9 설계 행 「반복 없음 → TC-300 ①(loop false)」 → 반복 재생 행으로 교체. 「CR-052」 절 신설(개정표·추적 3종·CR). `manual-checklist.md` MC-29·MC-30 같은 패스 개정. 신규 TC 없음, 수 불변(자동 265 · 수동 29) | 확정사항 CR-048 블록 「수정 (CR-052)」 🔒 · CR 대장 CR-052 · Q-05 · design.md §10.15 15.2 · design/functions.md §5.7 ④ |
 | 2026-09-26 | v2.0 | (최신 행) CR-051 증분(겹침 순서 변경 🔒 — 헤어를 `.jellyWrap` 첫 자식에서 `.canvas` 첫 자식 `.hairWrap`(hair 있을 때만)으로, 아래→위 헤어 → 배경 → 뽀모도 → `.jellyWrap`[팔 → 본체 → 펜 손], `.hairWrap`은 `.jellyWrap`과 같은 motion 클래스). 대기열 Q-04 전환. 개정 TC-241(① 새 DOM·② 뽀모도 변형)·TC-243(래퍼 class 대응·⑫ `pen_down_0` 본문 반영)·TC-244(두 래퍼 같은 motion·배경 밖)·TC-245(래퍼 생김·사라짐)·TC-246(`.canvas` 자식)·TC-247/MC-24(① 맨 뒤·⑤ 뽀모도 정지·⑧ 허용 조항), TC-FLOW-13 Step 3 문구(Step 5는 개정표 읽기 규칙), v1.5 절 관찰·로케이터 문장, 추적표 v1.5 설계 행 §10.11 자리·좌표·모션(나머지 v1.5 행은 「CR-051 추적」이 우선). 신규 TC-314(`.hairWrap` CSS — `overlayStyles.test.ts`). 스펙 `OverlayApp.hair.test.tsx` CSS mock `hairWrap`·`pomodoro`, 픽스처 `HAIR_POMO_MANIFEST`, 헬퍼 `animatedOnlyJelly` → `animatedEls`·`hairWrapOf`·`inOrder`. v1.5 행(2026-09-25)의 「겹침 배경 → 헤어 → 팔 → 본체 → 펜 손」은 이 행으로 대체(기록 보존). 설계 확인 필요 보고(design.md·components·functions 옛 구조, 확정사항 「팔·손 → 본체」 문구 vs CR 해석). 자동 264 → 265 | 확정사항 CR-051(🔒 2026-09-26) · CR 대장 CR-051 · Q-04 · `src/overlay/index.tsx`·`overlay.module.css` |

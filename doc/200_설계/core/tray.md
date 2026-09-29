@@ -1,7 +1,9 @@
 # tray 모듈 설계
 
-- 상태: 확정(사용자) — §3.5(CR-047)는 초안(범위는 사용자 확정, **실측 게이트 G1·G2 통과 조건부**) · §3.6(CR-048)은 인계 패킷 기준 확정 · 최종 갱신: 2026-09-27
+- 상태: 확정(사용자) — §3.5(CR-047)는 초안(범위는 사용자 확정, **실측 게이트 G1·G2 통과 조건부**) · §3.6(CR-048)은 인계 패킷 기준 확정 · §3.7(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정, **§3.7.3·§3.7.5·§3.7.6은 7차 감사 반영(소스 미적용)** · 최종 갱신: 2026-09-29
 - 변경이력:
+  - 2026-09-29 (7차, overlay R-40 **감사 반영** — 리뷰 CORE-301(MEDIUM)·SEC-301(LOW)·CORE-302(LOW)·CORE-304(MEDIUM, 기존 위반). 요구·사용자 결정 U-1~U-5·메뉴 항목·공개 API 시그니처 **불변**, 새 크레이트·unsafe 없음) ① **CORE-301 상태 3단계**: `POPUP_OPEN: AtomicBool` + `OpenGuard::try_begin` → `static POPUP: PopupGate`(`AtomicU8`, **Idle → Pending → Open → Idle**). `overlay-menu`가 post **전에** `Idle→Pending`(`try_reserve`), post 실패 시 `cancel`(→Idle), 메인 `popup_now`가 `begin_open`(Pending→Open), 모든 반환 경로에서 가드 Drop(→Idle). 근거: tao 0.37.1은 핸들러 실행 중(= `TrackPopupMenu` 모달) 온 사용자 이벤트를 버퍼링했다가 모달 뒤 실행한다(`runner.rs:143-148·208-226`). 그래서 옛 PU-b 전제("재진입을 `try_begin`이 막는다")가 틀렸다. PU-b·PU-c 개정, 상태 전이표 신설. ② **SEC-301 판정 순서**: ① 상태 → ② 오버레이 창 사각형(`overlay_screen_rect`, **`overlay-menu`에서**) → ③ 전경 창 전체 화면 → ④ 예약·post. 순수 `should_request`(단락 평가)로 고정했다. 사각형 밖 클릭은 다른 프로세스 창을 조회하지 않는다. 비메인 스레드 getter 안전 근거는 tauri-runtime-wry 2.12.0 `lib.rs:196-210·263-278`(동기 왕복). Pending·Open이면 getter를 부르지 않아 모달과 겹치지 않는다(PU-h·PU-i 신설). `popup_now`는 인자 `click`을 받지 않고 사각형 판정을 하지 않는다. ③ **CORE-302**: [hook.md](hook.md) §3.10.3 공통 전제를 코드 SAFETY에 넣고 U13 문구를 "실패 시 pid는 쓰지 않는다(tid 0이면 버림)"로 바꾸라는 인계(§3.7.9 표). ④ **CORE-304**: `lib.rs` setup 4단계를 `fn start_input_pipeline`으로 추출(§3.7.6, 필요 시 `initial_hand_anchor`·`build_app_state`). 테스트 PM5 개정 + **PM6~PM15 신설**. §1·§3·§3.7.3·§3.7.5~§3.7.9·§4 R-40·§8.2a·§10·§11(T16~T19, T12·T13 주석, T-j, T-f 보충) 갱신. 상대 [window.md](window.md) §3.1(스레드 문장), [hook.md](hook.md) §3.10.2·§3.10.3. **소스 미적용.**
+  - 2026-09-29 (6차, overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1·U-3·U-5, 수용 U-2·U-4 — 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2·§4·§7) **오버레이 오른쪽 클릭 = 트레이와 같은 메뉴.** 신규 `tray/popup.rs`(unsafe 없음) — 스레드 `overlay-menu`(`pub fn spawn_popup_listener(app, rx)`)가 훅의 `RightClick`을 받아 ① `POPUP_OPEN` 가드 ② **전체 화면이면 생략**(`hook::foreground_snapshot()` → 순수 `suppress_for_fullscreen`, fail-open) ③ 메인 스레드 post → `popup_now`: 창 사각형 두 점 판정(순수 `should_popup`, `window::overlay_screen_rect`) → `current_view` → **기존 `build_menu`** → `WebviewWindow::popup_menu`. **메뉴 클릭은 기존 `on_menu_event`(Tauri 전역 메뉴 리스너)가 처리 — 새 핸들러 등록 금지.** `tray/mod.rs`는 `sync_timer_menu_now`의 보기 계산을 `current_view`로 추출(동작 불변). `lib.rs` 4단계 배선(채널 1개·`hook::start(tx, click_tx)`·`spawn_popup_listener`). 메뉴 항목·문구·순서 불변. 의존 확장 `tray → hook`(`RightClick`·`foreground_snapshot`)·`tray → window`(`overlay_screen_rect`). 테스트 PM1~PM5·FS1~FS7, 수동 MC-31~MC-45(§8.3). 증분 전체 **§3.7**. 상대 [hook.md](hook.md) §3.9·§3.10, [window.md](window.md) §3.1.
   - 2026-09-27 (5차, data-reset R-B2) `refresh_overlay` 가시성만 `pub(crate)`로(§3.4 끝 줄). 동작·메뉴 불변. 정본 [data_reset.md](data_reset.md) §3.8. **소스 미적용.**
   - 2026-09-26 (4차, CR-048 타이머 모드, 🔒 사용자 결정 D-11 A·아키텍트 결정 A-3, 정본 패킷 `doc/200_설계/architecture/timer-mode-03-packet-core.md` §2.5, 근거 `timer-mode-02-design.md` §7) **동적 타이머 메뉴.** 스톱워치나 타이머가 켜져 있을 때만 맨 위에 「시작」(흐르면 「일시정지」, id `timer_toggle`)·「멈춤」(`timer_stop`)·구분선. 신규 `tray/timer_menu.rs`(순수 `TrayTimerView`·`tray_timer_view`), `tray/mod.rs`에 `pub fn sync_timer_menu(app)`(보기가 바뀔 때만 `set_menu`, 메인 스레드로 넘겨 실행)·메뉴 핸들러 2갈래(설정 잠금 → 타이머 잠금 차례, 동시 보유 금지 → 바뀌면 `crate::publish_timer_change`). 의존 추가 `tray → timer`. 증분 전체 **§3.6**, §8.3에 M-T12~M-T14, §10에 TM-11. **소스 미적용.**
   - 2026-09-26 (3차, CR-047 점검 후 정리, 🔒 확정사항 §6 자동 실행 줄 「일반 권한(LeastPrivilege)」, 근거 `.claude/reports/verify-20260926-1821.md` SEC-001·CORE-001) **자동 실행 작업 `RunLevel` `HighestAvailable` → `LeastPrivilege`, 등록·해제는 비승격 `schtasks` 직접 실행 — UAC 승격 경로 삭제**(`hook::run_elevated`·`ElevateError`·`hook/elevate.rs`([hook.md](hook.md) §3.8), `AutostartError::{Cancelled, StatePoisoned}`, code `autostart.cancelled`). 신규 `pub fn reconcile() -> Option<bool>`(시작 보정: 옛 관리자 작업이면 일반 권한으로 다시 등록), `query` 비공개화. `persist_autostart`·트레이 표시/숨김 저장은 `settings::update`([settings.md](settings.md) §3.9). 포터블 배포라 제거 훅 없음 — 남은 작업 지우는 법은 README(메인 세션 몫). **이 절이 §1 「가장 높은 권한」·비유의 UAC 문장, §2 `set_enabled` 실패 조건 `Cancelled`·`query` 공개, §3.2 `RunLevel`·승격 실행 절차, §6 `Cancelled`·`StatePoisoned`, §8.3 UAC 수동 항목을 대체한다**(옛 기록으로 유지). 증분 전체 **§3.5**. **소스 미적용.**
@@ -23,6 +25,7 @@
 | **SV2-05 (🔒 D-4·D-5)** | 컴퓨터 시작 시 자동 실행 토글 — 작업 스케줄러, 관리자 권한(자동 실행 작업만), 기본 꺼짐 | `autostart::{set_enabled, query, persist_autostart, build_task_xml}`, 시작 시 보정(§4) |
 | SV2-03·04 | 숨김 → 표시 뒤에도 위치 잠금·작업표시줄 상태 유지 | 트레이 표시 경로에서 `apply_overlay_window` 호출(§3.3) |
 | **TM-11 (CR-048, 🔒 D-11 A·A-3)** | 스톱워치·타이머가 켜져 있을 때만 메뉴 맨 위에 「시작」(흐르면 「일시정지」)·「멈춤」, 트레이 조작이 두 창에 반영 | `sync_timer_menu`·`tray_timer_view`·메뉴 핸들러(§3.6), 반영은 깔때기 `crate::publish_timer_change`([timer.md](timer.md) §3.7) |
+| **overlay R-40 (CR-062, 🔒 2026-09-29 U-1·U-3·U-5, 수용 U-2·U-4)** | 오버레이 창 위에서 오른쪽 버튼을 누르고 떼면(누른 곳·뗀 곳 모두 창 사각형 안) 커서 위치에 **트레이와 같은 메뉴**(항목·순서·문구·동작 동일, 뜨는 순간의 설정·타이머 상태). 위치 잠금 중에도 뜨고 클릭은 아래 창에도 전달. 숨김이면 안 뜸. **전체 화면이면 안 뜸.** 한 클릭에 메뉴 하나. 포커스 자동 복귀 없음 | `spawn_popup_listener`(스레드 `overlay-menu`)·`request_popup`·`popup_now`·`should_request`·`should_popup`·`suppress_for_fullscreen`·`PopupGate`/`OpenGuard`(7차 3단계 상태)·`current_view`(§3.7). 메뉴 동작은 기존 `on_menu_event` 공유 |
 
 ## 2. 공개 API
 
@@ -37,6 +40,7 @@
 | **`pub fn set_enabled(enabled: bool) -> Result<bool, AutostartError>`** | 켜기/끄기 | 끝난 뒤 실제 등록 상태 | `Cancelled`, `Failed`, `Io` | SV2-05 |
 | **`pub fn query() -> Option<bool>`** | — | 있음 `Some(true)` / 없음 `Some(false)` / 판정 불가 `None`(승격 없음) | 없음 | SV2-05 |
 | **`pub fn persist_autostart(settings: &Mutex<Settings>, path: &Path, enabled: bool) -> Result<Option<Settings>, AutostartError>`** | 설정 상태, settings.json 경로, 실제 등록 상태 | 바뀌어 저장했으면 `Some(스냅샷)`, 같으면 `None` | `StatePoisoned`, `Settings` | SV2-05 |
+| **`pub fn spawn_popup_listener(app: AppHandle, rx: std::sync::mpsc::Receiver<crate::hook::RightClick>) -> std::io::Result<()>`** (`popup.rs`, `tray/mod.rs`에서 `pub use`) | 앱 핸들(소유), 훅의 오른쪽 클릭 한 쌍 수신자 | () — 스레드 `overlay-menu`를 띄우고 바로 반환(수신자가 끊기면 스레드 종료) | 스레드 생성 실패(`io::Error`) — 호출자(`lib.rs`)는 경고 로그 후 앱 시작 계속 | overlay R-40 |
 
 - 🔒 이름(bridge 착수 조건, 패킷 §7): `tray::autostart::{set_enabled, query, AutostartError::code}` + `persist_autostart`(core-designer 추가 — §11 T3).
 - **블로킹**: `set_enabled`는 UAC 창에서 사용자가 누르고 `schtasks.exe`가 끝날 때까지 돌아오지 않는다. **메인 스레드에서 부르지 않는다**(bridge는 `tauri::async_runtime::spawn_blocking` — §9). `query`도 자식 프로세스를 기다린다(보통 0.1초 안팎) — setup에서는 백그라운드 스레드로(§4).
@@ -48,6 +52,8 @@
 |---|---|---|
 | `src-tauri/src/tray/mod.rs` (80줄) | 트레이 아이콘·메뉴·표시/숨김 토글 | `pub mod autostart;`, `toggle_overlay` 본문(§3.3), `//!` [자동 실행]·[공개 API] 갱신 |
 | `src-tauri/src/tray/autostart.rs` (신규, 예상 350~400줄 — 테스트 포함) | 작업 XML 생성, 임시 파일, `schtasks.exe` 승격 실행·조회, 설정 반영 | 신규. unsafe 없음 |
+| **`src-tauri/src/tray/popup.rs` (R-40 신규, 예상 230줄 — 테스트 포함)** | 오버레이 오른쪽 클릭 메뉴: `overlay-menu` 스레드(상태 → 창 사각형 → 전체 화면 판정, 예약·post), 메인 스레드 팝업, 상태 기계 `PopupGate`(Idle→Pending→Open, 7차), 순수 판정 3종 + PM1~PM15·FS1~FS7 | 신규. unsafe 없음(§3.7). 7차 개정 후 약 420줄 |
+| (R-40, 2026-09-29 실측) `tray/mod.rs` **282줄 → 약 290줄** | `mod popup; pub use popup::spawn_popup_listener;`, `current_view` 추출, `//!` 갱신 | §3.7.2 |
 
 ### 3.1 `autostart.rs` 비공개 항목
 
@@ -430,6 +436,391 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 - `set_settings` 부수 효과에 `tray::sync_timer_menu(app)`(또는 바뀌었으면 `publish_timer_change`) 추가 — bridge 패킷([timer.md](timer.md) §3.9). **과도 상태**: bridge 패킷 전에는 설정 창에서 켜고 꺼도 트레이 메뉴가 앱 재시작 전까지 바뀌지 않는다([timer.md](timer.md) §3.7).
 - D48-t1 메인 스레드 넘김 외 결정 없음. 후보 없음.
 
+### 3.7 overlay R-40 — 오버레이 오른쪽 클릭 메뉴 (CR-062, 🔒 사용자 결정 U-1·U-3·U-5, 수용 U-2·U-4 — 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.1~§2.14·§4, 구현자가 그대로 옮길 것)
+
+결론(7차 개정): 훅이 넘긴 오른쪽 누름→뗌 한 쌍(`hook::RightClick`)을 새 스레드 `overlay-menu`가 받는다. ① 메뉴가 예약됐거나(Pending) 열려 있으면(Open) 버린다. ② 두 점이 모두 **보이는 오버레이 창 사각형** 안이 아니면 버린다(🔒 U-1). ③ 전경 창이 다른 앱의 전체 화면이면 버린다(🔒 U-3). ④ 아니면 `Idle → Pending`으로 예약하고 메인 스레드에 팝업을 post한다. 메인 스레드는 ⑤ `Pending → Open`으로 바꾸고 트레이와 **같은 `build_menu`**로 새 메뉴를 만든다. ⑥ `WebviewWindow::popup_menu`로 커서 위치에 띄우고, 닫히면 `Idle`로 되돌린다. 항목 클릭은 **기존 `init`의 `on_menu_event`(Tauri 전역 메뉴 리스너)**가 처리한다 — 새 핸들러를 등록하지 않는다. 위치 잠금으로 분기하지 않는다(🔒 잠금 중에도 뜬다).
+
+비유: 계산대 호출 벨(트레이)과 같은 벨을 진열장(오버레이)에도 하나 더 단다. 전선(메뉴 id·핸들러)은 새로 깔지 않고 기존 벨 전선에 스위치만 병렬로 붙인다. 유리가 잠겨 손이 닿지 않아도(클릭 통과) 누를 수 있게 스위치는 입구 CCTV(전역 훅)에 연결한다. 다만 무대 조명이 꺼진 공연 중(다른 앱의 전체 화면)에는 벨이 울리지 않는다.
+
+#### 3.7.1 공개 API (§2 증분)
+
+```rust
+// tray/mod.rs — `mod popup; pub use popup::spawn_popup_listener;`
+// tray/popup.rs
+/// 오버레이 오른쪽 클릭 메뉴 스레드("overlay-menu")를 띄운다. 수신자가 끊기면(훅 종료) 스레드가 끝난다.
+pub fn spawn_popup_listener(app: AppHandle, rx: Receiver<crate::hook::RightClick>) -> std::io::Result<()>;
+```
+
+- 호출자: `lib.rs` setup 4단계 1곳(§3.7.6). 반환 `JoinHandle`은 두지 않는다(분리 스레드 — 앱 수명 동안 `recv` 대기, CPU 0).
+
+#### 3.7.2 `current_view` 추출 (`tray/mod.rs`, 동작 불변)
+
+```rust
+/// 지금 설정·타이머 상태의 메뉴 보기(트레이 동기화·오버레이 팝업 공용).
+/// 설정 잠금 → 해제 → 타이머 잠금 → 해제(두 잠금 동시 보유 금지, 계약 §5.8-6).
+/// AppState 없음 → None(로그 없음), 잠금 오염 → log::warn! 후 None.
+fn current_view(app: &AppHandle) -> Option<TrayTimerView> {
+    let state = app.try_state::<crate::AppState>()?;
+    let enabled = match state.settings.lock() {
+        Ok(s) => s.timer.enabled,
+        Err(e) => {
+            log::warn!("설정 잠금 실패(메뉴 보기 계산): {e}");
+            return None;
+        }
+    };
+    let status = match state.timer.lock() {
+        Ok(t) => t.status(),
+        Err(e) => {
+            log::warn!("타이머 잠금 실패(메뉴 보기 계산): {e}");
+            return None;
+        }
+    };
+    Some(tray_timer_view(enabled, status))
+}
+
+fn sync_timer_menu_now(app: &AppHandle) {
+    let Some(view) = current_view(app) else {
+        return;
+    };
+    // 이하(LAST_VIEW 비교 → tray_by_id → build_menu → set_menu)는 그대로.
+}
+```
+
+- 반환·잠금 순서·실패 경로가 같아 트레이 동작은 바뀌지 않는다(TV1·TV2 회귀 PASS). 두 호출자가 공유하므로 경고 문구의 괄호만 「(타이머 메뉴 동기화)」→「(메뉴 보기 계산)」으로 바꾼다.
+- `build_menu`는 **그대로**다(비공개, 자식 모듈 `popup`이 `super::build_menu`로 부른다). 항목·순서·문구·id를 바꾸지 않는다(요구: 트레이와 같게. 새 항목 금지).
+
+#### 3.7.3 `popup.rs` 본문 (7차 개정 2026-09-29 — 리뷰 CORE-301·SEC-301 반영, 소스 미적용)
+
+결론: 팝업 상태를 **3단계 `Idle → Pending → Open → Idle`**로 둔다. `overlay-menu`가 post **전에** `Idle → Pending`을 잡으므로 "보냈지만 아직 실행 전"인 요청이 있는 동안 온 클릭은 버려진다. 판정 순서는 **① 상태 → ② 오버레이 창 사각형(🔒 U-1·AC-4) → ③ 전경 창 전체 화면(🔒 U-3) → ④ 예약(Idle→Pending)·post**이고 모두 `overlay-menu` 스레드에서 한다. 사각형 밖 클릭은 다른 프로세스 창을 조회하지 않는다(SEC-301). 메인 스레드 `popup_now`는 `Pending → Open`으로 바꾼 뒤 메뉴를 띄우고, 반환하는 모든 경로에서 `Idle`로 되돌린다.
+
+비유: 접수대(overlay-menu)에 번호표가 한 장뿐이다. 번호표가 나가 있으면(Pending) 진료실(메인)이 부를 때까지 새 환자를 받지 않고, 진료 중(Open)에도 받지 않는다. 진료가 끝나야(Idle) 번호표가 돌아온다. 옛 설계는 진료실 문 앞에서만 막았다. 그래서 대기실에 밀린 환자가 진료가 끝나자마자 들어왔다.
+
+**왜 바꾸나(CORE-301):** tao 0.37.1은 이벤트 핸들러가 실행 중이면(= `popup_now` 안의 `TrackPopupMenu` 모달) 새 사용자 이벤트를 **버퍼에 쌓아 두었다가 핸들러가 끝난 뒤 실행**한다(`platform_impl/windows/event_loop/runner.rs:143-148` `should_buffer` — 핸들러를 빌려 간 상태면 참, `:208-226` `send_event` — 참이면 `event_buffer.push_back`, 아니면 실행 후 `dispatch_buffered_events`). 따라서 옛 PU-b의 전제 "모달 중 `popup_now`가 재진입해도 `try_begin`이 막는다"는 틀렸다. 재진입은 일어나지 않는다. 밀린 `popup_now`는 메뉴가 닫혀 가드가 풀린 **뒤에** 실행되어 통과한다. 게다가 옛 `POPUP_OPEN`은 메인 스레드가 `popup_now`를 시작할 때에야 참이 되었다. 그래서 post와 실행 사이에 온 클릭은 거르지 못했고, 빠른 오른쪽 두 번 클릭으로 메뉴가 닫히자마자 다시 떴다.
+
+```rust
+use std::sync::atomic::{AtomicU8, Ordering};
+use std::sync::mpsc::Receiver;
+
+use tauri::{AppHandle, Manager};
+
+use crate::hook::{self, ForegroundSnapshot, RightClick};
+use crate::window::{self, ScreenBounds};
+
+/// 오버레이 메뉴 상태 기계(Idle → Pending → Open → Idle). 앱 전체에 하나.
+static POPUP: PopupGate = PopupGate::new();
+
+pub fn spawn_popup_listener(app: AppHandle, rx: Receiver<RightClick>) -> std::io::Result<()> {
+    std::thread::Builder::new()
+        .name("overlay-menu".into())
+        .spawn(move || {
+            for click in rx {
+                request_popup(&app, click);
+            }
+        })
+        .map(|_| ())
+}
+
+/// overlay-menu 스레드. 판정(① 상태 ② 창 사각형 ③ 전체 화면) → ④ Idle→Pending 예약 → post.
+/// 메인 스레드의 "실행"은 기다리지 않는다. ②의 창 getter 는 메인 스레드 동기 왕복이지만
+/// Idle 일 때만 부르므로 우리 메뉴 모달과 겹치지 않는다(PU-h).
+fn request_popup(app: &AppHandle, click: RightClick) {
+    let wanted = should_request(
+        POPUP.is_idle(),
+        click,
+        || overlay_rect_or_none(app),
+        hook::foreground_snapshot,
+    );
+    if !wanted || !POPUP.try_reserve() {
+        return; // 판정으로 버림 — 로그 없음
+    }
+    let handle = app.clone();
+    if let Err(e) = app.run_on_main_thread(move || popup_now(&handle)) {
+        POPUP.cancel(); // Pending → Idle — post 실패로 고착되지 않게
+        log::warn!("오버레이 메뉴를 메인 스레드로 넘기지 못했습니다: {e}");
+    }
+}
+
+/// 보이는 오버레이 창 사각형(숨김 → None). 조회 실패는 경고 후 None(= 버림).
+fn overlay_rect_or_none(app: &AppHandle) -> Option<ScreenBounds> {
+    window::overlay_screen_rect(app).unwrap_or_else(|e| {
+        log::warn!("오버레이 메뉴: 창 위치를 읽지 못했습니다: {e}");
+        None
+    })
+}
+
+/// 메인 스레드 전용. popup_menu 는 메뉴가 닫힐 때까지 반환하지 않는다(TrackPopupMenu 모달).
+/// Pending → Open. 이후 모든 반환 경로에서 가드 Drop → Idle.
+fn popup_now(app: &AppHandle) {
+    let Some(_open) = POPUP.begin_open() else {
+        return; // Pending 이 아님 — 도달 불가(PU-c). 상태를 건드리지 않는다
+    };
+    let Some(view) = super::current_view(app) else {
+        log::warn!("오버레이 메뉴: 메뉴 보기를 계산하지 못했습니다.");
+        return;
+    };
+    let menu = match super::build_menu(app, view) {
+        Ok(m) => m,
+        Err(e) => {
+            log::warn!("오버레이 메뉴를 만들지 못했습니다: {e}");
+            return;
+        }
+    };
+    let Some(win) = app.get_webview_window(window::OVERLAY_LABEL) else {
+        return;
+    };
+    if let Err(e) = win.popup_menu(&menu) {
+        log::warn!("오버레이 메뉴를 띄우지 못했습니다: {e}");
+    }
+} // _open drop → Idle
+
+/// 순수 판정 순서(SEC-301): ① 상태 ② 창 사각형 ③ 전경 창. `&&` 단락 평가라 앞 단계에서
+/// 걸리면 뒤 조회(`rect`·`foreground`)를 부르지 않는다. 상태는 바꾸지 않는다(예약은 호출자).
+pub(super) fn should_request(
+    idle: bool,
+    click: RightClick,
+    rect: impl FnOnce() -> Option<ScreenBounds>,
+    foreground: impl FnOnce() -> Option<ForegroundSnapshot>,
+) -> bool {
+    idle && should_popup(rect(), click) && !suppress_for_fullscreen(foreground())
+}
+
+/// 순수(🔒 U-3): None(전경 없음·조회 실패) → false(띄움, fail-open).
+pub(super) fn suppress_for_fullscreen(snap: Option<ForegroundSnapshot>) -> bool {
+    snap.is_some_and(|s| !s.own_process && !s.shell && s.client.covers(&s.monitor))
+}
+
+/// 순수(🔒 U-1): 보이는 창 사각형이 있고 누름·뗌 두 점이 모두 그 안.
+pub(super) fn should_popup(rect: Option<ScreenBounds>, click: RightClick) -> bool {
+    rect.is_some_and(|r| {
+        r.contains(click.down.x, click.down.y) && r.contains(click.up.x, click.up.y)
+    })
+}
+
+/// 팝업 상태 기계. 원자 변수 하나(잠금이 아니라 교착 경로 없음). 정적 `POPUP` 하나를
+/// 쓰고, 테스트는 지역 인스턴스를 만든다(T13 원칙 — 병렬 cargo test 간섭 없음).
+struct PopupGate {
+    state: AtomicU8,
+}
+
+impl PopupGate {
+    const IDLE: u8 = 0;
+    const PENDING: u8 = 1;
+    const OPEN: u8 = 2;
+
+    const fn new() -> Self {
+        Self {
+            state: AtomicU8::new(Self::IDLE),
+        }
+    }
+
+    /// overlay-menu: 빠른 거름. Pending(보냈지만 실행 전)·Open(메뉴 열림)이면 false.
+    fn is_idle(&self) -> bool {
+        self.state.load(Ordering::Acquire) == Self::IDLE
+    }
+
+    /// overlay-menu: Idle → Pending. 성공한 호출만 post 한다.
+    fn try_reserve(&self) -> bool {
+        self.transition(Self::IDLE, Self::PENDING)
+    }
+
+    /// overlay-menu: post 실패 시 Pending → Idle.
+    fn cancel(&self) {
+        self.transition(Self::PENDING, Self::IDLE);
+    }
+
+    /// 메인: Pending → Open. 성공했을 때만 가드를 만든다(가드 Drop 이 Idle 로 되돌림).
+    /// `bool::then_some(OpenGuard { .. })` 금지 — 실패해도 가드가 만들어졌다가 Drop 되어
+    /// Open 상태를 Idle 로 덮어쓴다(PM9가 잡는다).
+    fn begin_open(&self) -> Option<OpenGuard<'_>> {
+        if self.transition(Self::PENDING, Self::OPEN) {
+            Some(OpenGuard { gate: self })
+        } else {
+            None
+        }
+    }
+
+    fn transition(&self, from: u8, to: u8) -> bool {
+        self.state
+            .compare_exchange(from, to, Ordering::AcqRel, Ordering::Acquire)
+            .is_ok()
+    }
+}
+
+/// Open 가드. Drop(모든 반환 경로)에서 Idle.
+struct OpenGuard<'a> {
+    gate: &'a PopupGate,
+}
+
+impl Drop for OpenGuard<'_> {
+    fn drop(&mut self) {
+        self.gate.state.store(PopupGate::IDLE, Ordering::Release);
+    }
+}
+```
+
+**상태 전이표** (쓰는 주체는 둘뿐: `overlay-menu` 스레드 1개, 메인 스레드 1개)
+
+| 현재 | 사건 | 누가 | 다음 | 비고 |
+|---|---|---|---|---|
+| Idle | 판정 ①~③ 통과 → `try_reserve` 성공 | overlay-menu | **Pending** | 그다음 post |
+| Idle | 판정에서 걸림(사각형 밖·숨김·전체 화면·창 조회 실패) | overlay-menu | Idle | 로그 없음(조회 실패만 경고) |
+| Pending | `run_on_main_thread` Err | overlay-menu | **Idle** | `cancel` + 경고 |
+| Pending | 새 클릭 | overlay-menu | Pending | ①에서 버림 — 창 getter·전경 조회 안 함 |
+| Pending | `popup_now` 시작 → `begin_open` 성공 | 메인 | **Open** | |
+| Open | 새 클릭 | overlay-menu | Open | ①에서 버림 |
+| Open | `popup_now`가 어떤 경로로든 반환(보기 계산 실패·메뉴 생성 실패·창 없음·팝업 오류·정상 닫힘) | 메인 | **Idle** | `OpenGuard` Drop |
+| Idle·Open | `begin_open` | 메인 | 불변 | 도달 불가(PU-c) — `None`, 상태를 건드리지 않음 |
+
+| # | 규칙 |
+|---|---|
+| PU-a | **스레드**: 다른 스레드에서 `popup_menu`를 직접 부르지 않는다. Tauri `popup_inner`가 메인 스레드에 일을 넘기고 채널로 결과를 기다리므로, 부른 스레드는 메뉴가 닫힐 때까지 멈춘다(횡단 F3). `input-forwarder`에서 부르면 입력 전달이 멈추므로 금지다. `overlay-menu`가 부르는 Tauri API는 둘뿐이다. 창 getter 3종(`window::overlay_screen_rect` — Idle일 때만, PU-h)과 `run_on_main_thread`(post)다 |
+| PU-b | **중복 방지 3중**(🔒 U-5 포함, 횡단 D-6): ① 입구는 하나다(훅 → `overlay-menu` → 메인). ② ui가 WebView2 기본 메뉴를 억제한다(ui 패킷). ③ 상태 기계 `PopupGate`가 **post 전에** `Idle → Pending`을 잡는다. 그래서 post된 `popup_now`는 언제나 많아야 하나다. Pending·Open 동안 온 클릭은 `overlay-menu`에서 버려져 post되지 않는다. 따라서 tao가 모달 동안 쌓아 두었다가 모달 뒤에 실행할 **밀린 `popup_now`가 생기지 않는다**(CORE-301). 메뉴가 오버레이 사각형 위에 겹쳐 그려지면 메뉴 위 오른쪽 클릭도 사각형 판정을 통과한다. 그래서 ③이 필요하다 |
+| PU-c | **상태 복귀**: `Open → Idle`은 `_open`이 함수 끝(모든 `return` 포함)에서 Drop되며 일어난다. `Pending → Idle`은 post 실패 때 `cancel`이 한다. post가 성공하면 tauri-runtime-wry가 `Message::Task`를 반드시 실행하므로 `popup_now`가 `Pending`을 소비한다. 예외는 이벤트 루프 종료(앱 종료)뿐이고, 그때 남는 `Pending`은 프로세스와 함께 사라진다. `begin_open` 실패(Pending이 아님)는 불변식상 도달할 수 없다. 이때는 상태를 바꾸지 않는다(강제로 Idle을 쓰면 열린 메뉴의 Open을 덮을 수 있다). 패닉 없는 코드라 누수 경로가 없다 |
+| PU-d | **메뉴 수명**: 메뉴 객체는 `popup_menu`가 반환한 뒤 버린다. muda는 `TrackPopupMenu(TPM_RETURNCMD)`가 돌려준 명령 id를 메뉴가 살아 있는 동안 항목으로 찾아 `MenuEvent`를 보낸다(muda 0.20.0 `platform_impl/windows/mod.rs:354-360·906-933·1129`). 이벤트는 id 문자열만 실어 이후 처리에 메뉴 객체가 필요 없다 |
+| PU-e | **위치**: `popup_menu`(커서 위치)를 쓴다. `popup_menu_at`(창 기준 좌표)은 쓰지 않는다 — 커서는 뗀 곳 근처이고, 창 기준 변환이 필요 없다 |
+| PU-f | **포커스(🔒 U-2 수용)**: muda가 `SetForegroundWindow(overlay)`를 부르므로 게임·작업 창이 키보드 포커스를 잃고, 메뉴를 닫아도 자동으로 돌아가지 않는다(트레이 메뉴와 같음). **복귀 코드를 넣지 않는다** |
+| PU-g | **입력**: 오른쪽 클릭을 삼키지 않는다(훅이 `CallNextHookEx` 유지 — [hook.md](hook.md) §3.9.3 RC-b). `position_lock`을 읽지 않는다(🔒 잠금 중에도 뜬다, 클릭은 아래 창에도 간다 — U-4 경합 수용) |
+| PU-h | **판정 순서와 스레드 안전성(SEC-301)**: `should_request`는 ① `is_idle`(원자 읽기) → ② `overlay_screen_rect`(우리 창) → ③ `foreground_snapshot`(다른 프로세스 창) 순서이고, `&&` 단락 평가라 앞에서 걸리면 뒤를 부르지 않는다. 화면 어디의 오른쪽 클릭이든 ②까지만 거치고, 오버레이 사각형 안의 클릭만 ③을 부른다. **②를 비메인 스레드에서 불러도 되는 근거**(tauri-runtime-wry 2.12.0 `src/lib.rs`): `is_visible`(:1939)·`outer_position`(:1886)·`outer_size`(:1894)는 `window_getter!`(:205-210) → `getter!`(:196-203)이다. `send_user_message`(:263-278)는 호출 스레드가 메인이면 바로 처리하고, 아니면 `proxy.send_event`로 메인 스레드에 넘긴 뒤 `rx.recv()`로 답을 기다린다(타임아웃 없음). 즉 **스레드 안전한 동기 왕복**이고, 창 상태는 메인 스레드에서만 읽힌다. 기다림이 길어지는 경우는 메인 스레드가 tao 핸들러 안에 머물 때뿐이다(위 버퍼링 — 대표 사례가 우리 `popup_now` 모달). 그런데 `Idle → Pending`을 만드는 주체가 `overlay-menu` 하나뿐이다. 그래서 ①에서 Idle을 본 순간 post된 `popup_now`도, 열린 우리 메뉴도 없고, ②가 우리 모달에 막히는 일이 구조적으로 없다. 잠금을 쥐지 않고 기다리며, 메인 스레드는 `overlay-menu`를 기다리지 않는다. 따라서 교착이 없다. 앱 종료로 메시지가 버려지면 `recv`가 `Err`(`FailedToReceiveMessage`)로 풀린다. 이 경우 경고 후 버린다 |
+| PU-i | **사각형 판정 시점**: 사각형은 **뗌 직후 `overlay-menu`에서** 한 번 읽는다. `popup_now`는 다시 판정하지 않는다. 🔒 U-1은 "누른 곳·뗀 곳이 그때 창 안"이라 클릭 시각에 가까운 판정이 정의에 맞다. 판정과 팝업 사이(밀리초)에 창을 숨기거나 옮기려면 트레이 메뉴 항목·설정 창 조작 같은 별도 좌클릭이 필요하다. 그래서 같은 오른쪽 클릭과 겹칠 수 없다(§11 T18) |
+
+#### 3.7.4 메뉴 이벤트 공유 — 새 핸들러 금지 (횡단 D-4·D-5)
+
+- Tauri 2.12.0 `TrayIconBuilder::on_menu_event`는 트레이 전용이 아니라 **전역 메뉴 리스너**로 등록된다. 문서 주석은 "called for any menu event, whether it is coming from this window, another window or from the tray icon menu"(tauri `tray/mod.rs:324-334`), 등록은 `manager.menu.global_event_listeners`(`427-434`), 메뉴 이벤트마다 전역 리스너를 모두 부른다(`app.rs:2755-2769`). 팝업 메뉴는 트레이와 **같은 id**(`open_settings`·`refresh`·`toggle_overlay`·`quit`·`timer_toggle`·`timer_stop`)로 만들므로 클릭이 기존 `init`의 핸들러로 간다 → 동작·타이머 동기화(`publish_timer_change`)·`settings://changed`(표시/숨김)가 **구조적으로 트레이와 같다.**
+- **새 `on_menu_event`를 등록하지 않는다**(앱·창·트레이 어디든). 두 리스너가 같은 이벤트를 받아 한 번의 클릭이 두 번 실행된다(「표시/숨김」이 두 번 토글돼 원래대로).
+- 같은 id가 트레이 메뉴와 팝업 메뉴에 동시에 있어도 된다. `sync_timer_menu`가 이미 같은 id로 메뉴를 갈아 끼우고 있고, 이벤트는 id 문자열만 싣는다.
+- 팝업은 뜰 때마다 `build_menu(app, current_view(app))`로 **새로** 만든다. `LAST_VIEW`·트레이 메뉴 객체는 읽지도 쓰지도 않는다. 타이머가 꺼져 있으면 4항목, 켜져 있고 흐르면 「일시정지」, 그 밖이면 「시작」이 붙는다(뜨는 순간의 상태 — §3.6.2 표와 같음).
+- 메뉴가 열린 동안 상태가 바뀌어도 라벨은 새로 고쳐지지 않는다(트레이와 같은 한계). 「시작/일시정지」는 `control_timer_from_tray`가 **클릭 순간 상태**로 정하므로 동작은 안전하다(§3.6.4).
+- 「오버레이 표시/숨김」을 고르면 기존 `toggle_overlay`가 숨기고 저장·emit한다. 숨긴 뒤 다시 보이는 길은 트레이뿐이다(트레이에서 고른 것과 같음).
+- `popup.rs` `//!`에 "메뉴 이벤트 핸들러 없음 — `init`의 전역 `on_menu_event` 공유(이유: 등록하면 두 번 실행)"를 적는다.
+
+#### 3.7.5 전체 화면이면 생략 (🔒 U-3, 횡단 §2.14 D-10~D-12)
+
+아래가 **모두** 참이면 `suppress_for_fullscreen`이 `true`(생략)다.
+
+| # | 조건 | 값의 출처 |
+|---|---|---|
+| ① | 전경 창이 있고 조회가 모두 성공했다 | `hook::foreground_snapshot()`이 `Some` |
+| ② | 전경 창이 이 앱 프로세스의 창이 아니다(오버레이·설정 창·트레이 숨은 창·우리 메뉴 모두 이 앱) | `!own_process` |
+| ③ | 바탕 화면·작업표시줄이 아니다 | `!shell` |
+| ④ | 전경 창의 **클라이언트 영역**이 자기 모니터 **전체**(작업 영역 아님)를 덮는다 | `client.covers(&monitor)` |
+
+| 전경 상황 | 결과 |
+|---|---|
+| 독점 전체 화면·테두리 없는 전체 화면 게임, 브라우저 F11·동영상 전체 화면 | **생략**(정의대로 — MC-40·MC-41·MC-44) |
+| 테두리 있는 창 모드(최대화 포함, 작업표시줄 자동 숨김 포함 — 제목 표시줄만큼 클라이언트가 모니터보다 작음) | 뜬다(MC-42) |
+| 바탕 화면(`Progman`·`WorkerW`)·작업표시줄 | 뜬다(MC-43) |
+| 이 앱 창(비잠금 오버레이를 클릭해 활성화된 경우 포함)·설정 창 | 뜬다 |
+| 전경 없음(활성화 전환 순간)·조회 실패 | 뜬다(fail-open — 게임 최소화 위험은 "전체 화면 창 조회에 성공했을 때"만 생긴다) |
+
+- **판정 위치·시점**(7차 개정, SEC-301): `overlay-menu` 스레드의 `should_request` ③단계다. **상태가 Idle이고 누름·뗌 두 점이 보이는 오버레이 사각형 안일 때만** 조회한다. 그 뒤 예약·post가 이어진다(🔒 지시 "post 직전" 유지). 사각형 밖·숨김·Pending·Open이면 `foreground_snapshot()`을 부르지 않는다. 다른 프로세스 창(클래스명·pid·사각형)을 읽는 일이 오버레이 위 클릭으로만 줄어든다. 게임 중 화면 곳곳의 오른쪽 클릭에는 Win32 전경 조회가 붙지 않는다. 훅 콜백(최소 작업)·메인 스레드가 아니다. 옛 문장 "창 사각형 판정은 `popup_now`(메인)에서 한다"는 폐기한다 — 사각형도 `overlay-menu`에서 먼저 본다(PU-h·PU-i).
+- **unsafe 없음**: Win32 조회는 hook의 안전 함수 `hook::foreground_snapshot()`만 부른다(SAFETY 근거 [hook.md](hook.md) §3.10.3 U12~U19). `tray/popup.rs`에는 `windows` 크레이트 import가 없다.
+- 켜고 끄는 설정은 없다(요구 없음 — 항상 적용).
+
+#### 3.7.6 `lib.rs` 배선 (setup 4단계, core-implementer)
+
+```rust
+// 4. 전역 입력 훅 → 이벤트 전달 스레드 (+ R-40 오버레이 오른쪽 클릭 메뉴 스레드)
+let (tx, rx) = mpsc::channel::<hook::InputEvent>();
+let (click_tx, click_rx) = mpsc::channel::<hook::RightClick>();
+let hook_handle = hook::start(tx, click_tx)?;
+app.manage(HookGuard(Mutex::new(Some(hook_handle))));
+// … input-forwarder spawn(불변) …
+// 메뉴 기능 실패는 앱 시작을 막지 않는다.
+if let Err(e) = tray::spawn_popup_listener(handle.clone(), click_rx) {
+    log::warn!("오버레이 메뉴 스레드를 시작하지 못했습니다: {e}");
+}
+```
+
+- setup 클로저 증가는 약 4줄(이미 50줄 초과 — 새 분기를 더하지 않는다). `//!` [스레드]에 "`overlay-menu`(`tray::spawn_popup_listener`) — 훅의 오른쪽 클릭 한 쌍을 받아 창 사각형·전체 화면 판정 뒤 메인 스레드에 팝업을 post(R-40)" 한 줄(7차: "창 사각형·" 추가).
+
+**4단계 추출 — `start_input_pipeline` (7차, 리뷰 CORE-304 — 기존 위반 정리, 동작 불변).** setup 클로저(`lib.rs:99-182`, 2026-09-29 실측 84줄 — 리뷰 표기 108줄과 셈법이 달라도 50줄 한계 초과는 같다)의 4단계(`lib.rs:152-173`: 채널 2개 → `hook::start` → `HookGuard` 등록 → `input-forwarder` spawn → `spawn_popup_listener`)를 lib.rs 비공개 함수 하나로 옮긴다. 클로저 자리는 `start_input_pipeline(&handle)?;` 한 줄(+ 기존 4단계 주석)이 된다. 순서·스레드 이름·실패 처리(훅 시작·전달 스레드 생성 실패는 setup 실패로 전파, 메뉴 스레드 실패는 경고 후 계속 — T14)는 **그대로다**. `HookGuard`는 `AppHandle`의 `Manager::manage`로 등록한다. `App`과 같은 상태 저장소라 `app.state::<HookGuard>()` 사용처에 영향이 없다.
+
+```rust
+/// setup 4단계: 전역 입력 훅 → 이벤트 전달 스레드 `input-forwarder` (+ overlay R-40
+/// 오른쪽 클릭 메뉴 스레드 `overlay-menu`). 훅·전달 스레드 실패는 Err(setup 실패 — 기존과
+/// 같음), 메뉴 스레드 실패는 경고 후 계속(tray.md §11 T14).
+fn start_input_pipeline(handle: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let (tx, rx) = mpsc::channel::<hook::InputEvent>();
+    let (click_tx, click_rx) = mpsc::channel::<hook::RightClick>();
+    let hook_handle = hook::start(tx, click_tx)?;
+    handle.manage(HookGuard(Mutex::new(Some(hook_handle))));
+
+    let emitter = handle.clone();
+    std::thread::Builder::new()
+        .name("input-forwarder".into())
+        .spawn(move || {
+            for ev in rx {
+                log_input_diag(&ev);
+                if let Err(e) = bridge::events::emit_input(&emitter, &ev) {
+                    log::warn!("입력 이벤트 emit 실패: {e}");
+                }
+            }
+        })?;
+
+    if let Err(e) = tray::spawn_popup_listener(handle.clone(), click_rx) {
+        log::warn!("오버레이 메뉴 스레드를 시작하지 못했습니다: {e}");
+    }
+    Ok(())
+}
+```
+
+- 추출 뒤 setup 클로저는 약 64줄로 예상한다. 구현자가 `wc`로 다시 잰다. **여전히 50줄을 넘으면 같은 커밋에서** 1단계 손 기준점 계산(`lib.rs:111-123`)도 `fn initial_hand_anchor(paths: &AppPaths, manifest: &assets::AssetManifest, settings: &Settings) -> Option<settings::Point>`로 뺀다. 본문(`match &settings.mouse` … `unwrap_or_else(|e| { log::warn!(…); None })`)과 경고 문구는 그대로다. 이렇게 하면 약 52줄이 된다. 그래도 넘으면 `AppState` 조립(`lib.rs:132-140`)을 `fn build_app_state(…) -> AppState`로 뺀다. 세 추출 모두 동작 불변이고 요구ID가 없는 정리 작업이다(golden-principles §1 — 표준 강제 항목).
+- 테스트: 새 자동 테스트 없음(Tauri 런타임 필요). 회귀 증거는 `cargo test` 전건 PASS와 dev 앱 기동 뒤 오버레이 입력 반응(MC-31)이다.
+- `lib.rs` `//!` [스레드]는 스레드 이름을 그대로 쓰므로 바뀌지 않는다(위 "창 사각형·" 한 줄만 추가).
+- 순서 근거: 3단계 `tray::init`이 먼저라 전역 메뉴 리스너가 등록된 뒤에만 메뉴가 뜬다. 오버레이 표시(5단계 `setup_overlay`) 전의 클릭은 `overlay_screen_rect`가 `None`이라 무시된다.
+
+#### 3.7.7 개인정보·로그
+
+- 좌표(`RightClick`)·전경 창 정보(`ForegroundSnapshot`)를 로그·파일·IPC에 싣지 않는다. 판정으로 버릴 때(열림·전체 화면·사각형 밖)는 로그를 남기지 않는다. 경고 로그에는 Tauri 오류 값만 싣는다([hook.md](hook.md) §1.1 P7).
+- 남는 상태는 `POPUP` 상태 값 하나(`AtomicU8`, Idle·Pending·Open 3값)뿐이다(좌표·시각·횟수를 기억하지 않는다 — 7차).
+- 데이터 최소화(7차, SEC-301): 다른 프로세스 창 조회(`foreground_snapshot`)는 오버레이 사각형 안의 클릭이면서 상태가 Idle일 때만 한다(PU-h). 사각형 밖 클릭은 우리 창 getter만 거쳐 버려진다.
+
+#### 3.7.8 테스트 (§8 증분 — `popup.rs` `#[cfg(test)] mod tests`)
+
+기준: 오버레이 `ScreenBounds { x: 100, y: 100, width: 450, height: 350 }`, 모니터 `ScreenRect(0, 0, 1920, 1080)`. `RightClick`·`ForegroundSnapshot`·`ScreenRect`는 pub 필드라 리터럴로 만든다.
+
+| # | 이름(안) | 입력 | 기대 |
+|---|---|---|---|
+| PM1 | `should_popup_both_inside` | 누름 (150,150)·뗌 (400,300) | `true` |
+| PM2 | `should_popup_hidden_is_false` | `rect = None`, 같은 클릭 | `false`(숨김 — AC-4) |
+| PM3 | `should_popup_down_only_inside` | 누름 (150,150)·뗌 (900,300) | `false`(🔒 U-1) |
+| PM4 | `should_popup_up_only_inside` | 누름 (50,50)·뗌 (150,150) | `false`(🔒 U-1) |
+| PM5 | `gate_full_cycle` (7차 개정 — 옛 `open_guard_single_holder` 대체) | 지역 `PopupGate::new()`: `is_idle` → `try_reserve` → `is_idle` → `begin_open`(가드 보유) → 가드 drop → `is_idle` | `true` → `true` → `false` → `Some` → (drop) → `true` |
+| PM6 | `gate_second_request_while_pending_is_dropped` | `try_reserve` 성공 뒤(= post됨, 실행 전) 두 번째 `is_idle`·`try_reserve` | `false`·`false`(두 번째 요청 버림 — CORE-301). 이어서 `begin_open` → `Some`, drop 뒤 `is_idle` `true` |
+| PM7 | `gate_cancel_after_post_failure_returns_idle` | `try_reserve` → `cancel` → `is_idle` → `try_reserve` | `true` → (취소) → `true` → `true`(다음 클릭이 다시 예약 가능 — Pending 고착 없음) |
+| PM8 | `gate_early_return_restores_idle` | 테스트 안 도우미 `fn simulated_popup(gate: &PopupGate, bail: bool) -> bool { let Some(_open) = gate.begin_open() else { return false }; if bail { return false; } true }`(`popup_now`의 조기 반환 모양 — 끝이 `true`라 clippy `needless_return` 없음) — `try_reserve` 후 `simulated_popup(&g, true)`, 다시 `try_reserve` 후 `simulated_popup(&g, false)` | `false`·`true`, 두 번 모두 호출 뒤 `is_idle` `true`(조기 반환·정상 반환 모두 Idle 복귀) |
+| PM9 | `gate_open_rejects_new_requests` | `try_reserve` → `begin_open`(가드 보유 중) → `is_idle`·`try_reserve`·`begin_open` | `false`·`false`·`None`. **실패한 `begin_open` 뒤에도 여전히 열림**(`is_idle` `false` — `then_some` 가드 오작성 검출). 가드 drop 뒤 `is_idle` `true` |
+| PM10 | `gate_begin_open_without_reservation_is_none` | Idle에서 `begin_open` | `None`, `is_idle` 여전히 `true`(상태 불변 — PU-c) |
+| PM11 | `busy_skips_window_and_foreground` | `should_request(false, 안쪽 클릭, rect 카운터 클로저, fg 카운터 클로저)` — 카운터는 `std::cell::Cell<u32>` | `false`, rect 0회·fg 0회(Pending·Open이면 창 getter도 안 부름 — PU-h) |
+| PM12 | `outside_click_skips_foreground_query` | `idle = true`, rect = `Some(오버레이)`, 누름 (150,150)·뗌 (900,300) | `false`, rect 1회·**fg 0회**(SEC-301) |
+| PM13 | `hidden_overlay_skips_foreground_query` | `idle = true`, rect = `None`, 안쪽 클릭 | `false`, fg 0회 |
+| PM14 | `inside_click_fullscreen_is_dropped` | `idle = true`, rect = `Some(오버레이)`, 안쪽 클릭, fg = FS2 스냅숏(다른 앱이 모니터를 덮음) | `false`, fg 1회 |
+| PM15 | `inside_click_not_fullscreen_is_requested` | 같은 조건, fg = `None` | `true`, rect 1회·fg 1회 |
+| FS1 | `fullscreen_none_is_not_suppressed` | `None` | `false`(띄움 — fail-open) |
+| FS2 | `fullscreen_other_app_covering_monitor` | `own_process: false, shell: false, client = monitor = (0,0,1920,1080)` | **`true`**(생략 — 테두리 없는·독점 전체 화면) |
+| FS3 | `fullscreen_own_process_is_not_suppressed` | FS2에서 `own_process: true` | `false` |
+| FS4 | `fullscreen_shell_is_not_suppressed` | FS2에서 `shell: true` | `false`(바탕 화면 `Progman`/`WorkerW`) |
+| FS5 | `windowed_app_is_not_suppressed` | 다른 앱, `client = (320,180,1600,900)` | `false` |
+| FS6 | `maximized_with_title_bar_is_not_suppressed` | 다른 앱, `client = (0,23,1920,1080)`(제목 표시줄 아래, 작업표시줄 자동 숨김으로 bottom = 모니터) | `false`(D-11 — 테두리 있으면 뜬다) |
+| FS7 | `fullscreen_on_secondary_monitor` | 다른 앱, `client = monitor = (-1920,0,0,1080)` | `true` |
+
+- 회귀: `timer_menu.rs` TV1·TV2 PASS(`current_view` 추출 후). PM1~PM4·FS1~FS7은 7차에서 불변.
+- 7차: 정적 `POPUP`을 거치는 테스트는 두지 않는다(PM5~PM10은 지역 `PopupGate::new()`, PM11~PM15는 `should_request`에 `bool`과 클로저를 넘긴다). `spawn_popup_listener`·`request_popup`·`overlay_rect_or_none`·`popup_now`는 Tauri 런타임·GUI가 필요해 자동 테스트하지 않는다 → §8.3 MC-31~MC-45. 7차 개정의 수동 확인 포인트는 **MC-37 ①**(열린 메뉴 위 오른쪽 클릭 → 닫힌 뒤 다시 뜨지 않음)과 **MC-36 ③ 변형**(오버레이 위 오른쪽 클릭을 아주 빠르게 두 번 → 메뉴 1개, 닫은 뒤 저절로 다시 뜨지 않음)이다.
+
+#### 3.7.9 파일·의존·수용 (§3·§7 증분)
+
+| 파일 | 변경 | 예상 줄 수 |
+|---|---|---|
+| `tray/mod.rs`(282줄) | `mod popup; pub use popup::spawn_popup_listener;`, `current_view` 추출·`sync_timer_menu_now` 앞부분 치환, `//!` [목적]·[공개 API]·[스레드]·[unsafe]·[테스트] 갱신 | ~290 |
+| `tray/popup.rs`(신규) | §3.7.3 + §3.7.8 테스트 | ~230 (7차: 285줄 → **약 420줄** — `PopupGate`·`should_request`·`overlay_rect_or_none` + PM5~PM15) |
+| `lib.rs`(442줄) | §3.7.6 | ~448 (7차: `start_input_pipeline` 추출 — 줄 수 거의 불변, setup 클로저 84 → 약 64줄, 필요 시 `initial_hand_anchor` 추가 추출) |
+| `window/mod.rs` (7차) | `overlay_screen_rect` 문서 주석의 스레드 문장만 교체 — [window.md](window.md) §3.1 | 불변 |
+| `hook/foreground.rs` (7차, CORE-302) | U13~U18 SAFETY 주석 문구만 — [hook.md](hook.md) §3.10.3 | 불변 |
+
+- 모듈 의존: `tray → hook` 확장(`RightClick`·`ForegroundSnapshot`·`foreground_snapshot` — 기존 `refresh`에 더해), `tray → window` 확장(`overlay_screen_rect`·`ScreenBounds::contains`·`OVERLAY_LABEL`). hook은 여전히 아무 모듈도 의존하지 않는다.
+- 수용 증거(횡단 §4.5): `cargo fmt --check`·`cargo clippy -- -D warnings` 0·`cargo test` 전건 PASS(신규 RC/WR/PM/FG/FS 포함). Grep `unsafe` in `src-tauri/src/tray`·`src-tauri/src/window` = 0. Grep `on_menu_event` in `src-tauri/src` = `tray/mod.rs` 1건. `git diff --stat`에 `Cargo.toml`·`Cargo.lock`·`src-tauri/src/bridge/`·`capabilities/`·`tauri.conf.json`·`src/` 없음.
+- **주의(횡단 §4.7)**: core만 반영된 상태에서는 비잠금 오른쪽 클릭에 WebView2 기본 메뉴와 새 메뉴가 **둘 다** 뜬다. ui 패킷(`.root` `onContextMenu` preventDefault) 완료 전에는 배포하지 않는다.
+
 ## 4. 스레드·채널
 
 ```
@@ -457,9 +848,38 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 - 보정 스레드와 `set_autostart`가 동시에 끝나면(시작 직후 1초 안에 토글) 늦게 끝난 쪽 값이 남는다 — 수용(§11 T6).
 - 종료: `set_enabled` 도중 앱이 종료되면 UAC 창·`schtasks.exe`는 독립 프로세스라 끝까지 돈다. 결과는 다음 시작 보정이 설정에 반영한다.
 
+### R-40 오버레이 오른쪽 클릭 메뉴 (§3.7)
+
+```
+win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶ overlay              (기존, 불변)
+       └──────(RightClick)──mpsc::Sender<RightClick>──▶ [overlay-menu 스레드, 신규 — spawn_popup_listener]
+                              for click in rx:                         (7차 개정 — CORE-301·SEC-301)
+                                ① POPUP.is_idle()? 아니면 버림          (Pending·Open — getter·전경 조회 없음)
+                                ② overlay_screen_rect(app)             (창 getter 3종 = 메인 스레드 동기 왕복, PU-h)
+                                   should_popup(두 점, 🔒 U-1)? 아니면 버림   (사각형 밖·숨김 — 전경 조회 없음)
+                                ③ hook::foreground_snapshot()          (Win32 조회, 스레드 무관, 마이크로초)
+                                   suppress_for_fullscreen? → 버림       ← 🔒 U-3
+                                ④ POPUP.try_reserve()  Idle → Pending
+                                   app.run_on_main_thread(popup_now)   (post, 실행은 기다리지 않음)
+                                   Err → POPUP.cancel()  Pending → Idle
+[메인 스레드] popup_now:
+   POPUP.begin_open()  Pending → Open → current_view → build_menu
+   → overlay.popup_menu(&menu)   ── TrackPopupMenu 모달(닫힐 때까지, tao는 이 동안 온 사용자 이벤트를 버퍼링) ──
+   → 가드 Drop(모든 반환 경로)  Open → Idle
+   항목 클릭 → MenuEvent → (기존) init 의 전역 on_menu_event → 트레이와 같은 동작
+
+상태:  Idle ──④ try_reserve──▶ Pending ──begin_open(메인)──▶ Open ──가드 Drop──▶ Idle
+                              └──── post 실패 cancel ────▶ Idle
+```
+
+- 채널: `std::sync::mpsc::Sender<hook::RightClick>`(hook → tray), 단방향, unbounded. 빈도 = 실제 오른쪽 클릭 수. `overlay-menu`는 `recv` 대기라 유휴 CPU 0.
+- 메뉴가 열린 동안 메인 스레드는 모달 루프에 있다(트레이 메뉴와 같은 조건). 훅·`input-forwarder`·`overlay-menu`는 따로 돌아 멈추지 않는다. `overlay-menu`는 Pending·Open 동안 ①에서 버리므로 창 getter를 부르지 않고, 우리 모달에 막히지 않는다(7차, PU-h). Idle일 때 창 getter 3종은 메인 스레드와 동기 왕복이다(쉬고 있는 메인 스레드에서 마이크로초 단위). 메인 스레드가 **다른 이유로** tao 핸들러 안에 오래 머물면 `overlay-menu`가 그동안 기다린다. 그 사이 온 클릭은 채널에 쌓였다가 게이트 때문에 많아야 1개만 메뉴가 된다(§11 T-j 관찰).
+- 잠금: `current_view`는 설정 → 해제 → 타이머 → 해제. 상태 기계는 잠금이 아니라 원자 변수이고, `overlay-menu`는 잠금을 쥔 채 기다리지 않으며, 메인 스레드는 `overlay-menu`를 기다리지 않는다. 그래서 교착 경로가 없다.
+- 종료: 훅 `stop`(`HookHandle` drop)이 `CLICK_SENDER`를 비우면 유일한 송신자가 사라져 `for click in rx`가 끝난다. 트레이 「종료」(`app.exit(0)`)는 프로세스와 함께 끝난다(정리할 상태 없음).
+
 ## 5. unsafe
 
-없음. 승격 실행은 `hook::run_elevated`(안전 래퍼, SAFETY 근거는 [hook.md](hook.md) §3.6.3). 조회는 `std::process::Command`(안전).
+없음. 승격 실행은 `hook::run_elevated`(안전 래퍼, SAFETY 근거는 [hook.md](hook.md) §3.6.3). 조회는 `std::process::Command`(안전). **R-40**: 전경 창 조회는 hook의 안전 함수 `hook::foreground_snapshot()`만 부른다(SAFETY 근거 [hook.md](hook.md) §3.10.3 U12~U19). `popup.rs`는 `windows` 크레이트를 import하지 않는다. 팝업·창 사각형은 Tauri 안전 API(`run_on_main_thread`·`popup_menu`·`overlay_screen_rect`).
 
 ## 6. 에러 타입
 
@@ -475,6 +895,7 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 
 - 굵은 2개는 패킷 §3.1 표에 없던 변형이다 — `persist_autostart`(§11 T3) 때문에 더했다. 코드 값은 기존 window와 같은 문자열이라 계약에 새 코드가 생기지 않는다.
 - bridge: `impl From<AutostartError> for BridgeError { BridgeError::new(e.code(), e.to_string()) }`(bridge 소관). 기존 `From<tauri_plugin_autostart::Error>`(`error.rs:51-58`)는 삭제.
+- **R-40**: 에러 변형 추가 없음. `spawn_popup_listener`는 `std::io::Result<()>`(스레드 생성 실패 — 호출자 경고 로그). 그 밖의 실패(메인 스레드 post·창 위치·메뉴 생성·팝업)는 `popup.rs` 안에서 `log::warn!`으로 끝나고 밖으로 나가지 않는다(메뉴 경로는 command가 아니라 ui에 알릴 곳이 없다). 판정으로 버리는 경우는 오류가 아니다(로그 없음).
 
 ## 7. 설정 의존
 
@@ -486,6 +907,7 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 
 - `autostart`의 **쓰기 주체는 이 둘뿐**이다. `set_settings` 입력값은 무시된다(🔒 02-design §3 「core 소유 필드」, [settings.md](settings.md) §3.5).
 - 모듈 의존: `tray → window`(기존), `tray → settings`(기존 — `toggle_overlay`가 저장), **`tray → hook`(신규, `run_elevated`)**. hook은 여전히 아무 모듈도 의존하지 않는다(§11 T2).
+- **R-40**: 읽음 `timer.enabled`(팝업이 뜨는 순간 `current_view`로 복사 — 트레이 동기화와 같은 경로), 창 `is_visible`(= `overlay.visible`의 창 반영값, `overlay_screen_rect`). **쓰지 않음**(쓰기는 기존 메뉴 핸들러 — 「표시/숨김」이 `overlay.visible`). `position_lock`은 읽지 않는다(🔒 잠금 중에도 뜬다). 전체 화면 판정은 설정값이 아니다(토글 없음). 의존 확장: `tray → hook`(`RightClick`·`ForegroundSnapshot`·`foreground_snapshot`), `tray → window`(`overlay_screen_rect`·`ScreenBounds::contains`).
 
 ## 8. 테스트 계획
 
@@ -516,6 +938,11 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 
 - `set_enabled`·`query`·`toggle_overlay`는 UAC·작업 스케줄러·Tauri 런타임이 필요해 자동 테스트하지 않는다 → §8.3.
 
+### 8.2a 단위 — `popup.rs` `#[cfg(test)] mod tests` (overlay R-40)
+
+- PM1~PM4(`should_popup`)·PM5~PM10(`PopupGate` 상태 전이, 7차)·PM11~PM15(`should_request` 판정 순서, 7차)·FS1~FS7(`suppress_for_fullscreen`) — 표는 §3.7.8. 정적 `POPUP`을 쓰는 테스트는 두지 않는다(지역 `PopupGate::new()`).
+- 짝 테스트: hook RC1~RC6·FG1~FG6([hook.md](hook.md) §3.9.5·§3.10.5), window WR1~WR3([window.md](window.md) §8.8). 회귀: TV1·TV2.
+
 ### 8.3 수동 체크리스트 (C-9 — 실행 증거: 명령 출력 캡처 + `settings.json` 캡처를 `doc/300_검증/`에, **T1 결과는 이 문서 §11에 기록 요청**)
 
 | # | 절차 | 기대 |
@@ -535,6 +962,26 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 | M-T13 | (CR-048) 트레이 「시작」 → 메뉴 다시 열기 | 두 창 글자가 흐르고, 라벨이 「일시정지」 |
 | M-T14 | (CR-048) 스톱워치 끄기(설정 창) → 메뉴 열기 | 「시작/일시정지」·「멈춤」·구분선이 사라지고 기존 4개만 |
 
+**overlay R-40 오버레이 오른쪽 클릭 메뉴 (MC-31~MC-45 — 횡단 설계 §7 원본, overlay `test/manual-checklist.md`와 같은 번호).** dev·release 각각. **사용자가 게임 중일 때는 실행하지 않는다** — 검증 세션에서 허락받아 진행한다. 실행 증거는 `doc/300_검증/screenshots/…` 스크린샷(메뉴·캡처)과 관찰 비고. core만 반영된 상태에서는 MC-31에 WebView2 기본 메뉴가 함께 뜬다(ui 패킷 뒤 확인).
+
+| # | 조건 | 절차 | 기대 |
+|---|---|---|---|
+| MC-31 | 비잠금·표시 | 오버레이 그림 위와 투명한 모서리 위에서 각각 오른쪽 클릭 | 두 곳 모두 트레이와 같은 메뉴가 커서 위치에 **1개** 뜬다. 브라우저 메뉴(뒤로·새로 고침·검사 등)는 없다. 체감 지연 없음(목표 < 100ms) |
+| MC-32 | 메뉴 동일성 | 타이머 ① 끔 ② 켬·정지 ③ 켬·흐르는 중 상태마다 트레이 메뉴와 오버레이 메뉴를 캡처 | 세 상태 모두 항목·순서·문구·구분선이 같다(① 4항목, ② 「시작」·「멈춤」+구분선+4, ③ 「일시정지」·「멈춤」+구분선+4) |
+| MC-33 | 항목 동작 | 오버레이 메뉴에서 차례로: 설정 열기 → 새로고침 → 시작/일시정지 → 멈춤 → 표시/숨김 → (트레이로 다시 표시) → 종료 | 트레이에서 고른 것과 같다. 설정 창은 한 개만 앞으로 온다. 오버레이가 다시 불러와진다. 오버레이 글자와 설정 창 타이머가 함께 바뀐다. 숨긴 뒤 트레이로 복귀할 수 있다. 앱이 종료된다. **한 번 고른 동작이 두 번 실행되지 않는다**(표시/숨김이 원래대로 돌아오지 않음 — §3.7.4) |
+| MC-34 | 🔒 잠금·표시 | 잠금을 켜고 ① 메모장(자체 메뉴 있음) 위 ② 창 모드 게임 또는 그림판 위 오버레이를 오른쪽 클릭 | 두 경우 모두 오버레이 메뉴가 뜬다. 오른쪽 클릭은 아래 창에도 전달된다. ①의 두 메뉴 경합 결과는 **관찰만** 하고 비고에 적는다(U-4 수용) |
+| MC-35 | 숨김 | 트레이로 오버레이를 숨기고 옛 자리를 오른쪽 클릭 | 오버레이 메뉴가 뜨지 않는다 |
+| MC-36 | 드래그(🔒 U-1) | 오른쪽 버튼을 ① 오버레이 안에서 누르고 밖에서 떼기 ② 밖에서 누르고 안에서 떼기 ③ 키를 누른 채 오른쪽 클릭 반복 | ①② 메뉴 없음. ③ 오른쪽 클릭마다 메뉴 1개, 엉뚱한 때 뜨는 메뉴 없음 |
+| MC-37 | 열린 메뉴 | 메뉴가 열린 상태에서 ① 오버레이 위 오른쪽 클릭 ② 바깥 좌클릭 ③ Esc | ① 두 번째 메뉴가 뜨지 않는다 ②③ 메뉴가 닫힌다. **잠금 중에도 닫히는지** 확인(R4). 비고: ①을 "메뉴 위"와 "메뉴 바깥의 오버레이 위"로 나눠 기록한다(§11 T-f·T-g) |
+| MC-38 | 트레이 메뉴와 겹침 | 트레이 메뉴를 연 채 오버레이를 오른쪽 클릭 | 동시에 두 메뉴가 남지 않는다(**관찰만**) |
+| MC-39 | 창 모드 게임·포커스(🔒 U-2) | **테두리 있는 창 모드** 게임에서 잠금을 켜고 오버레이 메뉴를 열었다 닫은 뒤 키 입력 | 메뉴가 뜬다. 메뉴가 열린 동안에도 키 입력에 오버레이가 반응한다(관찰). 닫은 뒤 게임 입력이 돌아오는 데 클릭이 필요한지 **기록만** 한다(수용된 동작) |
+| MC-40 | 🔒 테두리 없는 전체 화면 | 테두리 없는 창 모드 전체 화면 게임에서 잠금 오버레이를 오른쪽 클릭(누름·뗌 모두 오버레이 위) | **메뉴가 뜨지 않는다.** 게임 포커스가 유지되고, 게임은 오른쪽 클릭을 받는다 |
+| MC-41 | 🔒 독점 전체 화면 | 독점 전체 화면 게임에서 오버레이가 있던 자리를 오른쪽 클릭 | **메뉴가 뜨지 않고, 게임이 최소화되거나 화면이 전환되지 않는다** |
+| MC-42 | 최대화 창(테두리 있음) | 작업표시줄 자동 숨김을 ① 끈 채 ② 켠 채, 최대화한 브라우저 위 잠금 오버레이를 오른쪽 클릭 | ①② 모두 메뉴가 뜬다(클라이언트 영역이 제목 표시줄만큼 모니터보다 작음 — 횡단 D-11) |
+| MC-43 | 바탕 화면·작업표시줄 전경 | ① 바탕 화면 빈 곳을 좌클릭한 뒤 바탕 화면 위 잠금 오버레이를 오른쪽 클릭 ② 작업표시줄을 클릭해 전경으로 만든 뒤 오버레이를 오른쪽 클릭(잠금·비잠금) | ①② 메뉴가 뜬다(`Progman`·`WorkerW`·`Shell_TrayWnd` 예외). 비고: Alt+Tab 전환 화면·작업 보기가 떠 있을 때의 결과는 관찰만(R7) |
+| MC-44 | 브라우저·동영상 전체 화면 | 브라우저 F11 또는 동영상 전체 화면 위 잠금 오버레이를 오른쪽 클릭 | 메뉴가 뜨지 않는다(테두리 없는 전체 화면 — 정의대로). 전체 화면을 나가면 다시 뜬다 |
+| MC-45 | 경합·다중 모니터(관찰) | ① 모니터 A에 테두리 없는 전체 화면 게임(전경), 모니터 B에 잠금 오버레이 → B의 오버레이를 오른쪽 클릭 ② 비잠금 오버레이를 전체 화면 게임 위에서 오른쪽 클릭 ③ 배율이 다른 모니터(WQHD + 1080p)로 오버레이를 옮겨 MC-31 반복 | ① 오른쪽 누름으로 B의 아래 창이 활성화되면 전경이 바뀌어 메뉴가 뜰 수 있다 — 결과만 기록(R6) ② 클릭이 오버레이를 활성화해 전경이 이 앱이면 메뉴가 뜬다(정의대로) — 결과만 기록 ③ 메뉴가 뜨고 창 가장자리 판정이 맞다 |
+
 ## 9. bridge 요구 명세 (계약 확정은 bridge-designer)
 
 | 종류 | 이름 | 요구 | 빈도 |
@@ -545,6 +992,8 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 | 에러 | `error.rs` | `impl From<AutostartError> for BridgeError` | — |
 | 계약 문구 | contract §5 `set_autostart` | "작업 스케줄러 작업 `kuro_keyviewer`(로그온·가장 높은 권한) 등록/해제. 켜기·끄기마다 UAC 창이 뜬다(작업이 없을 때 끄기는 창 없음). 반환 = 끝난 뒤 실제 등록 상태. 앱 시작 때 core가 실제 상태로 `autostart`를 보정하고 바뀌면 `settings://changed`를 보낸다" | — |
 | event(기존) | `settings://changed` | 시작 보정으로 `autostart`가 바뀌면 1회(설정 창이 열려 있지 않으면 받는 쪽 없음 — `get_settings`가 보정값을 준다) | 앱 시작당 최대 1회 |
+
+- **R-40 (§3.7): bridge 요구 없음.** 메뉴 id·메뉴 이벤트는 Rust 내부(muda → 이벤트 루프)이고 IPC가 아니다. 팝업은 Rust `WebviewWindow::popup_menu`라 JS `menu` 권한·capabilities 변경이 없다. `InputEvent`·`input://mouse-button`은 불변(hook은 별도 채널). 새 command·event·에러 코드 없음 — contract v0.27 유지(횡단 §5). 「표시/숨김」의 `settings://changed`, 타이머 항목의 `timer://changed`는 기존 핸들러가 그대로 낸다.
 
 ### plugin-autostart 제거 순서 (🔒 빌드·실행이 깨지지 않게)
 
@@ -569,6 +1018,15 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 | 트레이 메뉴 3항목(기존) | §2 `init` | ✅(기존) |
 | **TM-11 (CR-048) — 켜져 있을 때만 「시작/일시정지」·「멈춤」, 보기가 바뀔 때만 재구성** | §3.6.1~§3.6.3, §3.6.6 TV1·TV2, §8.3 M-T12~M-T14 | ✅ 설계 · 소스 미적용(수동 확인은 ui·bridge 패킷 뒤 verify) |
 | **TM-11 — 트레이 조작(설정 → 타이머 잠금 차례, 동시 보유 금지) → 깔때기로 두 창 반영** | §3.6.4, [timer.md](timer.md) §3.7 | ✅ 설계 · 소스 미적용 |
+| **overlay R-40 AC-1 — 오버레이 위 오른쪽 클릭 → 트레이와 같은 메뉴가 커서 위치에 1개** | §3.7.3 `request_popup`·`popup_now`, §4 R-40, PM1, MC-31 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-2 — 항목·순서·문구·동작이 트레이와 같다(뜨는 순간 상태)** | §3.7.2 `current_view`, §3.7.4(기존 `build_menu`·전역 `on_menu_event` 공유), MC-32·MC-33 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-3 (🔒) — 위치 잠금 중에도 뜨고 클릭은 아래 창에도 전달** | §3.7.3 PU-g, [hook.md](hook.md) §3.9.3 RC-b, MC-34 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-4 — 숨김이면 안 뜸** | §3.7.3(`overlay_screen_rect` → `None`), PM2, MC-35 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-5 (🔒 U-1) — 누른 곳·뗀 곳 모두 창 사각형(투명 포함) 안** | §3.7.3 `should_popup`·`should_request`(7차 — `overlay-menu`에서 전경 조회보다 먼저), PM1~PM4·PM12·PM13, [window.md](window.md) §3.1 WR1~WR3, MC-36 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-6 (🔒 U-5) — 한 클릭에 메뉴 하나(중복 팝업 없음)** | §3.7.3 PU-b·PU-c·`PopupGate`(7차 — Idle→Pending→Open, post 전 예약), PM5~PM10, MC-31·MC-36 ③·MC-37 | 부분(core 몫 7차 설계 개정 · 소스 미적용. WebView2 기본 메뉴 억제는 ui 패킷) |
+| **R-40 AC-7 — 합성 뗌·드래그로는 안 뜸** | [hook.md](hook.md) §3.9.3 RC-c·RC-e, RC2·RC4·RC6, MC-36 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-8 (🔒 U-3) — 전체 화면이면 안 뜸(테두리 있는 창·바탕 화면·작업표시줄·이 앱 창이면 뜸)** | §3.7.5 `suppress_for_fullscreen`, FS1~FS7·PM14·PM15, [hook.md](hook.md) §3.10 FG1~FG6, MC-40~MC-45 | 설계 확정 · 소스 미적용 |
+| **R-40 AC-9 (U-2 수용) — 포커스 자동 복귀 없음** | §3.7.3 PU-f, MC-39(기록) | 수용(구현 없음) |
 
 ## 11. 설계 결정 노트
 
@@ -591,3 +1049,28 @@ ID_TIMER_STOP => { control_timer_from_tray(app, false); Ok(()) }
 - **T-d**: 단일 인스턴스 없음(02-design §5.1 R-2) — 자동 실행(관리자) + 수동 실행이 겹치면 두 벌 뜬다. 요구 밖.
 - **T-e**: 트레이 메뉴 번역(R-3)·잠금 해제 메뉴(R-4)는 요구 밖 — 트레이 문구는 한국어 그대로.
 - **W-2 (후속 작업)**: §9 제거 순서 ③.
+
+### R-40 결정 (2026-09-29, CR-062 — 횡단 설계 v2 §2.2~§2.14·§4 이행)
+
+| # | 결정 | 대안 | 근거 |
+|---|---|---|---|
+| T9 | 메뉴 동작은 **기존 `on_menu_event`(전역 리스너)를 공유**, 새 핸들러 없음 | 팝업 전용 `on_menu_event`·`Window::on_menu_event` 등록 | 횡단 D-4·F2. 등록하면 같은 이벤트를 두 리스너가 받아 한 클릭이 두 번 실행된다. 공유하면 동작·동기화가 구조적으로 트레이와 같아진다 |
+| T10 | 팝업마다 `build_menu(current_view)`로 **새 메뉴**, `LAST_VIEW` 불간섭 | 트레이 메뉴 객체 재사용 / `LAST_VIEW`로 보기 캐시 | 횡단 D-5. 트레이 메뉴 객체는 트레이 아이콘에 붙어 있고, `LAST_VIEW`는 "트레이에 마지막으로 적용한 보기"라 팝업이 쓰면 의미가 섞인다. 뜨는 순간의 상태를 직접 읽는 편이 정확하다 |
+| T11 | 판단 스레드 `overlay-menu`(post만) + 메인 스레드 `popup_now` | ① `input-forwarder`에서 판단·팝업 ② 훅 콜백에서 post | 횡단 §1.6·F3. `popup_menu`를 다른 스레드에서 부르면 메뉴가 닫힐 때까지 그 스레드가 멈춘다 — ①은 입력 전달이 멈춘다. ②는 콜백 최소 작업 위반이고 전경 창 조회를 둘 곳이 없다 |
+| T12 (7차: 순서는 상태·사각형 판정 **뒤** — T17) | 전체 화면 판정은 `overlay-menu`에서 post 직전, **fail-open** | 메인 스레드(`popup_now`)에서 판정 / 조회 실패 시 생략 | 횡단 D-12(🔒 지시). Win32 조회는 스레드 제약이 없어 메인 스레드를 기다릴 이유가 없다. 게임 최소화 위험은 전체 화면 창 조회에 성공했을 때만 생기고, 조회 실패로 기본 기능이 사라지는 쪽이 더 흔하고 더 나쁘다 |
+| T13 (7차: 구현 형태는 **T16이 대체**, 지역 인스턴스 원칙만 유지) | `OpenGuard`는 플래그를 인자로 받는다(`OpenGuard<'a>`) | 정적 `POPUP_OPEN`을 직접 쓰는 단위 구조체 | 횡단 §4.2 권고. 테스트(PM5)가 지역 `AtomicBool`로 돌아 정적 상태를 공유하지 않는다(병렬 `cargo test`) |
+| T14 | `spawn_popup_listener` 실패는 경고 로그 후 앱 시작 계속 | setup 실패로 전파(`?`) | 메뉴는 부가 기능이다. 트레이 메뉴가 같은 동작을 그대로 제공하므로 앱을 멈출 이유가 없다(횡단 §4.3-9) |
+| T15 | `current_view`의 경고 문구 괄호를 「(메뉴 보기 계산)」으로 | 기존 「(타이머 메뉴 동기화)」 유지 | 두 호출자 공용이 되어 기존 문구가 팝업 경로에서 틀린 맥락을 가리킨다. 로그 문구는 계약·테스트 대상이 아니다 |
+| **T16** (7차, CORE-301) | 팝업 상태를 **3단계 `Idle → Pending → Open`**(`PopupGate`, `AtomicU8` 하나)로. `overlay-menu`가 post **전에** `compare_exchange(Idle→Pending)`, 메인 `popup_now`가 `Pending→Open`, 가드 Drop이 `→Idle`, post 실패는 `cancel`(`Pending→Idle`). **T13의 `OpenGuard<'a>(&AtomicBool)`를 대체**한다. "플래그를 인자로 받아 테스트가 지역 인스턴스를 쓴다"는 T13 원칙은 `PopupGate::new()` 지역 인스턴스로 유지 | ① 옛 2단계 `POPUP_OPEN` 유지 ② 2단계 + `overlay-menu`에서 `true`를 먼저 세팅(post 전 CAS false→true) ③ 메인 스레드에서 밀린 요청을 시각으로 거름 | 옛 설계의 결함: tao가 모달 중 사용자 이벤트를 버퍼링했다가 닫힌 뒤 실행한다(runner.rs:143-148·208-226). 그래서 "보냈지만 실행 전" 요청이 가드가 풀린 뒤 통과한다. ②도 막을 수는 있다. 다만 한 값이 "예약됨"과 "열림"을 같이 뜻해, `popup_now` 조기 반환·post 실패 때 누가 되돌리는지 경계가 흐려진다. 3단계는 전이 주체가 스레드별로 나뉘고(Idle→Pending은 overlay-menu만, Pending→Open은 메인만) 표(§3.7.3 상태 전이표)와 PM5~PM10으로 검증된다. ③은 `RightClick`에 시각이 없어 hook 타입(횡단 D-8) 변경이 필요하다 |
+| **T17** (7차, SEC-301) | 판정 순서 **① 상태 → ② 오버레이 창 사각형 → ③ 전경 창 전체 화면 → ④ 예약·post**, 모두 `overlay-menu`에서. 순서는 순수 함수 `should_request`(단락 평가)로 고정하고 PM11~PM15로 검증. `overlay_screen_rect`는 `overlay-menu`(비메인)에서 부른다 | ① 옛 순서(전경 → post → 메인에서 사각형) ② 창 이동·크기·표시 이벤트로 갱신하는 사각형 캐시 ③ hook에 `GetWindowRect`·`IsWindowVisible` 안전 래퍼 + 오버레이 HWND 저장 | ①은 화면 어디의 오른쪽 클릭이든 다른 프로세스 창을 조회하고 메인 스레드를 깨운다(데이터 최소화·게임 중 비용). Tauri 창 getter는 비메인 스레드에서 **스레드 안전한 동기 왕복**이다(tauri-runtime-wry 2.12.0 `lib.rs:196-210·263-278`, PU-h). 막히는 경우는 메인 스레드가 핸들러 안에 있을 때뿐인데, ①에서 Pending·Open을 먼저 거르므로 우리 모달과는 구조적으로 겹치지 않는다. 그래서 대안이 필요 없다. ②는 표시 상태를 바꾸는 경로가 여럿이다(`toggle_overlay`·`set_overlay_visible`·`apply_overlay_window`·`setup_overlay`). 게다가 `set_size`는 `Moved`를 내지 않는다(window.md 사실). 하나라도 빠지면 캐시가 낡아 AC-4·AC-5를 조용히 어긴다. ③은 새 unsafe·모듈 간 HWND 전달이 필요한데 리뷰 범위 밖이고, 얻는 것이 왕복 3회(마이크로초)뿐이다 |
+| **T18** (7차) | 사각형은 `overlay-menu`에서 한 번만 판정하고 `popup_now`는 다시 판정하지 않는다(PU-i) | `popup_now`에서 가시성·사각형 재확인 | 🔒 U-1은 클릭 시각의 창 기준이라 먼저 보는 쪽이 정의에 더 가깝다. 판정과 팝업 사이(밀리초)에 창을 숨기거나 옮기려면 별도 좌클릭 조작이 필요해 같은 클릭과 겹칠 수 없다. 재확인은 메인 스레드 getter 3회와 분기를 더할 뿐 요구를 더 지키지 않는다 |
+| **T19** (7차, CORE-304) | `lib.rs` setup 4단계를 비공개 `fn start_input_pipeline(handle: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>>`로 추출. 50줄이 남으면 `initial_hand_anchor`·`build_app_state`도 차례로 추출(§3.7.6) | setup 클로저 그대로(기존 위반 유지) / 단계마다 전부 함수화 | 50줄 한계는 표준 강제 항목(golden-principles §1)이다. 4단계는 채널·훅·스레드 셋이 한 묶음이라 경계가 자연스럽다. 실패 전파 규칙(훅·전달 = setup 실패, 메뉴 = 경고)을 함수 문서 한 곳에 모은다. 전부 함수화는 요구 없는 재구성이라 한계를 넘는 만큼만 뺀다 |
+
+### R-40 확인 필요 · 관찰
+
+- **T-f (관찰 — 횡단 설계에 되돌릴 수 있음)**: 메뉴가 열린 채 **메뉴 바깥의 오버레이 위**를 오른쪽 클릭하면, 누름이 메뉴를 닫아(`TrackPopupMenu` 바깥 클릭 해제) 가드가 풀린 뒤 뗌이 도착한다. 두 점이 모두 창 안이면 **새 메뉴가 그 자리에 다시 뜰 수 있다**(동시에 두 개는 아님 — 바탕 화면 메뉴의 "닫고 다시 열기"와 같은 모양). 메뉴 **위** 오른쪽 클릭은 메뉴가 닫히지 않아 가드가 막는다. 횡단 MC-37 ① 기대 "두 번째 메뉴가 뜨지 않는다"를 "동시에 둘이 없다"로 읽으면 PASS, "다시 뜨지도 않는다"로 읽으면 FAIL이다. 막으려면 `RightClick`에 누름 시점 정보를 실어 "가드가 열린 동안 시작된 클릭"을 버려야 해 **횡단 설계(D-8 타입·§4.2) 변경**이 필요하다 — 이 문서는 반영하지 않고 MC-37 관찰 결과로 아키텍트 세션이 판단한다.
+- **T-g (관찰, 횡단 R4)**: 잠금 중에는 마지막 입력을 받은 프로세스가 아래 창이라 muda의 `SetForegroundWindow(overlay)`가 거부될 수 있다. 그러면 메뉴는 떠도 바깥 클릭으로 닫히지 않거나 키보드 조작이 안 될 수 있다. MC-37(잠금)으로 확인하고, 실패하면 횡단 설계 세션으로 되돌린다(core가 임의로 포커스 우회 코드를 넣지 않는다 — U-2).
+- **T-h (관찰, 횡단 R6·R7·MC-38·MC-45)**: 다중 모니터에서 오른쪽 누름이 다른 창을 활성화해 전경이 바뀌는 경합, Alt+Tab·작업 보기 같은 셸 전체 화면 창, 트레이 메뉴가 열린 동안의 클릭은 관찰만 한다.
+- **T-j (관찰, 7차)**: 메인 스레드가 우리 메뉴가 아닌 이유로 tao 핸들러 안에 오래 머물면 `overlay-menu`가 창 getter에서 그만큼 기다린다. 현재 코드에서 그런 경로는 알려져 있지 않다. 트레이 메뉴는 tray-icon 창 프로시저의 모달이라 핸들러 밖이라고 보지만 미확인이다 — MC-38 관찰. 그 사이 온 오른쪽 클릭은 채널에 쌓인다. 풀린 뒤 첫 클릭이 판정을 통과하면 Pending이 되고, 나머지는 ①에서 버려진다. 그래서 늦게 뜨는 메뉴는 **많아야 1개**다. 늦은 클릭까지 버리려면 `RightClick`에 시각이 필요하다(T-f와 같은 횡단 D-8 변경). 관찰 결과로 아키텍트 세션이 판단한다.
+- **T-f 보충(7차)**: 3단계 상태로도 T-f는 그대로다. 메뉴 바깥의 오버레이를 오른쪽 **누르면** 메뉴가 닫혀 Idle이 된다. 그 뒤 **뗌**이 도착하므로 새 요청이 정상 통과한다. CORE-301이 막는 것은 "post됐지만 실행 전" 요청이 모달 뒤에 실행되는 경우다. 누름·뗌이 모두 메뉴가 열린 동안 끝난 클릭은 옛 설계에서도 `load`가 걸렀고 새 설계에서도 ①이 거른다.
+- **T-i (요구ID)**: overlay `requirements.md` R-40은 ui-designer가 동시에 추가 중이다(횡단 §9 문구). 번호가 바뀌면 §1·§10을 맞춘다. 확정사항 §6 트레이 행 갱신(U-6)은 메인 세션 몫이다.

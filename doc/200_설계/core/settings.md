@@ -1,7 +1,8 @@
 # settings 모듈 설계
 
-- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · 최종 갱신 2026-09-27
+- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · 최종 갱신 2026-09-29(소스 동기화)
 - 변경이력:
+  - 2026-09-29 (소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **SEC-205 텍스트 크기 상한**: `settings/atomic.rs`에 `pub fn read_capped_string(path: &Path, max_bytes: u64) -> std::io::Result<String>`·`pub const MAX_TEXT_FILE_BYTES: u64 = 1024 * 1024`(1MiB), `mod.rs`가 `pub use atomic::{read_capped_string, write_atomic, MAX_TEXT_FILE_BYTES};`로 재노출. `load`는 이 함수로 읽는다 — `fs::metadata` 길이가 상한을 넘으면 읽지 않고 `ErrorKind::InvalidData` → `SettingsError::Io` → `load_or_default`가 기존 손상 파일 경로(기본값 대체 + 경고, 로그에는 파일 이름만)를 그대로 탄다. 같은 상한을 assets `load_manifest`·data_reset `read_marker`·`read_attempts`가 공유한다. 테스트: atomic.rs AW7(`aw7_read_capped_string_rejects_oversized_file`), `mod.rs` 1MiB 초과 settings.json → 기본값. §2 표 반영. ② **0.4.0 기본값**(`settings/timer.rs:80-96`, 계약 v0.27 §3.3과 일치): `timer.textPos` (142, 458) → **(268, 402)**, `timer.rotation` 9 → **7**, `timer.alarmVolume` 80 → **44**(`DEFAULT_ALARM_VOLUME`), `fontSize` 36·`countdownSecs` 1500(`DEFAULT_COUNTDOWN_SECS`)·`color` `"#333333"`·`enabled` false·`mode` Stopwatch 불변. `default_mouse()` 좌표(CR-044, §11 확인 필요 14): `shoulder` (582, 484)·`partPos` (411, 464)(키 없음 serde 기본은 여전히 (389, 492))·`penPos` (372, 476)·`penMode` **true**. §2·§3.1 표 반영. §3.7·§3.8·§3.10의 코드 조각과 테스트 기대값(S-T1·S-T10·S-T12·S-T13·S-T14·S-T17·S-T18의 (142, 458)·9·80, N1′의 (380, 496))은 **옛 기록** — 현재 값은 §3.1·소스. ③ **표기 정리**: 아래 변경이력·§3.x·§10의 「소스 미적용」(CR-017·019·024·033·035·045·047·048, SV2, data-reset, CR-053)은 모두 소스에 반영됨(`settings/{mod,timer,atomic,store,pen_mode_tests,pen_pos_tests}.rs`). CR-053 값은 0.4.0에서 다시 바뀌었다(②). `save`는 CR-047 ③단계대로 **비공개**(§2 행 정정). `idleSeconds` 검증은 60~3600(`IDLE_SECONDS_MIN/MAX`, 읽기는 보정 — §3.1 행 정정).
   - 2026-09-27 (data-reset, 🔒 사용자 결정 R-A·R-B·D-2(언어 유지)·D-3, 새 모듈 문서 [data_reset.md](data_reset.md)) **앱 시작 순서 변경**: settings `load_or_default`가 시딩보다 **앞으로** 오고, 그 값을 담은 `Mutex<Settings>`로 `data_reset::run_startup`이 돈다. 세대가 다르거나 없으면 `settings::update` 한 번으로 설정 전체를 `Settings::default()`로 바꾸되 `autostart`·`language`만 유지한다. 세대 표식은 settings 스키마 밖의 별도 파일 `data-generation.json`(`version` 필드 추가 없음 — D19 유지). **settings 공개 API·스키마·검증 불변**(호출자만 늘어남). 증분 **§3.11**. **소스 미적용.**
   - 2026-09-27 (CR-053 배포용 기본 세트 3차 — CR-044 대체, 🔒 사용자 지정, 확정사항 §6 CR-053 줄) **타이머 기본값 `timer.textPos` (268, 403) → (142, 458), `timer.rotation` 5 → 9.** 나머지 타이머 기본값(`enabled` 꺼짐·`fontSize` 36·`color` `"#333333"`·`countdownSecs` 1500(25분)·`alarmVolume` 80 등)과 범위·보정 규칙, 좌표 기본값(`shoulder`·`partPos`·`penPos`·`penMode`, CR-044 그대로)은 불변. 공개 API 시그니처·JSON 키 불변. 이미 저장된 `settings.json`의 값은 그대로 읽힌다(기본값은 키가 없을 때만 쓰인다). 갱신 위치: §2 `TimerSettings` 행, §3 필드 표 `timer.textPos`·`timer.rotation`, §3.8.1 `impl Default`, 테스트 S-T1·S-T10·S-T12(§3.8·§3.10 갱신본). 짝 문서 [assets.md](assets.md) §3.16(기본 그림 7장). **소스 미적용**(`settings/timer.rs:88·90`, 단위 테스트 `:241`·`:465`).
   - 2026-09-26 (CR-048 타이머 모드, 🔒 사용자 결정 D-1~D-11 권고안 확정 — 확정사항 CR-048 결정 줄, 정본 패킷 `doc/200_설계/architecture/timer-mode-03-packet-core.md` §2.1, 근거 `timer-mode-02-design.md` §5) **`TimerSettings`에 `mode: TimerMode`(`"stopwatch"|"countdown"`, 기본 Stopwatch)·`countdown_secs: u32`(`countdownSecs`, 1~359999, 기본 1500)·`alarm_volume: u32`(`alarmVolume`, 0~100, 기본 80) 추가, 상수 5개, `validate`·`normalize` 확장, 새 3필드 관대한 역직렬화(타입 오류가 설정 전체 `Format`으로 번지지 않음).** `enabled`는 유지하고 의미만 「스톱워치 또는 타이머 켜짐」(D-1 A) → 옛 `{"enabled":true}`는 이행 코드 없이 스톱워치 켜짐(TM-02). `version`·마이그레이션 없음(D19 유지), `keep_core_owned` 불변. 증분 전체 **§3.10**(§8·§9·§11 증분 포함), §10에 TM 행. **소스 미적용.**
@@ -55,11 +56,15 @@
 | `impl Default for Settings` | — | 기본 설정(**`slam` 없음**) | 없음 | 전체 |
 | `pub fn default_mouse() -> MouseSettings` | — | 마우스 기본값(`area` = `default_area()` 포함) | 없음 | ST-R-09, R-tmp-3, R-tmp-2, OV-R-14 |
 | `impl Settings { pub fn validate(&self) -> Result<(), SettingsError> }` | — | () | `Invalid`(**쾅 규칙 삭제** — 남은 규칙: 배율·유휴·`area` 유한수) | ST-R-03·04, R-tmp-3 |
-| `pub fn load_or_default(path: &Path) -> Settings` | 경로 | 설정(없음·손상 → 기본값 + 경고) | 없음 | 전체 |
-| `pub fn load(path: &Path) -> Result<Option<Settings>, SettingsError>` | 경로 | 파일 없으면 `None` | `Io`, `Format`, `Invalid` | 전체 |
-| `pub fn save(path: &Path, settings: &Settings) -> Result<(), SettingsError>` | 경로·설정 | () | `Invalid`, `Io`, `Format` | 전체, OV-R-13 |
+| `pub fn load_or_default(path: &Path) -> Settings` | 경로 | 설정(없음·손상·**1MiB 초과**(SEC-205) → 기본값 + 경고, 로그에는 파일 이름만) | 없음 | 전체 |
+| `pub fn load(path: &Path) -> Result<Option<Settings>, SettingsError>` | 경로 | 파일 없으면 `None`. 본문은 `read_capped_string(path, MAX_TEXT_FILE_BYTES)`로 읽는다 | `Io`(**1MiB 초과 = `InvalidData`**, SEC-205), `Format`, `Invalid` | 전체 |
+| `fn save(path: &Path, settings: &Settings) -> Result<(), SettingsError>` — **비공개**(CR-047 ③단계, 소스 반영) | 경로·설정 | () | `Invalid`, `Io`, `Format` | 전체, OV-R-13. 밖에서는 `update` |
 | `impl SettingsError { pub fn code(&self) -> &'static str }` | — | `settings.invalid` 등 | 없음 | — |
-| **`pub struct TimerSettings { pub enabled: bool, pub text_pos: Point, pub rotation: f64, pub font_size: f64, pub color: String }`** (`settings::timer`, `mod.rs`에서 `pub use timer::TimerSettings;`) + `impl Default` | — | 기본 `false`·(142, 458)·9·36·`"#333333"`(CR-053) | 없음 | **PT-04·07·08·09** (§3.8) |
+| `update` · `SaveOutcome` (`store.rs`, `pub use store::{update, SaveOutcome};`) | §3.9.2 | §3.9.2 | §3.9.2 | CORE-001 (CR-047) |
+| `pub fn write_atomic(path: &Path, bytes: &[u8]) -> std::io::Result<()>` (`atomic.rs`, 재노출) | 대상 경로, 전체 내용 | () | 폴더·임시 파일 생성·쓰기·`sync_all`·rename 실패(대상은 이전 내용 유지, 임시 파일 정리) | CORE-002 (CR-047) |
+| **`pub fn read_capped_string(path: &Path, max_bytes: u64) -> std::io::Result<String>`** (`atomic.rs`, 재노출) | 경로, 상한 바이트 | 파일 전체 텍스트 | 파일 없음 → `NotFound`. `fs::metadata` 길이 > `max_bytes` → 읽지 않고 `ErrorKind::InvalidData`(「파일 크기가 상한({max_bytes}바이트)을 넘습니다: {len}바이트」). 그 밖 IO 오류 | **SEC-205** |
+| **`pub const MAX_TEXT_FILE_BYTES: u64 = 1024 * 1024`** (`atomic.rs`, 재노출) | — | 1MiB — settings.json·manifest.json·data-generation.json·data-reset-attempts.json 공용 텍스트 상한 | — | **SEC-205** |
+| **`pub struct TimerSettings { pub enabled: bool, pub mode: TimerMode, pub countdown_secs: u32, pub alarm_volume: u32, pub text_pos: Point, pub rotation: f64, pub font_size: f64, pub color: String }`** (`settings::timer`, `mod.rs`에서 `pub use timer::TimerSettings;`) + `impl Default` | — | 기본 `false`·`Stopwatch`·1500·**44**·**(268, 402)**·**7**·36·`"#333333"`(0.4.0, `timer.rs:80-96`) | 없음 | **PT-04·07·08·09**, TM-01·04·10 (§3.8·§3.10) |
 | **`Settings.timer: TimerSettings`** | — | 키 없음 → `TimerSettings::default()` | — | **PT-04·07·08·09** |
 | **`pub fn timer::validate(t: &TimerSettings) -> Result<(), SettingsError>`** | 타이머 설정 | () — `Settings::validate` 끝에서 호출 | `Invalid`(범위 밖·비유한수·색 형식) | **PT-07·08** |
 | **`pub fn timer::normalize(t: TimerSettings) -> TimerSettings`** | 타이머 설정 | 범위로 자르고 비유한수·색 형식 오류는 기본값, 색 소문자 — `load`에서만 호출 | 없음 | **PT-07·08·09** |
@@ -77,23 +82,26 @@
 | 필드 | 타입 | 기본값 | 검증 |
 |---|---|---|---|
 | `scale` | `f64` | 1.0 | 0.25 ≤ x ≤ 2, 유한 |
-| `idleSeconds` | `u32` | 300 | ≥ 1 |
+| `idleSeconds` | `u32` | 300 | 60 ≤ x ≤ 3600(`IDLE_SECONDS_MIN/MAX`, 읽기는 보정 — SV2-12) |
 | ~~`slam.keys`~~ | — | — | **삭제(CR-019)** |
 | ~~`slam.durationMs`~~ | — | — | **삭제(CR-019)** |
 | `overlay.x`, `overlay.y` | `i32` | 100, 100 | 없음 |
 | `overlay.visible` | `bool` | true | — |
 | `mouse` | `Option<MouseSettings>` | `Some(default_mouse())` | 있으면 아래 |
-| `mouse.shoulder` | `Point` | (620, 530) | — |
+| `mouse.shoulder` | `Point` | (582, 484)(`default_mouse`, CR-044 — 옛 (620, 530)) | — |
 | ~~`mouse.pad`~~ | — | — | 삭제(CR-017) |
 | `mouse.area` | `[Point; 4]`, `#[serde(default = "default_area")]` | [(375,525), (495,525), (495,625), (375,625)](2026-09-23 실측 정정, §11 D8) | 네 점의 x·y 모두 유한수. 볼록성·순서·캔버스 안 여부는 검사하지 않음(§11 D9) |
-| `mouse.partPos` | `Point`, `#[serde(default = "default_part_pos")]` | (389, 492) | 없음 |
+| `mouse.partPos` | `Point`, `#[serde(default = "default_part_pos")]` | `default_mouse` (411, 464)(CR-044). 키 없음 → `default_part_pos()` (389, 492) | 없음 |
 | `mouse.hand` | `Option<Point>`, `#[serde(default)]` | `None` | — |
-| **`mouse.penPos`** (CR-024, 기본값 CR-035) | **`Option<Point>`, `#[serde(default)]`** | **`Some((380, 496))`**(CR-035 U-2 = B, §3.7). 키 없음·`null`은 `None`(필드 default) | **없음(§11 D17)** |
-| **`mouse.penMode`** (CR-033) | **`bool`, `#[serde(default)]`** | **false** | **없음(§11 D26)** — §3.6 |
+| **`mouse.penPos`** (CR-024, 기본값 CR-035 → CR-044) | **`Option<Point>`, `#[serde(default)]`** | **`Some((372, 476))`**(CR-044, 옛 (380, 496)). 키 없음·`null`은 `None`(필드 default) | **없음(§11 D17)** |
+| **`mouse.penMode`** (CR-033) | **`bool`, `#[serde(default)]`** | `default_mouse` **true**(CR-044 배포 기본). 키 없음 → false(필드 default) | **없음(§11 D26)** — §3.6 |
 | `autostart` | `bool` | false | — |
 | **`timer.enabled`** (CR-045) | **`bool`** | **false** | — |
-| **`timer.textPos`** (CR-045) | **`Point`**(글자 상자 **중심**, 캔버스 좌표) | **(142, 458)** (CR-053, 옛 (268, 403)) | 유한수, `0 ≤ x ≤ 900`, `0 ≤ y ≤ 700`(읽기는 자르기) |
-| **`timer.rotation`** (CR-045) | **`f64`**(도, 시계 방향 +) | **9** (CR-053, 옛 5) | 유한수, `−180 ≤ r ≤ 180`(읽기는 자르기) |
+| **`timer.mode`** (CR-048) | **`TimerMode`** `"stopwatch"`·`"countdown"` | **Stopwatch** | 타입 오류 → 그 필드만 기본값(관대한 역직렬화, §3.10.2) |
+| **`timer.countdownSecs`** (CR-048) | **`u32`** | **1500**(`DEFAULT_COUNTDOWN_SECS`) | 1 ≤ x ≤ 359999(읽기는 보정, §3.10.3) |
+| **`timer.alarmVolume`** (CR-048) | **`u32`**(%) | **44**(`DEFAULT_ALARM_VOLUME`, 0.4.0 — 옛 80) | 0 ≤ x ≤ 100(읽기는 보정, §3.10.3) |
+| **`timer.textPos`** (CR-045) | **`Point`**(글자 상자 **중심**, 캔버스 좌표) | **(268, 402)** (0.4.0, 🔒 사용자 지정 2026-09-28 — 옛 (268, 403) → CR-053 (142, 458)) | 유한수, `0 ≤ x ≤ 900`, `0 ≤ y ≤ 700`(읽기는 자르기) |
+| **`timer.rotation`** (CR-045) | **`f64`**(도, 시계 방향 +) | **7** (0.4.0 — 옛 5 → CR-053 9) | 유한수, `−180 ≤ r ≤ 180`(읽기는 자르기) |
 | **`timer.fontSize`** (CR-045) | **`f64`**(캔버스 px) | **36** | 유한수, `12 ≤ s ≤ 200`(읽기는 자르기) |
 | **`timer.color`** (CR-045) | **`String`** `#rrggbb` | **`"#333333"`** | `#` + 16진수 6자리(대소문자 허용). 읽기는 형식 오류면 기본값·소문자화 |
 

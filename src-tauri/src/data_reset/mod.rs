@@ -5,7 +5,7 @@
 //! [정책] ★ 베타 정책, 정식 배포 전 재결정. 판정은 decide()/POLICY 한 곳. 정식 배포 전환안
 //!        (옛 기본 그대로인 칸·좌표만 교체)은 doc/200_설계/architecture/data-reset-02-design.md §8 메모 — 미구현.
 //! [순서] ⓪ 시작 폴더 검사(data_dir·assets_dir 자체가 링크·재분석 지점이면 중단) → ① 표식 삭제
-//!        → ② 화이트리스트 삭제 → ③ 내장 기본 7장 시딩 → ④ settings::update(보존 규칙)
+//!        → ② 화이트리스트 삭제 → ③ 내장 기본 전부(`DEFAULT_ASSETS.len()`) 시딩 → ④ settings::update(보존 규칙)
 //!        → ⑤ 표식 기록(원자적) → ⑥ 시도 기록 삭제(실패해도 경고만). 어디서 끊겨도 표식이 없으므로
 //!        다음 시작 때 처음부터 다시 한다.
 //! [상한] 시작 경로만: 연속 실패 시도(data-reset-attempts.json)가 3회 이상이면 지우지 않고 경고만.
@@ -21,7 +21,7 @@
 //!        메시지·로그에 경로를 넣지 않는다. 시작 실패 로그 = 단계(Stage::label)·code·io::ErrorKind.
 //! [테스트] 단위: decide_table·reset_settings_keeps_autostart_and_language·reset_error_codes·
 //!        reset_error_io_kind, generation.rs marker_*·generation_fingerprint_guard, wipe.rs 4개,
-//!        attempts.rs 2개. 통합: tests/data_reset.rs.
+//!        attempts.rs 3개. 통합: tests/data_reset.rs.
 
 use std::sync::Mutex;
 use std::time::Instant;
@@ -112,7 +112,7 @@ pub fn reset_settings(current: &Settings) -> Settings {
     }
 }
 
-/// 비공개 ③단계 — 내장 기본 7장을 전부 채웠을 때만 성공으로 본다(DR-3).
+/// 비공개 ③단계 — 내장 기본 전부(`DEFAULT_ASSETS.len()`)를 채웠을 때만 성공으로 본다(DR-3).
 fn seed_fresh(assets_dir: &std::path::Path) -> Result<usize, ResetError> {
     use crate::assets::defaults::{seed_if_empty, SeedOutcome, DEFAULT_ASSETS};
     let outcome = seed_if_empty(assets_dir);

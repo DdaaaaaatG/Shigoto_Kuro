@@ -7,8 +7,16 @@
  */
 import { useEffect, useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from 'react'
 import { useMessages } from '../i18n/MessagesContext'
+import type { Messages } from '../i18n/types'
 import { pad2, parseHmsDraft, splitHms, type HmsDraft } from '../timerValues'
 import styles from './TimerTab.module.css'
+
+/** 안내 줄 문구 — 잠김 안내가 무효 안내보다 우선, 둘 다 아니면 비운다 */
+const durationMsg = (locked: boolean, showInvalid: boolean, t: Messages): string => {
+  if (locked) return t.timerDurationLocked
+  if (showInvalid) return t.timerDurationInvalid
+  return ''
+}
 
 export type CountdownTimeInputProps = {
   secs: number
@@ -20,7 +28,12 @@ export type CountdownTimeInputProps = {
 
 type FieldKey = keyof HmsDraft
 
-export const CountdownTimeInput = ({ secs, locked, inactive = false, onCommit }: CountdownTimeInputProps) => {
+export const CountdownTimeInput = ({
+  secs,
+  locked,
+  inactive = false,
+  onCommit,
+}: CountdownTimeInputProps) => {
   const t = useMessages()
   const off = locked || inactive
   const [draft, setDraft] = useState<HmsDraft | null>(null)
@@ -137,7 +150,7 @@ export const CountdownTimeInput = ({ secs, locked, inactive = false, onCommit }:
             : `${styles.msg} ${styles.durationMsg}`
         }
       >
-        {locked ? t.timerDurationLocked : invalid && !off ? t.timerDurationInvalid : ''}
+        {durationMsg(locked, invalid && !off, t)}
       </p>
     </>
   )

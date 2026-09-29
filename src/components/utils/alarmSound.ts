@@ -6,12 +6,16 @@
  * 쓴다 — 옛 `synthBeepWav`·`BEEP_*`·Blob URL 캐시는 폐기(아무 데서도 더 참조하지 않아 제거). design.md §10.15
  * 15.3·15.4·design/functions.md §5.7 ④는 아직 옛 합성음 서술로 남아 있음(ui-designer 동기화 대기).
  */
-import type { TimerSettings } from 'bridge'
+import { DEFAULT_TIMER_SETTINGS, type TimerSettings } from 'bridge'
 import defaultAlarmAsset from '@/assets/sounds/default-alarm.mp3'
 
 // ─── 상수(설정값 아님) ──────────────────────────────────────────────────────
-/** (CR-058, 0.4.0 기본 세트) 알림음 음량 기본값 % — 옛 80 */
-export const DEFAULT_ALARM_VOLUME = 44
+/**
+ * (CR-058, 0.4.0 기본 세트) 알림음 음량 기본값 % — 단일 소스는
+ * `DEFAULT_TIMER_SETTINGS.alarmVolume`(bridge/types.ts). `??` 뒤 44는 그 필드가 옵셔널 타입이라
+ * 붙인 타입 안전용 폴백일 뿐, 실제 값은 항상 그 상수에서 온다.
+ */
+export const DEFAULT_ALARM_VOLUME: number = DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44
 
 const clamp01 = (v: number): number => Math.min(1, Math.max(0, v))
 
@@ -20,7 +24,10 @@ export const defaultAlarmUrl = (): string => defaultAlarmAsset
 
 /** 알림음 음량(0~1) — alarmVolume 없음·비유한수는 DEFAULT_ALARM_VOLUME, 0~100으로 자른다 */
 export const alarmGain = (t: TimerSettings): number => {
-  const raw = typeof t.alarmVolume === 'number' && Number.isFinite(t.alarmVolume) ? t.alarmVolume : DEFAULT_ALARM_VOLUME
+  const raw =
+    typeof t.alarmVolume === 'number' && Number.isFinite(t.alarmVolume)
+      ? t.alarmVolume
+      : DEFAULT_ALARM_VOLUME
   return Math.min(100, Math.max(0, raw)) / 100
 }
 
@@ -31,7 +38,12 @@ export const alarmGain = (t: TimerSettings): number => {
  * 예약된 microtask도 stopped 확인으로 버린다) — 호출자의 `stopRef.current = playSound(...)` 대입이
  * onFail보다 항상 먼저 끝난다.
  */
-export const playSound = (url: string, volume: number, onFail?: () => void, loop = false): (() => void) => {
+export const playSound = (
+  url: string,
+  volume: number,
+  onFail?: () => void,
+  loop = false,
+): (() => void) => {
   let audio: HTMLAudioElement | null = null
   let stopped = false
   let settled = false

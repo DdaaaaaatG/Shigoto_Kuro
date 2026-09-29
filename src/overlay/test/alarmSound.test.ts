@@ -1,14 +1,13 @@
 /**
  * 알림음 공용 유틸 TC — CR-050(R-39) · CR-058(0.4.0 기본 세트 — 내장 기본음 = 번들 mp3, DEFAULT_ALARM_VOLUME 44).
  * 근거: design/functions.md §5.7 ④(defaultAlarmUrl·alarmGain·playSound), design.md §10.15 15.2(실패 알림
- *   순서 — onFail은 항상 queueMicrotask 비동기, stop() 뒤에는 부르지 않음)·15.4(내장 기본음 자산은 창당 같은 URL).
- *   ※ design.md·design/functions.md 본문은 아직 옛 합성 비프음(synthBeepWav·BEEP_*·Blob URL 캐시) 서술로 남아
- *   있음 — CR-058 조치 사항, ui-designer 동기화 대기.
+ *   순서 — onFail은 항상 queueMicrotask 비동기, stop() 뒤에는 부르지 않음)·15.4(내장 기본음 = 번들 정적 자산 URL,
+ *   런타임 생성물 없음)·15.7 TC-297~TC-299 행. CR-061: DEFAULT_ALARM_VOLUME = DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44.
  * 대상: src/components/utils/alarmSound.ts.
  * Audio는 전역 스텁(FakeAudio — play/pause/currentTime/volume/loop/error 이벤트 흉내).
  * bridge 호출 없음(타입만 import). 실제 소리·sleep 없음. microtask는 Promise.resolve 반복으로 비운다.
- * 시나리오: src/overlay/test/scenarios.md TC-297 ~ TC-299(TC-297은 CR-058로 대상이 synthBeepWav에서
- *   DEFAULT_ALARM_VOLUME 상수 확인으로 바뀜, TC-298은 mp3 자산 URL 확인으로 개정 — ui-test-designer 정리 필요)
+ * 시나리오: src/overlay/test/scenarios.md TC-297 ~ TC-299(v2.4 — CR-058 개정: TC-297 = DEFAULT_ALARM_VOLUME 44,
+ *   TC-298 = 번들 mp3 자산 URL, TC-299 ⑤ = 없음·NaN → 0.44)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TimerSettings } from 'bridge'

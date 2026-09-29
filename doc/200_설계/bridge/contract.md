@@ -1,6 +1,7 @@
 # bridge 계약 (command · event) — 단일 소스
 
-- 버전: **v0.26** (초안 — 사용자 확정 후 매니저가 v1로 올린다) — `reset_app_data` 호출 창 제한(배포 전 검증 SEC-002)·ui 보조 문구 정정(CR-003)·머리말 반영 상태 정정(아래 (v0.26) 줄). **소스 반영 상태**(2026-09-27 bridge-designer 실물 확인): v0.25까지 Rust·TS 핸들러·테스트 구현 완료, `src-tauri/src/lib.rs:193` `generate_handler!`에 `bridge::commands::reset_app_data` **등록됨**(v0.25 개정 때 적은 「`generate_handler!` 1줄 등록 미반영」은 그 뒤 해소된 옛 기록). **v0.26 소스 반영 완료**(2026-09-27, bridge-implementer — `src-tauri/src/bridge/commands/mod.rs`의 `ensure_reset_caller`·`reset_app_data`(주입 인자 `caller: tauri::WebviewWindow` 추가), `src-tauri/src/bridge/commands/tests.rs`의 `ensure_reset_caller_allows_settings_only`. TS 변경 없음). 작성: 2026-09-22 · 개정: 2026-09-27
+- 버전: **v0.27** (초안 — 사용자 확정 후 매니저가 v1로 올린다) — CR-058/059 타이머 기본값 문서 정정(아래 (v0.27) 줄, 코드 변경 없음). 이하 v0.26 기록: `reset_app_data` 호출 창 제한(배포 전 검증 SEC-002)·ui 보조 문구 정정(CR-003)·머리말 반영 상태 정정(아래 (v0.26) 줄). **소스 반영 상태**(2026-09-27 bridge-designer 실물 확인): v0.25까지 Rust·TS 핸들러·테스트 구현 완료, `src-tauri/src/lib.rs:193` `generate_handler!`에 `bridge::commands::reset_app_data` **등록됨**(v0.25 개정 때 적은 「`generate_handler!` 1줄 등록 미반영」은 그 뒤 해소된 옛 기록). **v0.26 소스 반영 완료**(2026-09-27, bridge-implementer — `src-tauri/src/bridge/commands/mod.rs`의 `ensure_reset_caller`·`reset_app_data`(주입 인자 `caller: tauri::WebviewWindow` 추가), `src-tauri/src/bridge/commands/tests.rs`의 `ensure_reset_caller_allows_settings_only`. TS 변경 없음). 작성: 2026-09-22 · 개정: 2026-09-29
+- (v0.27) CR-058/059 기본값 반영(🔒 사용자 지정 2026-09-28, 0.4.0 배포 기본 세트 — overlay CR-058·settings CR-059, 배포 전 검증 `doc/300_검증/verify-20260929-1928.md` 리뷰 CR-201): **문서 정정, 코드 변경 없음** — 0.4.0에 이미 구현·배포된 값에 계약을 맞춘다. §3.3 `TimerSettings` 기본값 `textPos` (142, 458) → **(268, 402)**, `rotation` 9 → **7**, `alarmVolume` 80 → **44**(TS 코드블록·Rust 주석·JSON 예시·기본값 표·관대한 역직렬화 대체값·옛 파일 호환 문장). 기본 알림음 서술을 「ui가 합성한 Blob URL」 → 「ui에 번들된 정적 mp3(`src/assets/sounds/default-alarm.mp3`, CSP `media-src 'self'`)」로 정정(§3.10·§5.9-4·5·§7·§9 TM-09). `enabled`·`mode`·`countdownSecs`·`fontSize`·`color` 기본값은 코드와 같아 불변. 필드·타입·command·event·에러 code·권한 불변. 정본 값: core `src-tauri/src/settings/timer.rs` `TimerSettings::default()`·`DEFAULT_ALARM_VOLUME`, TS `src/bridge/types.ts` `DEFAULT_TIMER_SETTINGS`.
 - (v0.26) 배포 전 검증 WARN 수정(사용자 승인 2026-09-27, 상위 세션 경유): ① **SEC-002(MEDIUM)** `reset_app_data`가 오버레이 창에서도 호출될 수 있던 문제(확인 절차는 settings UI에만 있음) — 핸들러가 Tauri 자동 주입 인자 `window: tauri::WebviewWindow`로 호출 창 라벨을 받아 `"settings"`가 아니면 설정 잠금·core 호출·emit·창 조작보다 **먼저** 새 code `reset.forbidden`으로 거부한다(§5·§5.10 0단계·「호출 창 제한」·§6·§6.2). 판정은 tauri 의존 없는 순수 함수 `ensure_reset_caller(label: &str) -> Result<(), BridgeError>`. JS 인자·TS 래퍼 `resetAppData()`·반환 불변, TS 타입 변경 없음(`BridgeError.code: string`). ② **CR-003(LOW)** §5.10 「소비자」·「ui 보조」의 「pending 동안 다른 조작을 막는다」 → 「초기화 버튼 재진입만 막는다」(settings `src/settings/design/general-tab.md` §7 해석 결정과 일치). ③ 머리말 반영 상태 정정(위 줄). 권한·capabilities·`tauri.conf.json` 불변(§7). 새 command·event·타입·필드 없음. 호환성 **비파괴**(호출 조건 강화이지만 ui 사용처가 settings 창 `src/settings/components/ResetAllCard.tsx:48` 1곳뿐) + **추가**(code 1).
 - (v0.25) data-reset(🔒 사용자 결정 2026-09-27, 설계 `doc/200_설계/architecture/data-reset-02-design.md` §0·§3, 인계 패킷 `data-reset-03-packet-bridge.md`, core `doc/200_설계/core/data_reset.md` §9): 요구 `R-B2`·`R-B3`·`R-A2`(아키텍처 횡단 ID — §9 v0.25). 신규 command `reset_app_data() -> void`(동기, **🔒 베타 전용** — 정식 배포 때 정책 재결정)와 상세 §5.10(보존 규칙·처리 순서·부분 실패·동시 실행 직렬화 불변식 C-4), §4 기존 이벤트 4종 발신 지점 추가 + 「두 스냅숏 이벤트 도착 순서 비의존」 주석 + 시작 초기화 무이벤트 주석, §5 `get_settings`·`get_asset_manifest` 시작 초기화 주석(R-A2), 에러 code `reset.io`·`reset.seed`(§6·§6.1·§6.2 — 24 → 26). 새 이벤트·타입·필드·권한 없음. 호환성 **추가**(파괴 없음). **소스 반영**(2026-09-27, bridge-implementer): `src-tauri/src/bridge/types.rs`(`From<ResetError> for BridgeError`), `src-tauri/src/bridge/commands/mod.rs`(`reset_app_data`·`reapply_after_reset`), `src-tauri/src/bridge/commands/tests.rs`(`reset_error_maps_to_bridge_codes`), `src/bridge/commands.ts`(`resetAppData`), `src/bridge/__tests__/commands.test.ts`. ~~**미반영**: `src-tauri/src/lib.rs`의 `generate_handler!` 등록(가드 차단 — 이 command는 아직 앱에서 호출 불가).~~ **(v0.26 정정) 등록 완료** — `src-tauri/src/lib.rs:193`(2026-09-27 Read 확인).
 - (v0.24 머리말) 버전 v0.24 — CR-053 배포용 기본 세트 3차(v0.20 CR-044 마우스 기본값은 그대로, 내장 기본 슬롯 목록·타이머 좌표만 재조정). **소스 반영**(2026-09-27, bridge-implementer): `src-tauri/src/bridge/commands/tests.rs`(내보내기 개수 6→7), `src/bridge/types.ts`(`DEFAULT_ASSET_SLOTS` 7개·`DEFAULT_TIMER_SETTINGS.textPos`·`.rotation`), `src/bridge/__tests__/types.test.ts`. core 선행 완료(2026-09-27 — `src-tauri/src/assets/defaults.rs` `DEFAULT_ASSETS`·`src-tauri/src/settings/timer.rs::default()`). 작성: 2026-09-22 · 개정: 2026-09-27
@@ -478,10 +479,10 @@ export const TIMER_ROTATION_MIN = -180
 export const TIMER_ROTATION_MAX = 180
 export const TIMER_FONT_SIZE_MIN = 12
 export const TIMER_FONT_SIZE_MAX = 200
-/** Rust settings::timer::TimerSettings::default()와 1:1 (U-6 권고값. v0.23 CR-053부터 textPos·rotation 재조정) */
+/** Rust settings::timer::TimerSettings::default()와 1:1 (U-6 권고값. CR-053: textPos (142, 458)·rotation 9 → v0.27 CR-058/059(0.4.0): (268, 402)·7) */
 export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
-  enabled: false, textPos: { x: 142, y: 458 }, rotation: 9, fontSize: 36, color: '#333333',
-}
+  enabled: false, textPos: { x: 268, y: 402 }, rotation: 7, fontSize: 36, color: '#333333',
+}   // v0.23 필드(mode·countdownSecs·alarmVolume)를 더한 전체 값은 아래 v0.23 블록
 // DEFAULT_SETTINGS에 timer: DEFAULT_TIMER_SETTINGS
 ```
 
@@ -494,22 +495,22 @@ pub timer: TimerSettings,       // (v0.21) JSON "timer". 키 없음 = TimerSetti
 #[serde(rename_all = "camelCase", default)]   // 일부 필드만 있는 옛 파일도 형식 오류가 되지 않게
 pub struct TimerSettings {
     pub enabled: bool,      // 기본 false
-    pub text_pos: Point,    // crate::settings::Point {f64} — 캔버스 좌표(창 위치 Position 아님). 기본 (142, 458)(v0.23 CR-053. v0.21~v0.22: (268, 403))
-    pub rotation: f64,      // 기본 9(v0.23 CR-053. v0.21~v0.22: 5)
+    pub text_pos: Point,    // crate::settings::Point {f64} — 캔버스 좌표(창 위치 Position 아님). 기본 (268, 402)(v0.27 CR-058/059, 0.4.0. CR-053: (142, 458). v0.21~v0.22: (268, 403))
+    pub rotation: f64,      // 기본 7(v0.27 CR-058/059, 0.4.0. CR-053: 9. v0.21~v0.22: 5)
     pub font_size: f64,     // 기본 36
     pub color: String,      // 기본 "#333333"
 }
 ```
 
 ```json
-"timer": { "enabled": false, "textPos": { "x": 142, "y": 458 }, "rotation": 9, "fontSize": 36, "color": "#333333" }
+"timer": { "enabled": false, "textPos": { "x": 268, "y": 402 }, "rotation": 7, "fontSize": 36, "color": "#333333" }
 ```
 
 | 필드 | 기본값 | `set_settings` 검증(밖이면 `settings.invalid`, 값을 고치지 않음) | 읽을 때 보정(core `load`) |
 |---|---|---|---|
 | `enabled` | `false` | — | — |
-| `textPos` | `{x: 142, y: 458}` (v0.23, CR-053 · 🔒 사용자 확정. v0.21~v0.22: `{x: 268, y: 403}`) | 유한수, `0 ≤ x ≤ 900`, `0 ≤ y ≤ 700` | 범위로 자르기, 비유한수 → 기본값 |
-| `rotation` | `9` (v0.23, CR-053 · 🔒 사용자 확정. v0.21~v0.22: `5`) | 유한수, `−180 ≤ r ≤ 180` | 자르기 |
+| `textPos` | `{x: 268, y: 402}` (v0.27, CR-058/059 · 🔒 사용자 지정 2026-09-28, 0.4.0. CR-053: `{x: 142, y: 458}`. v0.21~v0.22: `{x: 268, y: 403}`) | 유한수, `0 ≤ x ≤ 900`, `0 ≤ y ≤ 700` | 범위로 자르기, 비유한수 → 기본값 |
+| `rotation` | `7` (v0.27, CR-058/059 · 🔒 사용자 지정 2026-09-28, 0.4.0. CR-053: `9`. v0.21~v0.22: `5`) | 유한수, `−180 ≤ r ≤ 180` | 자르기 |
 | `fontSize` | `36` | 유한수, `12 ≤ s ≤ 200` | 자르기 |
 | `color` | `"#333333"` | `#` + 16진 6자리(대소문자 허용) | 형식 오류 → 기본값, 소문자로 |
 
@@ -536,22 +537,22 @@ export interface TimerSettings {
   mode?: TimerMode
   /** (v0.23) 카운트다운 시작 시간(초) 1 ~ 359999(99:59:59). Rust는 항상 보낸다. 없으면 1500 */
   countdownSecs?: number
-  /** (v0.23) 알림음 음량 % 0 ~ 100 정수. Rust는 항상 보낸다. 없으면 80 */
+  /** (v0.23) 알림음 음량 % 0 ~ 100 정수. Rust는 항상 보낸다. 없으면 44(v0.27 CR-058/059 — 이전 80) */
   alarmVolume?: number
   textPos: Point; rotation: number; fontSize: number; color: string   // v0.21 그대로
 }
 export const TIMER_COUNTDOWN_SECS_MIN = 1
 export const TIMER_COUNTDOWN_SECS_MAX = 359_999
 export const TIMER_ALARM_VOLUME_MAX = 100
-// DEFAULT_TIMER_SETTINGS = { enabled: false, mode: 'stopwatch', countdownSecs: 1500, alarmVolume: 80,
-//                            textPos: { x: 142, y: 458 }, rotation: 9, fontSize: 36, color: '#333333' }   // v0.23 CR-053
+// DEFAULT_TIMER_SETTINGS = { enabled: false, mode: 'stopwatch', countdownSecs: 1500, alarmVolume: 44,
+//                            textPos: { x: 268, y: 402 }, rotation: 7, fontSize: 36, color: '#333333' }   // v0.27 CR-058/059(0.4.0). CR-053: 80·(142, 458)·9
 ```
 
 ```rust
 // = crate::settings::timer::TimerSettings (bridge types.rs는 재노출만) — v0.21 필드에 추가(선언 순서 = 직렬화 순서: enabled, mode, countdownSecs, alarmVolume, textPos, …)
 #[serde(deserialize_with = "deserialize_mode")]           pub mode: TimerMode,       // 기본 Stopwatch
 #[serde(deserialize_with = "deserialize_countdown_secs")] pub countdown_secs: u32,   // 기본 1500 (DEFAULT_COUNTDOWN_SECS)
-#[serde(deserialize_with = "deserialize_alarm_volume")]   pub alarm_volume: u32,     // 기본 80 (DEFAULT_ALARM_VOLUME)
+#[serde(deserialize_with = "deserialize_alarm_volume")]   pub alarm_volume: u32,     // 기본 44 (DEFAULT_ALARM_VOLUME — v0.27 CR-058/059, 0.4.0. 이전 80)
 // = crate::settings::timer::TimerMode (§3.9 스냅숏도 같은 타입을 쓴다)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -560,21 +561,21 @@ pub enum TimerMode { #[default] Stopwatch, Countdown }
 ```
 
 ```json
-"timer": { "enabled": true, "mode": "countdown", "countdownSecs": 1500, "alarmVolume": 80, "textPos": { "x": 142, "y": 458 }, "rotation": 9, "fontSize": 36, "color": "#333333" }
+"timer": { "enabled": true, "mode": "countdown", "countdownSecs": 1500, "alarmVolume": 44, "textPos": { "x": 268, "y": 402 }, "rotation": 7, "fontSize": 36, "color": "#333333" }
 ```
 
 | 필드 | TS | Rust | 기본값 | `set_settings` 검증(밖이면 `settings.invalid`, 값을 고치지 않음) | 역직렬화(파일·`set_settings` 입력 공통) · 읽을 때 보정(core `load`) |
 |---|---|---|---|---|---|
 | `mode` | `TimerMode?` | `TimerMode` | `'stopwatch'` | — | 문자열 `"countdown"`만 `Countdown`, 그 밖 문자열·다른 타입·키 없음 → `Stopwatch`(형식 오류 없음 — 설정 전체가 무너지지 않는다) |
 | `countdownSecs` | `number?` | `u32` | `1500`(00:25:00, D-2) | `1 ≤ s ≤ 359999`(D-3 — 0 금지). message "타이머 시작 시간은 00:00:01 ~ 99:59:59 사이여야 합니다." | 0 이상 정수·소수(**내림**)만 값, 음수·문자열·`null`·bool → 1500. `load` 보정: 0 → 1500, 상한 초과 → 359999 |
-| `alarmVolume` | `number?` | `u32` | `80`(D-10) | `≤ 100`. message "알림음 음량은 0 ~ 100 사이여야 합니다." | 같은 관대한 규칙 → 80. `load` 보정: 100 초과 → 100 |
+| `alarmVolume` | `number?` | `u32` | `44`(v0.27, CR-058/059 · 🔒 사용자 지정 2026-09-28, 0.4.0. v0.23~v0.26: `80`, D-10) | `≤ 100`. message "알림음 음량은 0 ~ 100 사이여야 합니다." | 같은 관대한 규칙 → 44. `load` 보정: 100 초과 → 100 |
 
 - **Rust는 항상 보낸다. 선택 표기(`?`)는 TS 호환용이다** — `get_settings`·`set_settings` 반환·`settings://changed`에 세 키가 늘 있다. 선택으로 둔 이유: ui 테스트 25개 이상 파일이 `TimerSettings` 리터럴을 직접 만든다(필수면 `yarn tsc --noEmit` 파괴 — 패킷 §2, `Settings.timer?` 선례). ui는 값이 없으면 `DEFAULT_TIMER_SETTINGS` 값으로 읽는다.
 - **선택 표기의 대가**: ui가 `timer` 객체를 스프레드 없이 새로 만들어 보내면 빠진 키를 Rust가 기본값으로 채워 **저장된 모드·시작 시간·음량을 덮는다**(v0.13 `penPos` 판단과 같은 위험). 위 v0.21 규칙 「ui는 늘 `{...settings, timer: {...settings.timer, …}}`로 보낸다」를 그대로 지킨다.
 - 소수 입력(예: `countdownSecs: 90.7`)은 역직렬화에서 내림(90)되어 검증을 통과한다 — ui는 정수만 보낸다(TS `number`는 정수 여부를 막지 못한다).
 - `mode`·`countdownSecs` 변경은 `set_settings` 타이머 부수 효과(§5.3 6단계 — core `Timer::configure`)로 타이머에 반영된다. `alarmVolume`은 저장만 한다(재생 음량 `volume = alarmVolume / 100`은 ui — 02-design §6.4).
 - core 소유 필드가 아니다(`keep_core_owned` 보호 대상 아님). 손 기준점 재계산·창 리사이즈 트리거 아님.
-- 호환(🔒 TM-02, D-1 A): 옛 settings.json(`timer` 없음·`{"enabled":true}`만) → `mode: 'stopwatch'`·1500·80, 즉 `enabled: true`는 「스톱워치 켜짐」. 이행 코드·버전 필드 없음. 새 settings.json → 옛 앱은 모르는 키로 무시, 다음 저장 때 사라짐.
+- 호환(🔒 TM-02, D-1 A): 옛 settings.json(`timer` 없음·`{"enabled":true}`만) → `mode: 'stopwatch'`·1500·44(v0.27 — 이전 80), 즉 `enabled: true`는 「스톱워치 켜짐」. 이행 코드·버전 필드 없음. 새 settings.json → 옛 앱은 모르는 키로 무시, 다음 저장 때 사라짐.
 - **전환 위험 (v0.23)**: 옛 ui + 새 Rust — 받은 설정 사본을 펼쳐 보내므로 세 키 보존. 새 ui + 옛 Rust — 세 키 무시(저장 안 됨), 새 command 없음 → TS `unknown`. TS 선택 필드라 tsc 파괴 없음.
 
 ### 3.4 `ScreenBounds` · `Position`
@@ -875,7 +876,7 @@ null                                        // get_alarm_sound — 미등록
 - `format`은 파일 **앞 바이트(매직)**로 판별한다 — 확장자는 보지 않는다(core assets.md §3.15.2). 저장 이름은 `assets/alarm.wav`·`alarm.mp3`·`alarm.ogg` 중 하나로 고정.
 - `bytes` = 저장 파일 크기(`u64`, ≤ 1,048,576 — JS number 안전). `url` = `AssetEntry.url`과 같은 `versioned_asset_url`(`?v=` 수정 시각 ms — 같은 이름으로 다시 등록해도 webview 캐시가 갈린다).
 - 열거 표기 `lowercase`(한 단어라 camelCase·snake_case와 결과 같음). `AlarmSound`는 Serialize만(ui 입력으로 받지 않음).
-- 내장 기본음은 계약에 없다 — ui가 합성한 Blob URL(02-design §6.3, TM-09). 재생 음량은 `Settings.timer.alarmVolume`(§3.3 v0.23). 규칙은 §5.9.
+- 내장 기본음은 계약에 없다 — ui에 번들된 정적 mp3(`src/assets/sounds/default-alarm.mp3`, Vite 정적 asset import URL — webview 자체 출처 `'self'`, TM-09. v0.27 CR-058 정정 — v0.23~v0.26 문서: ui가 합성한 WAV Blob URL, 02-design §6.3). 재생 음량은 `Settings.timer.alarmVolume`(§3.3 v0.23). 규칙은 §5.9.
 
 ## 4. 이벤트 (Rust → UI)
 
@@ -1119,15 +1120,15 @@ command가 아니라 `src/bridge/commands.ts`가 Tauri 플러그인·창 API를 
 
 ### 5.9 알림음 규칙 (v0.23 신규, CR-048 — TM-07 · TM-08 · TM-09 · TM-13)
 
-벨소리 칸은 하나뿐이다. 새 봉투를 넣으면 옛 봉투는 버리고, 비우면 앱에 내장된 삐 소리로 돌아간다. 칸을 바꿨다고 방송(이벤트)하지 않는다 — 울릴 차례가 된 쪽이 그때 칸을 열어 본다.
+벨소리 칸은 하나뿐이다. 새 봉투를 넣으면 옛 봉투는 버리고, 비우면 앱에 내장된 기본 벨소리로 돌아간다. 칸을 바꿨다고 방송(이벤트)하지 않는다 — 울릴 차례가 된 쪽이 그때 칸을 열어 본다.
 
 | # | 규칙 |
 |---|---|
 | 1 | **이벤트 없음(A-1)**: 알림음 등록·삭제는 이벤트를 보내지 않는다(`alarm://…` 도메인 없음). 오버레이는 `timer://changed`에서 `finished` 진입(`prev.status !== 'finished' && next.status === 'finished'`)을 볼 때 `getAlarmSound()`를 불러 그 순간의 값을 쓴다(첫 `getTimer`가 이미 `finished`면 울리지 않음 — ui 몫). 설정 창은 마운트 때 조회, 등록·삭제 뒤에는 반환값(삭제면 `null`)으로 갱신 |
 | 2 | **저장 규칙**(core `assets::sound`, assets.md §3.15): 저장 이름 `assets/alarm.{wav\|mp3\|ogg}` 고정 — 사용자 파일명·확장자 불사용. 크기 1MiB(1,048,576바이트) 초과 → **읽기 전** `sound.too_many_bytes`(형식 검사보다 먼저). 형식은 앞 바이트(wav `RIFF…WAVE`, ogg `OggS`, mp3 `ID3` 또는 Layer III 프레임 동기 — AAC ADTS 제외)로 판별, 아니면 `sound.not_audio`. 원자 저장(임시 파일 → rename) 뒤 다른 두 형식 파일 삭제(삭제 실패는 경고 — `current`가 최신 수정 시각을 고른다). 디코딩 가능 여부는 보지 않는다(재생 실패 → ui가 기본음으로 1회 대체, A-4) |
 | 3 | **Rust 핸들러**(bridge-implementer): 세 command 모두 동기 `#[tauri::command]`, `State<'_, AppState>`의 `paths.assets_dir`만 쓴다(설정·타이머 잠금 없음, `AppHandle` 불필요). 본문은 core 호출 + `?` — 변환은 `From<SoundError> for BridgeError` 한 곳(§6.1). tauri 없는 순수 함수로 분리해 테스트(이름 재량) |
-| 4 | **재생·기본음·음량은 ui 몫**: 오버레이 webview `HTMLAudioElement`(`volume = timer.alarmVolume / 100`, 1회 재생, `finished`를 떠나면 정지 — D-6). 미등록이면 ui가 합성한 내장 기본음 Blob URL(TM-09). 계약에는 기본음이 없다 |
-| 5 | **webview 전제(§7 — 메인 세션 반영 완료)**: 사용자 소리는 asset URL(`http://asset.localhost/…`), 기본음은 `blob:` — CSP `media-src 'self' asset: http://asset.localhost blob:`(D-9). 오버레이는 사용자 제스처 없이 재생하므로 두 창 `additionalBrowserArgs`에 `--autoplay-policy=no-user-gesture-required`(D-8). 자동 재생 실측은 ui 패킷 첫 작업(스파이크) |
+| 4 | **재생·기본음·음량은 ui 몫**: 오버레이 webview `HTMLAudioElement`(`volume = timer.alarmVolume / 100`, 1회 재생, `finished`를 떠나면 정지 — D-6). 미등록이면 ui에 번들된 내장 기본음 정적 mp3(`src/assets/sounds/default-alarm.mp3`, TM-09 — v0.27 CR-058 정정, v0.23~v0.26 문서: 합성 WAV Blob URL). 계약에는 기본음이 없다 |
+| 5 | **webview 전제(§7 — 메인 세션 반영 완료)**: 사용자 소리는 asset URL(`http://asset.localhost/…`), 기본음은 번들 정적 자산(`'self'` — v0.27 CR-058 정정, v0.23~v0.26 문서: `blob:`) — CSP `media-src 'self' asset: http://asset.localhost blob:`(D-9. `blob:`은 현재 제품 코드에서 쓰는 곳이 없다 — §7 v0.27). 오버레이는 사용자 제스처 없이 재생하므로 두 창 `additionalBrowserArgs`에 `--autoplay-policy=no-user-gesture-required`(D-8). 자동 재생 실측은 ui 패킷 첫 작업(스파이크) |
 | 6 | **권한**: 새 command 3개는 앱 command(`generate_handler!` 등록만으로 허용 — `src-tauri/src/lib.rs` 3줄, 패킷 §1). `pickAudioFile`은 기존 `dialog:allow-open`(settings 창). `fs` 권한 없음 — 파일 접근은 Rust 안에서만 |
 
 - 테스트(bridge-implementer, 패킷 §7): cargo — `get_alarm_sound_none_when_empty`, `import_alarm_sound_error_codes`(`sound.too_many_bytes`·`sound.not_audio`), `import_alarm_sound_returns_versioned_url`, `remove_alarm_sound_idempotent`, `alarm_sound_json_shape`, `sound_error_to_bridge_error`. vitest — `getAlarmSound`·`importAlarmSound`·`removeAlarmSound`의 invoke 이름·인자(`{ path }`), reject → `BridgeError` 그대로.
@@ -1309,6 +1310,7 @@ command가 아니라 `src/bridge/commands.ts`가 Tauri 플러그인·창 API를 
 
 ## 7. capabilities (최소 권한)
 
+- **v0.27: 추가 권한 없음(capabilities·`tauri.conf.json` 변경 없음 — 문서 정정).** CR-058부터 내장 기본음은 번들 정적 mp3(`src/assets/sounds/default-alarm.mp3`)라 CSP `media-src`의 `'self'`로 재생된다(v0.23에서 기본음용으로 연 `blob:`은 2026-09-29 `src/` 제품 코드 `createObjectURL`·`blob:` 사용 0건 — 테스트·문서만). `blob:` 제거 여부는 CSP 강화라 사용자 판단·메인 세션 몫이며 이번 정정 범위 밖(「확인 필요」로 보고).
 - **v0.26: 추가 권한 없음(capabilities·`tauri.conf.json` 변경 없음 — 2026-09-27 확인).** `reset_app_data` 호출 창 제한(SEC-002)은 핸들러 0단계의 라벨 비교다(§5.10 「호출 창 제한」). `tauri::WebviewWindow` 주입 인자는 command 인자 주입이라 JS 창 API 권한이 필요 없다. **대안(보류)**: `src-tauri/build.rs`에 app manifest(`tauri_build::AppManifest`)를 두고 settings 창 capability에만 이 command를 허용하는 권한 층 차단 — 앱 command 권한 체계(목록 등록·창별 허용)를 새로 짜야 해서 이번 범위 밖. 심층 방어가 더 필요해지면 별도 요구로 올린다.
 - **v0.25: 추가 권한 없음(capabilities·`tauri.conf.json` 변경 없음).** `reset_app_data`는 앱 command다 — `src-tauri/build.rs`가 `tauri_build::build()`뿐(app manifest 없음)이라 `generate_handler!` 1줄 등록만으로 허용된다(2026-09-27 실물 확인). 파일 삭제·시딩·표식 기록은 Rust 안에서만 하므로 `fs` 권한이 필요 없다. 오버레이 창 적용·리사이즈·이동·WebView 새로고침(`reload`)은 Rust가 직접 부르므로 JS 창 권한도 필요 없다. 이벤트는 기존 두 창 `core:default`로 받는다. 기본 그림은 기존 asset scope `assets/**` 안이라 scope 변경도 없다.
 - **v0.23: 추가 권한 없음(capabilities 변경 없음).** `get_alarm_sound`·`import_alarm_sound`·`remove_alarm_sound`는 앱 command(`generate_handler!` 등록만으로 허용). `pickAudioFile`은 기존 `dialog:allow-open`(settings 창 — 필터만 다름). 사용자 소리는 기존 asset scope `$APPDATA/assets/**`(`assets/alarm.*`) 안이라 scope 변경 없음. `fs` 권한 불필요. `timer://changed` 구독은 기존 `core:default`.
@@ -1399,6 +1401,7 @@ command가 아니라 `src/bridge/commands.ts`가 Tauri 플러그인·창 API를 
 | v0.23 | 2026-09-26 | CR-048 타이머 모드(🔒 확정사항 §6 103~107행, 설계 `timer-mode-02-design.md` §4, 패킷 `timer-mode-03-packet-bridge.md`, 사용자 결정 D-1~D-11 권고안, A-1~A-5). ① §3.3 `TimerSettings` 선택 필드 `mode`·`countdownSecs`·`alarmVolume`(Rust 항상 직렬화·관대한 역직렬화·검증 2규칙), TS 상수 `TIMER_COUNTDOWN_SECS_MIN/MAX`·`TIMER_ALARM_VOLUME_MAX`, `DEFAULT_TIMER_SETTINGS` 새 값 ② §3.9 `TimerMode` 신규, `TimerStatus` +`'finished'`, `TimerSnapshot` 선택 필드 `mode`·`durationMs`, 상태×모드 표 ③ §3.10 신설 `AlarmFormat`·`AlarmSound` ④ §4 `timer://changed` 발신 지점 교체(트레이·모드 전환·대기 중 시작 시간·0 도달·끝남 만료 — 모두 core 깔때기 `publish_timer_change`), 이름·페이로드 타입 불변 ⑤ §5 신규 command `get_alarm_sound`·`import_alarm_sound`·`remove_alarm_sound`(이벤트 없음 — A-1), `control_timer`·`set_resting` 카운트다운 전이·깔때기(시그니처 불변) ⑥ §5.3 6단계(패킷상 7단계) `disable` → `configure` → publish 또는 트레이 동기화 ⑦ §5.4 `pickAudioFile` ⑧ §5.8 카운트다운 전이표·`configure` 규칙, 규칙 1(core 마감 스레드 1개·깔때기)·5·7·8 ⑨ §5.9 신설 알림음 규칙 ⑩ §6·§6.1·§6.2 `sound.not_audio`·`sound.too_many_bytes`·`sound.io`(21 → 24), `timer.disabled` 문구 변경 ⑪ §7 capabilities 불변, `tauri.conf.json` 요청 2건(CSP `media-src`·`additionalBrowserArgs`) 반영 확인. 소스 미반영(bridge-implementer 대기) | 추가(command 3·타입 3·선택 필드 5·code 3·TS 상수 3·래퍼 1)·비파괴(유니온 멤버 `'finished'` 추가, 문구 변경, 발신 지점·규칙 변경 — 시그니처 불변) |
 | v0.25 | 2026-09-27 | data-reset(🔒 사용자 결정 2026-09-27, `data-reset-02-design.md` §0·§3, 패킷 `data-reset-03-packet-bridge.md`, core `data_reset.md` §9·§11.4 C-4). ① §5 신규 command `reset_app_data() -> void`(동기, 🔒 베타 전용) + §5.10 신설(보존 규칙: 언어·자동 실행 유지, 알림음 삭제, 위치 기본값 / 처리 순서 가·나·1~9·다 / 부분 실패 표 / C-4 판정 = 동기 command 직렬화 + 불변식) ② §4 `settings://changed`·`assets://changed`·`assets://hand-anchor-changed`·`timer://changed` 발신 지점에 `reset_app_data` 추가, 「settings → assets 고정, 소비자는 도착 순서 비의존」 주석, 시작 초기화 무이벤트 주석 ③ §5 `get_settings`·`get_asset_manifest` R-A2 주석 ④ §6·§6.1·§6.2 `reset.io`·`reset.seed`(24 → 26), `From<ResetError>` ⑤ §7 권한 변경 없음. 새 이벤트·타입·필드 없음. 소스 미반영(bridge-implementer 대기) | 추가(command 1·code 2·TS 래퍼 1)·비파괴(주석·발신 지점 추가) — **파괴 없음** |
 | v0.26 | 2026-09-27 | 배포 전 검증 WARN 수정(사용자 승인 2026-09-27). ① **SEC-002(MEDIUM)** `reset_app_data` 호출 창 제한 — Rust 핸들러에 Tauri 주입 인자 `window: tauri::WebviewWindow` 추가, 첫 문장(0단계) 순수 함수 `ensure_reset_caller(label: &str) -> Result<(), BridgeError>`로 라벨이 `window::SETTINGS_LABEL`(`"settings"`)이 아니면 잠금·core·emit·창 조작 전에 거부. 새 code `reset.forbidden`(§6 — 26 → 27, 기존 code 중 맞는 것 없음 — §5.10 「호출 창 제한」 근거). §5 표 행·§5.10(에러·소비자·권한·Rust 핸들러 행, 「호출 창 제한」 신설, 처리 순서 0단계, 에러 우선순위, 테스트)·§6 머리글·표·현황 메모 ③·§6.2 행·§7 v0.26 줄(권한 불변, 대안(보류) 권한 층 차단). JS 인자·TS 래퍼·TS 타입 불변. ② **CR-003(LOW)** §5.10 「소비자」·「ui 보조」 문구 「pending 동안 다른 조작을 막는다」 → 「초기화 버튼 재진입만 막는다」(settings `design/general-tab.md` §7과 일치) — 문서 정정. ③ 머리말 반영 상태 정정 — `generate_handler!` 등록 완료(`src-tauri/src/lib.rs:193`), v0.25 줄의 「미반영」에 취소선. v0.25 이 행의 「소스 미반영」은 당시 기록이라 그대로 둔다. 파괴 영향 조사: `grep -rn resetAppData src` → 제품 코드 호출은 `src/settings/components/ResetAllCard.tsx:48` 1곳(settings 창), `src/overlay/` 0건. 새 command·event·타입·필드 없음. 소스 미반영(bridge-implementer 대기) | **비파괴**(호출 조건 강화 — 유일한 ui 호출 지점이 허용 창 안이라 실사용 영향 없음)·추가(code 1)·비파괴(문서 정정) |
+| v0.27 | 2026-09-29 | CR-058/059 기본값 반영(문서 정정, 코드 변경 없음 — 0.4.0 구현·배포값에 계약을 맞춤, 배포 전 검증 verify-20260929-1928 리뷰 CR-201). §3.3 `TimerSettings` 기본값 `textPos` (142, 458)→(268, 402)·`rotation` 9→7·`alarmVolume` 80→44(TS 코드블록·Rust 주석·JSON 예시 2곳·기본값 표 3행·관대한 역직렬화 대체값·옛 파일 호환 문장). 기본 알림음 서술 「ui 합성 WAV Blob URL」→「ui 번들 정적 mp3 `src/assets/sounds/default-alarm.mp3`(`'self'`)」(§3.10·§5.9 머리·4·5·§7 v0.27·§9 TM-09). 필드·타입·command·event·에러 code·권한 불변. 셋 대조: 계약=TS `DEFAULT_TIMER_SETTINGS`=Rust `TimerSettings::default()` 8필드 일치 | 비파괴(기본값 문서 정정 — 모양 불변) |
 
 - 호환성 분류: **추가**(새 command/event/선택 필드) · **비파괴 변경**(message 문구, 검증 완화) · **파괴 변경**(필드 삭제·이름·타입 변경, 필수 필드 추가, 이벤트 이름 변경). 파괴 변경은 ui 인계 절차(bridge-design-strategy §6)를 거친다.
 
@@ -1433,7 +1436,7 @@ v0.3~v0.17에서 만들거나 바꾼 항목만 싣는다. 기존 항목의 요�
 | TM-06 | §3.9 `TimerStatus` `'finished'`, §4 `timer://changed` 발신 지점(0 도달·끝남 만료), §5.8 규칙 1 | 확장(유니온 멤버·발신 지점) | 비파괴 | 깔때기 `crate::publish_timer_change`(마감 스레드 `timer::driver`·`Timer::tick`은 core 내부) |
 | TM-07 | `get_alarm_sound`, §3.10 `AlarmSound`, §5.9-1 | 신규(새 자원 — 알림음) | 추가 | `assets::sound::current` |
 | TM-08 | `import_alarm_sound`·`remove_alarm_sound`·`get_alarm_sound`, §3.10 `AlarmFormat`·`AlarmSound`, §5.4 `pickAudioFile`, §5.9 | 신규 | 추가 | `assets::sound::{import, remove, current}` |
-| TM-09 | §7 CSP `media-src … blob:` 요청(메인 세션 반영 완료), §5.9-5 | 설정 파일 요청(계약 표면 없음) | — | 없음(기본음은 ui 합성) |
+| TM-09 | §7 CSP `media-src … blob:` 요청(메인 세션 반영 완료), §5.9-5 | 설정 파일 요청(계약 표면 없음) | — | 없음(기본음은 ui 번들 정적 mp3 — v0.27 CR-058 정정, v0.23~v0.26: ui 합성) |
 | TM-10 | §3.3 `timer.alarmVolume`·TS `TIMER_ALARM_VOLUME_MAX`, 기존 `set_settings` | 확장 | 추가 | `settings::timer::validate`·`normalize` |
 | TM-11 | §4 `timer://changed` 발신 지점(트레이 메뉴), §5.3 6단계 `tray::sync_timer_menu` | 확장(발신 지점) | 비파괴 | `tray::sync_timer_menu`, `crate::publish_timer_change` |
 | TM-13 | §6 `sound.not_audio`·`sound.too_many_bytes`·`sound.io`, `timer.disabled` 문구 | 에러 code 추가·문구 변경 | 비파괴 | `SoundError::code()`, `TimerError` 메시지 |

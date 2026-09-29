@@ -19,8 +19,9 @@ export const useElapsedText = (snapshot: TimerSnapshot, receivedAt: number): str
 
     // 스냅숏이 바뀐 직후의 즉시 반영은 이 효과의 커밋 안에서 일어나므로 일반 setState로 둔다(React가
     // 이미 처리 중인 렌더 안에서 flushSync를 부르면 경고가 난다).
-    if (calcNow() !== lastRef.current) {
-      lastRef.current = calcNow()
+    const initial = calcNow()
+    if (initial !== lastRef.current) {
+      lastRef.current = initial
       setText(lastRef.current)
     }
     if (snapshot.status !== 'running') return

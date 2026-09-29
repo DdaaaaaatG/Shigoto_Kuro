@@ -1,7 +1,9 @@
 # window 모듈 설계
 
-- 상태: 확정(사용자) · 최종 갱신 2026-09-24
+- 상태: 확정(사용자) — §3.1(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정 · **소스 미적용** · 최종 갱신 2026-09-29
 - 변경이력:
+  - 2026-09-29 (R-40 감사 반영, 리뷰 SEC-301 — 문서 주석만, 시그니처·본문·에러 불변) `overlay_screen_rect`의 호출자가 tray `popup_now`(메인)에서 **tray `overlay-menu` 스레드(비메인)**로 바뀐다. 전경 창 조회보다 먼저 사각형을 판정하기 위해서다. 비메인 호출 안전 근거(tauri-runtime-wry 2.12.0 getter = 메인 스레드 동기 왕복)와 호출 조건(메뉴 상태 Idle일 때만)을 §3.1 문서 주석·스레드 줄에 적었다. 정본 [tray.md](tray.md) §3.7.3 PU-h·§11 T17. **소스 미적용**(`window/mod.rs:151-153` 문서 주석 교체).
+  - 2026-09-29 (overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.3·§4.2) **신규 공개 항목 2개**: `impl ScreenBounds { pub fn contains(&self, x: i32, y: i32) -> bool }`(반열림 `[x, x+w) × [y, y+h)`, i64 계산, 순수)·`pub fn overlay_screen_rect(app) -> Result<Option<ScreenBounds>, WindowError>`(보이는 오버레이 창의 바깥 사각형, 물리 px — 숨김이면 `Ok(None)`). 호출자는 [tray.md](tray.md) §3.7 `popup_now`(메인 스레드). 새 에러 변형·unsafe·스레드·설정 없음. 테스트 WR1~WR3(`mod.rs` 테스트). 증분 전체 **§3.1**, §1·§2·§5·§6·§8.8·§10·§11 갱신.
   - 2026-09-24 (R-set-v2 SV2-03·04·05·06, 🔒 사용자 결정 D-1~D-10, 확정사항 §6 「설정 창 개편」) **신규 공개 함수 4개**: `apply_overlay_window(app, &Settings)`(표시/숨김 + 작업표시줄 `set_skip_taskbar(!show_in_taskbar)` + 클릭 통과 `set_ignore_cursor_events(position_lock)`, 멱등, **호출마다 재적용**), `keep_core_owned(incoming, &current)`(`overlay.x/y` + `autostart` 유지 — 기존 `keep_overlay_position` 재사용), `default_overlay_position()`((100,100) 단일 출처 = `Settings::default().overlay`), `reset_overlay_position(app, &Mutex<Settings>, &Path)`(기본 위치로 이동·저장, 반환 = 저장 후 설정). **옛 `apply_overlay_settings(&OverlaySettings)`는 bridge 전환까지 유지**(core만 먼저 들어가도 `cargo check`가 깨지지 않게 — §2.4 D27). 시작 순서에 창 속성 적용·자동 실행 보정 추가. 이번 변경의 §1·§2·§4·§7·§8·§9·§10·§11 증분은 **§2.4에 모아 적었다.** 사용자 결정 완료로 바로 확정. **소스 미적용.**
   - 2026-09-23 (CR-017, 🔒 사용자 결정, 확정사항 §3 「이동 영역·팔 늘어나기」) 비공개 `monitor_rects` → **공개 `list_monitors(app) -> Result<Vec<ScreenBounds>, WindowError>`**(모니터별 사각형, 물리 px — 훅 마우스 좌표와 같은 좌표계). ui가 커서가 있는 모니터 기준으로 이동 영역(settings.md `mouse.area`)에 매핑한다. bridge 요구: 새 command `get_monitors`(§9.4). 사용자 결정 완료로 바로 확정.
   - 2026-09-23 확정 전환(직전 초안: R-13·R-03·set_settings 위치 불간섭 반영). §11 확인 필요 4(D10 여백 미포함)는 사용자 확인 완료로 D10 유지. 나머지 §11 관찰·후보(2, 3-1, 5~9)는 후속 후보로 유지하며 확정을 막지 않는다.
@@ -22,6 +24,7 @@
 | OV-R-13 | 창 위치는 설정에 저장 | **신규**: 이동 감지·디바운스 저장(`watch_overlay_moves`·`persist_overlay_position`), 시작 시 복원·화면 밖 보정(`restore_overlay_position`·`resolve_overlay_position`) |
 | OV-R-03 | 창 크기 = 표시 크기 자동 조절(확정사항 §3·§6) | **신규**: 표시 크기 계산(`overlay_display_size`, 순수)·창 리사이즈(`resize_overlay`). 호출 시점 3곳(시작·배율 변경·캔버스 변경)은 setup·bridge가 부른다(§4, §9.1) |
 | **R-tmp-4 (확인 필요 — CR-017, 확정사항 §3 「커서가 있는 모니터 기준」, 요구ID 미부여)** | 커서가 있는 모니터 안의 비율로 이동 영역에 매핑(ui 계산) | **모니터 목록 제공**: 비공개 `monitor_rects` → 공개 `list_monitors`(§2.3). 매핑 계산은 ui |
+| **overlay R-40 (CR-062, 🔒 2026-09-29 U-1)** | 오버레이 창 위 오른쪽 클릭(누른 곳·뗀 곳 모두 창 사각형 안, 투명 부분 포함) → 트레이와 같은 메뉴. 숨김이면 안 뜸 | **창 사각형 제공·점 판정**: `overlay_screen_rect`(보이는 창의 바깥 사각형, 숨김 → `None`)·`ScreenBounds::contains`(§3.1). 메뉴 표시·판정 흐름은 [tray.md](tray.md) §3.7 |
 
 ## 2.0 창 생성 시점 (2026-09-25, 긴급 결함 수정)
 
@@ -57,6 +60,8 @@
 | **`pub const MIN_VISIBLE_PX: u32 = 48`** | — | — | — | OV-R-13 |
 | **`pub fn overlay_display_size(canvas: Option<(u32, u32)>, scale: f64) -> OverlaySize`** | 캔버스 픽셀 크기(가로, 세로; 없으면 `None`), 배율 | 창 안쪽 크기(논리 px) | 없음(순수) | OV-R-03 |
 | **`pub fn resize_overlay(app: &AppHandle, canvas: Option<(u32, u32)>, scale: f64) -> Result<OverlaySize, WindowError>`** | 앱, 캔버스, 배율 | 적용한 크기(논리 px) | `NotFound`, `Tauri` | OV-R-03 |
+| **`impl ScreenBounds { pub fn contains(&self, x: i32, y: i32) -> bool }`** (R-40, §3.1) | 화면 좌표(물리 px) | 반열림 `[x, x+width) × [y, y+height)` 안이면 `true`(순수, i64 계산). 너비·높이 0이면 항상 `false` | 없음 | R-40 AC-5 |
+| **`pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, WindowError>`** (R-40, §3.1) | 앱 | 보이는 오버레이 창의 바깥 사각형(`outer_position` + `outer_size`, 물리 px). **숨김이면 `Ok(None)`** | `NotFound`, `Tauri` | R-40 AC-4·AC-5 |
 
 타입(기존): `Point { x: i32, y: i32 }`(물리 px, camelCase), `ScreenBounds { x: i32, y: i32, width: u32, height: u32 }`.
 타입(신규): **`#[derive(Debug, Clone, Copy, PartialEq, Eq)] pub struct OverlaySize { pub width: u32, pub height: u32 }`** — 논리 px(= ui의 CSS px). bridge로 직렬화하지 않으므로 serde 없음.
@@ -359,6 +364,61 @@ pub fn reset_overlay_position(
 | `normalize_scale` | `fn normalize_scale(scale: f64) -> f64` | §2.2 1단계 |
 | `ceil_px` | `fn ceil_px(v: f64) -> u32` | §2.2 5단계 |
 
+### 3.1 오버레이 창 사각형 판정 (overlay R-40, CR-062, 🔒 사용자 결정 U-1 2026-09-29 — 정본 횡단 설계 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.3·§4.2, 구현자가 그대로 옮길 것)
+
+결론: tray가 "오른쪽 누른 곳·뗀 곳이 모두 오버레이 위인가"를 판정할 수 있도록, 보이는 오버레이 창의 **바깥 사각형**(물리 px)을 주는 `overlay_screen_rect`와 점 포함 판정 `ScreenBounds::contains`를 더한다. "오버레이 위" = **창 사각형**(투명 부분 포함)이다 — 알파 판정은 하지 않는다(횡단 D-2). 좌표계는 훅 마우스 좌표와 같다(§1 [좌표], 횡단 F7).
+
+비유: 액자 테두리 안에 손가락이 들어왔는지만 본다. 그림이 비어 있는 투명 부분도 액자 안이다. 액자를 치워 두었으면(숨김) 판정하지 않는다.
+
+```rust
+// window/mod.rs
+impl ScreenBounds {
+    /// 점이 반열림 사각형 [x, x+width) × [y, y+height) 안인가(물리 px). 넘침 없게 i64로 계산한다.
+    /// 너비·높이가 0이면 항상 false. 모니터 경계 판정(ui `[x, x+width)`)과 같은 규칙.
+    pub fn contains(&self, x: i32, y: i32) -> bool {
+        let (px, py) = (i64::from(x), i64::from(y));
+        let (left, top) = (i64::from(self.x), i64::from(self.y));
+        px >= left
+            && px < left + i64::from(self.width)
+            && py >= top
+            && py < top + i64::from(self.height)
+    }
+}
+
+/// 보이는 오버레이 창의 바깥 사각형(물리 px, 가상 화면 — 훅 좌표와 같은 좌표계).
+/// 숨김이면 Ok(None) — 숨긴 창의 옛 자리는 판정에 쓰지 않는다(R-40 AC-4).
+/// 어느 스레드에서 불러도 된다 — 창 getter 3종은 비메인 스레드면 메인 스레드와 동기 왕복한다.
+/// 메인 스레드가 이벤트 핸들러 안(예: 팝업 메뉴 모달)이면 끝날 때까지 기다리므로, 호출자
+/// tray `overlay-menu`는 메뉴 상태가 Idle 일 때만 부른다(tray.md §3.7.3 PU-h).
+pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, WindowError> {
+    let win = overlay(app)?;
+    if !win.is_visible()? {
+        return Ok(None);
+    }
+    let pos = win.outer_position()?;
+    let size = win.outer_size()?;
+    Ok(Some(ScreenBounds {
+        x: pos.x,
+        y: pos.y,
+        width: size.width,
+        height: size.height,
+    }))
+}
+```
+
+| # | 규칙 |
+|---|---|
+| WR-a | 바깥 사각형(`outer_position`·`outer_size`)을 쓴다. 오버레이는 테두리·제목 표시줄이 없어 바깥 = 안쪽이고, 위치 저장(R-13)과 같은 기준이다 |
+| WR-b | 반열림: 왼쪽·위 가장자리는 안, 오른쪽·아래 가장자리(x+width, y+height)는 밖. `list_monitors`(§2.3)의 모니터 경계 규칙과 같다 |
+| WR-c | `ScreenBounds`의 직렬화 모양(`{x, y, width, height}` camelCase)은 바뀌지 않는다 — 메서드만 는다. bridge `get_screen_bounds`·`get_monitors` 계약 영향 없음 |
+| WR-d | `position_lock`(클릭 통과)은 보지 않는다 — 🔒 잠금 중에도 메뉴가 뜬다. 창 속성은 판정과 무관하다 |
+| WR-e | 최소화는 따로 판정하지 않는다. 오버레이는 테두리·최소화 버튼이 없고, 최소화돼도 Windows가 창을 (−32000, −32000)으로 옮겨 실제 클릭 좌표가 그 안에 들 수 없다(§3 `is_minimized_sentinel`과 같은 사실 — D33) |
+
+- 파일: `window/mod.rs`(271줄 → 약 330줄, 테스트 포함). 새 파일 없음. `//!` [공개 API]에 `overlay_screen_rect`, `ScreenBounds::contains` 추가, [목적]에 "오른쪽 클릭 메뉴용 창 사각형 판정(R-40)" 한 줄.
+- 스레드·에러·설정: 새 스레드 없음. **호출자는 tray `overlay-menu` 스레드(비메인)**다(7차 개정, 리뷰 SEC-301 — 옛 "tray `popup_now`가 메인 스레드에서 부른다"를 대체, [tray.md](tray.md) §3.7.3 PU-h). 비메인 호출이 안전한 근거는 tauri-runtime-wry 2.12.0 `src/lib.rs`다. `is_visible`(:1939)·`outer_position`(:1886)·`outer_size`(:1894)는 `window_getter!`(:205-210)이고, `send_user_message`(:263-278)가 비메인이면 `proxy.send_event`로 넘긴 뒤 `rx.recv()`로 답을 기다린다. 창 상태는 메인 스레드에서만 읽힌다. 기다림이 길어지는 경우는 메인 스레드가 tao 핸들러 안에 머물 때(tao 0.37.1 `runner.rs:143-148·208-226` 버퍼링)뿐이다. 우리 팝업 모달과 겹치지 않게 하는 것은 호출자 몫이다(Pending·Open이면 부르지 않음). 함수 본문·시그니처는 **불변**이고 문서 주석의 스레드 문장만 바뀐다. 새 에러 변형 없음(`NotFound`·`Tauri`만. 앱 종료로 답이 버려지면 `Tauri`(`FailedToReceiveMessage`)). 설정을 읽지도 쓰지도 않는다.
+- 테스트: §8.8 WR1~WR3. `overlay_screen_rect`는 Tauri 런타임이 필요해 수동([tray.md](tray.md) §8.3 MC-31·MC-35·MC-36·MC-45 ③).
+- 파급: 신규만. 호출자는 `tray/popup.rs` 하나. 기존 `ScreenBounds` 사용처(`bridge/types.rs:18` 재노출, `placement.rs`, `list_monitors`, `union`)는 바뀌지 않는다.
+
 ## 4. 스레드·채널
 
 ```
@@ -429,7 +489,7 @@ pub fn reset_overlay_position(
 
 ## 5. unsafe
 
-없음. 이동 감지는 Tauri `WindowEvent::Moved`, 모니터는 Tauri `available_monitors()`, 리사이즈는 Tauri `set_size`로 한다. Win32 직접 호출(`WM_EXITSIZEMOVE` 서브클래싱 등)이 필요해지면 hook 모듈에 안전한 래퍼를 두는 방향으로 재설계한다.
+없음. 이동 감지는 Tauri `WindowEvent::Moved`, 모니터는 Tauri `available_monitors()`, 리사이즈는 Tauri `set_size`로 한다. R-40 창 사각형(§3.1)도 Tauri `is_visible`·`outer_position`·`outer_size`만 쓴다(전경 창 조회 Win32는 hook의 안전 래퍼 — [hook.md](hook.md) §3.10). Win32 직접 호출(`WM_EXITSIZEMOVE` 서브클래싱 등)이 필요해지면 hook 모듈에 안전한 래퍼를 두는 방향으로 재설계한다.
 
 ## 6. 에러 타입
 
@@ -446,6 +506,7 @@ pub fn reset_overlay_position(
 
 - OV-R-03은 **새 변형이 없다**. `overlay_display_size`는 실패하지 않고, `resize_overlay`는 `NotFound`·`Tauri`만 낸다.
 - CR-017 `list_monitors`도 **새 변형이 없다**. `Tauri`만 낸다(모니터 0개는 오류가 아니라 빈 `Vec` — §11 D23).
+- R-40 `overlay_screen_rect`도 **새 변형이 없다**. `NotFound`(오버레이 창 없음)·`Tauri`만 낸다. 숨김은 오류가 아니라 `Ok(None)`. `contains`는 실패하지 않는다.
 - bridge 쪽 `error.rs`에 `impl From<WindowError> for BridgeError { code(), to_string() }` 추가가 필요하다(bridge 소관, §9).
 
 ## 7. 설정 의존
@@ -581,6 +642,16 @@ pub fn reset_overlay_position(
 | L5 | 작업 표시줄 위에 커서 | 좌표가 모니터 사각형 안(작업 영역이 아니라 전체 사각형이라는 증거) |
 | L6 | 앱 실행 중 모니터 1대 분리 → `get_monitors` 재호출 | 목록이 1개로 줄어든다(캐시 없음 — 호출마다 OS 조회) |
 
+### 8.8 오른쪽 클릭 메뉴 창 사각형 (overlay R-40, §3.1) — `window/mod.rs` `#[cfg(test)] mod tests`
+
+| # | 이름(안) | 입력 | 기대 |
+|---|---|---|---|
+| WR1 | `contains_half_open_edges` | `ScreenBounds { x: 100, y: 200, width: 450, height: 350 }`에 (100,200)·(549,549)·(550,300)·(300,550)·(99,300)·(300,199) | 앞 둘 `true`(왼쪽·위 가장자리·마지막 픽셀), 나머지 `false`(오른쪽 x+w·아래 y+h 가장자리와 바깥) |
+| WR2 | `contains_negative_origin` | 왼쪽 보조 모니터 위 창 `{ x: -1920, y: 0, width: 1920, height: 1080 }`에 (-1920,0)·(-1,1079)·(0,0)·(-1921,0) | `true`·`true`·`false`·`false` |
+| WR3 | `contains_zero_size_is_false` | `{ x: 0, y: 0, width: 0, height: 350 }`·`{ x: 0, y: 0, width: 450, height: 0 }`에 (0,0) | 둘 다 `false` |
+
+- 기존 `union` 테스트 2건은 그대로 PASS(회귀). `overlay_screen_rect`는 Tauri 런타임이 필요해 자동 테스트 없음 → [tray.md](tray.md) §8.3 MC-31(투명 모서리 포함)·MC-35(숨김)·MC-36(한쪽만 안)·MC-45 ③(배율 다른 모니터 가장자리).
+
 ## 9. bridge 요구 명세 (계약 확정은 bridge-designer)
 
 **결론: 새 command·event는 필요 없다.** 위치 저장은 core 내부에서 끝나고, 기존 `settings://changed`를 재사용한다.
@@ -683,6 +754,7 @@ ui 영향(ui-manager 인계, 참고): overlay 초기 로드 P-1의 `getScreenBou
 | OV-R-03 — 드래그 영역이 창 전체 | §9.2 UI-1 | 부분(ui 인계 필요) |
 | OV-R-12 | §1(ui 내장 드래그, 결과만 수신) | ✅(기존) |
 | OV-R-01 | §1(`tauri.conf.json`) | ✅(기존) |
+| **overlay R-40 (CR-062) — "오버레이 위" = 보이는 창 사각형(투명 포함), 누름·뗌 두 점 판정의 재료(🔒 U-1)·숨김이면 없음(AC-4)** | §1, §2 `contains`·`overlay_screen_rect`, §3.1, §6, §8.8 WR1~WR3 | 설계 확정 · 소스 미적용(두 점 조합 판정 `should_popup`은 [tray.md](tray.md) §3.7) |
 
 ## 11. 설계 결정 노트
 
@@ -713,6 +785,8 @@ ui 영향(ui-manager 인계, 참고): overlay 초기 로드 P-1의 `getScreenBou
 | **D23** | 모니터 0개 → `Ok(vec![])`(core), 오류 변환은 bridge 권장 | core에서 `Err(NoMonitor)` | `restore_overlay_position`이 빈 목록을 "판단 불가 → 저장 위치 유지"로 쓴다(§2.1 규칙 1). core가 오류로 바꾸면 복원 동작이 바뀐다 |
 | **D24** | `get_screen_bounds`·`screen_bounds`·`union`은 **이번에 건드리지 않는다** | 즉시 삭제 / 배열로 확장 | 확장은 파괴 변경(§9.4 근거 1). 삭제도 파괴 변경이며 ui 전환 뒤에야 사용처 0이 확인된다. ui가 `get_monitors`로 옮긴 뒤 사용처가 0이면 **제거 후보**(요구 역추적 불가 — 스킬 §10): bridge command 제거 → core `screen_bounds`·`union`·`WindowError::NoMonitor` 사용처 재확인. 결정은 bridge-manager·사용자 |
 | **D25** | 모니터 구성 변경 event 없음, ui 재조회 규칙으로 대체 | core event(`WM_DISPLAYCHANGE` 래퍼) / ui 주기 폴링 | §9.4. unsafe 래퍼 비용 대비 요구가 없다. 주기 폴링은 평상시 헛호출이라 조건부 재조회가 낫다 |
+| **D32** | (R-40) 점 판정을 기존 `ScreenBounds`의 메서드 `contains`로(반열림, i64) | ① tray 안의 비공개 함수 ② 새 사각형 타입 | 창·모니터 사각형의 주인이 window다(좌표계 정의 §1 [좌표]). 반열림은 `list_monitors` 경계 규칙과 같다. i64는 `x + width`가 `i32` 범위를 넘는 극단값에서 넘침 패닉(디버그)을 막는다. 새 타입은 bridge 재노출 타입과 중복된다 |
+| **D33** | (R-40) `overlay_screen_rect`는 숨김만 `None`, 최소화는 판정하지 않는다 | `is_minimized()` 검사 추가 | 오버레이는 최소화 버튼이 없고, 최소화돼도 창이 (−32000, −32000)으로 가 실제 클릭이 그 안에 들 수 없다(WR-e). 요구에 없는 분기를 더하지 않는다(스킬 §10) |
 
 ### 파급 (CR-017 `list_monitors`, Grep 2026-09-23)
 

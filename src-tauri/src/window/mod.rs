@@ -2,7 +2,8 @@
 //!
 //! [목적] 오버레이 창의 위치 조회·이동, 표시/숨김, 가상 화면(모든 모니터 합집합) 범위 계산,
 //!        드래그 이동 저장·시작 시 복원(OV-R-13), 표시 크기 자동 리사이즈(OV-R-03),
-//!        `set_settings`가 위치를 건드리지 않도록 하는 순수 병합(§2.1.1).
+//!        `set_settings`가 위치를 건드리지 않도록 하는 순수 병합(§2.1.1). 오른쪽 클릭 메뉴용
+//!        창 사각형 판정(overlay R-40).
 //! [공개 API] `overlay_position`, `set_overlay_position`, `set_overlay_visible`,
 //!            `screen_bounds`, `apply_overlay_settings`(재정의: `visible`만 적용, 유지·폐기 예정),
 //!            `apply_overlay_window`(SV2-03·04, 표시/숨김+작업표시줄+클릭 통과를 매번 재적용),
@@ -12,7 +13,9 @@
 //!            `placement::{MOVE_SAVE_DEBOUNCE, MIN_VISIBLE_PX, resolve_overlay_position,
 //!            restore_overlay_position, watch_overlay_moves, persist_overlay_position,
 //!            keep_overlay_position, keep_core_owned(SV2-05), reset_overlay_position(SV2-06)}`,
-//!            `sizing::{OverlaySize, overlay_display_size, resize_overlay}`.
+//!            `sizing::{OverlaySize, overlay_display_size, resize_overlay}`,
+//!            `overlay_screen_rect`(overlay R-40, 오른쪽 클릭 메뉴 창 사각형 판정용),
+//!            `ScreenBounds::contains`(순수 점 포함 판정).
 //! [방식] 전부 Tauri 창·모니터 API. Win32(GetSystemMetrics 등)를 직접 부르지 않는다 —
 //!        저수준 후킹 코드는 hook/ 에만 허용(확정사항 §2). 필요해지면 hook 모듈에 위임한다.
 //! [좌표] 위치는 물리 픽셀(훅이 주는 마우스 좌표와 같은 좌표계). 크기(`OverlaySize`)는 논리
@@ -28,7 +31,8 @@
 //!        (설계 §11 파급표). 신규 함수(`placement::*`·`sizing::*`)는 설계대로 `WindowError`를
 //!        직접 반환한다.
 //! [설정] `placement.rs`·`sizing.rs` 참고. 이 파일(`mod.rs`) 자체는 설정을 읽거나 쓰지 않는다.
-//! [테스트] 창이 필요한 함수는 자동 테스트 없음. 순수 계산(bounds 합집합)은 단위 테스트.
+//! [테스트] 창이 필요한 함수는 자동 테스트 없음(`overlay_screen_rect`도 Tauri 런타임이 필요해
+//!        수동 확인). 순수 계산(bounds 합집합, `ScreenBounds::contains` WR1~WR3)은 단위 테스트.
 //!        `placement.rs`·`sizing.rs`의 테스트는 각 파일 참고.
 
 use serde::Serialize;
@@ -97,6 +101,20 @@ pub struct ScreenBounds {
     pub height: u32,
 }
 
+impl ScreenBounds {
+    /// 점이 반열림 사각형 `[x, x+width) × [y, y+height)` 안인가(물리 px). 넘침 없게 i64로
+    /// 계산한다. 너비·높이가 0이면 항상 false. 모니터 경계 판정(`list_monitors`)과 같은
+    /// 규칙(overlay R-40).
+    pub fn contains(&self, x: i32, y: i32) -> bool {
+        let (px, py) = (i64::from(x), i64::from(y));
+        let (left, top) = (i64::from(self.x), i64::from(self.y));
+        px >= left
+            && px < left + i64::from(self.width)
+            && py >= top
+            && py < top + i64::from(self.height)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Point {
@@ -128,6 +146,27 @@ pub fn list_monitors(app: &AppHandle) -> Result<Vec<ScreenBounds>, WindowError> 
             }
         })
         .collect())
+}
+
+/// 보이는 오버레이 창의 바깥 사각형(물리 px, 가상 화면 — 훅 좌표와 같은 좌표계).
+/// 숨김이면 `Ok(None)` — 숨긴 창의 옛 자리는 판정에 쓰지 않는다(overlay R-40 AC-4).
+/// 어느 스레드에서 불러도 된다 — 창 getter 3종은 비메인 스레드면 메인 스레드와 동기
+/// 왕복한다. 메인 스레드가 이벤트 핸들러 안(예: 팝업 메뉴 모달)이면 끝날 때까지
+/// 기다리므로, 호출자 tray `overlay-menu`는 메뉴 상태가 Idle일 때만 부른다
+/// (tray.md §3.7.3 PU-h).
+pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, WindowError> {
+    let win = overlay(app)?;
+    if !win.is_visible()? {
+        return Ok(None);
+    }
+    let pos = win.outer_position()?;
+    let size = win.outer_size()?;
+    Ok(Some(ScreenBounds {
+        x: pos.x,
+        y: pos.y,
+        width: size.width,
+        height: size.height,
+    }))
 }
 
 pub fn overlay_position(app: &AppHandle) -> Result<Point, BridgeError> {
@@ -266,5 +305,53 @@ mod tests {
     #[test]
     fn union_of_none_is_none() {
         assert_eq!(union(&[]), None);
+    }
+
+    #[test]
+    fn contains_half_open_edges() {
+        let b = ScreenBounds {
+            x: 100,
+            y: 200,
+            width: 450,
+            height: 350,
+        };
+        assert!(b.contains(100, 200)); // 왼쪽·위 가장자리
+        assert!(b.contains(549, 549)); // 마지막 픽셀
+        assert!(!b.contains(550, 300)); // 오른쪽 가장자리(x+w)
+        assert!(!b.contains(300, 550)); // 아래 가장자리(y+h)
+        assert!(!b.contains(99, 300)); // 왼쪽 바깥
+        assert!(!b.contains(300, 199)); // 위 바깥
+    }
+
+    #[test]
+    fn contains_negative_origin() {
+        let b = ScreenBounds {
+            x: -1920,
+            y: 0,
+            width: 1920,
+            height: 1080,
+        };
+        assert!(b.contains(-1920, 0));
+        assert!(b.contains(-1, 1079));
+        assert!(!b.contains(0, 0));
+        assert!(!b.contains(-1921, 0));
+    }
+
+    #[test]
+    fn contains_zero_size_is_false() {
+        let zero_width = ScreenBounds {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 350,
+        };
+        let zero_height = ScreenBounds {
+            x: 0,
+            y: 0,
+            width: 450,
+            height: 0,
+        };
+        assert!(!zero_width.contains(0, 0));
+        assert!(!zero_height.contains(0, 0));
     }
 }

@@ -1,7 +1,8 @@
 # assets 모듈 설계
 
-- 상태: 확정(사용자) — §3.14(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.15(CR-048)는 인계 패킷 기준 확정 · §3.16(CR-053)은 사용자 지정 확정 · 최종 갱신 2026-09-27
+- 상태: 확정(사용자) — §3.14(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.15(CR-048)는 인계 패킷 기준 확정 · §3.16(CR-053)은 사용자 지정 확정 · 최종 갱신 2026-09-29(소스 동기화)
 - 변경이력:
+  - 2026-09-29 (15차, 소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **0.4.0 내장 기본 6장**(🔒 사용자 확정 배포 세트, hair 제외): `DEFAULT_ASSETS: [DefaultAsset; 6]` = kb_up → background → pomo_char → mouse_base → pen_up → pen_down_0(`defaults.rs:55-70`). 크기 캔버스 3장 900×700, `mouse_base` 168×151, `pen_up`·`pen_down_0` 119×196(`tests/default_assets.rs` D2 단언). `has_default(hair)`는 다시 거짓, `pomo_char` 참, `kb_down_0` 거짓. 현재 표는 **§3.16.0**, §3.16.1~§3.16.3의 7장·143×189·168×150·hair 뒤집기 테스트와 §1 DA-01 「현재 7장」은 옛 기록. 데이터 세대 5([data_reset.md](data_reset.md)). ② **SEC-205**: `load_manifest`가 `crate::settings::read_capped_string(&path, crate::settings::MAX_TEXT_FILE_BYTES)`(1MiB)로 읽는다 — 길이를 먼저 보고 상한을 넘으면 파싱 전에 `AssetError::Io`(`asset.io`)로 실패, 호출자는 기존 오류 경로 그대로. 공개 시그니처·에러 변형·code 불변. 테스트 `assets/mod.rs` `#[cfg(test)]`(1MiB 초과 manifest.json 거부). ③ **SEC-201 로그 최소화**: 로그에 절대 경로·원본 값을 남기지 않는다 — `sound.rs remove_other_formats` 삭제 실패 경고는 `file={파일 이름}, kind={ErrorKind}`만, `manifest_load.rs parse_entry` 형식 오류 경고는 serde 오류 메시지를 빼고 `slot=` 문자열만(SEC-002의 `fileName` 미기록과 같은 원칙). 동작·API 불변. ④ **표기 정리**: 1~14차 항목과 §10의 「소스 미적용」은 모두 소스에 반영됨(`assets/{mod,slot,url,anchor,defaults,export,manifest_load,sound,security_tests,mouse_part_tests,pen_part_tests}.rs`). 단 CR-053의 7장 표는 0.4.0에서 6장으로 다시 바뀌었다(①).
   - 2026-09-27 (14차, data-reset, 🔒 사용자 결정 R-A·R-B, 새 모듈 문서 [data_reset.md](data_reset.md)) **앱 시작 순서 변경**: AppPaths → `create_dir_all` → settings `load_or_default` → **`data_reset::run_startup`** → `seed_if_empty`(유지) → manifest 로드 …. 세대가 다르거나 없으면 `data_reset`이 assets 폴더의 화이트리스트 파일(`*.png`·`*.tmp`·`*.wav`·`*.mp3`·`*.ogg`·`manifest.json`)을 지우고 `seed_if_empty`로 7장을 다시 채운다. **assets 공개 API·시그니처·시딩 규칙 불변**(호출자만 늘어남). 증분 **§3.17**, §3.10.2 `lib.rs` 조각에 대체 표시, §4 갱신. **소스 미적용.**
   - 2026-09-27 (13차, CR-053 배포용 기본 세트 3차 — **CR-044 대체**, 🔒 사용자 지정, 확정사항 §6 CR-053 줄) **`DEFAULT_ASSETS` 6장 → 7장**: `kb_up`·`background`·`hair`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0`(원본 `doc/assets/defaults/`, 옛 6장은 `doc/assets/defaults-v3/`). **`hair`·`pomo_char` 추가, `kb_down_0` 제거.** 크기(IHDR 실측): 캔버스 레이어 4장 900×700, `mouse_base` 168×150, `pen_up`·`pen_down_0` 143×189(7장 모두 8bit RGBA·≤1MB). 시딩 규칙(매니페스트가 비었을 때만 + 같은 이름 파일 없음)·`restore_default`·`export_defaults` 동작과 공개 API 시그니처 불변 — 표만 바뀐다(배열 길이 `N`만 7). 결과로 `has_default(hair|pomo_char)` 참(§3.12.2·§3.13.2의 「내장 기본 없음」 대체), `has_default(kb_down_0)` 거짓(`restore_default` → `NoDefault`), `pomo_bubble`은 여전히 없음. 증분 전체 **§3.16**, §1·§2·§10 갱신. 짝 문서 [settings.md](settings.md)(타이머 기본값 (142,458)·9°). **소스 미적용.**
   - 2026-09-26 (CR-048 타이머 모드 — 알림음 저장소, 🔒 사용자 결정 D-1~D-11 권고안 확정·아키텍트 결정 A-1, 정본 패킷 `doc/200_설계/architecture/timer-mode-03-packet-core.md` §2.4, 근거 `timer-mode-02-design.md` §6.1·§6.2) **신규 자식 모듈 `assets/sound.rs`**(`AlarmFormat`·`AlarmSound`·`ALARM_MAX_BYTES`·`detect_format`·`alarm_file_name`·`current`·`import`·`remove`·`SoundError`+`code`). 저장 이름 `assets/alarm.{wav|mp3|ogg}` 고정, 형식은 매직 바이트로 판별(확장자·사용자 파일명 불사용 — CR-047 SEC-002 원칙), 1MiB 선검사·`read_capped` 재사용(SEC-003), `settings::write_atomic`(CORE-002). **`AssetSlot`·매니페스트·PNG 경로와 분리**(A-1). `assets/mod.rs`는 `pub mod sound;`와 `//!` 한 줄만. 증분 전체 **§3.15**, §10에 TM 행. **소스 미적용.**
@@ -1525,7 +1526,24 @@ impl SoundError {
 - **D48-4** `current`는 내용을 읽지 않고 이름으로 형식을 정한다(이름은 `import`만 만든다).
 - **Q48-1** `assets/` 폴더를 통째로 훑는 코드가 있다면(내보내기·시딩·정리) `alarm.*`를 PNG로 오인하지 않는지 구현자가 Grep으로 확인한다(설계자 확인 범위: `manifest_load`·`import`·`remove`는 매니페스트 항목·슬롯 이름으로만 접근).
 
-### 3.16 CR-053 — 배포용 기본 세트 3차: `DEFAULT_ASSETS` 7장 (🔒 2026-09-27 사용자 지정, 확정사항 §6 CR-053 줄, CR-044 대체, 구현자가 그대로 옮길 것)
+### 3.16 CR-053 — 배포용 기본 세트 3차: `DEFAULT_ASSETS` 7장 → **0.4.0에서 6장**(§3.16.0) (🔒 2026-09-27 사용자 지정, 확정사항 §6 CR-053 줄, CR-044 대체)
+
+#### 3.16.0 현재 표 — 0.4.0 (소스 정본, 2026-09-29 동기화)
+
+결론: 지금 exe에 든 기본 그림은 **6장**이다(🔒 사용자 확정 배포 세트, 뒷머리 `hair` 제외 — CR-053의 7장에서 뺐다). 아래 §3.16.1~§3.16.3의 7장 표·크기·테스트 표는 CR-053 당시 기록이다.
+
+| # | 슬롯 (`file_key`) | 원본 `doc/assets/defaults/` | 크기 | 그룹 | 용량 |
+|---|---|---|---|---|---|
+| 1 | `Simple(KbUp)` (`kb_up`) | `kb_up.png` | 900×700 | 캔버스 레이어 | 128,174 B |
+| 2 | `Simple(Background)` (`background`) | `background.png` | 900×700 | 캔버스 레이어 | 34,202 B |
+| 3 | `Simple(PomoChar)` (`pomo_char`) | `pomo_char.png` | 900×700 | 캔버스 레이어 | 135,486 B |
+| 4 | `Simple(MouseBase)` (`mouse_base`) | `mouse_base.png` | 168×151 | 팔 파츠 | 11,079 B |
+| 5 | `Simple(PenUp)` (`pen_up`) | `pen_up.png` | 119×196 | 손(펜) 파츠 | 12,701 B |
+| 6 | `PenDown { kind: PenDown, index: 0 }` (`pen_down_0`) | `pen_down_0.png` | 119×196 | 손(펜) 파츠 | 14,575 B |
+
+- 근거: 순서·장수 `assets/defaults.rs:55-70`(`[DefaultAsset; 6]`)·`//!` [목적]·[순서], 크기 `tests/default_assets.rs` D2(`:64-81`, IHDR 파싱 단언), 용량 `doc/assets/defaults/` 파일 크기(합 336,217 B = [data_reset.md](data_reset.md) `DEFAULT_ASSETS_FINGERPRINT` 바이트 합).
+- 결과 동작: `hair` — `has_default` 거짓, `restore_default` → `NoDefault`, 시딩·내보내기 제외(테스트 `hair_slot_has_no_default`·`seed_does_not_create_hair`는 **뒤집지 않은 채** 유지). `pomo_char` — 참(`pomo_char_has_builtin_default`). `kb_down_0`·`pomo_bubble` — 거짓(`kb_down_0_has_no_default`·`pomo_bubble_has_no_builtin_default`).
+- 테스트 장수: D1 `keys.len() == 6`(hair·kb_down_0 없음), D4·`seed_does_not_create_hair` `Seeded { count: 6 }`, D14 `written.len() == 6`, D15 부분 실패 5. 시딩 순서(C53-1)는 kb_up → background → pomo_char → mouse_base → pen_up → pen_down_0로 코드 확정.
 
 결론: 내장 기본 표 `DEFAULT_ASSETS`만 7장으로 바꾼다 — **`hair`·`pomo_char` 추가, `kb_down_0` 제거.** `default_bytes`가 `file_key`로 표를 찾으므로(D35·D38 선례) `has_default`·`seed_if_empty`·`restore_default`·`export_defaults` 코드는 한 줄도 바뀌지 않고 결과만 따라온다. 공개 함수 시그니처·에러 변형·`code()`·계약 모양 불변(배열 길이 `[DefaultAsset; N]`의 `N`만 6 → 7).
 

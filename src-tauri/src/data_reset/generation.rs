@@ -4,9 +4,11 @@
 //! [공개 API] 모두 `pub(super)`. `read_marker`·`write_marker`·`remove_marker`, `#[cfg(test)] fingerprint`.
 //! [스레드] 없음. 호출자 스레드에서 동기 실행.
 //! [unsafe] 없음.
-//! [에러] 쓰기·삭제는 `std::io::Error`. 읽기는 실패를 삼키고 `None`을 돌려준다(§3.5).
+//! [에러] 쓰기·삭제는 `std::io::Error`. 읽기는 실패를 삼키고 `None`을 돌려준다(§3.5). 1MiB
+//!        상한(SEC-205, `settings::MAX_TEXT_FILE_BYTES`) 초과도 같은 경로로 `None`이 된다.
 //! [설정] 없음. settings 스키마 밖의 별도 파일이다.
 //! [테스트] `marker_roundtrip`·`marker_missing_is_none`·`marker_corrupt_is_none`·
+//!        `marker_over_size_cap_is_none`(SEC-205)·
 //!        `generation_fingerprint_guard`(이 파일 `#[cfg(test)] mod tests`).
 
 use std::path::Path;
@@ -33,7 +35,12 @@ struct MarkerOut<'a> {
 
 /// 표식을 읽는다. 없음·읽기 실패·파싱 실패·필드 없음·형식 오류는 모두 `None`이다.
 pub(super) fn read_marker(data_dir: &Path) -> Option<u32> {
-    let text = std::fs::read_to_string(data_dir.join(MARKER_FILE)).ok()?;
+    // SEC-205: 1MiB 상한 초과는 다른 읽기 실패와 같이 None(표식 없음으로 본다).
+    let text = crate::settings::read_capped_string(
+        &data_dir.join(MARKER_FILE),
+        crate::settings::MAX_TEXT_FILE_BYTES,
+    )
+    .ok()?;
     let parsed: MarkerIn = serde_json::from_str(&text).ok()?;
     Some(parsed.generation)
 }
@@ -110,6 +117,17 @@ mod tests {
             std::fs::write(dir.path().join(MARKER_FILE), content).expect("write");
             assert_eq!(read_marker(dir.path()), None, "content={content}");
         }
+    }
+
+    /// SEC-205: 1MiB 를 넘는 표식 파일은 읽지 않고 None(표식 없음)으로 본다.
+    #[test]
+    fn marker_over_size_cap_is_none() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let mut content = br#"{"generation": 5, "pad": ""#.to_vec();
+        content.extend(vec![b'x'; crate::settings::MAX_TEXT_FILE_BYTES as usize]);
+        content.extend_from_slice(br#""}"#);
+        std::fs::write(dir.path().join(MARKER_FILE), &content).expect("write");
+        assert_eq!(read_marker(dir.path()), None);
     }
 
     #[test]

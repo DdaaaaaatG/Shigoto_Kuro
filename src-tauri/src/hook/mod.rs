@@ -12,11 +12,15 @@
 //!        `Down` 칸·버튼을 `GetAsyncKeyState`로 대조해 실제로는 떼진 것을 뗌 이벤트로 먼저
 //!        내보낸다(CR-046, hook.md §3.7 — 보안 데스크톱 전환·UIPI·IME 토글 키·다른 훅이
 //!        뗌을 삼키는 경우의 "눌림 고정" 복구). 마우스 좌·우 버튼도 같은 원리로 정리한다
-//!        (hook.md §3.7.10, 같은 원리 보강 — 클릭 유지 고착 복구).
-//! [공개 API] `start(tx) -> HookHandle`, `HookHandle::stop()`, `InputEvent`, `MouseButton`,
+//!        (hook.md §3.7.10, 같은 원리 보강 — 클릭 유지 고착 복구). overlay R-40(CR-062): 훅이
+//!        실제로 본 오른쪽 버튼 누름→뗌 한 쌍을 두 번째 채널로 내보내고(메뉴를 띄울지는 tray가
+//!        판단), 메인 스레드가 아닌 곳에서 전경 창을 조회하는 안전 래퍼를 둔다.
+//! [공개 API] `start(tx, clicks) -> HookHandle`, `HookHandle::stop()`, `InputEvent`, `MouseButton`,
 //!        `SpecialKey`, `HookError`. `pub(crate) fn refresh`
 //!        — 트레이 「새로고침」 전용 진입점(tray.md, 훅 스레드가 실행 중이어도 안전 — `KEYS`·
-//!        `MOUSE_BUTTONS`는 Mutex 라 콜백과 경합하지 않는다).
+//!        `MOUSE_BUTTONS`는 Mutex 라 콜백과 경합하지 않는다). `right_click::{RightClick,
+//!        ScreenPoint}`, `foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect}`
+//!        (overlay R-40).
 //! [방식] Microsoft 공식 `windows` 크레이트로 `SetWindowsHookExW(WH_KEYBOARD_LL / WH_MOUSE_LL)` 직접 호출.
 //!        포장 크레이트(rdev 등) 사용 금지(확정사항 §2).
 //! [스레드] 전용 스레드 하나가 두 훅을 설치하고 `GetMessageW` 메시지 루프를 돈다.
@@ -27,12 +31,17 @@
 //!        CR-021·CR-023 은 unsafe 블록을 추가·변경하지 않는다 — `classify`·`KeyTable`·반복 판정은
 //!        안전한 Rust다. CR-046: `async_key_down`(U11) 하나 — `GetAsyncKeyState` 호출. 키 표
 //!        칸(0..255)과 마우스 좌·우 버튼 가상 키 코드(`VK_LBUTTON`·`VK_RBUTTON`) 조회에 함께
-//!        쓴다(포인터·핸들 인자가 없어 대상이 늘어도 안전 조건은 같다).
+//!        쓴다(포인터·핸들 인자가 없어 대상이 늘어도 안전 조건은 같다). overlay R-40:
+//!        `foreground.rs`에 U12~U19(전경 창 조회, 훅 콜백·훅 스레드와 무관) — 이 파일(`mod.rs`)
+//!        에는 새 unsafe 블록이 없다. `right_click.rs`는 unsafe 0.
 //! [개인정보] `vkCode`는 눌린 키 표(`KeyTable`)와 `classify` 안에서만 쓴다. 키 코드·스캔 코드·문자는
 //!        저장(이력)·전달·로그하지 않는다(확정사항 §5). 표는 `start`·`stop`·`refresh` 때 비운다.
 //!        밖으로는 개수·분류값·**반복 여부**만 나간다. 반복 횟수·시각은 세지 않는다.
 //!        CR-046 조회 대상은 표에 이미 있는 칸·눌린 걸로 믿는 마우스 버튼뿐이다(256칸 전수
 //!        훑기·주기 폴링 없음). 조회 결과·정리 횟수·시각은 저장하지 않는다.
+//!        overlay R-40: 기억하는 것은 오른쪽 누름 좌표 1개(`RightClickTracker.down`)뿐이고
+//!        뗌·합성 뗌·`reset_keys` 때 비운다. 전경 창 조회는 클래스명·pid를 고정 값과 비교만
+//!        하고 버린다 — 밖으로는 불리언 2개와 사각형 2개만 나간다. 창 제목은 조회하지 않는다.
 //!        [진단 로그] `reset_keys`가 표를 비울 때 `target: "kuro_diag"`로 방향
 //!        ("start"|"stop"|"refresh")한 줄만 남긴다(CR-046, 사용자 승인 2026-09-26). 키 값·개수는
 //!        싣지 않는다. 콜백(`keyboard_proc`·`mouse_proc`) 안에서는 로그를 호출하지 않는다 — 콜백
@@ -47,6 +56,9 @@
 //!        unsafe 는 이 파일에 그대로 남음)에서 단위 테스트한다 — 특수 키 분류(`classify` C1~C10)·
 //!        눌린 키 표(`KeyTable` T1~T17)·전역 경로(`keyboard_event` W1)·마우스 스로틀·버튼 매핑·
 //!        뗌 유실 정리(`release_stale` S1~S7, `MouseButtonState::release_stale` MB2~MB4).
+//!        overlay R-40: RC1~RC6(`right_click.rs`)·FG1~FG6(`foreground.rs`) — 각 새 파일 안,
+//!        전역 상태를 거치지 않는다. `track_right_click`·`send_click`·배선은 코드 리뷰 + 수동
+//!        (tray.md §8.3 MC-31~MC-45)으로 확인한다.
 
 // unsafe fn 안에서도 unsafe 연산마다 명시적 블록 + SAFETY 주석을 강제한다.
 #![deny(unsafe_op_in_unsafe_fn)]
@@ -69,6 +81,12 @@ use windows::Win32::UI::WindowsAndMessaging::{
     WH_KEYBOARD_LL, WH_MOUSE_LL, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MOUSEMOVE,
     WM_QUIT, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_SYSKEYDOWN, WM_SYSKEYUP,
 };
+
+mod foreground;
+mod right_click;
+
+pub use foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect};
+pub use right_click::{RightClick, ScreenPoint};
 
 // windows 크레이트의 VIRTUAL_KEY(u16) 상수를 match 패턴·배열 인덱스용 정수로 옮긴다(값을 새로
 // 정의하지 않는다 — hook.md §11 D10).
@@ -161,6 +179,12 @@ pub enum HookError {
 /// 콜백은 전역 함수라 채널 송신자를 전역에 둔다. `start` 가 채우고 `stop` 이 비운다.
 static SENDER: OnceLock<Mutex<Option<Sender<InputEvent>>>> = OnceLock::new();
 static LAST_MOVE_MS: AtomicU64 = AtomicU64::new(0);
+/// 오른쪽 클릭 한 쌍 송신자(overlay R-40). `start`가 채우고 `stop`이 비운다 — `SENDER`와
+/// 같은 수명 규칙.
+static CLICK_SENDER: OnceLock<Mutex<Option<Sender<RightClick>>>> = OnceLock::new();
+/// 오른쪽 누름 좌표(overlay R-40). 훅 콜백·`reset_keys`만 잡는다.
+static RIGHT_CLICK: Mutex<right_click::RightClickTracker> =
+    Mutex::new(right_click::RightClickTracker::new());
 
 /// 가상 키 + 누른 순간의 Shift·Ctrl 상태 → 특수 키 분류. 그 밖의 키는 None(알 수 없음).
 /// Ctrl 이 눌려 있으면 Shift 없는 Z(되돌리기)만 분류하고 나머지(Ctrl+Shift+Z 포함)는 None.
@@ -368,6 +392,10 @@ fn reset_keys(reason: &'static str) {
         .lock()
         .unwrap_or_else(PoisonError::into_inner)
         .clear();
+    RIGHT_CLICK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .clear();
     log::debug!(target: "kuro_diag", "hook keys cleared reason={reason}");
 }
 
@@ -407,10 +435,19 @@ fn recover_missed_mouse_releases(
     ts: u64,
     is_down: impl Fn(u32) -> bool,
 ) -> Vec<InputEvent> {
-    MOUSE_BUTTONS
+    let released = MOUSE_BUTTONS
         .lock()
         .unwrap_or_else(PoisonError::into_inner)
-        .release_stale(except, is_down)
+        .release_stale(except, is_down);
+    if released.contains(&MouseButton::Right) {
+        // 합성 뗌으로는 메뉴를 띄우지 않는다 — 기억한 누름 좌표도 버린다(overlay R-40 AC-7).
+        // MOUSE_BUTTONS 잠금을 푼 뒤에 잡는다(두 잠금을 겹쳐 쥐지 않는다).
+        RIGHT_CLICK
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clear();
+    }
+    released
         .into_iter()
         .map(|button| InputEvent::MouseButton {
             button,
@@ -438,6 +475,31 @@ fn mouse_button_down(msg: u32) -> bool {
 
 fn sender_slot() -> &'static Mutex<Option<Sender<InputEvent>>> {
     SENDER.get_or_init(|| Mutex::new(None))
+}
+
+fn click_sender_slot() -> &'static Mutex<Option<Sender<RightClick>>> {
+    CLICK_SENDER.get_or_init(|| Mutex::new(None))
+}
+
+/// 오른쪽 버튼 메시지에서만 `RIGHT_CLICK`을 잠근다(이동·왼쪽 버튼·키보드는 잠금 0회,
+/// overlay R-40 D28).
+fn track_right_click(msg: u32, x: i32, y: i32) -> Option<RightClick> {
+    if !matches!(msg, WM_RBUTTONDOWN | WM_RBUTTONUP) {
+        return None;
+    }
+    RIGHT_CLICK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .on_message(msg, ScreenPoint { x, y })
+}
+
+/// `send`와 같은 모양. 수신자가 없거나(시작 전·종료 중) 끊겼으면 조용히 버린다.
+fn send_click(c: RightClick) {
+    if let Ok(guard) = click_sender_slot().lock() {
+        if let Some(tx) = guard.as_ref() {
+            let _ = tx.send(c);
+        }
+    }
 }
 
 fn now_ms() -> u64 {
@@ -566,6 +628,11 @@ unsafe extern "system" fn mouse_proc(code: i32, wparam: WPARAM, lparam: LPARAM) 
         if let Some(ev) = mouse_event(msg, info.pt.x, info.pt.y, ts) {
             send(ev);
         }
+        // overlay R-40: 실제 오른쪽 누름→뗌 한 쌍을 두 번째 채널로(메뉴 판단은 tray). 입력은
+        // 삼키지 않는다(아래 CallNextHookEx 는 항상 호출).
+        if let Some(c) = track_right_click(msg, info.pt.x, info.pt.y) {
+            send_click(c);
+        }
     }
     // SAFETY: 위와 동일.
     unsafe { CallNextHookEx(HHOOK::default(), code, wparam, lparam) }
@@ -586,6 +653,9 @@ impl HookHandle {
         if let Ok(mut guard) = sender_slot().lock() {
             *guard = None;
         }
+        if let Ok(mut guard) = click_sender_slot().lock() {
+            *guard = None;
+        }
         // SAFETY: 훅 스레드의 메시지 루프에 WM_QUIT 을 보내 루프를 끝낸다. 대상 스레드 id 는
         // start 에서 그 스레드가 직접 알려준 값이다. 이미 종료됐으면 실패를 무시한다.
         let _ = unsafe { PostThreadMessageW(self.thread_id, WM_QUIT, WPARAM(0), LPARAM(0)) };
@@ -603,12 +673,16 @@ impl Drop for HookHandle {
     }
 }
 
-/// 훅 스레드를 시작한다. 두 훅이 모두 설치된 뒤에 돌아온다.
-pub fn start(tx: Sender<InputEvent>) -> Result<HookHandle, HookError> {
+/// 훅 스레드를 시작한다. 두 훅이 모두 설치된 뒤에 돌아온다. `clicks`는 오른쪽 누름→뗌 한 쌍
+/// (overlay R-40).
+pub fn start(tx: Sender<InputEvent>, clicks: Sender<RightClick>) -> Result<HookHandle, HookError> {
     // 훅 스레드를 만들기 전에 비운다 — 이전 실행의 눌림 상태가 남지 않는다(개인정보 규칙 P4).
     reset_keys("start");
     if let Ok(mut guard) = sender_slot().lock() {
         *guard = Some(tx);
+    }
+    if let Ok(mut guard) = click_sender_slot().lock() {
+        *guard = Some(clicks);
     }
 
     // 훅 설치 결과와 스레드 id 를 한 번만 되돌려 받는 채널

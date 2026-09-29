@@ -54,7 +54,12 @@ export const ResetAllCard = ({ onError }: ResetAllCardProps) => {
     }
   }
 
-  const statusText = phase === 'pending' ? t.resetAllPending : phase === 'done' ? t.resetAllDone : ''
+  const statusTextByPhase: Record<Phase, string> = {
+    idle: '',
+    pending: t.resetAllPending,
+    done: t.resetAllDone,
+  }
+  const statusText = statusTextByPhase[phase]
 
   return (
     <SettingsCard

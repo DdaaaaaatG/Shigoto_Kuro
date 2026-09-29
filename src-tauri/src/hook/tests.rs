@@ -1,9 +1,13 @@
 //! `hook/mod.rs` 단위 테스트(골든 원칙 §1 — 파일 800줄 한계로 CR-021 때 분리).
 //!
 //! [목적] `classify`(C1~C10)·`KeyTable`(T1~T17, CR-023 자동 반복 T5·T6·T9·T10·T14~T17)·
-//!        전역 경로(`keyboard_event` W1)·마우스 스로틀·버튼 매핑을 검증한다. 프로덕션 코드는
-//!        `mod.rs`에 그대로 남는다(unsafe 위치 불변).
+//!        전역 경로(`keyboard_event` W1·복구 케이스 `keyboard_event_recovery_increment`)·
+//!        마우스 스로틀·버튼 매핑을 검증한다. 프로덕션 코드는 `mod.rs`에 그대로 남는다(unsafe 위치 불변).
 //! [unsafe] 없음(테스트는 안전한 공개·비공개 함수만 부른다).
+//! [테스트 격리] CORE-201: 전역 `KEYS`를 거치는 두 테스트(`keyboard_event_wires_message_table_and_class`·
+//!        `keyboard_event_recovery_increment`)는 `KEYS_TEST_LOCK`으로 직렬화하고 시작 시
+//!        `reset_keys`로 표를 비운다 — 병렬 `cargo test` 스레드에서 서로의 `held` 계산을
+//!        어지럽히지 않는다. 그 밖의 테스트는 지역 인스턴스만 써서 잠금이 필요 없다.
 
 use super::*;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
@@ -444,12 +448,22 @@ fn modifier_auto_repeat_suppressed_but_state_kept() {
     );
 }
 
-// ─── 전역 경로 — keyboard_event (W1 하나만) ────────────────────────────
+// ─── 전역 경로 — keyboard_event (W1) ────────────────────────────
 
-/// W1: 전역 `KEYS` 를 거치는 유일한 테스트 — 메시지 → 눌림 → 분류 → 자동 반복 전체 연결 확인.
+/// CORE-201: `keyboard_event_wires_message_table_and_class`·`keyboard_event_recovery_increment`가
+/// 공유하는 전역 `KEYS`(hook/mod.rs)를 병렬 `cargo test` 스레드에서 직렬화한다. 두 테스트 모두
+/// 시작할 때 이 잠금을 잡고 `reset_keys`로 표를 비운 뒤 진행한다(poison은 into_inner로 복구,
+/// KEYS·MOUSE_BUTTONS 와 같은 규칙). 다른 테스트는 지역 `KeyTable`/`MouseButtonState` 인스턴스만
+/// 쓰므로 이 잠금이 필요 없다.
+static KEYS_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+/// W1: 전역 `KEYS` 를 거치는 테스트 — 메시지 → 눌림 → 분류 → 자동 반복 전체 연결 확인.
 #[test]
 fn keyboard_event_wires_message_table_and_class() {
-    // 테스트끼리 전역 KEYS 를 공유하므로 이 테스트만 쓰는 vk 대역(K_SPACE)을 쓴다.
+    let _guard = KEYS_TEST_LOCK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    reset_keys("test");
     assert_eq!(
         keyboard_event(WM_KEYDOWN, K_SPACE, 1),
         Some(InputEvent::Keyboard {
@@ -741,9 +755,14 @@ fn mouse_state_clear_resets_both() {
 // ─── 전역 경로 증분 — keyboard_event / recover_missed_releases (W1 ⑤~⑦) ───────
 
 /// W1 증분: 기존 ①~④ 뒤에 이어지는 흐름 — 자동 반복·정리 정경로가 같은 전역 `KEYS`를 쓴다.
+/// CORE-201: `KEYS_TEST_LOCK`을 잡고 `reset_keys`로 시작해 W1 첫 테스트와 겹치지 않게 한다.
 #[test]
 fn keyboard_event_recovery_increment() {
-    // ⑤ Enter 를 새로 누른다(다른 W1 대역과 겹치지 않도록 여기서만 쓰는 키).
+    let _guard = KEYS_TEST_LOCK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    reset_keys("test");
+    // ⑤ Enter 를 새로 누른다.
     let c5 = keyboard_event(WM_KEYDOWN, K_RETURN, 5).expect("enter down");
     assert_eq!(
         c5,
@@ -755,7 +774,8 @@ fn keyboard_event_recovery_increment() {
             ts: 5,
         }
     );
-    // ⑥ 스페이스가 뗌을 놓친 채 남아 있었다고 가정하고 정리한다(Enter 는 except).
+    // ⑥ Enter 가 뗌을 놓친 채 남아 있었다고 가정하고 정리한다(스페이스가 except — 방금 이
+    // 콜백을 일으킨 키라고 가정해 조회 대상에서 뺀다. CORE-208: 실제로 정리되는 키는 Enter).
     let recovered = recover_missed_releases(Some(K_SPACE), 6, |_| false);
     assert_eq!(
         recovered,

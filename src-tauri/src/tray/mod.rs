@@ -8,22 +8,33 @@
 //!        고착됐을 때 사용자가 수동으로 되돌리는 비상 스위치다.
 //!        CR-048 TM-11 — 스톱워치나 타이머가 켜져 있을 때만(`timer.enabled`) 메뉴 맨 위에
 //!        「시작」(흐르는 중이면 「일시정지」)·「멈춤」·구분선을 더 보인다(`sync_timer_menu`).
+//!        overlay R-40(CR-062) — 훅이 넘긴 오른쪽 누름→뗌 한 쌍을 받아 열림 가드·전체 화면
+//!        판정 뒤 오버레이 창 사각형 안이면 트레이와 같은 메뉴를 커서 위치에 띄운다
+//!        (`popup.rs`). 메뉴 클릭은 새 핸들러 없이 기존 `init`의 전역 `on_menu_event`가 처리한다.
 //! [공개 API] `init(app)`, `autostart::{TASK_NAME, AutostartError, build_task_xml, set_enabled,
 //!        reconcile, persist_autostart}`(SV2-05, CR-047, `autostart.rs`), `sync_timer_menu(app)`
-//!        (CR-048, `timer_menu::{TrayTimerView, tray_timer_view}` 재수출).
+//!        (CR-048, `timer_menu::{TrayTimerView, tray_timer_view}` 재수출),
+//!        `spawn_popup_listener(app, rx)`(overlay R-40, `popup.rs` 재수출).
 //! [방식] Tauri 2 `tray-icon` feature. 아이콘은 번들 기본 창 아이콘을 재사용한다.
 //! [스레드] `sync_timer_menu`는 본문 전체를 `AppHandle::run_on_main_thread`로 메인 스레드에
 //!        넘겨 실행한다(D48-t1) — 호출 스레드가 여럿(메인·마감 스레드·command)이라 늦게 계산한
 //!        보기가 먼저 적용되는 뒤바뀜을 막는다. `TrayIcon::set_menu` 자체도 내부적으로
 //!        `run_on_main_thread` + 채널 대기로 메인 스레드에 동기 위임한다(Tauri 2.11.6
 //!        `menu/mod.rs` `run_item_main_thread!` 확인, T-C6). 마지막 보기는 모듈 정적
-//!        `LAST_VIEW: Mutex<Option<TrayTimerView>>`.
+//!        `LAST_VIEW: Mutex<Option<TrayTimerView>>`. overlay R-40: `spawn_popup_listener`가
+//!        전용 스레드 "overlay-menu"를 하나 띄운다(수신 전용, `recv` 대기라 idle CPU 0).
+//!        상태(`PopupGate`) 판정·창 사각형 조회·전경 화면 판정은 그 스레드에서, 팝업은
+//!        `run_on_main_thread`로 메인 스레드에 post한다.
 //! [자동 실행] `autostart.rs` — 작업 스케줄러 작업 `kuro_keyviewer`(로그온·일반 권한, CR-047).
 //!        옛 tauri-plugin-autostart 는 bridge 전환 전까지 병행 유지(설계 §9 제거 순서).
 //! [unsafe] 없음(승격 실행 경로는 CR-047로 삭제됐다. 새로고침은 `hook::refresh`·
-//!        `WebviewWindow::reload` 모두 안전한 공개 API. 타이머 메뉴도 안전한 Tauri API만 쓴다).
+//!        `WebviewWindow::reload` 모두 안전한 공개 API. 타이머 메뉴도 안전한 Tauri API만 쓴다.
+//!        overlay R-40: 전경 창 조회는 `hook::foreground_snapshot()`(안전 래퍼)만 부른다 —
+//!        `popup.rs`는 `windows` 크레이트를 import하지 않는다).
 //! [테스트] GUI·UAC 필요 — 수동 확인(tray.md §8.3). `autostart.rs`·`timer_menu.rs`는 순수 로직
-//!        단위 테스트.
+//!        단위 테스트. overlay R-40: `popup.rs`의 `should_popup`·`suppress_for_fullscreen`·
+//!        `should_request`·`PopupGate`는 PM1~PM15·FS1~FS7(순수, 지역 상태만). `spawn_popup_listener`·
+//!        `request_popup`·`popup_now`는 Tauri 런타임·GUI가 필요해 수동(tray.md §8.3 MC-31~MC-45).
 
 use std::sync::Mutex;
 use std::time::Instant;
@@ -37,8 +48,10 @@ use crate::timer::{TimerAction, TimerError, TimerStatus};
 use crate::window;
 
 pub mod autostart;
+mod popup;
 mod timer_menu;
 
+pub use popup::spawn_popup_listener;
 pub use timer_menu::{tray_timer_view, TrayTimerView};
 
 const ID_OPEN_SETTINGS: &str = "open_settings";
@@ -152,25 +165,32 @@ pub fn sync_timer_menu(app: &AppHandle) {
     }
 }
 
-fn sync_timer_menu_now(app: &AppHandle) {
-    let Some(state) = app.try_state::<crate::AppState>() else {
-        return;
-    };
+/// 지금 설정·타이머 상태의 메뉴 보기(트레이 동기화·오버레이 팝업 공용, overlay R-40).
+/// 설정 잠금 → 해제 → 타이머 잠금 → 해제(두 잠금 동시 보유 금지, 계약 §5.8-6).
+/// `AppState` 없음 → `None`(로그 없음), 잠금 오염 → `log::warn!` 후 `None`.
+fn current_view(app: &AppHandle) -> Option<TrayTimerView> {
+    let state = app.try_state::<crate::AppState>()?;
     let enabled = match state.settings.lock() {
         Ok(s) => s.timer.enabled,
         Err(e) => {
-            log::warn!("설정 잠금 실패(타이머 메뉴 동기화): {e}");
-            return;
+            log::warn!("설정 잠금 실패(메뉴 보기 계산): {e}");
+            return None;
         }
     };
     let status = match state.timer.lock() {
         Ok(t) => t.status(),
         Err(e) => {
-            log::warn!("타이머 잠금 실패(타이머 메뉴 동기화): {e}");
-            return;
+            log::warn!("타이머 잠금 실패(메뉴 보기 계산): {e}");
+            return None;
         }
     };
-    let view = tray_timer_view(enabled, status);
+    Some(tray_timer_view(enabled, status))
+}
+
+fn sync_timer_menu_now(app: &AppHandle) {
+    let Some(view) = current_view(app) else {
+        return;
+    };
 
     let mut last = match LAST_VIEW.lock() {
         Ok(l) => l,

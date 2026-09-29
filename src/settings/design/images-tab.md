@@ -659,7 +659,7 @@ CSS(`ImagesTab.module.css`에 추가):
 
 비유: 견본 상자에 뒷머리·뽀모도 인물 견본이 새로 들어오고, 「타자 입력 1」 견본은 빠졌다. 견본이 생긴 두 칸은 「견본으로 되돌리기」와 「지우개」가 다른 일이 되므로 지우개를 단다. 견본이 없어진 「타자 입력 1」은 「되돌리기」가 곧 지우개라 따로 단 지우개를 뗀다.
 
-- 계약: contract **v0.24** — `DEFAULT_ASSET_SLOTS` **7개**(`kb_up`·`background`·`hair`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` — `kb_down_0` 제외), `DEFAULT_TIMER_SETTINGS` `textPos` (142,458)·`rotation` 9(`design/timer-tab.md` §3 상수 행). 새 command·event·에러 코드·문구 키 없음.
+- 계약: contract **v0.24** — `DEFAULT_ASSET_SLOTS` **7개**(`kb_up`·`background`·`hair`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` — `kb_down_0` 제외), `DEFAULT_TIMER_SETTINGS` `textPos` (142,458)·`rotation` 9(`design/timer-tab.md` §3 상수 행 — **CR-058·CR-059(2026-09-28, contract v0.27)로 (268,402)·7·음량 44로 다시 바뀜**, 현재값은 그 상수 행이 정본). 새 command·event·에러 코드·문구 키 없음.
 - 이 절이 대체하는 곳: §12(「타자 입력 1」 셋째 버튼) 전체, §13.1 `EMPTYABLE_SLOT_KEYS = ['kb_down_0']`·`hair` `clear`, §13.2 뒷머리 카드 버튼 2개·첫 실행 6칸·다운로드 n = 6, §14 「`pomo_char` `resetKind` `clear`·`emptyable` false」. `pomo_bubble`은 §14 그대로(기본 없음, 「기본값」 = 비우기).
 
 ### 15.1 순수 모듈 (`imageSlots.ts`) — 값 1곳

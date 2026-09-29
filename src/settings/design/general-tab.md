@@ -202,7 +202,7 @@ import: `useEffect`·`useRef`·`useState`(react), `resetAppData`·`toBridgeError
 | `phase` | 버튼 비활성·상태 줄 문구 | `'idle' \| 'pending' \| 'done'` | `'idle'` | `ResetAllCard` `useState` |
 | `buttonRef` | 「전체 초기화」 버튼 — 포커스 복귀 대상 | `RefObject<HTMLButtonElement>` | `useRef<HTMLButtonElement>(null)` | `useRef` |
 | `focusAfterRef` | 확인 뒤 pending이 끝나면 버튼으로 포커스를 돌릴지 | `boolean`(ref) | `false` | `useRef` |
-| (파생) `statusText` | 상태 줄 내용 | `string` | `phase === 'pending'` → `t.resetAllPending`, `phase === 'done'` → `t.resetAllDone`, 그 밖 `''` | 렌더 중 계산 |
+| (파생) `statusText` | 상태 줄 내용 | `string` | 렌더 중 매핑 `statusTextByPhase: Record<Phase, string> = { idle: '', pending: t.resetAllPending, done: t.resetAllDone }`(`type Phase = 'idle' \| 'pending' \| 'done'`, 컴포넌트 파일 로컬 타입)에서 `statusTextByPhase[phase]` — CR-060(중첩 삼항 대체, 값 불변) | 렌더 중 계산 |
 
 - 상태 전이: `idle`/`done` —확인→ `pending` —resolve→ `done` / —reject→ `idle`. 확인창 열기·취소는 `phase`를 바꾸지 않는다(`done` 문구는 다음 확인까지 남는다). 타이머·자동 해제 없음.
 - **(규범, 판정 대상)** 탭을 옮기면 `GeneralTab`과 함께 언마운트되어 상태는 초기값(`dialogOpen` false·`phase` idle)으로 돌아온다 — 다시 돌아오면 카드는 초기값이다(보존하지 않는다). pending 중 언마운트돼도 `onError`는 부모(`SettingsApp`) 것이므로 실패는 창 공통 오류 줄에 **반드시** 보여야 한다. 이 두 규칙은 설명이 아니라 구현·검증이 따라야 하는 규범이다(매니저 결정).

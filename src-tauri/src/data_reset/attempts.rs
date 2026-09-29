@@ -7,10 +7,11 @@
 //! [스레드] 없음. 호출자 스레드에서 동기 실행.
 //! [unsafe] 없음.
 //! [에러] 쓰기·삭제는 `std::io::Error`. 읽기는 실패를 삼키고 `0`을 돌려준다(카운터 손상으로
-//!        초기화가 영영 막히지 않게 — 열린 쪽 실패).
+//!        초기화가 영영 막히지 않게 — 열린 쪽 실패). 1MiB 상한(SEC-205,
+//!        `settings::MAX_TEXT_FILE_BYTES`) 초과도 같은 경로로 `0`이 된다.
 //! [설정] 없음. settings 스키마 밖의 별도 파일이다.
-//! [테스트] `attempts_roundtrip_and_clear`·`attempts_missing_or_corrupt_is_zero`
-//!        (이 파일 `#[cfg(test)] mod tests`).
+//! [테스트] `attempts_roundtrip_and_clear`·`attempts_missing_or_corrupt_is_zero`·
+//!        `attempts_over_size_cap_is_zero`(SEC-205)(이 파일 `#[cfg(test)] mod tests`).
 
 use std::path::Path;
 
@@ -26,7 +27,11 @@ struct AttemptsFile {
 
 /// 시도 횟수를 읽는다. 없음·읽기 실패·JSON 손상·필드 없음·형식 오류(문자열·음수 등)는 모두 `0`이다.
 pub(super) fn read_attempts(data_dir: &Path) -> u32 {
-    let text = match std::fs::read_to_string(data_dir.join(ATTEMPTS_FILE)) {
+    // SEC-205: 1MiB 상한 초과도 다른 읽기 실패와 같이 0(시도 없음)으로 본다.
+    let text = match crate::settings::read_capped_string(
+        &data_dir.join(ATTEMPTS_FILE),
+        crate::settings::MAX_TEXT_FILE_BYTES,
+    ) {
         Ok(t) => t,
         Err(_) => return 0,
     };
@@ -64,6 +69,17 @@ mod tests {
         assert_eq!(read_attempts(dir.path()), 0);
         // 파일이 없어도 clear_attempts는 Ok.
         assert!(clear_attempts(dir.path()).is_ok());
+    }
+
+    /// SEC-205: 1MiB 를 넘는 시도 기록 파일은 읽지 않고 0으로 본다.
+    #[test]
+    fn attempts_over_size_cap_is_zero() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let mut content = br#"{"attempts": 2, "pad": ""#.to_vec();
+        content.extend(vec![b'x'; crate::settings::MAX_TEXT_FILE_BYTES as usize]);
+        content.extend_from_slice(br#""}"#);
+        std::fs::write(dir.path().join(ATTEMPTS_FILE), &content).expect("write");
+        assert_eq!(read_attempts(dir.path()), 0);
     }
 
     #[test]

@@ -4,8 +4,12 @@
   `cargo fmt --check`·`cargo clippy --all-targets -D warnings`·`cargo test` 273건 PASS). §3.7.10
   (마우스 버튼 보강)은 **core-implementer가 같은 원리로 추가 구현·소스 반영 완료**, 단 설계
   자체는 core-designer·사용자 재확인 대기(아래 8차 항목). §3.8(CR-047)은 초안(실측 게이트
-  G1·G2 통과 조건부) · 최종 갱신: 2026-09-26
+  G1·G2 통과 조건부) · §3.9·§3.10(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6 반영) 기준
+  확정 · **소스 미적용** · 최종 갱신: 2026-09-29(R-40)
 - 변경이력:
+  - 2026-09-29 (12차, R-40 감사 반영 — 리뷰 CORE-302(LOW)·SEC-301(LOW). 공개 API·동작·unsafe 블록 수·테스트 불변) ① §3.10.3: 핸들 유효성 공통 전제를 코드 SAFETY 주석(U13~U18 첫 문장)에도 넣으라는 구현 인계 한 줄. U13 근거 문구를 "실패 시 pid는 쓰지 않는다(tid 0이면 버림)"로 교체(옛 문구는 API가 출력 포인터를 건드리지 않는다고 단정 — 문서화된 보장 아님). ② §3.10.2 스레드 줄: `foreground_snapshot()` 호출 조건이 "뗌마다"에서 "메뉴 Idle + 두 점이 오버레이 사각형 안일 때만"으로 좁아짐(호출자 순서 변경 — 정본 [tray.md](tray.md) §3.7.3 PU-h·§11 T17). **소스 미적용**(`foreground.rs` 주석만).
+  - 2026-09-29 (11차, overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1·U-3 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.4·§2.8·§2.14·§4) ① **오른쪽 클릭 신호**: 신규 `hook/right_click.rs`(unsafe 없음) — `ScreenPoint`·`RightClick { down, up }`·비공개 `RightClickTracker`. 훅이 실제로 본 오른쪽 누름→뗌 한 쌍을 **두 번째 채널 `Sender<RightClick>`**으로 내보낸다. **`start` 시그니처 변경** `start(tx)` → `start(tx, clicks)`(호출자 `lib.rs` 1곳). 합성 뗌(CR-046 정리)이면 기억한 누름을 버린다. `InputEvent`·`input://mouse-button` **불변**. ② **전경 창 조회 안전 래퍼**: 신규 `hook/foreground.rs` — `ScreenRect`(+순수 `covers`)·`ForegroundSnapshot`·`pub fn foreground_snapshot() -> Option<ForegroundSnapshot>`, 새 unsafe **U12~U19**(Win32 조회 8종, 훅 콜백·훅 스레드와 무관). `mod.rs`에는 새 unsafe 없음. 개인정보 P7 신설. 테스트 RC1~RC6·FG1~FG6(각 새 파일 안 — `tests.rs`는 792줄). §1·§1.1·§2·§3·§3.9(신설)·§3.10(신설)·§4·§5·§8·§10·§11 갱신. 새 크레이트·feature 없음. 상대 문서 [tray.md](tray.md) §3.7, [window.md](window.md) §3.1.
+  - 2026-09-29 (10차, 소스 동기화 — **설계 변경 아님, 소스가 정본**, 근거 `doc/300_검증/verify-20260929-1928.md` CORE-201) **테스트 격리**: 전역 `KEYS`를 거치는 테스트가 W1(`keyboard_event_wires_message_table_and_class`)과 CR-046 증분 `keyboard_event_recovery_increment`(§3.7.7 「W1 증분」을 별도 테스트로 구현) **둘**이라, `hook/tests.rs`의 `static KEYS_TEST_LOCK: Mutex<()>`로 직렬화하고 각 테스트 시작 때 `reset_keys`로 표를 비운다(poison은 `PoisonError::into_inner`). 프로덕션 코드·공개 API·unsafe·스레드 불변. §8.1 전역 상태 원칙에 반영. 8·9차의 소스 반영 여부는 이번 동기화 범위 밖.
   - 2026-09-26 (9차, CR-047 점검 후 정리, 🔒 확정사항 §6 자동 실행 줄 「일반 권한(LeastPrivilege)」, 근거 `.claude/reports/verify-20260926-1821.md` SEC-001) **UAC 승격 래퍼 `hook/elevate.rs` 삭제**(`run_elevated`·`ElevateError`·unsafe E1~E4·테스트 4건). 유일한 호출자 `tray::autostart`가 비승격 `schtasks`로 바뀐다([tray.md](tray.md) §3.5). 훅 콜백·스레드·`KeyTable`·unsafe U1~U11·`start`/`HookHandle`/`InputEvent` **불변**. **6차 항목과 §3.6 전체는 옛 기록**(이 절이 대체). 전제: tray.md §3.5.2 G1·G2 통과 — 실패하면 적용하지 않는다. 상세 **§3.8**. **소스 미적용.**
   - 2026-09-26 (8차, CR-046 보강, core-implementer — task-manager 지시 "마우스 버튼 뗌 유실도
     같은 원리로 보강하라") **마우스 좌·우 버튼 뗌 유실도 정리한다.** 7차 설계(§3.7)는 키보드
@@ -50,6 +54,7 @@
 | **R-tmp-1 (CR-023, 🔒 2026-09-24, 확정사항 §4 3행)** | 어떤 키든 누른 채 OS 자동 반복 입력이 들어오는 동안 오버레이가 계속 부르르 떨리고, 떼면(또는 반복이 멈추면) 멈춘다. 처음 누름은 기존 젤리 | 자동 반복 누름을 **`repeat: true`** 이벤트로 내보냄(§3.5). 떨림 표시·"반복 멈춤" 판단은 ui 몫(§9.2 RB4) |
 | **R-tmp-2 (CR-046, 🔒 2026-09-26, 확정사항 §6 「키 뗌 유실 복구」)** | 뗌 신호를 놓친 키(한/영·한자 키, 보안 데스크톱 전환, 관리자 창 포커스 등)도 결국 「눌림 없음」으로 복구. 입력 내용은 기록하지 않음. D2·D18의 한계 수용을 대체 | 누름 계열 입력 직전 남은 `Down` 칸 대조·정리 + 칸마다 뗌 이벤트(§3.7). 이벤트 모양 불변 |
 | OV-R-04·OV-R-20 등(마우스 추종) | 마우스 이동·좌우 클릭 | `MouseMove`(≈60Hz 스로틀), `MouseButton`(기존, CR-021·CR-023 영향 없음. **CR-046: 버튼 누름이 뗌 유실 정리를 부른다 — 마우스 이벤트 자체는 불변**) |
+| **overlay R-40 (CR-062, 🔒 2026-09-29 U-1·U-3)** | 오버레이 창 위 오른쪽 클릭(누른 곳·뗀 곳 모두 창 사각형 안) → 트레이와 같은 메뉴. 잠금 중에도 뜨고 클릭은 아래 창에도 전달. 전체 화면이면 안 뜸 | ① 실제 오른쪽 누름→뗌 좌표 한 쌍을 두 번째 채널로 전달(§3.9) ② 전경 창 조회 안전 래퍼(§3.10). 메뉴 표시·판정은 [tray.md](tray.md) §3.7, 창 사각형은 [window.md](window.md) §3.1 |
 
 ### 1.1 개인정보 규칙 — 입력 내용 기록 금지 (🔒 확정사항 §5, CR-021 · CR-023 유지)
 
@@ -63,6 +68,7 @@
 | P4 | 훅이 멈추면(`stop`·Drop) 표를 비운다. 훅이 시작될 때(`start`)도 비운다 — 이전 실행의 눌림 상태가 남지 않는다 | 단위 테스트 T9(`clear`) + 코드 리뷰 |
 | P5 | 파일·레지스트리·클립보드 쓰기 없음(hook은 IO를 하지 않는다 — 스킬 §1) | Grep `std::fs\|File` in hook = 0 |
 | P6 | `InputEvent`의 `Debug` 출력은 테스트 단언용이다. **bridge 전달 스레드·`emit_input`·ui는 키보드 이벤트나 그 페이로드를 로그·콘솔·파일로 남기지 않는다**(§9 요구 명세 B5·RB7). 반복 이벤트도 같다 | bridge·ui 리뷰 |
+| **P7** | (R-40) 오른쪽 클릭 신호가 기억하는 것은 **오른쪽 누름 좌표 1개**(`RightClickTracker.down`)뿐이고, 뗌·합성 뗌·`reset_keys` 때 비운다. 전경 창 조회(§3.10)는 클래스명·pid를 hook 안에서 고정 값과 비교만 하고 버린다 — 밖으로는 불리언 2개와 사각형 2개만 나간다. 창 제목(`GetWindowTextW`)은 부르지 않는다. 좌표·전경 창 정보는 로그·파일·IPC로 남기지 않는다(tray 쪽도 같음 — [tray.md](tray.md) §3.7.7) | 코드 리뷰: `right_click.rs`·`foreground.rs`에 `log::`·`GetWindowTextW` 0건 |
 
 - 비유: 검사원 책상에는 "지금 창구에 서 있는 손님" 명단만 있다. 손님이 나가면 이름을 지운다. 누가 몇 번 왔는지 적는 장부는 없다. 초인종을 계속 누르는 손님이 있어도 "또 눌렀다"만 알리고, 몇 번 눌렀는지는 세지 않는다.
 - `KeyTable`의 칸 256개는 키보드의 "지금 눌림" 불빛과 같다. 불빛을 모아도 입력한 글자 순서는 되살릴 수 없다(순서·시간 정보가 없음). 기존 `HELD: [bool; 256]`과 같은 성격이며 칸마다 분류값 1바이트만 늘어난다. Ctrl 칸도 다른 키 칸과 똑같은 불빛 하나다.
@@ -74,7 +80,12 @@
 
 | 이름 | 인자 | 반환 | 실패 조건 | 요구ID |
 |---|---|---|---|---|
-| `pub fn start(tx: Sender<InputEvent>) -> Result<HookHandle, HookError>` | 이벤트 송신자 | 훅 핸들(두 훅 설치 완료 후 반환) | `Thread`(스레드 생성), `Install { which }`(훅 설치), `Ready`(준비 신호 없음). 시작 전에 `KeyTable`을 비운다(P4) | OV-R-07 |
+| ~~`pub fn start(tx: Sender<InputEvent>) -> Result<HookHandle, HookError>`~~ → **`pub fn start(tx: Sender<InputEvent>, clicks: Sender<RightClick>) -> Result<HookHandle, HookError>`** (R-40, §3.9) | 이벤트 송신자, **오른쪽 클릭 한 쌍 송신자** | 훅 핸들(두 훅 설치 완료 후 반환) | `Thread`(스레드 생성), `Install { which }`(훅 설치), `Ready`(준비 신호 없음). 시작 전에 `KeyTable`·**`RIGHT_CLICK`**을 비운다(P4·P7) | OV-R-07, **R-40** |
+| **`pub struct ScreenPoint { pub x: i32, pub y: i32 }`** (`right_click.rs`) | — | — | — | R-40 |
+| **`pub struct RightClick { pub down: ScreenPoint, pub up: ScreenPoint }`** (`right_click.rs`) | — | — | — | R-40 AC-5·AC-7 |
+| **`pub struct ScreenRect { pub left: i32, pub top: i32, pub right: i32, pub bottom: i32 }`** + **`pub fn covers(&self, other: &ScreenRect) -> bool`** (`foreground.rs`) | 덮을 사각형 | 가장자리 포함 완전 덮음 여부(순수) | 없음 | R-40 AC-8 |
+| **`pub struct ForegroundSnapshot { pub own_process: bool, pub shell: bool, pub client: ScreenRect, pub monitor: ScreenRect }`** (`foreground.rs`) | — | — | — | R-40 AC-8 |
+| **`pub fn foreground_snapshot() -> Option<ForegroundSnapshot>`** (`foreground.rs`) | — | 전경 창 요약 | 없음 — 전경 창 없음·조회 실패는 `None`(에러 타입 아님, §3.10 D29). 훅 콜백 안에서 부르지 않는다 | R-40 AC-8 |
 | `pub fn stop(self)` (`impl HookHandle`) | — | () | 없음(실패는 무시 — 이미 끝난 스레드). 스레드 join 뒤 `KeyTable`을 비운다(P4). Drop도 같은 경로 | OV-R-07 |
 | `pub enum InputEvent` | — | — | — | OV-R-07, OV-R-22, **R-tmp-1(`Keyboard.repeat`)** |
 | `pub enum MouseButton { Left, Right }` | — | — | — | 마우스(기존) |
@@ -132,6 +143,9 @@ pub enum InputEvent {
 |---|---|---|
 | `src-tauri/src/hook/mod.rs` (현재 456줄 → CR-023 적용 후 약 465줄) | 훅 설치·메시지 루프·콜백·이벤트 변환·스로틀·눌린 키 표·특수 키 분류·**자동 반복 구분** | CR-023: `InputEvent::Keyboard.repeat`, `KeyChange.repeat`, `KeyTable::apply` 본문·반환 타입, `keyboard_event`, `//!` 갱신(§3.4) |
 | `src-tauri/src/hook/tests.rs` (현재 401줄 → 약 470줄) | 단위 테스트(`classify` C1~C10, `KeyTable` T1~T17, `keyboard_event` W1, 마우스 2건) | CR-023: `apply(..)` 호출의 `.expect(..)` 제거(반환이 `Option` 아님), T5·T6·T9·T10·T14·W1 기대값 갱신, T15~T17 추가(§8.1) |
+| **`src-tauri/src/hook/right_click.rs` (R-40 신규, 예상 110줄 — 테스트 포함)** | 오른쪽 누름→뗌 한 쌍 추적(`ScreenPoint`·`RightClick`·`RightClickTracker`) + RC1~RC6 | 신규. unsafe·로그·Win32 호출 없음(`WM_RBUTTONDOWN/UP` 상수만) — §3.9 |
+| **`src-tauri/src/hook/foreground.rs` (R-40 신규, 예상 190줄 — 테스트 포함)** | 전경 창 조회 안전 래퍼(`ScreenRect`·`ForegroundSnapshot`·`foreground_snapshot`·`is_shell_class`) + FG1~FG6 | 신규. unsafe U12~U19(블록마다 `// SAFETY:`), 로그·IO 없음 — §3.10 |
+| (R-40, 2026-09-29 실측) `mod.rs` **693줄 → 약 735줄** · `tests.rs` **792줄(변경 없음)** | `mod`·`pub use` 2줄씩, `CLICK_SENDER`·`RIGHT_CLICK`·`click_sender_slot`·`track_right_click`·`send_click`, `mouse_proc` 1줄, `reset_keys`·`recover_missed_mouse_releases`·`start`·`shutdown` 보강, `//!` 갱신 | 800줄 한계 안. `tests.rs`는 한계 직전이라 R-40 테스트는 새 파일 두 곳에 둔다 |
 | (CR-046 소스 반영, 2026-09-26 실측) `mod.rs` 498줄 → **696줄** · `tests.rs` 515줄 → **772줄** | 뗌 유실 정리(`KeyTable::release_stale`·`recover_missed_releases`·`async_key_down`·`mouse_button_down`) + 마우스 보강(`MouseButtonState`·`recover_missed_mouse_releases`, §3.7.10), 콜백 두 곳의 호출, `refresh()` | §3.7.4·§3.7.10 코드 반영. 테스트 S1~S7·MB1~MB4·W1 ⑤~⑦ 추가(§3.7.7·§3.7.10). 둘 다 800줄 한계 안(`tests.rs`는 772줄로 여유가 적다 — 다음 증분은 분리 검토) |
 
 ### 3.1 특수 키 분류 — `classify` (🔒 판정 규칙, CR-023 변경 없음)
@@ -805,6 +819,255 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 - bridge 요구: 없음(bridge가 쓰는 `start`·`HookHandle`·`InputEvent` 불변).
 - **D25** 죽은 unsafe 삭제(검토 표면 축소, golden-principles §6 「unsafe는 필요한 곳에만」). 추적: SEC-001(hook 몫) → §3.8 설계 완료, 실측 게이트 대기, 소스 미적용.
 
+### 3.9 오버레이 오른쪽 클릭 신호 `right_click.rs` (overlay R-40, CR-062, 🔒 사용자 결정 U-1 2026-09-29 — 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.4·§2.8·§4.2·§4.3, 구현자가 그대로 옮길 것)
+
+결론: 훅이 **실제로 본 오른쪽 버튼 누름→뗌 한 쌍**의 두 화면 좌표를 **두 번째 채널 `Sender<RightClick>`**으로 내보낸다. 메뉴를 띄울지(창 사각형·전체 화면·열림 가드)는 tray가 판단한다([tray.md](tray.md) §3.7). `InputEvent`·`input://mouse-button`·`bridge/events.rs`는 바뀌지 않는다.
+
+비유: 검사원이 오른쪽 초인종을 누른 자리를 포스트잇 한 장에 적어 둔다. 손을 떼면 뗀 자리와 함께 옆 창구(`overlay-menu` 스레드)에 한 장으로 건네고 포스트잇을 버린다. 누르는 걸 못 본 뗌이나 검사원이 대신 정리한 뗌(합성 뗌)에는 아무것도 건네지 않는다.
+
+#### 3.9.1 공개 API (§2 증분)
+
+```rust
+// hook/right_click.rs — 순수, unsafe·로그 없음
+/// 화면 좌표(물리 px, 가상 화면). InputEvent::MouseMove 와 같은 좌표계(MSLLHOOKSTRUCT.pt).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ScreenPoint { pub x: i32, pub y: i32 }
+
+/// 훅이 실제로 본 오른쪽 버튼 누름→뗌 한 쌍. 합성 뗌(CR-046 정리)에서는 만들지 않는다.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RightClick { pub down: ScreenPoint, pub up: ScreenPoint }
+
+// hook/mod.rs — `mod right_click;` + `pub use right_click::{RightClick, ScreenPoint};`
+/// 훅 스레드를 시작한다. 두 훅이 모두 설치된 뒤에 돌아온다. `clicks`는 오른쪽 누름→뗌 한 쌍(R-40).
+pub fn start(tx: Sender<InputEvent>, clicks: Sender<RightClick>) -> Result<HookHandle, HookError>;
+```
+
+- `start`의 실패 조건·반환·스레드 수명은 그대로다. 인자 하나가 늘 뿐이다(파급 §3.9.6).
+
+#### 3.9.2 비공개 항목
+
+```rust
+// hook/right_click.rs
+/// 오른쪽 누름 좌표 1개만 기억한다(§1.1 P7). 떼거나 정리하면 비운다.
+pub(super) struct RightClickTracker { down: Option<ScreenPoint> }
+
+impl RightClickTracker {
+    pub(super) const fn new() -> Self;                                    // down: None (static 초기화용)
+    pub(super) fn on_down(&mut self, p: ScreenPoint);                     // 덮어씀(뗌 유실 뒤 새 누름)
+    pub(super) fn on_up(&mut self, p: ScreenPoint) -> Option<RightClick>; // self.down.take().map(|down| RightClick { down, up: p })
+    pub(super) fn clear(&mut self);                                       // down = None
+    /// 메시지 매핑(순수 — RC6): WM_RBUTTONDOWN → on_down 후 None, WM_RBUTTONUP → on_up,
+    /// 그 밖의 메시지 → None(상태 불변).
+    pub(super) fn on_message(&mut self, msg: u32, p: ScreenPoint) -> Option<RightClick>;
+}
+
+// hook/mod.rs
+/// 오른쪽 클릭 한 쌍 송신자. `start`가 채우고 `stop`이 비운다(SENDER 와 같은 수명).
+static CLICK_SENDER: OnceLock<Mutex<Option<Sender<RightClick>>>> = OnceLock::new();
+/// 오른쪽 누름 좌표. 훅 콜백·`reset_keys`만 잡는다.
+static RIGHT_CLICK: Mutex<RightClickTracker> = Mutex::new(RightClickTracker::new());
+
+fn click_sender_slot() -> &'static Mutex<Option<Sender<RightClick>>>; // sender_slot 과 같은 모양
+
+/// 오른쪽 버튼 메시지에서만 RIGHT_CLICK 을 잠근다(이동·왼쪽 버튼·키보드는 잠금 0회).
+fn track_right_click(msg: u32, x: i32, y: i32) -> Option<RightClick> {
+    if !matches!(msg, WM_RBUTTONDOWN | WM_RBUTTONUP) {
+        return None;
+    }
+    RIGHT_CLICK
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .on_message(msg, ScreenPoint { x, y })
+}
+
+/// send() 와 같은 모양. 수신자가 없거나(시작 전·종료 중) 끊겼으면 조용히 버린다.
+fn send_click(c: RightClick);
+```
+
+#### 3.9.3 규칙
+
+| # | 규칙 |
+|---|---|
+| RC-a | **콜백**: `mouse_proc`의 기존 `if let Some(ev) = mouse_event(..) { send(ev); }` **뒤에** `if let Some(c) = track_right_click(msg, info.pt.x, info.pt.y) { send_click(c); }` 한 줄. 추가 비용 = 오른쪽 버튼 메시지마다 Mutex 1회 + 뗌마다 send 1회. 할당·로그·Tauri 호출·전경 창 조회 없음(스킬 §3-3, 횡단 §2.13) |
+| RC-b | **입력 통과(🔒)**: `CallNextHookEx`(U2)는 그대로다. 오른쪽 클릭을 삼키지 않는다(0이 아닌 값 반환·생략 금지). 잠금(클릭 통과) 중에도 아래 창에 그대로 간다. `position_lock` 등 설정을 보지 않는다(hook은 설정을 모른다 — §7) |
+| RC-c | **합성 뗌(R-40 AC-7)**: `recover_missed_mouse_releases`가 정리한 버튼에 `Right`가 있으면 `RIGHT_CLICK`를 `clear()`한다. `MOUSE_BUTTONS` 잠금을 푼 **뒤에** 잡는다(두 잠금을 겹쳐 쥐지 않는다). `RightClick`은 만들지 않는다 |
+| RC-d | **수명**: `reset_keys`(start·stop·refresh)가 `RIGHT_CLICK`도 비운다. `start`는 `SENDER`를 채운 다음 `CLICK_SENDER = Some(clicks)`. `shutdown`은 `SENDER`를 비운 다음 `CLICK_SENDER = None`(유일한 송신자가 사라져 tray `overlay-menu` 스레드의 수신 루프가 끝난다). 종료 순서: `SENDER`·`CLICK_SENDER` 비움 → `WM_QUIT` → `join` → `reset_keys` |
+| RC-e | **짝 규칙**: 누름 없이 온 뗌(앱 시작 전에 누름, 정리 뒤의 뗌)은 `None`. 뗌 유실로 누름이 두 번 오면 마지막 누름과 짝을 짓는다(덮어씀). 한 쌍은 한 번만 나간다(`take`) |
+| RC-f | **좌표**: `MSLLHOOKSTRUCT.pt` 그대로(물리 px, 가상 화면). 버튼 메시지는 스로틀 대상이 아니다. 좌표 변환·창 판정은 hook이 하지 않는다(hook은 window를 모른다 — 스킬 §1) |
+
+변경 코드(구현자가 그대로 옮길 것):
+
+```rust
+// mouse_proc — 기존 send(ev) 뒤
+if let Some(ev) = mouse_event(msg, info.pt.x, info.pt.y, ts) {
+    send(ev);
+}
+// R-40: 실제 오른쪽 누름→뗌 한 쌍을 두 번째 채널로(메뉴 판단은 tray). 입력은 삼키지 않는다.
+if let Some(c) = track_right_click(msg, info.pt.x, info.pt.y) {
+    send_click(c);
+}
+
+// recover_missed_mouse_releases — 본문
+let released = MOUSE_BUTTONS
+    .lock()
+    .unwrap_or_else(PoisonError::into_inner)
+    .release_stale(except, is_down);
+if released.contains(&MouseButton::Right) {
+    // 합성 뗌으로는 메뉴를 띄우지 않는다 — 기억한 누름 좌표도 버린다(R-40 AC-7).
+    RIGHT_CLICK.lock().unwrap_or_else(PoisonError::into_inner).clear();
+}
+released
+    .into_iter()
+    .map(|button| InputEvent::MouseButton { button, pressed: false, ts })
+    .collect()
+
+// reset_keys — MOUSE_BUTTONS clear 다음 줄
+RIGHT_CLICK.lock().unwrap_or_else(PoisonError::into_inner).clear();
+```
+
+- `//!` 갱신: [목적] 오른쪽 클릭 한 쌍 전달(R-40)·전경 창 조회 래퍼 1문장씩, [공개 API] `start(tx, clicks)`·`RightClick`·`ScreenPoint`·`foreground_snapshot`·`ForegroundSnapshot`·`ScreenRect`, [unsafe] "`foreground.rs` U12~U19(전경 창 조회, 훅 콜백 밖) — `mod.rs` 블록 수 불변", [개인정보] P7 한 줄, [테스트] RC1~RC6·FG1~FG6 위치.
+
+#### 3.9.4 스레드·에러·설정 (§4·§6·§7 증분)
+
+- 새 스레드 없음(수신 스레드 `overlay-menu`는 tray 소유 — [tray.md](tray.md) §3.7). 채널 `std::sync::mpsc::Sender<RightClick>`(hook → tray), 단방향, unbounded. 빈도 = 사용자의 실제 오른쪽 클릭 수(초당 수 건 이하).
+- `RIGHT_CLICK` 잠금은 훅 콜백과 `reset_keys`만 잡는다. `refresh`(트레이, 훅 실행 중)와 겹쳐도 Mutex라 데이터 경합이 없다 — 겹치면 그 한 번의 클릭만 메뉴가 안 뜰 수 있다(수용, `KEYS`와 같은 성격).
+- 에러: 변형 추가 없음. `send_click` 실패는 버린다(`send`와 같음).
+- 설정: 읽지 않는다(`position_lock` 분기 없음 — 🔒 잠금 중에도 뜬다).
+
+#### 3.9.5 테스트 (§8 증분 — `right_click.rs` `#[cfg(test)] mod tests`, 지역 `RightClickTracker::new()`만)
+
+`hook/tests.rs`는 792줄이라 새 테스트를 두지 않는다(800줄 한계). 전역 `RIGHT_CLICK`을 거치는 테스트는 두지 않는다(D8·D27).
+
+| # | 이름(안) | 순서 | 기대 |
+|---|---|---|---|
+| RC1 | `down_then_up_pairs` | `on_down((1,2))` → `on_up((3,4))` | `Some(RightClick { down: (1,2), up: (3,4) })` |
+| RC2 | `up_without_down_is_none` | `on_up((3,4))` | `None` |
+| RC3 | `second_down_overwrites` | `on_down((1,1))` → `on_down((5,5))` → `on_up((6,6))` | `Some(RightClick { down: (5,5), up: (6,6) })` |
+| RC4 | `clear_drops_pending_down` | `on_down((1,1))` → `clear()` → `on_up((2,2))` | `None`(합성 뗌 정리·`reset_keys` 경로의 순수 부분) |
+| RC5 | `pair_is_consumed_once` | `on_down((1,1))` → `on_up((2,2))` → `on_up((3,3))` | 첫 `Some`, 둘째 `None`(`take`) |
+| RC6 | `on_message_maps_right_button_only` | `on_message(WM_RBUTTONDOWN, (1,2))` → `(WM_MOUSEMOVE, (9,9))` → `(WM_LBUTTONDOWN, (9,9))` → `(WM_LBUTTONUP, (9,9))` → `(WM_RBUTTONUP, (3,4))` → `(0x9999, (0,0))` | ①~④ `None` ⑤ `Some(RightClick { down: (1,2), up: (3,4) })`(사이의 다른 메시지가 기억한 누름을 바꾸지 않음) ⑥ `None` |
+
+- `track_right_click`은 "오른쪽 메시지가 아니면 즉시 `None`, 맞으면 잠금 + `on_message`" 두 줄이라 RC6이 매핑을 증명한다. `send_click`·`mouse_proc`·RC-c 배선은 코드 리뷰 + 수동([tray.md](tray.md) §8.3 MC-31·MC-34·MC-36 ③)으로 확인한다.
+
+#### 3.9.6 파급 (Grep `hook::start` 2026-09-29)
+
+| 파일·위치 | 현재 | 필요한 수정 | 소관 | 컴파일 |
+|---|---|---|---|---|
+| `src-tauri/src/lib.rs:151-152` | `mpsc::channel::<hook::InputEvent>()` → `hook::start(tx)?` | 채널 하나 더(`mpsc::channel::<hook::RightClick>()`) → `hook::start(tx, click_tx)?` → `input-forwarder` spawn 뒤 `tray::spawn_popup_listener(handle.clone(), click_rx)`(실패는 `log::warn!`, [tray.md](tray.md) §3.7.6). `//!` [스레드]에 `overlay-menu` 추가 | core-implementer | **같은 묶음 필수**(인자 누락이면 컴파일 오류) |
+| `src-tauri/src/bridge/**` | `InputEvent`·`MouseButton` 사용 | 없음(모양 불변) | — | 영향 없음 |
+| 테스트 | `hook::start`를 부르는 테스트 없음(`src-tauri/tests/`·`hook/tests.rs`) | 없음 | — | — |
+
+### 3.10 전경 창 조회 안전 래퍼 `foreground.rs` (overlay R-40 AC-8, 🔒 사용자 결정 U-3 2026-09-29 — 정본 횡단 설계 §2.14 D-10~D-12·§4.2, 구현자가 그대로 옮길 것)
+
+결론: tray가 "지금 전경 창이 다른 앱의 전체 화면인가"를 판정하도록, 필요한 Win32 조회를 hook 안의 안전 함수 **`foreground_snapshot()`** 하나로 감싼다. 생략 여부 판정은 tray의 순수 함수 `suppress_for_fullscreen`이 한다([tray.md](tray.md) §3.7.5). 훅 콜백·훅 스레드·`KeyTable`과 **무관한** 래퍼이고, hook 모듈이 앱의 유일한 unsafe 구역이라 여기 둔다(golden-principles §6, 옛 `elevate.rs`와 같은 자리 규칙).
+
+비유: 극장 안내원(tray)이 들어가기 전에 "상영관 불이 꺼졌나"를 묻는 창구다. 창구 직원(hook)은 문틈으로 보고 네 가지만 알려 준다 — 우리 매표소인가, 로비인가, 화면 크기, 스크린 크기. 영화 제목(창 제목)이나 관객 번호(pid·클래스명)는 알려 주지 않는다.
+
+#### 3.10.1 공개 API (§2 증분)
+
+```rust
+// hook/foreground.rs — `mod foreground;` + `pub use foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect};`
+/// 화면 사각형(물리 px). right·bottom 은 끝(exclusive) 좌표 — Win32 RECT 와 같다.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ScreenRect { pub left: i32, pub top: i32, pub right: i32, pub bottom: i32 }
+
+impl ScreenRect {
+    /// self 가 other 를 완전히 덮는가(가장자리 포함): left ≤, top ≤, right ≥, bottom ≥.
+    pub fn covers(&self, other: &ScreenRect) -> bool;
+}
+
+/// 전경 창 요약. 클래스명·pid·창 제목은 밖으로 내보내지 않는다(비교 결과만 — §1.1 P7).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ForegroundSnapshot {
+    pub own_process: bool,   // 전경 창 pid == std::process::id()
+    pub shell: bool,         // 바탕 화면·작업표시줄(GetShellWindow 와 같거나 is_shell_class)
+    pub client: ScreenRect,  // GetClientRect + ClientToScreen(두 모서리, 정규화)
+    pub monitor: ScreenRect, // MonitorFromWindow(NEAREST) → GetMonitorInfoW().rcMonitor
+}
+
+/// 전경 창이 없거나 조회가 하나라도 실패하면 None(호출자는 "띄움" — fail-open, 횡단 D-12).
+/// 어느 스레드에서나 부를 수 있다(Tauri 호출 없음). **훅 콜백 안에서는 부르지 않는다.**
+pub fn foreground_snapshot() -> Option<ForegroundSnapshot>;
+```
+
+#### 3.10.2 비공개 항목·절차 (조회 함수마다 unsafe 블록 1개, 본문 50줄 한계 준수)
+
+| 함수 | Win32(블록) | 반환 | 실패 |
+|---|---|---|---|
+| `fn foreground_hwnd() -> Option<HWND>` | U12 `GetForegroundWindow()` | NULL이 아니면 `Some` | NULL(활성화 전환 순간) → `None` |
+| `fn window_pid(hwnd: HWND) -> Option<u32>` | U13 `GetWindowThreadProcessId(hwnd, Some(&mut pid))` | 반환값(스레드 id)이 0이 아니면 `Some(pid)` | 0 → `None` |
+| `fn shell_hwnd() -> HWND` | U14 `GetShellWindow()` | 셸 창(없으면 NULL — 실패가 아니라 비교가 거짓이 될 뿐) | — |
+| `fn class_is_shell(hwnd: HWND) -> Option<bool>` | U15 `GetClassNameW(hwnd, &mut buf)`, `buf: [u16; 256]` | 복사 길이 `n > 0`이면 `Some(is_shell_class(&buf[..n as usize]))` | `n <= 0` → `None` |
+| `fn client_rect_on_screen(hwnd: HWND) -> Option<ScreenRect>` | U16 `GetClientRect(hwnd, &mut rc)` → `to_screen` 2회(`(rc.left, rc.top)`·`(rc.right, rc.bottom)`) | 두 점을 **min/max로 정규화**한 사각형(D30) | `Err`·`to_screen` 실패 → `None` |
+| `fn to_screen(hwnd: HWND, x: i32, y: i32) -> Option<(i32, i32)>` | U17 `ClientToScreen(hwnd, &mut pt)` | BOOL 참이면 `Some` | 거짓 → `None` |
+| `fn monitor_rect(hwnd: HWND) -> Option<ScreenRect>` | U18 `MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)` → U19 `GetMonitorInfoW(hmon, &mut mi)` | `mi.rcMonitor`(모니터 전체 — 작업 영역 `rcWork` 아님) | 핸들 NULL·BOOL 거짓 → `None` |
+| `fn is_shell_class(name: &[u16]) -> bool` | 없음(순수) | `Progman`·`WorkerW`·`Shell_TrayWnd`·`Shell_SecondaryTrayWnd` 중 하나와 **완전 일치** | — |
+
+```rust
+const SHELL_CLASSES: [&str; 4] = ["Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd"];
+
+pub fn foreground_snapshot() -> Option<ForegroundSnapshot> {
+    let hwnd = foreground_hwnd()?;
+    let own_process = window_pid(hwnd)? == std::process::id();
+    let shell = hwnd == shell_hwnd() || class_is_shell(hwnd)?;
+    let client = client_rect_on_screen(hwnd)?;
+    let monitor = monitor_rect(hwnd)?;
+    Some(ForegroundSnapshot { own_process, shell, client, monitor })
+}
+
+/// 할당 없는 완전 일치 비교(UTF-16).
+fn is_shell_class(name: &[u16]) -> bool {
+    SHELL_CLASSES.iter().any(|c| name.iter().copied().eq(c.encode_utf16()))
+}
+```
+
+- import: `windows::Win32::Foundation::{HWND, POINT, RECT}`, `windows::Win32::Graphics::Gdi::{ClientToScreen, GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST}`, `windows::Win32::UI::WindowsAndMessaging::{GetClassNameW, GetClientRect, GetForegroundWindow, GetShellWindow, GetWindowThreadProcessId}`. 두 feature(`Win32_UI_WindowsAndMessaging`·`Win32_Graphics_Gdi`)는 `Cargo.toml`에 이미 켜져 있다(횡단 F11, windows 0.58.0 `WindowsAndMessaging/mod.rs:1076·1092·1172·1464·1631`, `Gdi/mod.rs:157·1530·2115` 시그니처 확인) — **Cargo.toml 변경 없음**.
+- `MONITORINFO`는 `cbSize: std::mem::size_of::<MONITORINFO>() as u32`를 **호출 전에** 채운다(`..Default::default()`).
+- 호출 수: 최대 9회(전경 창이 셸 창과 같으면 `GetClassNameW` 생략) — 모두 사용자 모드 조회로 마이크로초 단위(횡단 §2.13 「약 8회」와 같은 규모).
+- 스레드: tray `overlay-menu` 스레드가 부른다. 7차 개정(리뷰 SEC-301, [tray.md](tray.md) §3.7.3 PU-h)부터는 **메뉴 상태가 Idle이고 누름·뗌 두 점이 보이는 오버레이 사각형 안인 한 쌍에만** 1회 부른다. 사각형 밖·숨김·메뉴 예약/열림 중에는 부르지 않는다. 옛 "뗌마다 1회"를 대체한다. 훅 스레드(콜백)·메인 스레드에서는 부르지 않는다(횡단 D-12). 다른 프로세스 창의 조회는 창 소유 스레드 조건이 없다.
+- 좌표: 앱은 모니터별 DPI 인식(PMv2)이라 다른 프로세스 창의 `ClientToScreen`·`rcMonitor`도 물리 px다. `covers`는 같은 호출에서 얻은 두 사각형끼리만 비교하므로 훅·Tauri 좌표와 섞이지 않는다(횡단 D-11).
+- 금지: 로그(`log::`)·파일 IO·`GetWindowTextW`·결과 저장(정적 상태 없음 — 호출마다 새로 조회).
+
+#### 3.10.3 unsafe (§5 증분 — U12~U19, 각 블록 바로 위 `// SAFETY:` 주석에 이 문장을 적는다)
+
+공통 전제(모든 블록): 인자 HWND는 `GetForegroundWindow`가 방금 준 값이다. 그 창은 언제든 닫혀 핸들이 무효가 될 수 있다. 하지만 이 함수들은 커널이 핸들을 검증해 무효면 실패 값만 돌려주므로, 핸들 유효성이 메모리 안전의 전제가 아니다. 호출 스레드 조건이 없다.
+
+- **코드 반영(7차, 리뷰 CORE-302 — 구현 인계):** 이 공통 전제를 코드 SAFETY 주석에도 넣는다. HWND를 인자로 받는 블록 **U13~U18**의 `// SAFETY:` 첫 문장을 "(공통) hwnd 는 GetForegroundWindow 가 방금 준 값이라 그새 무효가 될 수 있으나, 커널이 핸들을 검증해 실패 값만 돌려준다 — 핸들 유효성은 메모리 안전 전제가 아니다."로 둔다. 블록별 근거는 그 뒤에 잇는다. U12·U14는 HWND 인자가 없고, U19는 `hmon`이라 해당 없다. 같은 이유로 **U13 문구를 바꾼다**. 옛 문구 "무효 핸들이면 0을 돌려주고 `pid`를 쓰지 않는다(초기값 0 유지)"는 API가 출력 포인터를 건드리지 않는다고 단정하는데, 문서화된 보장이 아니다. 새 문구는 "실패 시 pid는 쓰지 않는다(tid 0이면 버림)"다. 즉 우리 코드가 반환 tid 0이면 `pid` 값을 읽지 않고 버린다(`foreground.rs:89` `(tid != 0).then_some(pid)` — 동작 불변). 아래 표 U13 행이 새 문구다. 증거는 코드 리뷰(`foreground.rs` U13~U18 SAFETY 첫 문장)다. 동작·테스트 불변.
+
+| # | 함수 | 호출 | SAFETY 근거 |
+|---|---|---|---|
+| U12 | `foreground_hwnd` | `GetForegroundWindow()` | 인자 없는 조회. 반환 HWND 값만 읽고 역참조하지 않는다. NULL 가능 — 호출자가 검사한다 |
+| U13 | `window_pid` | `GetWindowThreadProcessId(hwnd, Some(&mut pid))` | (공통 전제 문장) 출력 포인터는 이 스택 프레임의 지역 `u32`를 가리키고 호출 동안 유효하다. 실패 시 pid는 쓰지 않는다(tid 0이면 버림) — 7차 문구(CORE-302) |
+| U14 | `shell_hwnd` | `GetShellWindow()` | 인자 없는 조회. 반환 값은 비교에만 쓴다 |
+| U15 | `class_is_shell` | `GetClassNameW(hwnd, &mut buf)` | 버퍼는 이 스택 프레임의 `[u16; 256]`이고 windows 크레이트가 슬라이스 길이를 최대 문자 수로 넘겨 넘침이 없다. 반환 `n`은 복사한 문자 수(0..=255)라 `n > 0` 검사 뒤 `&buf[..n as usize]`가 범위 안이다 |
+| U16 | `client_rect_on_screen` | `GetClientRect(hwnd, &mut rc)` | 출력 포인터는 지역 `RECT`. 실패는 `Err`로 돌아온다 |
+| U17 | `to_screen` | `ClientToScreen(hwnd, &mut pt)` | 입출력 포인터는 지역 `POINT`. 실패는 BOOL 거짓 |
+| U18 | `monitor_rect` | `MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)` | 포인터 인자 없음. 반환 모니터 핸들은 소유권이 없어 해제하지 않는다 |
+| U19 | `monitor_rect` | `GetMonitorInfoW(hmon, &mut mi)` | `mi`는 지역 `MONITORINFO`이고 `cbSize`를 호출 전에 채워 함수가 그 크기까지만 쓴다. `hmon`은 U18이 방금 준 NULL 아닌 값 |
+
+- `#![deny(unsafe_op_in_unsafe_fn)]`(mod.rs, 하위 모듈에도 적용) 유지. `foreground.rs` 밖의 hook 파일에는 R-40으로 새 unsafe가 생기지 않는다.
+
+#### 3.10.4 에러 (§6 증분)
+
+- **변형 추가 없음.** 반환이 `Option`이다 — 실패 원인을 나눠도 호출자의 처리가 하나(띄움, fail-open)이고, 로그를 남기지 않으므로(P2·P7) 원인 보존의 이득이 없다(D29). Win32 오류 값은 버린다(스킬 §5 "GetLastError 보존"은 `Result`를 돌려주는 공개 함수의 규칙 — 여기서는 사용처가 없다).
+
+#### 3.10.5 테스트 (§8 증분 — `foreground.rs` `#[cfg(test)] mod tests`, 순수 부분만)
+
+| # | 이름(안) | 입력 | 기대 |
+|---|---|---|---|
+| FG1 | `covers_same_rect_edges_inclusive` | `(0,0,1920,1080).covers(&(0,0,1920,1080))` | `true`(가장자리 포함) |
+| FG2 | `covers_larger_on_all_sides` | `(-8,-8,1928,1088).covers(&(0,0,1920,1080))` | `true` |
+| FG3 | `covers_short_side_is_false` | 아래 모자람 `(0,0,1920,1040)`(작업 영역) / 위 모자람 `(0,23,1920,1080)`(제목 표시줄 아래 클라이언트) 대 `(0,0,1920,1080)` | 둘 다 `false` |
+| FG4 | `covers_negative_secondary_monitor` | `(-1920,0,0,1080).covers(&(-1920,0,0,1080))` / `(0,0,1920,1080).covers(&(-1920,0,0,1080))` | `true` / `false` |
+| FG5 | `shell_classes_match` | `Progman`·`WorkerW`·`Shell_TrayWnd`·`Shell_SecondaryTrayWnd`(UTF-16 `Vec<u16>`) | 모두 `true` |
+| FG6 | `other_classes_do_not_match` | `UnityWndClass`·`Chrome_WidgetWin_1`·빈 이름·`ProgmanX`·`Progma` | 모두 `false`(완전 일치만) |
+
+- `foreground_snapshot()` 자체는 자동 테스트하지 않는다 — 결과가 테스트를 돌리는 순간의 전경 창에 달려 결정적이지 않다(D31). 수동은 [tray.md](tray.md) §8.3 MC-40~MC-45.
+
+#### 3.10.6 파급
+
+- 없음. 신규 공개 항목만 생기고 호출자는 `tray/popup.rs` 하나다. hook은 여전히 다른 모듈을 의존하지 않는다(`std::process::id`만).
+
 ## 4. 스레드·채널
 
 ```
@@ -825,6 +1088,7 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 - `KEYS` 잠금은 **훅 스레드(콜백)만** 잡는다. `start`의 `reset_keys`는 훅 스레드를 만들기 전, `shutdown`의 `reset_keys`는 `join` 뒤에 돈다 → 콜백 안 잠금 대기가 생기지 않는다(스킬 §3-3).
 - 종료 순서(불변): `SENDER` 비움 → `PostThreadMessageW(WM_QUIT)` → `join` → `reset_keys()`.
 - 재시작: 반드시 `stop()` 후 `start()`(이중 등록 금지 — 기존).
+- **R-40(§3.9·§3.10)**: `mouse_proc`가 오른쪽 뗌에서 `send_click(RightClick)` ──`mpsc::Sender<RightClick>`──▶ tray `overlay-menu` 스레드(수신·전경 창 조회·메인 스레드 post — [tray.md](tray.md) §3.7). 종료 순서는 `SENDER`·`CLICK_SENDER` 비움 → `WM_QUIT` → `join` → `reset_keys()`(`RIGHT_CLICK` 포함). `foreground_snapshot()`은 훅 스레드가 아니라 `overlay-menu` 스레드에서 돈다.
 
 ## 5. unsafe
 
@@ -843,8 +1107,10 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 | U9 | 같음 | `TranslateMessage`·`DispatchMessageW` | `GetMessageW`가 채운 msg의 표준 처리 |
 | U10 | 같음(루프 뒤) | `UnhookWindowsHookEx` ×2 | 이 스레드가 설치한 핸들. 실패해도 스레드 종료로 훅이 사라진다 |
 | **U11** | `async_key_down` (CR-046) | `GetAsyncKeyState(vk as i32)` | 포인터·핸들·버퍼 인자가 없는 조회 함수이고 반환 `i16`만 읽는다. 어떤 정수 vk에도 동작이 정의되어 있어(지원하지 않는 키·비활성 데스크톱이면 0) 메모리 안전 전제가 없다. 인자는 표 칸 번호(0..=255). 호출 스레드 조건 없음. "지금 콜백의 키는 조회하지 않는다"는 정확성 규칙(§3.7 L2)이다 |
+| **U12~U19** | `foreground.rs` (R-40) | `GetForegroundWindow`·`GetWindowThreadProcessId`·`GetShellWindow`·`GetClassNameW`·`GetClientRect`·`ClientToScreen`·`MonitorFromWindow`·`GetMonitorInfoW` | §3.10.3 표(블록마다 한 문장). 훅 콜백·훅 스레드와 무관한 조회 래퍼. 공통: 인자 HWND는 방금 받은 값, 무효면 실패 값만 돌려줌, 출력 포인터는 지역 변수, `cbSize`·버퍼 길이는 호출 전에 정해짐 |
 
 - `#![deny(unsafe_op_in_unsafe_fn)]` 유지.
+- **R-40은 `mod.rs`에 unsafe 블록을 추가·변경하지 않는다**(U1~U11 문구 그대로). 새 블록 U12~U19는 모두 `foreground.rs` 안이다. `right_click.rs`는 unsafe 0.
 - **CR-046은 unsafe 블록을 U11 하나만 추가한다**(§3.7.5). 정리 로직 `release_stale`·`recover_missed_releases`는 안전한 Rust다. U1~U3의 SAFETY 문구는 바뀌지 않는다. unsafe 블록 수: 훅 U1~U11 + 승격 E1~E4.
 
 ## 6. 에러 타입
@@ -868,6 +1134,8 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 ### 8.1 단위 — `hook/tests.rs` (`#[cfg(test)] mod tests;`)
 
 **전역 상태 원칙:** `cargo test`는 테스트를 여러 스레드에서 동시에 돌린다. 전역 `KEYS`를 쓰는 테스트가 둘 이상이면 서로의 눌림 개수가 섞인다. 따라서 **표 동작은 지역 `KeyTable::new()`로 검증**하고, 전역 `KEYS`를 거치는 테스트는 **W1 하나만** 둔다.
+
+**테스트 격리(CORE-201, 2026-09-29 소스 동기화):** 실제 소스에서 전역 `KEYS`를 거치는 테스트는 W1과 `keyboard_event_recovery_increment`(§3.7.7) 둘이다. 두 테스트는 `hook/tests.rs`의 `static KEYS_TEST_LOCK: Mutex<()>`을 잡고(`unwrap_or_else(PoisonError::into_inner)`) `reset_keys`로 표를 비운 뒤 진행해, 병렬 `cargo test`에서도 서로의 `held` 정확값 단언을 어지럽히지 않는다. 나머지 테스트는 지역 `KeyTable`·`MouseButtonState` 인스턴스만 써서 잠금이 필요 없다. 이 절과 §3.7.7의 「W1 하나만」(D8)은 이 규칙으로 읽는다.
 
 **CR-023 공통 변경:** `apply`가 `KeyChange`를 바로 돌려주므로 테스트의 `t.apply(..).expect("down")`·`.expect("up")`는 `t.apply(..)`로 바뀐다(기계적). 이전에 `assert_eq!(t.apply(..), None)`으로 "자동 반복 = 이벤트 없음"을 단언하던 자리(T5·T6·T14)는 `repeat: true` 단언으로 바뀐다.
 
@@ -923,9 +1191,14 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 - 마우스 테스트(`mouse_buttons_map_left_right_only`, `mouse_move_is_throttled`)는 불변.
 - 완료 기준(스킬 §9): `cargo fmt --check`, `cargo clippy -- -D warnings` 경고 0, `cargo test` 전건 PASS. **bridge `events.rs` 테스트(페이로드 리터럴)도 같은 묶음에서 컴파일돼야 한다(§9.2 RB6).**
 
+#### R-40 — 오른쪽 클릭 추적(RC1~RC6)·전경 창 순수 판정(FG1~FG6)
+
+- 표는 §3.9.5(`right_click.rs` 테스트)·§3.10.5(`foreground.rs` 테스트). 둘 다 지역 인스턴스·순수 값만 쓰고 전역 정적 상태를 거치지 않는다(D8). `tests.rs`(792줄)는 바뀌지 않는다.
+
 ### 8.2 통합
 
 - 없음. 훅은 사용자 세션이 필요하고, 분류·표·반복 판정은 §8.1에서 끝난다.
+- R-40도 없음. 오른쪽 클릭 → 메뉴의 종단 확인은 GUI가 필요해 [tray.md](tray.md) §8.3 MC-31~MC-45(수동)로 한다.
 
 ### 8.3 수동 체크리스트 (`yarn tauri dev`, 결과·스크린샷은 `doc/300_검증/`에)
 
@@ -1016,7 +1289,9 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 | **R-tmp-1 (CR-023) — 떼면·반복이 멈추면 정지** | §3.5 A7, §9.2 RB4(뗌 이벤트 + ui 타임아웃), §8.3 R2·R3 | 부분(core는 뗌 이벤트·규칙적 반복 신호까지 소스 반영. 멈춤 판단·떨림 표시는 ui 몫) |
 | **R-tmp-1 (CR-023) — 개인정보 P1~P6 유지** | §1.1 P1·P3·P6, §3.3, §8.3 P-1, §9.2 RB7 | ✅ 설계 · 소스 반영(정적 상태 `KEYS`만 유지, 로그 호출 0건) |
 | **R-tmp-2 (CR-046) — 키 뗌 유실 복구(누름·클릭 때 남은 칸 대조·정리 + 칸마다 뗌 이벤트)** | §1, §3.7(세부 추적 §3.7.9), §4 그림, §5 U11, §11 D2·D18 개정·D20~D24 | 설계 · 소스 미적용(한/영·한자 키는 K1 실측 전 부분) |
-| 마우스 이동·좌우 클릭 | §2, §4 | ✅(기존, 영향 없음. CR-046: 버튼 누름이 정리 트리거 — 마우스 이벤트 자체는 불변) |
+| 마우스 이동·좌우 클릭 | §2, §4 | ✅(기존, 영향 없음. CR-046: 버튼 누름이 정리 트리거 — 마우스 이벤트 자체는 불변. R-40: `InputEvent`·`input://mouse-button` 불변) |
+| **overlay R-40 (CR-062) — 실제 오른쪽 누름·뗌 좌표 한 쌍 전달(🔒 U-1의 입력), 잠금 무관·입력 통과(AC-3), 합성 뗌 제외(AC-7)** | §1, §1.1 P7, §2 `start`·`RightClick`·`ScreenPoint`, §3.9, §4, §8 RC1~RC6 | 설계 확정 · 소스 미적용 |
+| **overlay R-40 AC-8 (🔒 U-3) — 전체 화면 판정용 전경 창 조회 안전 래퍼(fail-open)** | §2 `foreground_snapshot`·`ForegroundSnapshot`·`ScreenRect`, §3.10, §5 U12~U19, §8 FG1~FG6 | 설계 확정 · 소스 미적용(생략 판정은 [tray.md](tray.md) §3.7) |
 
 ## 11. 설계 결정 노트
 
@@ -1089,3 +1364,20 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 |---|---|---|---|
 | C2 | IME 토글 키(`VK_HANGUL` 0x15·`VK_HANJA` 0x19) 특례: 누름을 "누름 + 즉시 뗌" 두 이벤트로 내보내고 표에 남기지 않음 | OS 비동기 상태조차 그 키의 뗌을 모르면(§3.7 H-c) (a)로는 풀리지 않는다 | 뗌이 실제로 오는 환경(T7 전제)에서는 "누름 못 본 뗌"이 추가로 생기고, 원인 ③ 하나만 막는다. **§3.7.7 K1이 실패할 때만** 요구로 올린다. 그때 T7 기대값·ui 영향(짧은 누름-뗌 쌍)을 함께 설계한다 |
 | C3 | 마우스 이동에서도 정리(저빈도, 예: 이동 이벤트 1초에 1회) | §3.7 H-b — 이동만 할 때 키보드 그림이 "눌림"으로 남음 | 요구 증상(바운스·분류)은 누름·클릭에서만 판단되므로 해당 없음. 이동 콜백에 시각 비교·잠금이 붙는다. 사용자가 그림 고정을 문제로 보면 요구로 올린다 |
+
+### R-40 결정 (2026-09-29, CR-062 — 횡단 설계 v2 §2.8·§2.14·§4 이행)
+
+| # | 결정 | 대안 | 채택 근거 |
+|---|---|---|---|
+| D26 | 오른쪽 클릭 좌표는 **별도 신호 `RightClick { down, up }` + 두 번째 채널**(`start`에 인자 추가) | ① `InputEvent::MouseButton`에 `x, y` 추가 ② forwarder가 마지막 `MouseMove` 좌표 기억 ③ 메인 스레드 `GetCursorPos` | 횡단 D-8 그대로. ①은 `bridge/events.rs`의 `match *ev` 분해가 깨져 bridge 파일 수정이 필요하고 합성 뗌과 구분이 안 된다. ②는 16ms 스로틀로 좌표가 늦고 합성 뗌과 구분이 안 된다. ③은 누름 좌표를 알 수 없어 🔒 U-1을 판정할 수 없다 |
+| D27 | RC6(메시지 매핑)은 **순수 메서드 `RightClickTracker::on_message`**로 분리해 지역 인스턴스로 검증하고, 전역 `track_right_click`은 "필터 + 잠금 + 위임" 두 줄로 둔다 | 전역 `RIGHT_CLICK`을 거치는 테스트 + `KEYS_TEST_LOCK` 같은 직렬화 잠금 | 횡단 패킷 §4.5 RC6이 core-designer 결정으로 넘긴 항목. 전역 상태 테스트를 늘리지 않는다(D8, CORE-201). `tests.rs`가 792줄이라 전역 경로 테스트를 넣을 자리도 없다 |
+| D28 | `track_right_click`은 **오른쪽 버튼 메시지에서만** 잠근다 | 모든 마우스 메시지에서 `on_message` 호출 | 이동 메시지(수백 Hz 원본)에 잠금이 붙지 않는다 — 콜백 추가 비용 "오른쪽 메시지에 Mutex 1회"(횡단 §2.13) 준수 |
+| D29 | `foreground_snapshot`은 `Option` 반환, 에러 enum 없음 | `Result<_, HookError>`(새 변형 `Foreground(windows::core::Error)`) | 호출자 처리가 실패 종류와 무관하게 하나(띄움, fail-open — 횡단 D-12)이고 로그도 남기지 않는다(P2·P7). 변형을 만들면 쓰이지 않는 원인 정보가 생긴다(스킬 §10) |
+| D30 | 클라이언트 사각형은 `ClientToScreen` 두 점을 **min/max로 정규화** | 왼쪽 위·오른쪽 아래 점을 그대로 left/top·right/bottom에 대입 | 오른쪽→왼쪽 배치(`WS_EX_LAYOUTRTL`) 창은 `ClientToScreen`이 x를 거울처럼 돌려 left > right가 된다 — 그대로 두면 RTL 전체 화면 앱에서 `covers`가 거짓(메뉴가 뜸)이 된다. 정규화는 판정 정의(횡단 D-10 ④ "클라이언트 영역이 모니터 전체를 덮음")를 바꾸지 않고 좌표 표현만 맞춘다 — **구현 세부 보강이며 횡단 설계와의 차이로 보고함** |
+| D31 | `foreground_snapshot()`·`track_right_click`·`send_click` 배선은 자동 테스트 없음(코드 리뷰 + 수동 MC) | 테스트에서 실제 Win32 호출·전역 경로 실행 | 전경 창은 테스트 실행 환경에 따라 달라 결정적이지 않다. 배선은 한두 줄 위임이라 순수 부분(RC·FG)과 리뷰로 충분하다 |
+| D32 | 셸 클래스 목록은 4개 **완전 일치**(대소문자 포함) | 접두 일치·대소문자 무시 | `GetClassNameW`는 등록 철자를 그대로 돌려준다. 접두 일치는 `Progman…` 같은 다른 앱 클래스까지 예외로 만든다(FG6) |
+
+### R-40 확인 필요 · 관찰
+
+12. **요구ID**: overlay `requirements.md` R-40은 ui-designer가 동시에 추가 중이다(횡단 §9 문구). 이 문서는 "overlay R-40"으로 추적한다 — 번호가 바뀌면 §1·§10을 맞춘다.
+13. **(관찰) SwapMouseButton(왼손잡이 설정)**: 저수준 훅이 전달하는 버튼 메시지가 물리 버튼 기준인지 논리(교체 후) 기준인지는 실측하지 않았다. 기존 `MouseButton` 매핑과 같은 조건이라 R-40만의 새 위험은 아니다. 수동 확인이 필요하면 tray.md §8.3 MC-31에 비고로 적는다.

@@ -4,8 +4,8 @@
 //! [공개 API] `Settings`(+하위 구조체), `Language`, `TimerSettings`(timer.rs), `load_or_default`,
 //!        `load`, `Settings::validate`, `SettingsError`, `IDLE_SECONDS_MIN`, `IDLE_SECONDS_MAX`,
 //!        `update`·`SaveOutcome`(store.rs, CR-047 저장 단일 창구), `write_atomic`(atomic.rs, CR-047
-//!        공용 원자적 쓰기 — assets 매니페스트도 재사용). `save`는 비공개(CR-047 ③단계) — 밖에서는
-//!        `update`를 쓴다.
+//!        공용 원자적 쓰기 — assets 매니페스트도 재사용), `read_capped_string`·`MAX_TEXT_FILE_BYTES`
+//!        (atomic.rs, 텍스트 파일 상한 읽기). `save`는 비공개(CR-047 ③단계) — 밖에서는 `update`를 쓴다.
 //! [규칙] scale 0.25~2 / idleSeconds 60~3600(읽기는 보정) / mouse 가 있으면 area 네 점이
 //!        유한수(볼록성·순서는 검사 안 함). language·positionLock·showInTaskbar 는 검증 없음(SV2).
 //!        timer 위치·회전·크기·색(읽기는 보정, CR-045).
@@ -23,10 +23,13 @@
 //!          새 필드 3개 기본·관용 언어·직렬화 키·읽기 clamp(SV2),
 //!          penMode 기본·옛 파일·왕복(CR-033, pen_mode_tests.rs),
 //!          penPos 기본·null 유지(pen_pos_tests.rs N1′~N6, CR-035),
-//!          타이머 설정(timer.rs, CR-045).
+//!          타이머 설정(timer.rs, CR-045),
+//!          1MiB 상한 초과 파일 → 기본값 대체(SEC-205, atomic.rs AW7과 함께).
 
-use std::fs;
 use std::path::Path;
+
+#[cfg(test)]
+use std::fs;
 
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -35,7 +38,7 @@ pub use timer::TimerSettings;
 
 mod atomic;
 mod store;
-pub use atomic::write_atomic;
+pub use atomic::{read_capped_string, write_atomic, MAX_TEXT_FILE_BYTES};
 pub use store::{update, SaveOutcome};
 
 pub const SCALE_MIN: f64 = 0.25;
@@ -267,8 +270,10 @@ pub fn load_or_default(path: &Path) -> Settings {
         Ok(None) => Settings::default(),
         Err(e) => {
             log::warn!(
-                "설정 파일을 읽지 못해 기본값을 씁니다 ({}): {e}",
-                path.display()
+                "설정 파일을 읽지 못해 기본값을 씁니다 (파일={}): {e}",
+                path.file_name()
+                    .map(|n| n.to_string_lossy())
+                    .unwrap_or_default()
             );
             Settings::default()
         }
@@ -280,7 +285,9 @@ pub fn load(path: &Path) -> Result<Option<Settings>, SettingsError> {
     if !path.exists() {
         return Ok(None);
     }
-    let text = fs::read_to_string(path)?;
+    // SEC-205: 상한(1MiB)을 넘는 파일은 읽지 않는다 — Io 오류가 돼 load_or_default가 기존
+    // "손상된 파일" 경로(기본값 대체)를 그대로 탄다.
+    let text = atomic::read_capped_string(path, atomic::MAX_TEXT_FILE_BYTES)?;
     let mut settings: Settings = serde_json::from_str(&text)?;
     // 범위 밖 유휴 시간은 거부 대신 보정한다 — 옛 파일이 이 한 필드 때문에 위치·마우스
     // 설정까지 통째로 기본값으로 대체되지 않게 한다(D24).
@@ -383,6 +390,21 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("settings.json");
         fs::write(&path, "{ not json").expect("write");
+        assert_eq!(load_or_default(&path), Settings::default());
+    }
+
+    /// SEC-205: 1MiB 를 넘는 settings.json 은 읽지 않고 기본값으로 대체한다(기존 손상 파일 경로).
+    #[test]
+    fn oversized_file_falls_back_to_default() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("settings.json");
+        let mut json = br#"{"scale": 1.5, "pad": ""#.to_vec();
+        json.extend(vec![b'x'; atomic::MAX_TEXT_FILE_BYTES as usize]);
+        json.extend_from_slice(br#""}"#);
+        fs::write(&path, &json).expect("write");
+        assert!(json.len() as u64 > atomic::MAX_TEXT_FILE_BYTES);
+
+        assert!(matches!(load(&path), Err(SettingsError::Io(_))));
         assert_eq!(load_or_default(&path), Settings::default());
     }
 

@@ -51,8 +51,12 @@ fn parse_entry(value: serde_json::Value) -> Option<AssetEntry> {
             }
             Some(entry)
         }
-        Err(e) => {
-            log::warn!("manifest.json 항목을 건너뜁니다(알 수 없는 슬롯이거나 형식 오류, slot={slot}): {e}");
+        Err(_) => {
+            // SEC-201: serde_json 오류 메시지는 항목의 원본 값을 그대로 담을 수 있어(예: 잘못된
+            // 타입의 필드 값) 로그에 넣지 않는다. slot 은 이미 문자열화된 값이라 안전하다.
+            log::warn!(
+                "manifest.json 항목을 건너뜁니다(알 수 없는 슬롯이거나 형식 오류, slot={slot})"
+            );
             None
         }
     }

@@ -170,7 +170,12 @@ fn remove_other_formats(assets_dir: &Path, keep: AlarmFormat) {
         match fs::remove_file(&path) {
             Ok(()) => {}
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-            Err(e) => log::warn!("다른 형식 알림음 삭제 실패({path:?}): {e}"),
+            // SEC-201: 절대 경로 대신 파일 이름과 오류 종류만 남긴다.
+            Err(e) => log::warn!(
+                "다른 형식 알림음 삭제 실패(file={:?}, kind={:?})",
+                path.file_name(),
+                e.kind()
+            ),
         }
     }
 }

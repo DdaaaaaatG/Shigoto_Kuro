@@ -1,9 +1,9 @@
 //! 사용자 이미지(에셋) 검증·저장·매니페스트.
 //!
 //! [목적] 확정사항 §3·§4 — PNG 32bit RGBA 만, 상태 레이어(캔버스 레이어) ≤900×700·≤1MB·서로 같은 크기.
-//!        마우스 파츠(`mouse_base`·`mouse_left`·`mouse_right`)는 단일 모드 — ≤900×700·≤1MB·셋이
-//!        서로 같은 크기(2026-09-23 재정의, 캔버스와 같을 필요 없음). 검증을 통과한 파일만 앱 데이터
-//!        `assets/` 로 복사하고 manifest.json 에 기록.
+//!        마우스 파츠(`mouse_base`·`mouse_left`·`mouse_right`)는 각각 ≤900×700·≤1MB만 만족하면 되고
+//!        셋이 서로 같은 크기일 필요는 없다(CR-036, 2026-09-25 확정 「팔·손 파츠 크기 자유」). 검증을
+//!        통과한 파일만 앱 데이터 `assets/` 로 복사하고 manifest.json 에 기록.
 //!        OV-R-14(CR-007·CR-008)는 `mouse_base` 의 손 기준점(끝부분 무게중심)을 캔버스 좌표(그림 좌표 +
 //!        `part_pos`)로 계산한다.
 //!        OV-R-17(CR-014)은 배경 슬롯(맨 아래·전체 캔버스·선택)을 추가한다.
@@ -11,7 +11,7 @@
 //!        캔버스 레이어로 추가한다(slot.rs).
 //!        R-tmp-4(CR-024)는 펜 쥔 손 파츠 그룹(`pen_up`·`pen_down_N`·`pen_key_*` 7개)을 추가한다
 //!        — 캔버스 레이어도 마우스 파츠도 아닌 세 번째 그룹, 펜 그림끼리만 같은 크기(slot.rs).
-//!        CR-035 내장 기본 세트(defaults.rs)·내보내기(export.rs) — 기본 그림 15장을 exe 에
+//!        CR-035 내장 기본 세트(defaults.rs)·내보내기(export.rs) — `DEFAULT_ASSETS` 전부를 exe 에
 //!        `include_bytes!`로 담아 첫 실행 시딩·기본값 복원·사용자 폴더 내보내기를 지원한다.
 //! [공개 API] `AssetSlot`, `SimpleSlot`, `KbDownKind`, `PenDownKind`(slot.rs 재노출), `AssetManifest`,
 //!            `parse_png_header`, `validate`, `load_manifest`, `import`, `import_bytes`, `remove`,
@@ -48,7 +48,8 @@
 //!          내장 기본 세트(tests/default_assets.rs D1~D17, M1),
 //!          마우스·펜 파츠 크기 자유(CR-036, mouse_part_tests.rs M1~M6, pen_part_tests.rs P3~P6),
 //!          manifest fileName 불신·가져오기 크기 선검사(CR-047, security_tests.rs FN1~FN7, RC1~RC6),
-//!          알림음 저장소(CR-048, `sound.rs` `#[cfg(test)]` A1~A14 — `AssetSlot`·매니페스트와 분리).
+//!          알림음 저장소(CR-048, `sound.rs` `#[cfg(test)]` A1~A14 — `AssetSlot`·매니페스트와 분리),
+//!          manifest.json 1MiB 상한 초과 거부(SEC-205, 이 파일 `#[cfg(test)]`).
 //! [알림음] CR-048 TM-08 — `sound.rs`(`pub mod sound;`)가 `assets/alarm.{wav|mp3|ogg}`를 이 모듈의
 //!        PNG·매니페스트 경로와 분리해 관리한다. 보안 규칙(`read_capped`·`write_atomic`)만 재사용한다.
 
@@ -280,7 +281,10 @@ pub fn load_manifest(assets_dir: &Path) -> Result<AssetManifest, AssetError> {
     if !path.exists() {
         return Ok(AssetManifest::default());
     }
-    manifest_load::parse_manifest(&fs::read_to_string(path)?)
+    // SEC-205: 상한(1MiB, settings::MAX_TEXT_FILE_BYTES)을 넘는 매니페스트는 읽지 않는다 —
+    // Io 오류가 돼 기존 오류 전파 경로(호출자가 그대로 실패로 본다)를 그대로 탄다.
+    let text = crate::settings::read_capped_string(&path, crate::settings::MAX_TEXT_FILE_BYTES)?;
+    manifest_load::parse_manifest(&text)
 }
 
 /// `settings::write_atomic`(CR-047 CORE-002)로 고유 임시 파일 → `sync_all` → rename 한 번으로
@@ -713,6 +717,17 @@ mod tests {
                 height: 700
             })
         );
+    }
+
+    /// SEC-205: 1MiB 를 넘는 manifest.json 은 파싱 전에 거부한다(Io 오류).
+    #[test]
+    fn load_manifest_rejects_oversized_file() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let assets = dir.path().join("assets");
+        fs::create_dir_all(&assets).expect("mkdir");
+        let huge = vec![b'x'; (ASSET_MAX_BYTES + 1) as usize];
+        fs::write(assets.join(MANIFEST_FILE), &huge).expect("write huge manifest");
+        assert!(matches!(load_manifest(&assets), Err(AssetError::Io(_))));
     }
 
     /// B13: 배경이 캔버스를 붙잡고 있으면 몸통을 다른 크기로 재등록해도 거부된다.

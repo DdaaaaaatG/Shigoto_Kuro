@@ -20,7 +20,10 @@ import {
 } from 'bridge/types'
 
 /** 「타이머」 탭 카드 2 미리보기 상자 크기(design/timer-tab.md §1.2) */
-export const TIMER_PREVIEW_BOX: { readonly width: 400; readonly height: 350 } = { width: 400, height: 350 }
+export const TIMER_PREVIEW_BOX: { readonly width: 400; readonly height: 350 } = {
+  width: 400,
+  height: 350,
+}
 
 const clampAxis = (v: number, max: number): number =>
   Number.isFinite(v) ? Math.min(max, Math.max(0, Math.round(v))) : 0
@@ -44,7 +47,8 @@ export const clampFontSize = (v: number): number =>
     : DEFAULT_TIMER_SETTINGS.fontSize
 
 /** '#rrggbb' 형식이면 소문자로, 아니면 null(저장하지 않는다) */
-export const normalizeColor = (v: string): string | null => (/^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : null)
+export const normalizeColor = (v: string): string | null =>
+  /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : null
 
 // ─── CR-050(타이머 모드) §14.5 ──────────────────────────────────────────────
 
@@ -64,7 +68,9 @@ export const fullTimer = (t: TimerSettings | undefined): FullTimerSettings => ({
 })
 
 /** 두 스위치의 표시값 — 켜짐 && 그 모드일 때만 true(한쪽이 켜지면 다른 쪽은 저절로 꺼짐) */
-export const timerToggles = (t: FullTimerSettings): { stopwatchOn: boolean; countdownOn: boolean } => ({
+export const timerToggles = (
+  t: FullTimerSettings,
+): { stopwatchOn: boolean; countdownOn: boolean } => ({
   stopwatchOn: t.enabled && t.mode === 'stopwatch',
   countdownOn: t.enabled && t.mode === 'countdown',
 })
@@ -75,11 +81,15 @@ export const togglePatch = (mode: TimerMode, on: boolean): Partial<TimerSettings
 
 /** 시작 시간 입력 잠금 — 타이머(카운트다운)가 켜져 있고 흐르는 중·일시정지·끝남일 때만 */
 export const isDurationLocked = (t: FullTimerSettings, status: TimerStatus): boolean =>
-  t.enabled && t.mode === 'countdown' && (status === 'running' || status === 'paused' || status === 'finished')
+  t.enabled &&
+  t.mode === 'countdown' &&
+  (status === 'running' || status === 'paused' || status === 'finished')
 
 /** 초 → 시·분·초. 비유한수는 0, 0 ~ TIMER_COUNTDOWN_SECS_MAX(359999)로 자른다 */
 export const splitHms = (secs: number): { h: number; m: number; s: number } => {
-  const n = Number.isFinite(secs) ? Math.min(TIMER_COUNTDOWN_SECS_MAX, Math.max(0, Math.floor(secs))) : 0
+  const n = Number.isFinite(secs)
+    ? Math.min(TIMER_COUNTDOWN_SECS_MAX, Math.max(0, Math.floor(secs)))
+    : 0
   return { h: Math.floor(n / 3600), m: Math.floor((n % 3600) / 60), s: n % 60 }
 }
 
@@ -111,7 +121,7 @@ export const parseHmsDraft = (d: HmsDraft): number | null => {
   return total < TIMER_COUNTDOWN_SECS_MIN ? null : total
 }
 
-/** 알림음 음량(%) 자르기 — 비유한수는 기본값(44, CR-058), 반올림 뒤 0 ~ TIMER_ALARM_VOLUME_MAX(100) */
+/** 알림음 음량(%) 자르기 — 비유한수는 기본값(DEFAULT_TIMER_SETTINGS.alarmVolume, CR-058), 반올림 뒤 0 ~ TIMER_ALARM_VOLUME_MAX(100) */
 export const clampVolume = (v: number): number =>
   Number.isFinite(v)
     ? Math.min(TIMER_ALARM_VOLUME_MAX, Math.max(0, Math.round(v)))

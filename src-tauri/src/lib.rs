@@ -7,7 +7,9 @@
 //!        시작 시 단발 스레드 `autostart-sync`(spawn_autostart_sync, SV2-05)가 자동 실행
 //!        등록 상태를 조회해 설정을 보정한다. CR-048 TM-06 — 마감 시각 스레드
 //!        `timer-deadline`(`timer::driver::spawn`)이 카운트다운 0 도달·끝남 만료를 감지해
-//!        `publish_timer_change`(깔때기)를 부른다. 주기 emit 없음.
+//!        `publish_timer_change`(깔때기)를 부른다. 주기 emit 없음. overlay R-40(CR-062) —
+//!        `overlay-menu`(`tray::spawn_popup_listener`) 스레드가 훅의 오른쪽 클릭 한 쌍을 받아
+//!        창 사각형·전체 화면 판정 뒤 메인 스레드에 팝업을 post한다.
 //! [진단 로그] CR-046 원인 확정용(사용자 승인 2026-09-26). 전달 스레드가 콜백 밖에서
 //!        `target: "kuro_diag"`로 개수·방향만 남긴다(`log_input_diag`) — 어떤 키인지·vk 코드는
 //!        절대 남기지 않는다(확정사항 §5). `RUST_LOG=kuro_diag=debug`일 때만 보인다.
@@ -106,19 +108,7 @@ pub fn run() {
                 log::warn!("매니페스트를 읽지 못해 캔버스 없음으로 처리합니다: {e}");
                 assets::AssetManifest::default()
             });
-            let initial_hand_anchor = match &settings.mouse {
-                Some(m) => assets::compute_hand_anchor(
-                    &paths.assets_dir,
-                    &manifest,
-                    m.shoulder,
-                    m.part_pos,
-                )
-                .unwrap_or_else(|e| {
-                    log::warn!("손 기준점 초기 계산 실패: {e}");
-                    None
-                }),
-                None => None,
-            };
+            let initial_hand_anchor = initial_hand_anchor(&paths, &manifest, &settings);
             // 1-a. 마감 시각 스레드(CR-048 TM-06) — AppState보다 먼저 띄운다. 콜백은 부를
             // 때마다 app.try_state::<AppState>()로 찾는다(없으면 next_wake = None → 무기한 대기).
             let (nw_handle, od_handle) = (handle.clone(), handle.clone());
@@ -147,22 +137,8 @@ pub fn run() {
             tray::init(&handle)?;
             tray::sync_timer_menu(&handle);
 
-            // 4. 전역 입력 훅 → 이벤트 전달 스레드
-            let (tx, rx) = mpsc::channel::<hook::InputEvent>();
-            let hook_handle = hook::start(tx)?;
-            app.manage(HookGuard(Mutex::new(Some(hook_handle))));
-
-            let emitter = handle.clone();
-            std::thread::Builder::new()
-                .name("input-forwarder".into())
-                .spawn(move || {
-                    for ev in rx {
-                        log_input_diag(&ev);
-                        if let Err(e) = bridge::events::emit_input(&emitter, &ev) {
-                            log::warn!("입력 이벤트 emit 실패: {e}");
-                        }
-                    }
-                })?;
+            // 4. 전역 입력 훅 → 이벤트 전달 스레드 (+ overlay R-40 오버레이 오른쪽 클릭 메뉴 스레드)
+            start_input_pipeline(&handle)?;
 
             // 5. 오버레이 창 리사이즈·위치 복원·표시(속성 전체)·이동 감시 (계약 §5.1·§5.2, SV2-03·04)
             setup_overlay(&handle, &settings, &manifest);
@@ -300,6 +276,51 @@ fn create_configured_windows<R: tauri::Runtime>(app: &tauri::App<R>) {
             log::warn!("창 생성 실패({label}): {e}");
         }
     }
+}
+
+/// setup 1단계 일부: 저장된 마우스 설정으로 손 기준점을 초기 계산한다(OV-R-14, 계약 v0.3).
+/// 마우스 설정이 없거나 계산이 실패하면 `None`(경고 로그만 — `run()`의 setup 클로저가
+/// 50줄을 넘어 분리했다, golden-principles §1).
+fn initial_hand_anchor(
+    paths: &AppPaths,
+    manifest: &assets::AssetManifest,
+    settings: &Settings,
+) -> Option<settings::Point> {
+    let mouse = settings.mouse.as_ref()?;
+    assets::compute_hand_anchor(&paths.assets_dir, manifest, mouse.shoulder, mouse.part_pos)
+        .unwrap_or_else(|e| {
+            log::warn!("손 기준점 초기 계산 실패: {e}");
+            None
+        })
+}
+
+/// setup 4단계: 전역 입력 훅 → 이벤트 전달 스레드 `input-forwarder` (+ overlay R-40
+/// 오른쪽 클릭 메뉴 스레드 `overlay-menu`). 훅·전달 스레드 실패는 Err(setup 실패 — 기존과
+/// 같음), 메뉴 스레드 실패는 경고 후 계속(tray.md §3.7.6 T14, `run()`의 setup 클로저가
+/// 50줄을 넘어 분리했다 — golden-principles §1).
+fn start_input_pipeline(handle: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let (tx, rx) = mpsc::channel::<hook::InputEvent>();
+    let (click_tx, click_rx) = mpsc::channel::<hook::RightClick>();
+    let hook_handle = hook::start(tx, click_tx)?;
+    handle.manage(HookGuard(Mutex::new(Some(hook_handle))));
+
+    let emitter = handle.clone();
+    std::thread::Builder::new()
+        .name("input-forwarder".into())
+        .spawn(move || {
+            for ev in rx {
+                log_input_diag(&ev);
+                if let Err(e) = bridge::events::emit_input(&emitter, &ev) {
+                    log::warn!("입력 이벤트 emit 실패: {e}");
+                }
+            }
+        })?;
+
+    // 메뉴 기능 실패는 앱 시작을 막지 않는다(overlay R-40, tray.md §3.7.6 T14).
+    if let Err(e) = tray::spawn_popup_listener(handle.clone(), click_rx) {
+        log::warn!("오버레이 메뉴 스레드를 시작하지 못했습니다: {e}");
+    }
+    Ok(())
 }
 
 /// 설정 로드 + 데이터 세대 검사(R-A2). 세대가 다르거나 없으면 전체 초기화한 뒤의 값을 돌려준다.

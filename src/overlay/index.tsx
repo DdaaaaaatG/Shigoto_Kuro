@@ -22,6 +22,7 @@ import {
   useReducer,
   useRef,
   useState,
+  type MouseEvent,
   type WheelEvent,
 } from 'react'
 import {
@@ -84,6 +85,9 @@ const jellyClass = (motion: WrapMotion, base: string = styles.jellyWrap): string
   if (motion === 'shiver') return `${base} ${styles.shiver}`
   return base
 }
+
+/** WebView2 기본 오른쪽 클릭 메뉴 억제(CR-062, R-40). .root 한 곳에만 붙인다 — 상태·dispatch·bridge 호출 없음 */
+const preventContextMenu = (e: MouseEvent<HTMLDivElement>) => e.preventDefault()
 
 const OverlayApp = () => {
   const [settings, setLocalSettings] = useState<Settings>(DEFAULT_SETTINGS)
@@ -221,7 +225,12 @@ const OverlayApp = () => {
   const hasHair = useMemo(() => findEntry(manifest, 'hair') !== undefined, [manifest])
 
   return (
-    <div className={styles.root} data-tauri-drag-region onWheel={onWheel}>
+    <div
+      className={styles.root}
+      data-tauri-drag-region
+      onWheel={onWheel}
+      onContextMenu={preventContextMenu}
+    >
       {canvas && (
         <div
           className={styles.canvas}

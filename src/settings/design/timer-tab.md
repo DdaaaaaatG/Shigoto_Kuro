@@ -230,7 +230,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | command | `get_timer` | `getTimer()` | → `TimerSnapshot` | 공용 `useTimerSnapshot`(`TimerPreview` 마운트) | 없음(초기값 유지) |
 | event | `timer://changed` | `onTimerChanged(handler)` | `TimerSnapshot { status: TimerStatus; elapsedMs: number }` | 공용 `useTimerSnapshot` | — |
 | event | `settings://changed` · `assets://changed` | 기존 | `Settings` · `AssetManifest` | `SettingsApp`(기존) | — |
-| 상수 | v0.21 | `DEFAULT_TIMER_SETTINGS`(`enabled` false · `textPos` (142, 458) · `rotation` 9(CR-053, v0.24 — 옛 (268, 403)·5) · `fontSize` 36 · `color` `'#333333'`) · `TIMER_ROTATION_MIN/MAX`(−180/180) · `TIMER_FONT_SIZE_MIN/MAX`(12/200) | — | `timerValues`, `TimerTab` 슬라이더 범위 | — |
+| 상수 | v0.21 | `DEFAULT_TIMER_SETTINGS`(`enabled` false · `textPos` (268, 402) · `rotation` 7(CR-058·CR-059 🔒 2026-09-28, contract v0.27 — 이력: CR-053 v0.24 (142, 458)·9, 그 전 (268, 403)·5) · `fontSize` 36 · `color` `'#333333'`) · `TIMER_ROTATION_MIN/MAX`(−180/180) · `TIMER_FONT_SIZE_MIN/MAX`(12/200) | — | `timerValues`, `TimerTab` 슬라이더 범위 | — |
 | 타입 | v0.21 | `AssetSlot` `'pomo_char'`·`'pomo_bubble'`(캔버스 레이어·선택·`hasBuiltinDefault` false) | — | `TimerPreview`(url), `imageSlots.buildSlotGroups`(§13) | — |
 
 화면 코드는 `invoke`·`listen`·이벤트 이름 문자열을 쓰지 않는다. 테스트는 `vi.mock('bridge/commands')`에 `getTimer`·`controlTimer`·`onTimerChanged`를 추가한다(기존 설정 창 테스트 mock 포함 — 기존 테스트 전부 Green).
@@ -278,8 +278,8 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 
 - 요구: `requirements.md` **v1.21** — R-49(두 토글, TM-01·02·12) · R-50(시작 시간, TM-04·05) · R-51(두 모드 공통 버튼, TM-03·05·12) · R-52(끝남 깜빡임, TM-06, A-5) · R-53(알림음 카드, TM-08·09) · R-54(음량, TM-10) · R-55(3개 국어, TM-13). R-44의 「on/off 토글」 부분은 R-49가 대체한다.
 - 근거: 확정사항 §6 「타이머 모드 추가 (🔒 2026-09-26, CR-048)」·결정 줄(D-1~D-11 권고안 확정), `doc/200_설계/architecture/timer-mode-02-design.md` §3.6·§6·§8, `timer-mode-03-packet-ui.md` §2·§3·§5·§6·§7.
-- 계약: contract **v0.23** — `src/bridge`에 반영됨(확정, 인용만). 이름: `TimerMode`, `TimerSettings.mode?`·`countdownSecs?`·`alarmVolume?`, `DEFAULT_TIMER_SETTINGS`(`mode` `'stopwatch'`·`countdownSecs` 1500·`alarmVolume` 80), `TIMER_COUNTDOWN_SECS_MIN`(1)·`TIMER_COUNTDOWN_SECS_MAX`(359999)·`TIMER_ALARM_VOLUME_MAX`(100), `TimerStatus` `'finished'`, `TimerSnapshot.mode?`·`durationMs?`, `AlarmFormat`·`AlarmSound { format, bytes, url }`, 래퍼 `getAlarmSound()`·`importAlarmSound(path)`·`removeAlarmSound()`·`pickAudioFile(title?)`, 에러 `sound.not_audio`·`sound.too_many_bytes`·`sound.io`.
-- 공용 코드(overlay 설계 CR-050이 정의를 소유 — 여기서는 **이름과 쓰는 방식만 인용**): `components/utils/timerClock`(표시 ms 모드 분기 `timerDisplayMs`, 카운트다운 올림 표기, `mode` 없음 → 스톱워치), `components/utils/timerClock`의 `isTimerBlinking(snapshot: TimerSnapshot): boolean`(순수 — `snapshot.status === 'finished'`), `components/hooks/useElapsedText`(**이름·시그니처·반환 불변** `useElapsedText(snapshot, receivedAt): string` — 모드 분기 반영: 카운트다운 `running`은 올림 초, `finished`는 `'00:00:00'`, `finished`면 interval 없음. 깜빡임 여부는 반환하지 않는다 — 호출자가 `isTimerBlinking`을 부른다), `components/hooks/useTimerSnapshot`(반환 상태에 선택 필드 `fromEvent?: boolean` 추가 — 오버레이 알람 판정용. 이 화면은 읽지 않으며 기존 mock 반환값 `{ snapshot, receivedAt }`은 그대로 유효), `components/utils/alarmSound`(`defaultAlarmUrl(): string` — 첫 호출에 내장 기본음(삐 3번) Blob URL을 만들어 창마다 캐시·재사용; `playSound(url: string, volume: number, onFail?: () => void): () => void` — `volume`은 **0~1 배율**(범위 밖은 0~1로 자름, 비유한수 0), **예외를 던지지 않고** 재생 실패(`play()` 거부·`error` 이벤트·동기 예외)는 `onFail` **최대 1회**로 알림, 반환 = 정지 함수(정지 뒤에는 `onFail` 없음, 두 번 불러도 안전)). 같은 모듈의 `alarmGain(t: TimerSettings)`(저장값 0~100 → 0~1)은 오버레이 알람용이며 이 화면은 쓰지 않는다 — 미리 듣기는 **초안값**(`volumeDraft.shown`)을 `/ 100`으로 직접 바꾼다(슬라이더를 놓기 전 값이라 저장된 `TimerSettings`가 아니다). 정의 출처: `src/overlay/design/functions.md` §5.7 ①②④.
+- 계약: contract **v0.23** — `src/bridge`에 반영됨(확정, 인용만). 이름: `TimerMode`, `TimerSettings.mode?`·`countdownSecs?`·`alarmVolume?`, `DEFAULT_TIMER_SETTINGS`(`mode` `'stopwatch'`·`countdownSecs` 1500·`alarmVolume` **44** — CR-058·CR-059 🔒 2026-09-28, contract v0.27. v0.23 당시 80), `TIMER_COUNTDOWN_SECS_MIN`(1)·`TIMER_COUNTDOWN_SECS_MAX`(359999)·`TIMER_ALARM_VOLUME_MAX`(100), `TimerStatus` `'finished'`, `TimerSnapshot.mode?`·`durationMs?`, `AlarmFormat`·`AlarmSound { format, bytes, url }`, 래퍼 `getAlarmSound()`·`importAlarmSound(path)`·`removeAlarmSound()`·`pickAudioFile(title?)`, 에러 `sound.not_audio`·`sound.too_many_bytes`·`sound.io`.
+- 공용 코드(overlay 설계 CR-050이 정의를 소유 — 여기서는 **이름과 쓰는 방식만 인용**): `components/utils/timerClock`(표시 ms 모드 분기 `timerDisplayMs`, 카운트다운 올림 표기, `mode` 없음 → 스톱워치), `components/utils/timerClock`의 `isTimerBlinking(snapshot: TimerSnapshot): boolean`(순수 — `snapshot.status === 'finished'`), `components/hooks/useElapsedText`(**이름·시그니처·반환 불변** `useElapsedText(snapshot, receivedAt): string` — 모드 분기 반영: 카운트다운 `running`은 올림 초, `finished`는 `'00:00:00'`, `finished`면 interval 없음. 깜빡임 여부는 반환하지 않는다 — 호출자가 `isTimerBlinking`을 부른다), `components/hooks/useTimerSnapshot`(반환 상태에 선택 필드 `fromEvent?: boolean` 추가 — 오버레이 알람 판정용. 이 화면은 읽지 않으며 기존 mock 반환값 `{ snapshot, receivedAt }`은 그대로 유효), `components/utils/alarmSound`(`defaultAlarmUrl(): string` — 번들된 정적 mp3 자산(`src/assets/sounds/default-alarm.mp3`, 사용자 지정 원본 — CR-058 🔒 2026-09-28)의 URL을 돌려준다, 항상 같은 문자열·부작용 없음. 옛 합성 비프음(삐 3번) Blob URL 캐시는 CR-058로 폐기; 음량 기본 상수 `DEFAULT_ALARM_VOLUME` = `DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44`(CR-060 — 이 화면은 쓰지 않는다); `playSound(url: string, volume: number, onFail?: () => void): () => void` — `volume`은 **0~1 배율**(범위 밖은 0~1로 자름, 비유한수 0), **예외를 던지지 않고** 재생 실패(`play()` 거부·`error` 이벤트·동기 예외)는 `onFail` **최대 1회**로 알림, 반환 = 정지 함수(정지 뒤에는 `onFail` 없음, 두 번 불러도 안전)). 같은 모듈의 `alarmGain(t: TimerSettings)`(저장값 0~100 → 0~1)은 오버레이 알람용이며 이 화면은 쓰지 않는다 — 미리 듣기는 **초안값**(`volumeDraft.shown`)을 `/ 100`으로 직접 바꾼다(슬라이더를 놓기 전 값이라 저장된 `TimerSettings`가 아니다). 정의 출처: `src/overlay/design/functions.md` §5.7 ①②④.
 - 레이아웃 확정 상태: **확정**(패킷 §3 화면 명세 수용, ui-layout-designer 구성안 없음).
 - **구현 선행 조건(공용 3모듈).** `src/components/utils/timerClock.ts`의 추가 함수(`timerDisplayMs`·`isTimerBlinking` 등), `src/components/utils/alarmSound.ts`(`defaultAlarmUrl`·`playSound`·`alarmGain`), `src/components/hooks/useTimerSnapshot`의 `fromEvent?` 필드는 **overlay CR-050 구현이 만든다.** settings 구현은 그 뒤에 한다. settings 구현은 이 파일들을 새로 만들거나 시그니처를 바꾸지 않는다(import만).
 
@@ -366,7 +366,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | 이름 | 시그니처 | 동작 | 예외 | 요구ID |
 |---|---|---|---|---|
 | `FullTimerSettings` | `type = Required<TimerSettings>` | 새 필드 3개가 채워진 타이머 설정 | — | R-49 |
-| `fullTimer` | `(t: TimerSettings \| undefined) => FullTimerSettings` | `{ ...DEFAULT_TIMER_SETTINGS, ...t, mode: t?.mode ?? DEFAULT_TIMER_SETTINGS.mode ?? 'stopwatch', countdownSecs: t?.countdownSecs ?? DEFAULT_TIMER_SETTINGS.countdownSecs ?? 1500, alarmVolume: t?.alarmVolume ?? DEFAULT_TIMER_SETTINGS.alarmVolume ?? 80 }` — `t`가 `undefined`면 기본값 전체. 명시 `undefined` 필드도 기본값으로 메운다 | 없음 | R-49, R-50, R-54 |
+| `fullTimer` | `(t: TimerSettings \| undefined) => FullTimerSettings` | `{ ...DEFAULT_TIMER_SETTINGS, ...t, mode: t?.mode ?? DEFAULT_TIMER_SETTINGS.mode ?? 'stopwatch', countdownSecs: t?.countdownSecs ?? DEFAULT_TIMER_SETTINGS.countdownSecs ?? 1500, alarmVolume: t?.alarmVolume ?? DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44 }`(끝의 `?? 44`는 옵셔널 타입용 폴백 — 실제 값은 bridge 상수, CR-059) — `t`가 `undefined`면 기본값 전체. 명시 `undefined` 필드도 기본값으로 메운다 | 없음 | R-49, R-50, R-54 |
 | `timerToggles` | `(t: FullTimerSettings) => { stopwatchOn: boolean; countdownOn: boolean }` | `stopwatchOn = t.enabled && t.mode === 'stopwatch'`, `countdownOn = t.enabled && t.mode === 'countdown'` | 없음 | R-49 |
 | `togglePatch` | `(mode: TimerMode, on: boolean) => Partial<TimerSettings>` | `on` → `{ enabled: true, mode }`, 아니면 `{ enabled: false }`(모드 유지) | 없음 | R-49 |
 | `isDurationLocked` | `(t: FullTimerSettings, status: TimerStatus) => boolean` | `t.enabled && t.mode === 'countdown' && (status === 'running' \|\| status === 'paused' \|\| status === 'finished')` | 없음 | R-50 |
@@ -376,10 +376,10 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | `HmsDraft` | `type = { h: string; m: string; s: string }` | 세 칸의 입력 문자열 | — | R-50 |
 | `parseHmsField` | `(raw: string, max: number) => number \| null` | `v = raw.trim()` → `''`이면 0 → `/^\d{1,2}$/`가 아니면 `null` → `n = Number(v)`, `n > max`면 `null`, 아니면 `n` | 없음 | R-50 |
 | `parseHmsDraft` | `(d: HmsDraft) => number \| null` | `h = parseHmsField(d.h, 99)`, `m = parseHmsField(d.m, 59)`, `s = parseHmsField(d.s, 59)` 중 하나라도 `null`이면 `null` → `total = joinHms(h, m, s)` → `total < TIMER_COUNTDOWN_SECS_MIN`(1 — 곧 합계 0)이면 `null`(상한은 칸 범위로 이미 359999 이하), 아니면 `total`(정수) | 없음 | R-50 |
-| `clampVolume` | `(v: number) => number` | 비유한수 → `DEFAULT_TIMER_SETTINGS.alarmVolume ?? 80`, 아니면 `round(v)`를 0~`TIMER_ALARM_VOLUME_MAX`로 자름 | 없음 | R-54 |
+| `clampVolume` | `(v: number) => number` | 비유한수 → `DEFAULT_TIMER_SETTINGS.alarmVolume ?? 44`(CR-059), 아니면 `round(v)`를 0~`TIMER_ALARM_VOLUME_MAX`로 자름 | 없음 | R-54 |
 | `soundSizeKb` | `(bytes: number) => number` | `Math.ceil(bytes / 1024)`(패킷 §3) | 없음 | R-53 |
 
-검증 예: `fullTimer(undefined)` → `DEFAULT_TIMER_SETTINGS`와 같은 값 · `fullTimer({ enabled: true, textPos: {x:1,y:2}, rotation: 0, fontSize: 36, color: '#333333' })` → `mode 'stopwatch'`·`countdownSecs 1500`·`alarmVolume 80`·`enabled true`(옛 설정) · `timerToggles` 그 값 → `{ stopwatchOn: true, countdownOn: false }` · `{ enabled: false, mode: 'countdown' }` → 둘 다 false · `togglePatch('countdown', true)` → `{ enabled: true, mode: 'countdown' }` · `togglePatch('stopwatch', false)` → `{ enabled: false }` · `isDurationLocked({…countdown, enabled: true}, 'paused')` → true · 같은 설정 `'stopped'` → false · `{…stopwatch, enabled: true}` `'running'` → false · `{…countdown, enabled: false}` `'paused'` → false · `splitHms(1500)` → `{0,25,0}` · `splitHms(3723)` → `{1,2,3}` · `splitHms(359999)` → `{99,59,59}` · `splitHms(NaN)` → `{0,0,0}` · `parseHmsDraft({h:'01',m:'02',s:'03'})` → 3723 · `{h:'',m:'0',s:'5'}` → 5 · `{h:'0',m:'0',s:'0'}` → `null` · `{h:'0',m:'60',s:'0'}` → `null` · `{h:'1a',m:'0',s:'0'}` → `null` · `{h:'100',…}` → `null`(세 자리) · `{h:'99',m:'59',s:'59'}` → 359999 · `clampVolume(80.4)` → 80 · `clampVolume(101)` → 100 · `clampVolume(-3)` → 0 · `clampVolume(NaN)` → 80 · `soundSizeKb(312004)` → 305 · `soundSizeKb(1024)` → 1 · `pad2(5)` → `'05'`.
+검증 예: `fullTimer(undefined)` → `DEFAULT_TIMER_SETTINGS`와 같은 값 · `fullTimer({ enabled: true, textPos: {x:1,y:2}, rotation: 0, fontSize: 36, color: '#333333' })` → `mode 'stopwatch'`·`countdownSecs 1500`·`alarmVolume 44`·`enabled true`(옛 설정) · `timerToggles` 그 값 → `{ stopwatchOn: true, countdownOn: false }` · `{ enabled: false, mode: 'countdown' }` → 둘 다 false · `togglePatch('countdown', true)` → `{ enabled: true, mode: 'countdown' }` · `togglePatch('stopwatch', false)` → `{ enabled: false }` · `isDurationLocked({…countdown, enabled: true}, 'paused')` → true · 같은 설정 `'stopped'` → false · `{…stopwatch, enabled: true}` `'running'` → false · `{…countdown, enabled: false}` `'paused'` → false · `splitHms(1500)` → `{0,25,0}` · `splitHms(3723)` → `{1,2,3}` · `splitHms(359999)` → `{99,59,59}` · `splitHms(NaN)` → `{0,0,0}` · `parseHmsDraft({h:'01',m:'02',s:'03'})` → 3723 · `{h:'',m:'0',s:'5'}` → 5 · `{h:'0',m:'0',s:'0'}` → `null` · `{h:'0',m:'60',s:'0'}` → `null` · `{h:'1a',m:'0',s:'0'}` → `null` · `{h:'100',…}` → `null`(세 자리) · `{h:'99',m:'59',s:'59'}` → 359999 · `clampVolume(80.4)` → 80 · `clampVolume(101)` → 100 · `clampVolume(-3)` → 0 · `clampVolume(NaN)` → 44(기본값, CR-059) · `soundSizeKb(312004)` → 305 · `soundSizeKb(1024)` → 1 · `pad2(5)` → `'05'`.
 
 ### 14.6 상태
 
@@ -397,7 +397,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | `soundPending` | 등록·기본값 처리 중(두 번 누름 방지) | `boolean` | `false` | `AlarmSoundCard` `useState` |
 | `previewFailed` | 미리 듣기 실패 문구 | `boolean` | `false` | `AlarmSoundCard` `useState` |
 | `stopRef` | 재생 중인 미리 듣기의 정지 함수 | `useRef<(() => void) \| null>` | `null` | `AlarmSoundCard` |
-| `volumeDraft` | 음량 슬라이더 초안(`const volumeDraft = useSliderDraft(volume, commitVolume)` — `volume`은 prop 저장값) | 훅 반환(`volumeDraft.shown`·`volumeDraft.onChange`·`onPointerUp`·`onKeyUp`·`onBlur`) | `volumeDraft.shown = volume`(저장값, 기본 80) | `AlarmSoundCard` |
+| `volumeDraft` | 음량 슬라이더 초안(`const volumeDraft = useSliderDraft(volume, commitVolume)` — `volume`은 prop 저장값) | 훅 반환(`volumeDraft.shown`·`volumeDraft.onChange`·`onPointerUp`·`onKeyUp`·`onBlur`) | `volumeDraft.shown = volume`(저장값, 기본 44 — CR-059) | `AlarmSoundCard` |
 | `saving` | 시작 시간 저장 중(이중 저장 방지) | `boolean` | `false` | `CountdownTimeInput` `useState` |
 | `blinking` (파생) | 미리보기 글자 깜빡임 | `boolean` | `isTimerBlinking(snapshot)`(공용 순수 함수 — 값은 `snapshot.status === 'finished'`, 화면에서 재구현 금지) → 훅 초기값(`stopped`)이면 `false` | `TimerPreview` 파생 |
 
@@ -426,7 +426,8 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | 저장값 동기 효과 | `useEffect(() => { setDraft(null) }, [secs])` | 저장값(`props.secs`)이 바뀌면(자기 저장 성공 또는 다른 경로의 `settings://changed`) 입력 중 값을 버리고 새 저장값을 보인다. 저장 성공 시 `draft`와 새 저장값이 같은 숫자라 화면 변화 없음 | 없음 | R-50 |
 | `onGroupBlur` | `(e: FocusEvent<HTMLDivElement>) => void` — 세 칸을 감싼 `div[role=group]`의 `onBlur` | `e.currentTarget.contains(e.relatedTarget as Node \| null)`이면(세 칸 안 이동) 무시 → 아니면 `void commit()`. 칸 사이 Tab 이동으로는 저장하지 않는다(01:02:03 입력이 한 번에 저장) | 없음 | R-50 |
 | `onFieldKeyDown` | `(e: KeyboardEvent<HTMLInputElement>) => void` | `e.key === 'Enter'`면 `e.preventDefault()` → `void commit()`(포커스 유지) | 없음 | R-50 |
-| 잠금 정리 효과 | `useEffect(() => { if (locked) { setDraft(null); setInvalid(false) } }, [locked])` | 흐르기 시작하면 입력 중 값을 버린다 | 없음 | R-50 |
+| 잠금 정리 효과 | `useEffect(() => { if (locked) { setDraft(null); setInvalid(false) } }, [locked])` | 흐르기 시작하면 입력 중 값을 버린다(CR-052 이후 조건은 `off` — §14.16) | 없음 | R-50 |
+| `durationMsg` (CR-060, 파일 로컬·컴포넌트 밖 순수 함수) | `(locked: boolean, showInvalid: boolean, t: Messages) => string` | `locked` → `t.timerDurationLocked` / 아니고 `showInvalid` → `t.timerDurationInvalid` / 그 밖 `''`. 호출 = 렌더의 안내 줄 `durationMsg(locked, invalid && !off, t)`(§14.8) | 없음 | R-50 |
 
 검증 예(컴포넌트): 저장값 1500 → 칸 `00`·`25`·`00` · 칸에 `01`·`02`·`03` 입력 후 그룹 밖으로 포커스 → `onCommit(3723)` 1회 · `00`·`00`·`00` → `onCommit` 0회, 칸 `00`·`25`·`00`, 문구 `timerDurationInvalid` · 분 `60` → 같음 · 입력 없이 blur → 0회 · `locked` true → 세 칸 `disabled`, 문구 `timerDurationLocked` · `01`·`02`·`03` 입력 후 Enter → 저장 대기 중 그룹 밖 blur → `onCommit` **1회**(`saving`) · 저장 중 칸 = `01`·`02`·`03` 유지 → 성공(`true`) 후 `secs` 3723 수신 → 칸 `01`·`02`·`03`(튐 없음) · 실패(`false`) → 칸 = 옛 저장값 `00`·`25`·`00` · 칸에 `01` 입력 → `locked` true로 재렌더 뒤 focusOut(`locked` true 상태에서 그룹 blur 발생) → `onCommit` **0회**, 칸 = 저장값.
 
@@ -477,10 +478,12 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
   <span className={styles.hint}>{t.timerDurationHint}</span>
 </div>
 <p id="timer-duration-msg" aria-live="polite"
-   className={invalid && !locked ? `${styles.msg} ${styles.msgError}` : styles.msg}>
-  {locked ? t.timerDurationLocked : invalid ? t.timerDurationInvalid : ''}
+   className={invalid && !off ? `${styles.msg} ${styles.durationMsg} ${styles.msgError}` : `${styles.msg} ${styles.durationMsg}`}>
+  {durationMsg(locked, invalid && !off, t)}
 </p>
 ```
+
+- (CR-052·CR-060 반영) `off = locked || inactive`(§14.16). 안내 줄 문구는 파일 로컬 순수 함수 `durationMsg(locked: boolean, showInvalid: boolean, t: Messages): string`(`Messages` = `../i18n/types` 타입 import) — `locked` → `t.timerDurationLocked`, 아니고 `showInvalid` → `t.timerDurationInvalid`, 그 밖 `''`. 잠김 안내가 무효 안내보다 우선, `inactive`만 참이면 빈 줄. 예외 없음. 옛 중첩 삼항을 대체한 정리(CR-060)로 보이는 문구·조건은 불변. 관련 R-50.
 
 `AlarmSoundCard` 반환:
 
@@ -538,7 +541,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | 래퍼(TS) | — | `pickAudioFile(title?)` | → `string \| null`(취소 `null`) | `AlarmSoundCard.onImport`(`t.alarmPickTitle`) | reject → 오류 줄 |
 | 상수 | v0.23 | `DEFAULT_TIMER_SETTINGS`·`TIMER_COUNTDOWN_SECS_MIN/MAX`·`TIMER_ALARM_VOLUME_MAX` | — | `timerValues`, 음량 슬라이더 `max` | — |
 
-화면 코드는 `invoke`·`listen`·`new Audio`를 직접 쓰지 않는다(소리는 공용 `playSound`만). 테스트는 `vi.mock('bridge/commands')`에 `getAlarmSound`·`importAlarmSound`·`removeAlarmSound`·`pickAudioFile`을 추가하고 `vi.mock('components/utils/alarmSound')`로 `defaultAlarmUrl`·`playSound`를 대체한다(jsdom에 `URL.createObjectURL`·오디오 재생 없음). 알림음 변경 이벤트는 없다(A-1) — 카드는 자기 조작 결과로만 갱신한다.
+화면 코드는 `invoke`·`listen`·`new Audio`를 직접 쓰지 않는다(소리는 공용 `playSound`만). 테스트는 `vi.mock('bridge/commands')`에 `getAlarmSound`·`importAlarmSound`·`removeAlarmSound`·`pickAudioFile`을 추가하고 `vi.mock('components/utils/alarmSound')`로 `defaultAlarmUrl`·`playSound`를 대체한다(jsdom에 오디오 재생 없음. CR-058 뒤 `defaultAlarmUrl`은 번들 mp3 자산 URL이며 `URL.createObjectURL`을 쓰지 않는다). 알림음 변경 이벤트는 없다(A-1) — 카드는 자기 조작 결과로만 갱신한다.
 
 ### 14.11 접근성
 
@@ -584,7 +587,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | TC-280 | 기본값 — 확인창 없이 `removeAlarmSound` 1회 → 기본 문구·버튼 비활성, 재생 중이면 정지, 실패(`sound.io`) → 오류 줄 | R-53 |
 | TC-281 | 미리 듣기 — 사용자 url / 없으면 `defaultAlarmUrl()`, 음량 = 초안/100(슬라이더를 놓기 전 값), 다시 누르면 이전 정지 후 재생, 실패 → `alarmPreviewFailed`(`role=alert`, 오류 줄 아님), 다음 누름에 지움 | R-53, R-54 |
 | TC-282 | 미리 듣기 정지 — ① 다른 탭으로 이동(언마운트) → 정지 함수 호출 ② (창 숨김) 미리 듣기 중 `document.visibilityState`를 `'hidden'`으로 두고 `visibilitychange` 발생 → 정지 함수 1회, 카드는 그대로 렌더 / `'visible'`로 `visibilitychange` → 정지·재생 0회 ③ 언마운트 뒤 `visibilitychange` → 정지 함수 추가 호출 없음(구독 해제) | R-53 |
-| TC-283 | 음량 — 끄는 동안 `{n}%`만, 놓을 때 `alarmVolume` 정수 1회, 같은 값 0회, 키 300ms 1회, 기본 80% | R-54 |
+| TC-283 | 음량 — 끄는 동안 `{n}%`만, 놓을 때 `alarmVolume` 정수 1회, 같은 값 0회, 키 300ms 1회, 기본 44%(CR-059 — 옛 80%) | R-54 |
 | TC-284 | 미리보기 끝남 — `finished` → 글자 `.blink`·`00:00:00`(공용 훅 mock), 그 밖 상태 → 클래스 없음, `useTimerSnapshot` 구독 1개(TimerTab) | R-52 |
 | TC-285 | 탭 레이아웃·포커스 순서 — 카드 3개 순서, §14.11 Tab 순서 | R-49, R-50, R-53 |
 | TC-286 | i18n — 세 사전 키 집합 동일(새 22키 포함, `timerEnabled`·`timerEnabledDesc` 없음), `ERROR_CODES` 25(`sound.*` 3개 `timer.disabled` 뒤), `timerStopHint`·`errors['timer.disabled']` 새 문구 | R-55 |
@@ -595,7 +598,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 
 **기존 TC 개정(기대값 갱신)**: TC-249(`src/settings/test/TimerTab.test.tsx:216` — `DEFAULT_TIMER_SETTINGS` 새 필드 3개 때문에 지금 깨져 있다. 기대 `timer` = `{ ...DEFAULT_TIMER_SETTINGS, enabled: true, mode: 'stopwatch' }` — 스위치 대상도 「스톱워치 사용」) · TC-248(토글 1 → 2·카드 3개) · TC-250·TC-251(스위치 이름·저장 인자에 `mode`) · TC-260~TC-265(`TimerPreview`에 `snapshot`·`receivedAt` props, TC-261은 훅 mock 대신 props) · TC-246(`ERROR_CODES` 22 → 25, 단순 키 증감) · TC-268(3개 국어 문구 새 키). TC-247의 `getTimer` 1회는 유지된다(구독이 `TimerTab` 하나).
 
-**수동 확인 예정(`test/manual-checklist.md`, ui-test-designer)**: ① 패킷 §0 자동 재생 스파이크 — 트레이 「시작」만으로 00:00:05 타이머가 0에 닿을 때 오버레이에서 기본음이 울리는가(울림/`NotAllowedError` 기록, 실패 시 아키텍트로 되돌림) ② 실제 소리 청취 — 미리 듣기 기본음(삐 3번)·사용자 wav·mp3·ogg, 음량 0·80·100 차이 ③ 미리 듣기 중 다른 탭으로 옮기거나 설정 창 X(숨기기)를 누르면 소리가 멈추는가 ④ 끝남 깜빡임을 설정 미리보기와 오버레이에서 함께 눈으로 확인(스크린샷) ⑤ 시간 칸 IME(한글 입력 상태)에서 숫자 입력.
+**수동 확인 예정(`test/manual-checklist.md`, ui-test-designer)**: ① 패킷 §0 자동 재생 스파이크 — 트레이 「시작」만으로 00:00:05 타이머가 0에 닿을 때 오버레이에서 기본음이 울리는가(울림/`NotAllowedError` 기록, 실패 시 아키텍트로 되돌림) ② 실제 소리 청취 — 미리 듣기 기본음(번들 mp3 — CR-058, 옛 삐 3번 합성음 폐기)·사용자 wav·mp3·ogg, 음량 0·44(기본)·100 차이 ③ 미리 듣기 중 다른 탭으로 옮기거나 설정 창 X(숨기기)를 누르면 소리가 멈추는가 ④ 끝남 깜빡임을 설정 미리보기와 오버레이에서 함께 눈으로 확인(스크린샷) ⑤ 시간 칸 IME(한글 입력 상태)에서 숫자 입력.
 
 ### 14.15 공용화 후보 · 확인 필요
 

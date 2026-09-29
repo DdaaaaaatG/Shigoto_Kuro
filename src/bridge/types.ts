@@ -199,7 +199,7 @@ export interface TimerSettings {
   mode?: TimerMode
   /** (v0.23) 카운트다운 시작 시간(초) 1 ~ 359999(99:59:59). Rust는 항상 보낸다. 없으면 1500 */
   countdownSecs?: number
-  /** (v0.23) 알림음 음량 % 0 ~ 100 정수. Rust는 항상 보낸다. 없으면 80 */
+  /** (v0.23) 알림음 음량 % 0 ~ 100 정수. Rust는 항상 보낸다. 없으면 44(v0.27, CR-058/059. CR-053까지: 80) */
   alarmVolume?: number
   /** 시간 글자 상자 **중심**, 캔버스 좌표. 0 ≤ x ≤ 900, 0 ≤ y ≤ 700 */
   textPos: Point
