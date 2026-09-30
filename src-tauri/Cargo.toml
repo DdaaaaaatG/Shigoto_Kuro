@@ -1,6 +1,6 @@
 [package]
 name = "kuro-keyviewer"
-version = "0.4.0"
+version = "0.5.0"
 description = "봉고캣류 키뷰어 — 키보드·마우스 입력에 반응하는 투명 오버레이"
 edition = "2021"
 rust-version = "1.90"

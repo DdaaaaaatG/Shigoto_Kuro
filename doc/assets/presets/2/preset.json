@@ -1,0 +1,69 @@
+{
+  "formatVersion": 1,
+  "name": "게님드림",
+  "savedAt": 1790765304848,
+  "images": [
+    "background",
+    "hair",
+    "pomo_char",
+    "kb_up",
+    "mouse_base",
+    "pen_up",
+    {
+      "kind": "pen_down",
+      "index": 0
+    }
+  ],
+  "alarm": "mp3",
+  "settings": {
+    "scale": 1.0,
+    "idleSeconds": 300,
+    "mouse": {
+      "shoulder": {
+        "x": 582.0,
+        "y": 484.0
+      },
+      "area": [
+        {
+          "x": 375.0,
+          "y": 525.0
+        },
+        {
+          "x": 495.0,
+          "y": 525.0
+        },
+        {
+          "x": 495.0,
+          "y": 625.0
+        },
+        {
+          "x": 375.0,
+          "y": 625.0
+        }
+      ],
+      "partPos": {
+        "x": 411.0,
+        "y": 464.0
+      },
+      "hand": null,
+      "penPos": {
+        "x": 372.0,
+        "y": 476.0
+      },
+      "penMode": true
+    },
+    "timer": {
+      "enabled": true,
+      "mode": "stopwatch",
+      "countdownSecs": 1500,
+      "alarmVolume": 44,
+      "textPos": {
+        "x": 142.0,
+        "y": 456.0
+      },
+      "rotation": 11.0,
+      "fontSize": 36.0,
+      "color": "#333333"
+    }
+  }
+}
