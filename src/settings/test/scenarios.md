@@ -4040,11 +4040,144 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 - **AC-4 — 해소(v30 정정)**: 편집 저장·취소 버튼 접근 이름 = `presetActionAria` 형식 「저장: {name}」·「취소: {name}」(설계 §5.3). TC-325 · 340 · 342 · 348 · 349 반영
 - **AC-5 — 해소(v30 정정)**: 탭 루트 = `<section aria-label={t.tabPresets} aria-busy>`(설계 §8.1). TC-343은 이 region을 루트로 조회
 
+## v31 개정 — 프리셋 세로형 카드 격자 · 그림 미리보기 (CR-065, R-66 개정 · R-68 🔒, 증분 모드 — 신규 TC · 개정 · TDD 선행)
+
+비유: 옷걸이 이름표만 있던 카드에 마네킹 사진을 붙였다. 검사표는 ① 사진을 찍는 규칙(어느 옷을 어떤 순서·어느 자리에 겹치나 — 순수 함수) ② 사진 틀(한 장이라도 못 불러오면 「사진 없음」 표지) ③ 카드 배치(사진 위, 이름·날짜·요약·버튼 2×2 아래)를 따로 본다. 격자 열 수·버튼 줄바꿈처럼 눈으로만 보이는 것은 수동표로 뺐다.
+
+- **v31 기준(이 절이 앞 모든 기준 줄보다 우선 — 프리셋 카드 범위)**: `src/settings/requirements.md` **v1.29**(R-66 CR-065 개정 원문 · R-68 신설 · S-35) / `design/presets-tab.md` **§11**(11.1 ~ 11.9, §1.2 · §5.3 `meta`는 §11이 대체) / `design.md` RTM R-66 · R-68 / `design/i18n.md` §4.12 CR-065 추가분(`presetPreviewUnavailable` — 단순 키 173 → **174**) / contract **v0.31** `PresetSummary.preview`(필수) · `PresetPreview` · `PresetPreviewLayer`(`src/bridge/types.ts` 실물 대조 완료 — 이름 §11.9 권고안과 같음)
+- **CR-ID**: CR-065. 대기열 행 없음(TDD 선행 — CR-064와 같은 이유)
+- **번호**: 자동 **TC-354 ~ TC-362**(9개), TC-FLOW-34(S-35), 수동 M-65a ~ M-65c(`manual-checklist.md` v23)
+- **수(v31)**: 자동 번호 362(유효 349 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
+- **픽스처 규약**: 모든 `PresetSummary` 픽스처에 `preview` 필수(v0.31) — `PresetsTab.test.tsx` `pv(dir)`(kb_up 900×700 · mouse_base 168×150 · partPos (411,464) · penPos null, url `asset://presets/{dir}/…`), `PresetCard.test.tsx` `PV`(배경 · 팔 · kb_up). 옛 픽스처의 tsc 오류(`PresetCard.test.tsx:17`, `PresetsTab.test.tsx:124 ~ 128 · 916`) 해소
+- **겹침 순서 기대(AD-1 확정 대기)**: 스펙 `presetValues.preview.test.ts` 상수 `EXPECTED_ORDER` 한 곳 = `['hair','background','pomo_char','pomo_bubble','mouse_base','body','idle','kb_up','pen_up']`(오버레이 렌더 순서 `MouseArm` → `LayerStack`(몸통 → 상태 → 키보드) → `PenHand` — §11.3 근거표 · §11.9-2 추가 위치 권고). 현재 §11.3 표는 `body` · `idle` 미포함 7키 — ui-designer 확정본과 다르면 이 상수 한 줄만 맞춘다(판정 방식 불변)
+- **자동 불가 → 수동**: 격자 열 수(720 → 1열 · 900 → 2열 · 982+ → 3열)·같은 줄 카드 높이·버튼 2×2 한 줄 글자·이름 2줄 말줄임·체크무늬·실제 PNG 합성 모양은 jsdom이 레이아웃·이미지 디코딩을 하지 않아 M-65a ~ M-65c
+- **Red(예정)**: `previewLayout` · `PREVIEW_ORDER` · `DEFAULT_PREVIEW_RATIO` · `PresetPreviewBox` · `PresetCard` 개정(미리보기 · 두 줄 · `title` · 격자) · i18n 1키가 없으면 새 스펙과 개정 TC(TC-319 · 346 · 347 · FLOW-33 요약 줄, TC-094 · 352 키 수)가 실패 — 정상
+
+### v31 신규 TC
+
+#### 순수 함수 — `test/presetValues.preview.test.ts`
+
+### TC-354 · previewLayout 설계 검증 예 — % 배치 정확 값 · 종류: 자동 · 요구: R-68 · 설계: presets-tab §11.3 `previewLayout` ③④ · 검증 예 · 스펙: `test/presetValues.preview.test.ts`
+- Given 캔버스 900×700, layers(순서 뒤섞음) `pen_up` 120×90 · `kb_up` 900×700 · `mouse_base` 200×150, partPos (411,464), penPos (372,476) / 같은 입력에 `mouse_base` 168×150만
+- When `previewLayout(preview)`
+- Then ⓐ(반환값) `aspectRatio` `"900 / 700"`, items 순서 [mouse_base, kb_up, pen_up], mouse_base = left 411/900 (45.666…) · top 464/700 (66.285…) · width 200/900 (22.222…) · height 150/700 (21.428…)%, kb_up = (0, 0, 100, 100), pen_up = left 372/900 (41.333…) · top 68 · width 120/900 (13.333…) · height 90/700 (12.857…)% — 반올림 없음(10자리 비교). 168×150이면 width 168/900 = 18.666…·height 21.428… ⓑ `url`은 layer 값 그대로 ⓒ bridge 호출 없음
+
+### TC-355 · 겹침 순서 · 캔버스 레이어 전체 채움 · 목록 밖 슬롯 무시 · 같은 키 첫째 · 종류: 자동 · 요구: R-68 · 설계: §11.3 `PREVIEW_ORDER` · 근거표 · `previewLayout` ② · §11.9-2 · 스펙: 같음
+- Given 모든 미리보기 슬롯 + 목록 밖 슬롯(`rest` · `key_space` · `kb_down_0` · `mouse_left` · `mouse_right` · `pen_down_0`) + 둘째 `kb_up`(url `?dup`), penPos (0,0)
+- When `PREVIEW_ORDER` 확인 · `previewLayout`
+- Then ⓐ `PREVIEW_ORDER` = `EXPECTED_ORDER`, items 키 = 같은 순서(9장 — 목록 밖 6장 없음), 팔 · 펜 손 외 캔버스 레이어(hair · background · pomo_char · pomo_bubble · body · idle · kb_up) 모두 (0,0,100,100), kb_up url = 첫째 ⓑ 시간 글자 등 슬롯 아닌 항목 없음 ⓒ 없음
+- 비고: **설계 확인 필요 AD-1**(body · idle 포함 여부와 위치)
+
+### TC-356 · 표시 불가 · 생략 · 입력 불변 · 종류: 자동 · 요구: R-68 · 설계: §11.3 `previewLayout` ①③ · `DEFAULT_PREVIEW_RATIO` · 스펙: 같음
+- Given 기준 preview(kb_up · 팔 168×150 · pen_up · penPos null)
+- When canvas null · 0 · 음수 · NaN · Infinity / layers [] / penPos null / 팔만 / partPos (990,−70) / 캔버스 600×700
+- Then ⓐ canvas 무효 5종 → `null`(던지지 않음), layers [] → `{ aspectRatio:'900 / 700', items: [] }`, penPos null → [mouse_base, kb_up], 팔만 → [mouse_base], 범위 밖 → left 110 · top −10(자르지 않음 — 박스가 잘라 냄), `"600 / 700"`, `DEFAULT_PREVIEW_RATIO` = `${BASE_BOX.width} / ${BASE_BOX.height}` = `"450 / 350"` ⓑ 입력 JSON 불변 ⓒ 없음
+
+#### 미리보기 박스 — `test/PresetPreviewBox.test.tsx`
+
+### TC-357 · 합성 렌더 — 비율 · 순서 · % 위치 · 장식 img · 시간 글자 없음 · 종류: 자동 · 요구: R-68, R-66 · 설계: §11.5 `PresetPreviewBox` 렌더 · §11.7 · §11.6 `.previewLayer` · 스펙: `test/PresetPreviewBox.test.tsx`
+- Given preview = 캔버스 900×700, kb_up · pen_up 120×90 · background · mouse_base 168×150 · rest, partPos (411,464), penPos (372,476)
+- When 렌더
+- Then ⓐ 박스 인라인 `aspect-ratio` `900 / 700`, role · aria-label · 글자 없음, img src 순서 [background, mouse_base, kb_up, pen_up](rest 없음), 모든 img `alt=""` · `draggable=false` · `loading=lazy` · `transform` 없음, 역할 `img` 0개(장식), 배경 · kb_up 0/0/100/100%, 팔 · 펜 손 = TC-354 식 % ⓑ 실패 상태 없음 ⓒ bridge · onError 없음(props는 preview뿐)
+
+### TC-358 · 표시할 것 없음 → 안내 문구 · 종류: 자동 · 요구: R-68 · 설계: §11.5 `showNote` · 렌더(안내 `p` 하나만) · §11.1 끝 문단 · 스펙: 같음
+- Given ① canvas null ② layers = rest · key_space만 ③ penPos null
+- When 렌더 · rerender
+- Then ⓐ ① 박스 비율 `450 / 350`, img 0, 글자 = 「미리보기를 표시할 수 없습니다.」, `p` 1개 ② 비율 `900 / 700`, img 0, 같은 안내 ③ img 3장(펜 손 없음), 안내 없음 ⓑ — ⓒ 없음
+
+### TC-359 · 그림 로드 실패 → 박스 전체 안내 · url 바뀌면 저절로 해제 · ja · en · 종류: 자동 · 요구: R-68, R-20 · 설계: §11.4 `failedUrl` · 파생 `failed` · §11.5 `onError`(img) · 스펙: 같음
+- Given TC-357 preview
+- When 팔 img `error` → 같은 url 목록(새 객체)으로 rerender → 다른 폴더(p2) url 목록으로 rerender / ja · en Provider + canvas null
+- Then ⓐ 실패 뒤 img 0 · 안내 문구만 · 비율 `900 / 700` 유지, 같은 url 목록이면 안내 유지, 다른 url 목록이면 img 4장 · 안내 없음(되살림 효과 없이), ja · en 안내 = 사전 값 ⓑ `failedUrl` 로컬 — 부모로 올리지 않음 ⓒ bridge 없음
+
+#### 카드 — `test/PresetCard.test.tsx`
+
+### TC-360 · 세로형 카드 구조 — 미리보기 위 · 정보 · 버튼 격자 · title · 종류: 자동 · 요구: R-66, R-68 · 설계: §11.1 카드 ASCII · §11.5 `PresetCard` 렌더 순서 · 버튼 4 `title` · §11.7 · 스펙: `test/PresetCard.test.tsx`
+- Given P(preview = 배경 · 팔 · kb_up, penPos null) / 편집 중(renaming, 초안 「고양이 A」)
+- When 렌더 · rerender
+- Then ⓐ li 직계 자식 순서 = [미리보기 박스, h3, `p` 「저장 {date}」, `p` 「그림 12장 · 알림음 있음」, 버튼 격자(4개)], 편집 중 = [미리보기, h3(DOM 유지), 편집 줄, 날짜, 요약, 버튼 격자]. h3 `title` = 「고양이 A」, 미리보기 img src = [background, mouse_base, kb_up] · 전부 `alt=""`, 미리보기 안 포커스 가능 요소 0, 버튼 글자 [적용, 내보내기, 이름 바꾸기, 삭제] · `title` = 보이는 글자 · 접근 이름 「{동사}: 고양이 A」(aria-label 우선) ⓑ li 접근 이름 = 「고양이 A」(그림이 섞이지 않음) ⓒ 콜백 0회
+
+#### 탭 — `test/PresetsTab.test.tsx`
+
+### TC-361 · 카드별 미리보기 · 한 카드 로드 실패는 그 카드만 · 종류: 자동 · 요구: R-68, R-66 · 설계: §11.8 PR-1(보강) 오류 열 · §11.4(`onError` 없음) · 스펙: `test/PresetsTab.test.tsx`
+- Given 목록 [P1, P2, P3](각자 `pv(dir)`)
+- When 렌더 → 「고양이 B」 카드 첫 img `error`
+- Then ⓐ 카드마다 자기 폴더 url [mouse_base, kb_up], 실패 뒤 「고양이 B」만 img 0 · 안내 문구, 다른 카드 2장씩 그대로, 「고양이 B」 버튼 4 활성, 상태 줄 빈 칸 ⓑ 목록 불변 ⓒ `onError` 0회(창 오류 줄 불변), `listPresets` 1회, 다른 bridge 0회
+
+#### 사전 — `test/i18n.test.ts`
+
+### TC-362 · presetPreviewUnavailable · 단순 키 174 · 종류: 자동 · 요구: R-68, R-20 · 설계: i18n §4.12 CR-065 추가분 · 스펙: `test/i18n.test.ts`
+- Given 세 사전 실물
+- When 대조
+- Then ⓐ ko 「미리보기를 표시할 수 없습니다.」 · ja 「プレビューを表示できません。」 · en 「Preview unavailable.」(§4.12 표 — ja · en 검수 필요) ⓑ 세 사전 키 집합 동일 · 단순 키 174, `ERROR_CODES` 39 불변 ⓒ 없음
+
+### TC-FLOW-34 · S-35: 이름이 헷갈리는 프리셋 두 개를 카드 위 미리보기로 구분해 방송용 캐릭터를 골라 적용 · 종류: 자동 · 요구: R-66, R-68, R-61 · Steps: **Step 1** TC-361(카드별 미리보기 부분) → **Step 2** TC-330(적용 — 확인창 · `applyPreset` 부분) → **Step 3** 적용 뒤 목록 · 미리보기 불변(FLOW 자체 판정) → M-65a(실물 모양) · 스펙: `test/PresetsTab.test.tsx` · **신규(CR-065)**
+- 상태 전달: Given 목록 [방송용(x1), 방송용 2(y1)] → Step 1 두 카드 url 목록이 다름 → Step 2 「적용: 방송용 2」 → `applyPreset('y1')` · 상태 줄 적용 문구 → Step 3 `listPresets` 1회 · 「방송용」 미리보기 url 그대로, 다른 bridge 0회
+
+### v31 개정 TC (번호 유지 — 앞 본문을 대체)
+
+| TC | 개정 내용 | 스펙 |
+|---|---|---|
+| TC-347 | 요약 한 줄 → **두 줄**: `p` 「저장 {date}」 + `p` 「그림 {n}장 · 알림음 있음/없음」(§11.5 `metaDate` · `metaInfo`), 옛 한 줄 문자열 없음. 픽스처 `preview` 추가 | `PresetCard.test.tsx` |
+| TC-319 · TC-346 | 카드 요약 판정을 두 줄(`expectMeta` — 각 줄이 `p`)로. 그 밖 판정 불변 | `PresetsTab.test.tsx` |
+| TC-FLOW-33 | Step 4 「원래 저장 날짜」 판정 = 날짜 줄(`meta(A_IMP)[0]`) | `PresetsTab.test.tsx` |
+| TC-094 · TC-352 | 단순 키 173 → 174(값 단언은 TC-362) | `i18n.test.ts` |
+| TC-348 ~ TC-350 · TC-319 ~ TC-346 · TC-353 · TC-FLOW-33 | 픽스처에 `preview` 추가만 — 판정 불변(버튼 4 · 접근 이름 · 포커스 표 §8.2 회귀) | 두 스펙 |
+
+### v31 추적표
+
+**요구 → TC**
+
+| 요구ID | TC | TC-FLOW | 수동 |
+|---|---|---|---|
+| R-66(CR-065 개정 — 세로형 카드 격자 · 위 미리보기 · 아래 정보 · 버튼 4) | TC-347(개정 — 두 줄), TC-357, TC-360, TC-361 + v30 행(TC-317 · 319 · 320 · 343 · 345 · 346 · 348 · 350 · 351 · 352) | TC-FLOW-34, TC-FLOW-33 | M-65a, M-65b, M-64f |
+| R-68 미리보기 합성 | TC-354, TC-355, TC-356, TC-357, TC-358, TC-359, TC-360, TC-361, TC-362 | TC-FLOW-34 | M-65a, M-65c |
+| R-20(새 문구) | TC-359, TC-362 | — | M-65c |
+
+**설계 항목(presets-tab §11) → TC**
+
+| 설계 항목 | TC |
+|---|---|
+| §11.1 격자 · 열 수 · 같은 줄 높이 · 폭 검산 | M-65b(자동 불가 — CSS 레이아웃) |
+| §11.1 카드 배치(미리보기 → 이름 → 날짜 → 요약 → 버튼 2×2) · 편집 중 배치 | TC-360 |
+| §11.1 이름 2줄 말줄임 · `title` | TC-360(`title`), M-65b(말줄임) |
+| §11.1 박스 비율(캔버스 · 기본 9:7) | TC-357, TC-358, TC-356 |
+| §11.2 `PresetPreviewBox` props · bridge 없음 | TC-357 ~ TC-359 |
+| §11.2 `PresetCard` 개정 · `PresetsTab` 불변 | TC-360, TC-361 |
+| §11.3 `PreviewKey` · `PreviewItem` · `PreviewLayout` 타입 | TC-354 ~ TC-356(반환 모양) |
+| §11.3 `PREVIEW_ORDER` · 근거표 | TC-355 (AD-1) |
+| §11.3 `DEFAULT_PREVIEW_RATIO` | TC-356, TC-358 |
+| §11.3 `previewLayout` ① ~ ④ · 검증 예 | TC-354, TC-355, TC-356 |
+| §11.4 `failedUrl` · `failed` 파생(되살림 효과 없음) · 부모로 올리지 않음 | TC-359, TC-361 |
+| §11.5 `layout` · `showNote` · 렌더 · img `onError` | TC-357, TC-358, TC-359 |
+| §11.5 `metaDate` · `metaInfo` · 렌더 순서 · 버튼 `title` | TC-347, TC-360 |
+| §11.6 스타일(`.list` 격자 · `.preview` 체크무늬 · `.previewNote` · `.actionGrid` 등) | M-65b(시각) |
+| §11.7 접근성(img `alt=""` · 박스 role 없음 · 안내 일반 p · 포커스 없음 · title vs aria-label) | TC-357, TC-358, TC-360 |
+| §11.8 PR-1 보강(카드별 · 실패 격리) · PR-6 보강(url 같으면 그대로) | TC-361, TC-359(같은 url 유지), TC-FLOW-34 |
+| §11.8 url 그대로 `src`(경로 조립 없음) | TC-354, TC-357 |
+| §11.9 계약 이름 대조 | 스펙 import(`PresetPreview` · `PresetPreviewLayer` — `src/bridge/types.ts` 실물) |
+| §11.9 확인 필요 4(scope) | M-65a 선행 |
+| §11.9 확인 필요 6(ja · en 검수) | M-65c |
+
+**사용자행 → TC-FLOW**
+
+| 사용자행 | TC-FLOW |
+|---|---|
+| S-35 미리보기로 골라 적용 | TC-FLOW-34 |
+
+### v31 설계 확인 필요 (관리자 인계 — 문서 수정은 소유자)
+
+- **AD-1(ui-designer · 사용자)**: 겹침 순서의 `body` · `idle` 위치. 위임문은 「… pomo_bubble → body → idle → mouse_base → kb_up …」(팔 앞)이지만 오버레이 정본(§11.3 근거표 4 · 5행, `.jellyWrap` 안 `MouseArm` → `LayerStack` 몸통 → 상태 → 키보드)과 §11.9-2 권고는 **팔 다음 · kb_up 앞**이다. 스펙 `EXPECTED_ORDER`는 정본 쪽(`mouse_base` → `body` → `idle` → `kb_up`)으로 두었다. 현재 §11.3 `PREVIEW_ORDER` 표는 7키(`body` · `idle` 없음)라 확정본 반영 뒤 한 줄 대조 필요. 확정본이 7키 그대로면 `EXPECTED_ORDER`에서 두 키를 빼고 TC-355 「9장」 → 「7장」
+- **AD-2(bridge · ui-designer)**: §11.9-3 `penPos: null` → 펜 손 생략(오버레이는 기본 위치 계산). TC-356 · TC-358은 생략으로 판정한다. v0.31이 `penPos`를 항상 해석된 값으로 준다면 차이 없음
+- **AD-3(구현 참고)**: TC-357 · 358 · 359는 박스 비율을 `element.style.aspectRatio`로 읽는다. jsdom의 CSS 파서가 `aspect-ratio`를 버리는 버전이면 이 단언만 Red가 난다 — 그때는 구현을 바꾸지 말고 이 단언을 수동(M-65b)으로 옮길지 관리자 판단
+- **AD-4(메인 · bridge)**: 미리보기 실물은 asset protocol scope `presets/**` 반영이 선행(§11.9-4). 미반영이면 M-65a는 「선행 미충족」
+
 ## 변경이력
 
 | 일자 | 내용 |
 |---|---|
-| 2026-09-30 | (최신 행) v30 정정 — **ui-test-checker FAIL 지적 반영(BLOCKER 1 · MAJOR 2 · MINOR 4).** ① BLOCKER-1: TC-325 · 340 · 342 · 348 · 349 편집 저장·취소 접근 이름 = `presetActionAria` 형식(설계 §5.3) — AC-4 해소 ② MAJOR-1: TC-345 ⓒ 언마운트 뒤 흐름 진행(resolve = `onError(null)` · `listPresets` 2회, 로컬 상태 쓰기만 생략) — AC-3 해소 ③ MAJOR-2: 신규 TC-353(이름 중복 허용 — 같은 이름 저장·이름 바꾸기 호출), 추적 R-64 · 설계 §5.1 행 ④ MINOR-1: 탭 루트 `<section aria-label={t.tabPresets} aria-busy>` 확정 — TC-343 · TC-156(프리셋 탭도 region) 반영, AC-1 · AC-5 해소 ⑤ MINOR-2: TC-FLOW-33 Step 1 ~ 5 번호, 원래 저장 날짜 판정을 FLOW 자체 판정으로 ⑥ MINOR-3: TC-334 픽스처 폴더 이름 번호 없음(「고양이 A」) ⑦ MINOR-4: `tone='danger'` 판정 TC 추가 안 함 — AC-6 권고. 수: 자동 번호 353(유효 340 · 폐기 8 · 결번 5) · TC-FLOW 33 · 수동 60 |
+| 2026-09-30 | (최신 행) v31 — **CR-065 세로형 카드 격자 · 그림 미리보기(R-66 개정 · R-68 🔒, requirements v1.29 · presets-tab §11 · i18n §4.12 CR-065 · contract v0.31, 증분 모드 · TDD 선행).** 「v31 개정」 절 신설(기준 · 픽스처 규약 · 신규 TC · TC-FLOW · 개정 표 · 추적 3종 · 설계 확인 AD-1 ~ AD-4). 신규 TC-354 ~ TC-356(`presetValues.preview.test.ts` 신규 — `previewLayout` 검증 예 · 순서 · 표시 불가), TC-357 ~ TC-359(`PresetPreviewBox.test.tsx` 신규 — 합성 렌더 · 안내 · 로드 실패), TC-360(`PresetCard.test.tsx` — 세로형 구조 · title), TC-361(`PresetsTab.test.tsx` — 카드별 미리보기 · 실패 격리), TC-362(`i18n.test.ts` — `presetPreviewUnavailable`), TC-FLOW-34(S-35). 개정: TC-347(요약 두 줄) · TC-319 · TC-346 · TC-FLOW-33(`expectMeta`) · TC-094 · TC-352(단순 키 174), 픽스처 `preview` 추가(tsc 오류 7건 해소). `manual-checklist.md` v23(M-65a ~ M-65c). 수: 자동 번호 362(유효 349 · 폐기 8 · 결번 5) · TC-FLOW 34 · 수동 63 |
+| 2026-09-30 | v30 정정 — **ui-test-checker FAIL 지적 반영(BLOCKER 1 · MAJOR 2 · MINOR 4).** ① BLOCKER-1: TC-325 · 340 · 342 · 348 · 349 편집 저장·취소 접근 이름 = `presetActionAria` 형식(설계 §5.3) — AC-4 해소 ② MAJOR-1: TC-345 ⓒ 언마운트 뒤 흐름 진행(resolve = `onError(null)` · `listPresets` 2회, 로컬 상태 쓰기만 생략) — AC-3 해소 ③ MAJOR-2: 신규 TC-353(이름 중복 허용 — 같은 이름 저장·이름 바꾸기 호출), 추적 R-64 · 설계 §5.1 행 ④ MINOR-1: 탭 루트 `<section aria-label={t.tabPresets} aria-busy>` 확정 — TC-343 · TC-156(프리셋 탭도 region) 반영, AC-1 · AC-5 해소 ⑤ MINOR-2: TC-FLOW-33 Step 1 ~ 5 번호, 원래 저장 날짜 판정을 FLOW 자체 판정으로 ⑥ MINOR-3: TC-334 픽스처 폴더 이름 번호 없음(「고양이 A」) ⑦ MINOR-4: `tone='danger'` 판정 TC 추가 안 함 — AC-6 권고. 수: 자동 번호 353(유효 340 · 폐기 8 · 결번 5) · TC-FLOW 33 · 수동 60 |
 | 2026-09-30 | v30 — **CR-064 「프리셋」 탭(R-58 ~ R-67 🔒, requirements v1.28 · presets-tab · i18n §4.12 · §4.6 · contract v0.30, 증분 모드 · TDD 선행).** 「v30 개정」 절 신설(기준 · mock 규약 · 신규 TC · TC-FLOW · 추적 3종 · 설계 확인 AC-1 ~ AC-5). 신규 TC-315 ~ TC-352(38개 — 스펙 `presetValues.test.ts` · `PresetsTab.test.tsx` · `PresetCard.test.tsx` 신규, `SettingsApp.test.tsx` TC-351, `i18n.test.ts` TC-352), TC-FLOW-33(S-31 ~ S-34). TC-311 ~ TC-314 결번(AC-2). 개정: `SettingsApp.test.tsx`(프리셋 래퍼 일반 함수 mock · 메뉴 5항목 — TC-031 · 032 · 099 · 100 · 101 · 153 · 154 · 156 · 1078행), `i18n.test.ts`(TC-093 · 094 · 246 · 286 — `ERROR_CODES` 39 · 단순 키 173). `manual-checklist.md` v22(M-64a ~ M-64f). 수: 자동 번호 353(유효 340 · 폐기 8 · 결번 5 — v30 정정 반영) · TC-FLOW 33 · 수동 60 |
 | 2026-09-30 | v29 — **뒷머리 내장 기본 없음(🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29 `DEFAULT_ASSET_SLOTS` 6개 · `hasBuiltinDefault('hair')` false, 증분 모드 — 개정만).** 「v29 개정」 절 신설(기준 · 새 기대값 규칙 1 ~ 5 · TC-196/TC-206 번호 판정 · 개정 표 · TC-FLOW-18 본문 · 추적 3종 · 설계 확인 AB-1 ~ AB-5). v28 「제외」(기본 세트 6/7장 · R-35 판정) 해소. 개정: `Hair.test.tsx` 전면(TC-193 · 196 · 200 · 201 · 202 · 206 · 207 · TC-FLOW-18 — 뒷머리 = 단일 비우기 칸 · 버튼 2개 · 한 줄 · 「기본값」 = 비우기, 도우미 `hairClear` · `expectNoRestoreOrEmpty`, TC-203 주석), `imageSlots.test.ts`(TC-133 · 177 · 178 · 192 · 232, `DEFAULT_FILES` 6장 · `FIRST7` 내용 6장), `ImagesTab.test.tsx`(TC-142 · 179 · 182 · 189 · 233 · 234 · TC-FLOW-15 · 17 · 22, 픽스처 `BUILTIN_KEYS` · `BUILTIN_FILES` · `DONE_BUILTIN` · `DESC_BUILTIN_KO` 6칸 — 옛 `DEFAULT_KEYS7` · `DONE7` · `DESC7_KO`), `ResetAllCard.test.tsx` 주석. 폐기 유지 TC-204 · TC-205 · TC-FLOW-19. `manual-checklist.md` v21(「v21 읽는 법」 — M-29 · M-30 · M-32 · M-33 · M-43). 소스 선행: `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`(ui-fixer) 전까지 셋째 버튼 부재 단언 TC는 Red(예정). 수: 자동 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 그대로 |
 | 2026-09-30 | v28 — **doc-sync 배치(requirements v1.26 · design 2026-09-30 행 · 현행 소스 대조, 증분 모드) + 대기열 Q-02(CR-039) 소진.** ① TC-208/TC-209 중복 해소: CR-039 재시도 스펙 가번호 TC-208 → TC-306 · TC-209 → TC-308 이동(CR-040 alphaMask 쪽이 정식 등록 선행), TC-307 결번, 옛 자리에 이동 한 줄 ② Q-02 전환: TC-306 · TC-308 BDD 본문 + 신규 TC-309(설정·매니페스트 따로 판정) · TC-310(언마운트 취소) — design §6 P-1, 스펙 `SettingsApp.retry.test.tsx` 초안 2건 추가·이름 변경 ③ 색: 추적표 2행·R-19 읽기 규칙의 「초록」 → CR-032 `#BE72AD`·`#F8EBF5` ④ R-18 리셋: TC-089 제목·TC-FLOW-07 상태 전달·추적표 R-17 행의 `penPos` null → `DEFAULT_MOUSE_SETTINGS.penPos` (372,476) ⑤ S-22 v1.26: TC-FLOW-23 현행 본문(셋째 버튼 없음·「기본값」 = 비우기·「이미지 변경」으로 다시) — 원 본문 끝 정정 표시, TC-FLOW-22 점검 불변 ⑥ J-1(11키 실재 — design 표기만 남음)·V-1(기록 갱신)·V-3(해소) ⑦ 스펙 이름·주석: `AlarmSoundCard.test.tsx` TC-283(카드)·`TimerTab.test.tsx` 334·344행·`TimerTab.cr052.test.tsx` 52행(단언 불변) ⑧ `manual-checklist.md` v20. 「doc-sync 개정(v28)」 절 신설(정식 TC·개정 표·색 표·재대조 표·추적 3종·설계 확인 AA-1 ~ AA-5). 제외: 기본 세트 6/7장·R-35·R-41 판정(사용자 결정 대기). 수: 자동 305 → 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 |

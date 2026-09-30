@@ -16,6 +16,7 @@ import type {
   AssetSlot,
   BridgeError,
   PresetImportReport,
+  PresetPreview,
   PresetSummary,
 } from 'bridge/types'
 import {
@@ -121,11 +122,21 @@ const aria = (action: string, name: string) => `${action}: ${name}`
 const renameAria = (name: string) => `「${name}」의 새 이름`
 
 // ─── 픽스처 ────────────────────────────────────────────────────────────────
-const P1: PresetSummary = { id: 'p1', name: '고양이 A', savedAt: Date.UTC(2026, 8, 30, 3, 0), imageCount: 12, hasAlarm: true }
-const P2: PresetSummary = { id: 'p2', name: '고양이 B', savedAt: Date.UTC(2026, 8, 29, 3, 0), imageCount: 7, hasAlarm: false }
-const P3: PresetSummary = { id: 'p3', name: '강아지', savedAt: Date.UTC(2026, 8, 28, 3, 0), imageCount: 9, hasAlarm: true }
-const NEW: PresetSummary = { id: 'n1', name: '고양이 C', savedAt: Date.UTC(2026, 8, 30, 9, 0), imageCount: 10, hasAlarm: false }
-const IMP: PresetSummary = { id: 'i1', name: '가져온 고양이', savedAt: Date.UTC(2026, 7, 1, 3, 0), imageCount: 6, hasAlarm: true }
+/** (CR-065, contract v0.31) PresetSummary.preview 필수 — 프리셋 폴더마다 다른 url(kb_up·팔 2장, 펜 손 없음) */
+const pv = (dir: string): PresetPreview => ({
+  canvas: { width: 900, height: 700 },
+  layers: [
+    { slot: 'kb_up', url: `asset://presets/${dir}/kb_up.png`, width: 900, height: 700 },
+    { slot: 'mouse_base', url: `asset://presets/${dir}/mouse_base.png`, width: 168, height: 150 },
+  ],
+  partPos: { x: 411, y: 464 },
+  penPos: null,
+})
+const P1: PresetSummary = { id: 'p1', name: '고양이 A', savedAt: Date.UTC(2026, 8, 30, 3, 0), imageCount: 12, hasAlarm: true, preview: pv('p1') }
+const P2: PresetSummary = { id: 'p2', name: '고양이 B', savedAt: Date.UTC(2026, 8, 29, 3, 0), imageCount: 7, hasAlarm: false, preview: pv('p2') }
+const P3: PresetSummary = { id: 'p3', name: '강아지', savedAt: Date.UTC(2026, 8, 28, 3, 0), imageCount: 9, hasAlarm: true, preview: pv('p3') }
+const NEW: PresetSummary = { id: 'n1', name: '고양이 C', savedAt: Date.UTC(2026, 8, 30, 9, 0), imageCount: 10, hasAlarm: false, preview: pv('n1') }
+const IMP: PresetSummary = { id: 'i1', name: '가져온 고양이', savedAt: Date.UTC(2026, 7, 1, 3, 0), imageCount: 6, hasAlarm: true, preview: pv('i1') }
 const DIR_IN = 'X:/in/cat-a' // 가짜 경로(폴더 선택 창 결과 흉내)
 const DIR_OUT = 'X:/out'
 const entry = (slot: AssetSlot): AssetEntry => ({
@@ -189,14 +200,19 @@ const card = (name: string) => within(listCard()).getByRole('listitem', { name }
 const cardBtn = (preset: string, action: string) => within(card(preset)).getByRole('button', { name: aria(action, preset) })
 const dialog = () => screen.queryByRole('alertdialog')
 const inDialog = (name: string) => within(screen.getByRole('alertdialog')).getByRole('button', { name })
-const meta = (p: PresetSummary, lang: Lang = 'ko') => {
+/** (CR-065 §11.5) 요약 두 줄 — [metaDate, metaInfo] */
+const meta = (p: PresetSummary, lang: Lang = 'ko'): [string, string] => {
   const t = DICT[lang]
   return [
     format(t.presetSavedAt, { date: formatSavedAt(p.savedAt, lang) }),
-    format(t.presetImageCount, { count: p.imageCount }),
-    p.hasAlarm ? t.presetHasAlarm : t.presetNoAlarm,
-  ].join(' · ')
+    [format(t.presetImageCount, { count: p.imageCount }), p.hasAlarm ? t.presetHasAlarm : t.presetNoAlarm].join(' · '),
+  ]
 }
+/** 카드 안에 요약 두 줄이 각각 p 로 있다 */
+const expectMeta = (li: HTMLElement, p: PresetSummary, lang: Lang = 'ko') => {
+  for (const line of meta(p, lang)) expect(within(li).getByText(line, { selector: 'p' })).toBeInTheDocument()
+}
+const previewSrcs = (li: HTMLElement) => Array.from(li.querySelectorAll('img')).map(i => i.getAttribute('src'))
 const typeName = (v: string) => fireEvent.change(nameInput(), { target: { value: v } })
 const allPresetButtons = () => [
   saveBtn(),
@@ -248,10 +264,10 @@ describe('PresetsTab — 렌더·목록 (presets-tab §1.2 · §5.1, R-66 · R-5
     for (const p of [P1, P2, P3]) {
       const li = card(p.name) // li 접근 이름 = h3(aria-labelledby)
       expect(within(li).getByRole('heading', { level: 3 }).textContent).toBe(p.name)
-      expect(within(li).getByText(meta(p))).toBeInTheDocument()
+      expectMeta(li, p) // CR-065: 요약 두 줄
       expect(within(li).getAllByRole('button').map(b => b.textContent)).toEqual(['적용', '내보내기', '이름 바꾸기', '삭제'])
     }
-    expect(within(card('고양이 B')).getByText(meta(P2)).textContent).toContain('알림음 없음')
+    expect(within(card('고양이 B')).getByText(meta(P2)[1], { selector: 'p' }).textContent).toContain('알림음 없음')
     expect(screen.queryByText(KO.empty)).toBeNull()
     expect(dialog()).toBeNull()
     expect(screen.queryByRole('alert')).toBeNull()
@@ -886,7 +902,7 @@ describe('PresetsTab — ja·en (R-66 · R-20)', () => {
       expect(nameInput(t.presetNameLabel)).toHaveAttribute('placeholder', t.presetNamePlaceholder)
       expect(within(saveCard(t.cardPresetSave)).getByRole('button', { name: t.presetSave })).toBeDisabled()
       const li = within(listCard(t.cardPresetList)).getByRole('listitem', { name: P1.name })
-      expect(within(li).getByText(meta(P1, lang))).toBeInTheDocument()
+      expectMeta(li, P1, lang) // CR-065: 요약 두 줄
       for (const action of [t.presetApply, t.presetExport, t.presetRename, t.presetDelete]) {
         expect(within(li).getByRole('button', { name: format(t.presetActionAria, { action, name: P1.name }) })).toHaveTextContent(action)
       }
@@ -911,9 +927,63 @@ describe('PresetsTab — ja·en (R-66 · R-20)', () => {
 })
 
 // ─── TC-FLOW-33 (S-31 ~ S-34 종단) ──────────────────────────────────────────
+// ─── CR-065 세로형 카드 미리보기 (presets-tab §11.1 · §11.5 · §11.8 PR-1 보강, R-66 · R-68) ───────────
+describe('PresetsTab — 카드 미리보기 (CR-065, R-68 · R-66)', () => {
+  it('TC-361: 카드마다 자기 preview 로 미리보기(목록 순서 = core 순서), 한 카드 그림 로드 실패 → 그 카드만 안내 문구·다른 카드·버튼·상태 줄·오류 줄 불변·재조회 없음', async () => {
+    await renderTab([P1, P2, P3])
+    expect(cardNames()).toEqual(['고양이 A', '고양이 B', '강아지'])
+    for (const [p, dir] of [
+      [P1, 'p1'],
+      [P2, 'p2'],
+      [P3, 'p3'],
+    ] as const) {
+      expect(previewSrcs(card(p.name))).toEqual([`asset://presets/${dir}/mouse_base.png`, `asset://presets/${dir}/kb_up.png`])
+    }
+    fireEvent.error(card('고양이 B').querySelector('img') as HTMLImageElement)
+    expect(previewSrcs(card('고양이 B'))).toEqual([])
+    expect(within(card('고양이 B')).getByText('미리보기를 표시할 수 없습니다.')).toBeInTheDocument()
+    expect(previewSrcs(card('고양이 A'))).toHaveLength(2)
+    expect(previewSrcs(card('강아지'))).toHaveLength(2)
+    for (const b of within(card('고양이 B')).getAllByRole('button')) expect(b).toBeEnabled()
+    expect(status().textContent).toBe('')
+    expect(onError).not.toHaveBeenCalled() // 창 오류 줄은 command 실패 전용(§11.4)
+    expect(listPresets).toHaveBeenCalledTimes(1)
+    expectNoForeignBridge()
+  })
+})
+
+// ─── TC-FLOW-34 (S-35) ──────────────────────────────────────────────────────
+describe('TC-FLOW-34 — 미리보기로 캐릭터를 골라 적용', () => {
+  it('TC-FLOW-34: S-35 — 이름이 헷갈리는 두 카드를 미리보기(서로 다른 그림)로 구분 → 고른 카드 적용 → 미리보기·목록 그대로', async () => {
+    const X: PresetSummary = { ...P1, id: 'x1', name: '방송용', preview: pv('x1') }
+    const Y: PresetSummary = { ...P2, id: 'y1', name: '방송용 2', preview: pv('y1') }
+    vi.mocked(applyPreset).mockResolvedValueOnce(undefined)
+    await renderTab([X, Y])
+    // Step 1(TC-361) — 카드마다 다른 미리보기
+    expect(previewSrcs(card('방송용'))).not.toEqual(previewSrcs(card('방송용 2')))
+    expect(previewSrcs(card('방송용 2'))).toContain('asset://presets/y1/kb_up.png')
+    // Step 2(TC-330) — 고른 카드 적용
+    fireEvent.click(cardBtn('방송용 2', '적용'))
+    fireEvent.click(inDialog(KO.applyOk))
+    await waitFor(() => expect(status().textContent).toBe(applied('방송용 2')))
+    expect(applyPreset).toHaveBeenCalledWith('y1')
+    // Step 3 — 적용은 목록·미리보기를 바꾸지 않는다(PS-10, 재조회 없음)
+    expect(listPresets).toHaveBeenCalledTimes(1)
+    expect(previewSrcs(card('방송용'))).toEqual(['asset://presets/x1/mouse_base.png', 'asset://presets/x1/kb_up.png'])
+    expectNoForeignBridge()
+  })
+})
+
 describe('TC-FLOW-33 — 저장 → 내보내기(충돌 → 이름 바꾸기 → 다시) → 삭제 → 가져오기 → 적용', () => {
   it('TC-FLOW-33: S-31 ~ S-34 — 앞 Step 결과(목록·포커스)가 다음 Step 의 Given', async () => {
-    const A: PresetSummary = { id: 'a1', name: '고양이 A', savedAt: Date.UTC(2026, 8, 30, 10, 0), imageCount: 12, hasAlarm: true }
+    const A: PresetSummary = {
+      id: 'a1',
+      name: '고양이 A',
+      savedAt: Date.UTC(2026, 8, 30, 10, 0),
+      imageCount: 12,
+      hasAlarm: true,
+      preview: pv('a1'),
+    }
     const A2: PresetSummary = { ...A, name: '고양이 A 방송' }
     const A_IMP: PresetSummary = { ...A2, id: 'a9' } // 원래 저장 날짜 유지(U-5)
     const exists: BridgeError = { code: 'preset.export_exists', message: '같은 이름의 폴더가 이미 있습니다.' }
@@ -963,7 +1033,7 @@ describe('TC-FLOW-33 — 저장 → 내보내기(충돌 → 이름 바꾸기 →
     await waitFor(() => expect(cardNames()).toEqual(['고양이 A 방송']))
     expect(importPreset).toHaveBeenCalledWith(DIR_IN)
     expect(status().textContent).toBe(imported('고양이 A 방송'))
-    expect(within(card('고양이 A 방송')).getByText(meta(A_IMP))).toBeInTheDocument() // 원래 날짜
+    expect(within(card('고양이 A 방송')).getByText(meta(A_IMP)[0], { selector: 'p' })).toBeInTheDocument() // 원래 날짜(CR-065: 날짜 줄)
     // Step 5(TC-330) — S-31 · S-33 적용
     fireEvent.click(cardBtn('고양이 A 방송', '적용'))
     fireEvent.click(inDialog(KO.applyOk))

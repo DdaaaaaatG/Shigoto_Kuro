@@ -369,7 +369,8 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     // CR-054: + 8(i18n §4.11 cardReset ~ resetAllDone — 값 단언은 ResetAllCard.test.tsx TC-301) — 옛 128
     // CR-057: + 1(areaDesc — 값 단언은 MousePartsTab.test.tsx TC-305, 3개 국어) — 옛 136
     // CR-064: + 36(i18n §4.12 tabPresets ~ presetRenameInputAria — 값 단언은 TC-352) — 옛 137
-    expect(simpleKeys(ko)).toHaveLength(173) // CR-035: + 12(i18n §4.7) — 옛 80
+    // CR-065: + 1(i18n §4.12 CR-065 추가분 presetPreviewUnavailable — 값 단언은 TC-362) — 옛 173
+    expect(simpleKeys(ko)).toHaveLength(174) // CR-035: + 12(i18n §4.7) — 옛 80
     for (const dict of [ko, ja, en]) {
       expect('areaDesc' in dict, 'CR-057 areaDesc').toBe(true)
     }
@@ -645,7 +646,7 @@ describe('i18n 사전 — 프리셋 (CR-064)', () => {
     expect(ERROR_CODES).not.toContain('preset.forbidden')
     for (const dict of [ko, ja, en]) {
       expect('preset.forbidden' in dict.errors).toBe(false)
-      expect(simpleKeys(dict)).toHaveLength(173)
+      expect(simpleKeys(dict)).toHaveLength(174) // CR-065: + presetPreviewUnavailable(TC-362) — 옛 173
     }
     for (const dict of [ja, en]) {
       const rec = dict as unknown as Record<string, string>
@@ -674,6 +675,21 @@ describe('i18n 사전 — 프리셋 (CR-064)', () => {
     for (const dict of [ko, ja, en]) {
       expect(Object.keys(dict).filter(k => k.startsWith('preset') && /sep|dash|dot/i.test(k))).toEqual([])
     }
+  })
+})
+
+// CR-065 · R-68 · R-20 (i18n §4.12 CR-065 추가분) — scenarios.md 「v31 개정」 절
+describe('i18n 사전 — 프리셋 미리보기 (CR-065)', () => {
+  it('TC-362: presetPreviewUnavailable — ko 「미리보기를 표시할 수 없습니다.」, ja·en = §4.12 표 값(검수 필요)·ko 와 다름, 세 사전 단순 키 174·키 집합 동일', () => {
+    expect(ko.presetPreviewUnavailable).toBe('미리보기를 표시할 수 없습니다.')
+    expect(ja.presetPreviewUnavailable).toBe('プレビューを表示できません。')
+    expect(en.presetPreviewUnavailable).toBe('Preview unavailable.')
+    for (const dict of [ja, en]) {
+      expect(dict.presetPreviewUnavailable).not.toBe(ko.presetPreviewUnavailable)
+      expect(simpleKeys(dict)).toEqual(simpleKeys(ko))
+    }
+    for (const dict of [ko, ja, en]) expect(simpleKeys(dict)).toHaveLength(174)
+    expect(ERROR_CODES).toHaveLength(39) // 에러 code 는 늘지 않는다(새 command 없음)
   })
 })
 
