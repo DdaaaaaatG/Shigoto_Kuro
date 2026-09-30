@@ -11,6 +11,7 @@
 종료코드 2 = 차단(사유 stderr). 0 = 허용.
 """
 import json
+import os
 import re
 import sys
 
@@ -47,13 +48,23 @@ def _file_path(raw: str) -> str:
         return m.group(1) if m else ""
 
 
-def _normalize(path: str) -> str:
-    """역슬래시→슬래시, 드라이브 문자 제거 후 프로젝트 루트 기준 상대 경로로 정규화한다."""
+def _unify(path: str) -> str:
+    """역슬래시→슬래시, Git Bash 형식(/d/...)→D:/..., 비교용 소문자."""
     p = path.replace("\\", "/")
-    # 절대 경로면 프로젝트 루트(kuro_keyviewer/) 이후만 남긴다.
-    m = re.search(r"/kuro_keyviewer/(.*)$", p)
+    m = re.match(r"^/([a-zA-Z])/(.*)$", p)
     if m:
-        p = m.group(1)
+        p = f"{m.group(1)}:/{m.group(2)}"
+    return p
+
+
+def _normalize(path: str) -> str:
+    """프로젝트 루트(CLAUDE_PROJECT_DIR) 기준 상대 경로로 정규화한다.
+    폴더 이름을 고정하지 않는다(2026-09-30: 옛 `kuro_keyviewer/` 고정 매칭이 실제 폴더명과 달라
+    절대 경로가 전부 차단되던 버그 수정). 루트 밖 절대 경로는 그대로 두어 fail-closed."""
+    p = _unify(path)
+    root = _unify(os.environ.get("CLAUDE_PROJECT_DIR", "")).rstrip("/")
+    if root and p.lower().startswith(root.lower() + "/"):
+        p = p[len(root) + 1:]
     p = re.sub(r"^\./", "", p)
     return p
 
