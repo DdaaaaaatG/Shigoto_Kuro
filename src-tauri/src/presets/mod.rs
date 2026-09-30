@@ -6,7 +6,7 @@
 //!        실패 시 되돌림」이며 설정 쓰기는 `settings::update` 하나만 쓴다. PC별 설정 5개는 건드리지 않는다.
 //! [공개 API] `list`·`save`·`apply`·`export_to`·`import_from`·`rename`·`delete`, `PresetSummary`·
 //!        `PresetPreview`·`PresetPreviewLayer`·`PresetProblem`·`PresetImportReport`·`PresetExportResult`·`AppliedPreset`, `PresetError`
-//!        (`code()`·`may_have_changed()`), 상수 5개.
+//!        (`code()`·`may_have_changed()`), 상수 5개, `seed_builtin`·`SeedOutcome`·`SeedSkip`(PS-11).
 //! [형식] `preset.json`(formatVersion 1) + `{file_key}.png` + `alarm.{wav|mp3|ogg}`. 파일 이름은 슬롯·형식에서만
 //!        만든다(JSON에 파일 이름 문자열 없음).
 //! [보안] 사용자 문자열은 경로 조각이 되지 않는다(id는 규칙 검사, 이름은 내보내기 때만 정화). 링크·재분석
@@ -17,7 +17,7 @@
 //! [에러] `PresetError::{NotFound, InvalidName, MissingRequired, NotPreset, Format, InvalidSettings, Damaged,
 //!        BadDir, ExportExists, Io, Settings}`.
 //! [설정] 읽기/쓰기 대상은 `Settings`의 `scale`·`idle_seconds`·`mouse`·`timer`뿐. `settings.json` 스키마 불변.
-//! [테스트] 단위: 이 파일(에러 3개)·`format.rs`·`scan.rs`. 통합: `tests/presets.rs`·`tests/presets_apply.rs`.
+//! [테스트] 단위: 이 파일(에러 3개)·`format.rs`·`scan.rs`. 통합: `tests/presets.rs`·`tests/presets_apply.rs`·`tests/presets_preview.rs`·`tests/presets_builtin.rs`.
 
 use std::path::{Path, PathBuf};
 
@@ -27,6 +27,7 @@ use crate::assets::AssetManifest;
 use crate::settings::SettingsError;
 
 mod apply;
+mod builtin;
 mod format;
 mod load;
 mod preview;
@@ -34,6 +35,7 @@ mod scan;
 mod write;
 
 pub use apply::apply;
+pub use builtin::{seed_builtin, SeedOutcome, SeedSkip};
 pub use preview::{PresetPreview, PresetPreviewLayer};
 pub use scan::{delete, list, rename};
 pub use write::{export_to, import_from, save};

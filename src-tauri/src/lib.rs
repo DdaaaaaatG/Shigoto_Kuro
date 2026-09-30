@@ -110,6 +110,7 @@ pub fn run() {
             std::fs::create_dir_all(&paths.assets_dir)?;
             let settings = startup_settings(&paths); // load_or_default → data_reset::run_startup(R-A2)
             seed_default_assets(&paths.assets_dir); // CR-035 DA-02 — data-reset 뒤에 돈다(초기화 직후엔 Skipped)
+            seed_builtin_presets(&paths.presets_dir()); // PS-11 — presets/가 없을 때만. 실패해도 앱은 계속 뜬다
             let manifest = assets::load_manifest(&paths.assets_dir).unwrap_or_else(|e| {
                 log::warn!("매니페스트를 읽지 못해 캔버스 없음으로 처리합니다: {e}");
                 assets::AssetManifest::default()
@@ -356,6 +357,20 @@ fn seed_default_assets(assets_dir: &std::path::Path) {
             log::warn!("기본 이미지 시딩 일부 실패: {outcome:?} ({ms} ms)")
         }
         _ => log::info!("기본 이미지 시딩: {outcome:?} ({ms} ms)"),
+    }
+}
+
+/// 내장 프리셋 시딩(PS-11). 실패해도 앱은 계속 뜬다 — 결과·소요 시간만 로그(경로 없음).
+fn seed_builtin_presets(presets_dir: &std::path::Path) {
+    let started = std::time::Instant::now();
+    let outcome = presets::seed_builtin(presets_dir);
+    let ms = started.elapsed().as_millis();
+    match &outcome {
+        Ok(presets::SeedOutcome::Seeded { failed, .. }) if !failed.is_empty() => {
+            log::warn!("내장 프리셋 시딩 일부 실패: {outcome:?} ({ms} ms)")
+        }
+        Ok(o) => log::info!("내장 프리셋 시딩: {o:?} ({ms} ms)"),
+        Err(e) => log::warn!("내장 프리셋 시딩 실패 code={} ({ms} ms)", e.code()),
     }
 }
 

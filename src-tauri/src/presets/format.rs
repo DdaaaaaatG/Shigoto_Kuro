@@ -130,7 +130,7 @@ fn format_err(reason: &str) -> PresetError {
 }
 
 /// JSON 문자열 → 검사된 `PresetFile`(형식 버전·중복·개수·이름·설정). 파일 검사는 하지 않는다.
-fn parse_preset(text: &str) -> Result<PresetFile, PresetError> {
+pub(super) fn parse_preset(text: &str) -> Result<PresetFile, PresetError> {
     let mut file: PresetFile = serde_json::from_str(text).map_err(|_| format_err(FORMAT_JSON))?;
     if file.format_version != FORMAT_VERSION {
         return Err(format_err(FORMAT_VERSION_BAD));
