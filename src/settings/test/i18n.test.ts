@@ -49,8 +49,93 @@ const EXPECTED_ERROR_CODES = [
   'sound.io', // CR-050
   'reset.io', // CR-054(contract v0.25 §6, i18n §4.6 CR-054 주 — 25 → 27개). sound.io 바로 뒤·unknown 앞, 이 순서로 확정
   'reset.seed', // CR-054
+  // CR-064(contract v0.30 §6, i18n §4.6 CR-064 추가분 — 27 → 39개). reset.seed 바로 뒤·unknown 앞, 계약 표 순서. preset.forbidden 제외
+  'preset.not_found',
+  'preset.invalid_name',
+  'preset.missing_required',
+  'preset.not_preset',
+  'preset.format',
+  'preset.invalid_settings',
+  'preset.damaged',
+  'preset.bad_dir',
+  'preset.export_exists',
+  'preset.io',
+  'preset.file_missing',
+  'preset.file_link',
   'unknown',
 ]
+
+/** CR-064(i18n §4.6 CR-064 추가분 ko 열 — 정확 일치) */
+const EXPECTED_KO_PRESET_ERRORS = {
+  'preset.not_found': '프리셋을 찾을 수 없습니다. 목록을 다시 확인하세요.',
+  'preset.invalid_name': '프리셋 이름은 1~50자로 입력하세요.',
+  'preset.missing_required': '필수 그림(키보드 기본·팔)이 없습니다.',
+  'preset.not_preset': '프리셋 폴더가 아닙니다. preset.json이 있는 폴더를 고르세요.',
+  'preset.format': '프리셋 파일 형식이 올바르지 않습니다.',
+  'preset.invalid_settings': '프리셋에 들어 있는 설정값이 올바르지 않습니다.',
+  'preset.damaged': '저장된 프리셋이 손상되어 적용하지 않았습니다. 지금 상태는 그대로입니다.',
+  'preset.bad_dir': '폴더를 찾을 수 없습니다.',
+  'preset.export_exists': '고른 위치에 같은 이름의 폴더가 이미 있습니다. 다른 위치를 고르거나 프리셋 이름을 바꾸세요.',
+  'preset.io': '프리셋 파일을 읽거나 쓰지 못했습니다.',
+  'preset.file_missing': '파일이 없습니다.',
+  'preset.file_link': '바로 가기·링크 파일은 쓸 수 없습니다.',
+}
+
+/** CR-064(i18n §4.12 ko 열 — 36키, 표 순서. ko 확정·ja·en 검수 필요) */
+const EXPECTED_KO_PRESET = {
+  tabPresets: '프리셋',
+  cardPresetSave: '현재 상태를 프리셋으로 저장',
+  presetSaveDesc:
+    '지금 등록한 그림 전부·알림음·배율·휴식 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.',
+  presetNameLabel: '프리셋 이름',
+  presetNamePlaceholder: '예: 고양이 A',
+  presetSave: '저장',
+  presetSaveNeedsRequired: '키보드 기본 그림과 팔 그림이 있어야 저장할 수 있습니다. 「이미지 설정」에서 먼저 등록하세요.',
+  presetSaved: '「{name}」 프리셋을 저장했습니다.',
+  presetImport: '폴더에서 가져오기',
+  presetImportDesc: '내보낸 프리셋 폴더(preset.json이 들어 있는 폴더)를 고르세요.',
+  presetImported: '「{name}」 프리셋을 가져왔습니다.',
+  presetImportFailed: '가져오지 못했습니다. 아래 파일을 고친 뒤 다시 가져오세요.',
+  pickPresetFolderTitle: '가져올 프리셋 폴더 선택',
+  pickExportFolderTitle: '내보낼 위치 선택',
+  cardPresetList: '저장한 프리셋',
+  presetListEmpty: '저장한 프리셋이 없습니다.',
+  presetSavedAt: '저장 {date}',
+  presetImageCount: '그림 {count}장',
+  presetHasAlarm: '알림음 있음',
+  presetNoAlarm: '알림음 없음',
+  presetApply: '적용',
+  presetExport: '내보내기',
+  presetRename: '이름 바꾸기',
+  presetDelete: '삭제',
+  presetRenameSave: '저장',
+  presetApplied: '「{name}」 프리셋을 적용했습니다.',
+  presetExported: '「{folder}」 폴더로 내보냈습니다.',
+  presetDeleted: '「{name}」 프리셋을 삭제했습니다.',
+  confirmPresetApplyTitle: '프리셋 적용',
+  confirmPresetApplyMessage:
+    '지금 그림·알림음·설정이 「{name}」 프리셋의 것으로 모두 바뀝니다. 프리셋에 없는 그림 칸은 비워집니다. 지금 상태는 따로 남지 않으니, 남기려면 먼저 「현재 상태를 프리셋으로 저장」하세요. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 그대로입니다.',
+  confirmPresetApplyOk: '적용',
+  confirmPresetDeleteTitle: '프리셋 삭제',
+  confirmPresetDeleteMessage: '「{name}」 프리셋을 삭제할까요? 되돌릴 수 없습니다.',
+  confirmPresetDeleteOk: '삭제',
+  presetActionAria: '{action}: {name}',
+  presetRenameInputAria: '「{name}」의 새 이름',
+}
+/** 자리표시자가 있는 키 — ja·en 에도 같은 자리표시자가 남아 있어야 한다 */
+const PRESET_PLACEHOLDERS: Record<string, string[]> = {
+  presetSaved: ['{name}'],
+  presetImported: ['{name}'],
+  presetSavedAt: ['{date}'],
+  presetImageCount: ['{count}'],
+  presetApplied: ['{name}'],
+  presetExported: ['{folder}'],
+  presetDeleted: ['{name}'],
+  confirmPresetApplyMessage: ['{name}'],
+  confirmPresetDeleteMessage: ['{name}'],
+  presetActionAria: ['{action}', '{name}'],
+  presetRenameInputAria: ['{name}'],
+}
 
 /** design/i18n.md §4.4 `SlotMessageKey` — CR-037 로 25개(옛 24 + hair), CR-042 로 18개(pen_key_* 7 삭제 — §4.4 CR-042 블록 1), CR-045 로 20개 */
 const SLOT_KEYS = [
@@ -219,7 +304,7 @@ const simpleKeys = (m: object) =>
     .sort()
 
 describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
-  it('TC-093: ko·ja·en 의 키 집합이 같고 빈 문자열이 없으며 errors 키 = ERROR_CODES(27개 = 계약 v0.25 §6 code 26 + unknown — CR-049 · CR-050 · CR-054)', () => {
+  it('TC-093: ko·ja·en 의 키 집합이 같고 빈 문자열이 없으며 errors 키 = ERROR_CODES(39개 = 계약 v0.30 §6 ui 대상 code 38 + unknown — CR-049 · CR-050 · CR-054 · CR-064)', () => {
     expect([...ERROR_CODES]).toEqual(EXPECTED_ERROR_CODES)
     for (const dict of [ja, en]) {
       expect(simpleKeys(dict)).toEqual(simpleKeys(ko))
@@ -270,6 +355,7 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
       // CR-054(i18n §4.6 CR-054 행 ko 열 — core message 가 빈 문자열일 때의 폴백)
       'reset.io': '데이터를 모두 초기화하지 못했습니다(일부만 초기화됐을 수 있습니다). 앱을 다음에 시작할 때 다시 시도합니다.',
       'reset.seed': '기본 그림을 다시 채우지 못했습니다. 앱을 다음에 시작할 때 다시 시도합니다.',
+      ...EXPECTED_KO_PRESET_ERRORS, // CR-064(i18n §4.6 CR-064 추가분)
     })
     // 이관 26 + 새 43(CR-028) + CR-033 11(i18n.md §4.3 표 penModeLabel ~ penFirstNo — 값 단언은 PenMode.test.tsx TC-174).
     // 주: i18n.md 본문 「위 10키」·「+10」과 표 행 수(11)가 어긋난다 — 표를 따른다(scenarios.md 설계 확인 필요 J-1)
@@ -282,7 +368,8 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     // CR-052: − 1(timerCardDesc 삭제 — 확정사항 CR-048 블록 「수정 (CR-052)」) — 옛 129
     // CR-054: + 8(i18n §4.11 cardReset ~ resetAllDone — 값 단언은 ResetAllCard.test.tsx TC-301) — 옛 128
     // CR-057: + 1(areaDesc — 값 단언은 MousePartsTab.test.tsx TC-305, 3개 국어) — 옛 136
-    expect(simpleKeys(ko)).toHaveLength(137) // CR-035: + 12(i18n §4.7) — 옛 80
+    // CR-064: + 36(i18n §4.12 tabPresets ~ presetRenameInputAria — 값 단언은 TC-352) — 옛 137
+    expect(simpleKeys(ko)).toHaveLength(173) // CR-035: + 12(i18n §4.7) — 옛 80
     for (const dict of [ko, ja, en]) {
       expect('areaDesc' in dict, 'CR-057 areaDesc').toBe(true)
     }
@@ -426,7 +513,7 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     expect(ko.errors['asset.canvas_mismatch']).toBe(KO_CANVAS_MISMATCH)
     // 수(계약 v0.21 §6 · i18n §4.9) — CR-049: 23 → 22, CR-050(contract v0.23 §6 · i18n §4.10): sound.* 3개로 22 → 25
     // CR-054(contract v0.25 §6 · i18n §4.6): reset.io·reset.seed 로 25 → 27
-    expect(ERROR_CODES).toHaveLength(27)
+    expect(ERROR_CODES).toHaveLength(39) // CR-064: 27 → 39(preset.* 12)
     expect(ERROR_CODES).toContain('timer.disabled')
     expect(ERROR_CODES).not.toContain('autostart.cancelled')
     // ja·en — 검수 필요 문구라 전체 비교 대신 키 존재·비어 있지 않음·핵심어만(v8 관례)
@@ -501,7 +588,7 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
       expect('timerEnabledDesc' in dict).toBe(false)
     }
     // ERROR_CODES 27(CR-054 개정 — 옛 25) · 순서(timer.disabled → sound.* 3 → reset.io·reset.seed(CR-054) → unknown)
-    expect(ERROR_CODES).toHaveLength(27)
+    expect(ERROR_CODES).toHaveLength(39) // CR-064: 27 → 39(preset.* 12)
     const i = ERROR_CODES.indexOf('timer.disabled')
     expect(ERROR_CODES.slice(i)).toEqual([
       'timer.disabled',
@@ -510,6 +597,8 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
       'sound.io',
       'reset.io',
       'reset.seed',
+      // CR-064: preset.* 12개가 reset.seed 바로 뒤·unknown 앞(i18n §4.6 CR-064 추가분)
+      ...Object.keys(EXPECTED_KO_PRESET_ERRORS),
       'unknown',
     ])
     // ja·en — 검수 필요 문구라 정확 비교 대신 존재·비어 있지 않음·ko 와 다름·자리표시자(v8 관례)
@@ -538,6 +627,52 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     // 단위 %·구분 : 는 키가 아니다(공통 리터럴)
     for (const dict of [ko, ja, en]) {
       expect(Object.keys(dict).filter(k => /percent|colon|sep/i.test(k))).toEqual([])
+    }
+  })
+})
+
+// CR-064 · R-66 · R-63 · R-20 (i18n §4.12 · §4.6 CR-064 추가분 · contract v0.30 §6) — scenarios.md 「v30 개정」 절
+describe('i18n 사전 — 프리셋 (CR-064)', () => {
+  it('TC-352: CR-064 사전 — 새 단순 키 36개 ko 정확(표 순서), ja·en 존재·비어 있지 않음·자리표시자 유지, errors preset.* 12개 ko 정확·ja·en 존재, preset.forbidden 은 ERROR_CODES·세 사전 모두 없음, ERROR_CODES 39', () => {
+    const koRec = ko as unknown as Record<string, string>
+    expect(Object.keys(EXPECTED_KO_PRESET)).toHaveLength(36)
+    for (const [k, v] of Object.entries(EXPECTED_KO_PRESET)) expect(koRec[k], k).toBe(v)
+    expect(Object.keys(EXPECTED_KO_PRESET_ERRORS)).toHaveLength(12)
+    for (const [c, v] of Object.entries(EXPECTED_KO_PRESET_ERRORS)) {
+      expect(ko.errors[c as keyof typeof ko.errors], c).toBe(v)
+    }
+    expect(ERROR_CODES).toHaveLength(39)
+    expect(ERROR_CODES).not.toContain('preset.forbidden')
+    for (const dict of [ko, ja, en]) {
+      expect('preset.forbidden' in dict.errors).toBe(false)
+      expect(simpleKeys(dict)).toHaveLength(173)
+    }
+    for (const dict of [ja, en]) {
+      const rec = dict as unknown as Record<string, string>
+      for (const k of Object.keys(EXPECTED_KO_PRESET)) {
+        expect(typeof rec[k], k).toBe('string')
+        expect(rec[k].trim().length, k).toBeGreaterThan(0)
+      }
+      for (const [k, ph] of Object.entries(PRESET_PLACEHOLDERS)) {
+        for (const p of ph) expect(rec[k], `${k} ${p}`).toContain(p)
+      }
+      for (const c of Object.keys(EXPECTED_KO_PRESET_ERRORS)) {
+        expect(dict.errors[c as keyof typeof dict.errors].trim().length, c).toBeGreaterThan(0)
+      }
+    }
+    // i18n §4.12 표에 확정된 ja·en 탭 이름(폭 검산 근거)
+    expect(ja.tabPresets).toBe('プリセット')
+    expect(en.tabPresets).toBe('Presets')
+    // 치환 예(design/presets-tab.md §8.1 — 「적용: 고양이 A」)
+    expect(format(ko.presetActionAria, { action: ko.presetApply, name: '고양이 A' })).toBe('적용: 고양이 A')
+    expect(format(ko.presetRenameInputAria, { name: '고양이 A' })).toBe('「고양이 A」의 새 이름')
+    // 표시 규칙 — ko 는 core message 우선, 빈 message 면 사전(가져오기 문제 줄·export_exists)
+    expect(errorText(ko, 'ko', { code: 'preset.file_link', message: '' })).toBe('바로 가기·링크 파일은 쓸 수 없습니다.')
+    expect(errorText(ko, 'ko', { code: 'preset.damaged', message: '손상: kb_up.png' })).toBe('손상: kb_up.png')
+    expect(errorText(en, 'en', { code: 'preset.forbidden', message: 'x' })).toBe(en.errors.unknown)
+    // 구분자 ` · `·` — ` 는 키가 아니다(세 언어 공통 리터럴)
+    for (const dict of [ko, ja, en]) {
+      expect(Object.keys(dict).filter(k => k.startsWith('preset') && /sep|dash|dot/i.test(k))).toEqual([])
     }
   })
 })

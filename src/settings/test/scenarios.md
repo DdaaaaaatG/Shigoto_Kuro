@@ -3741,11 +3741,301 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 - **AB-4. CR-ID 미부여.** 이 결정의 CR 행이 대장에 없다. 관리자가 기록하면 이 절 · 스펙 제목의 「v29」에 CR-ID를 병기한다.
 - **AB-5. 픽스처 이름 옛 개수.** `imageSlots.test.ts` `FIRST7`(내용 6장) · `DEFAULT7`(사용자 설치 예) · `ImagesTab.test.tsx` `d7()` · `D7`은 이름만 옛 개수(W-8 관례, 판정 무관). `ImagesTab.test.tsx` 194행 주석의 `DEFAULT_KEYS7` 언급은 이름 변경(→ `BUILTIN_KEYS`) 뒤 남은 주석 잔재 — 다음 위임에서 정리.
 
+## v30 개정 — 「프리셋」 탭 (CR-064, R-58 ~ R-67 🔒, 증분 모드 — 신규 TC · TDD 선행)
+
+비유: 옷장(프리셋 탭) 검사표다. 위 칸(저장 카드)에 옷을 거는 법·다른 집 옷걸이를 들이는 법, 아래 칸(목록)에서 갈아입기·밖으로 복사·이름표 바꾸기·버리기를 하나씩 확인하고, 마지막에 한 사람이 처음부터 끝까지 다 해 보는 흐름(TC-FLOW-33)으로 잇는다.
+
+- **v30 기준(이 절이 앞 모든 기준 줄보다 우선 — 프리셋 탭 범위)**: `src/settings/requirements.md` **v1.28**(R-58 ~ R-67 · S-31 ~ S-34 · 용어 주 CR-064 ① R-19 「프리셋 탭」 금지 해제 ② R-27 메뉴 5항목) / `design/presets-tab.md`(§1 ~ §10, 레이아웃 확정) / `design.md` RTM R-58 ~ R-67 / `design/i18n.md` §4.12(단순 키 36 → 137 → **173**) · §4.6 CR-064 추가분(`ERROR_CODES` 27 → **39**, `preset.forbidden` 제외) / contract **v0.30** §3.11 · §5 · §5.11 · §6 (bridge 반영 완료 e8850c7 — 스펙은 mock) / 수용 기준 `doc/200_설계/architecture/presets-03-packet-ui.md` §5
+- **CR-ID**: CR-064. 대기열 행 없음(구현 전 TDD 선행 — CR-054 Q-07 선례와 달리 소스 변경이 아직 없어 「변경 → TC」 전환 대상이 아니다. ui-implementer 적용 후 CR 대장에 기록)
+- **번호**: 자동 **TC-315 ~ TC-352**(38개). **TC-311 ~ TC-314 결번** — CR 대장 CR-051 계열 행(「2단계 … TC-314 신규(ui-test-designer)」)이 본문에 없는 TC-314를 가리키고 있어 같은 번호의 두 뜻을 막으려 건너뛴다(AC-2). TC-FLOW-33. 수동 M-64a ~ M-64f(`manual-checklist.md` v22)
+- **수(v30)**: 자동 번호 352(유효 339 · 폐기 8 · 결번 5 — TC-307 · TC-311 ~ TC-314) · TC-FLOW 33(유효 32 · 폐기 1) · 수동 60
+- **mock 규약**: `vi.mock('bridge/commands')`(실물 `toBridgeError`)에 프리셋 래퍼 7개 + `pickFolder`를 `vi.fn`으로(`PresetsTab.test.tsx`), 이 탭이 부르면 안 되는 `getAlarmSound`·`getSettings`·`setSettings`·`getAssetManifest`·`importAsset`·`removeAsset`도 `vi.fn`으로 두고 0회 단언. `vi.mock('bridge/events')`는 전부 `vi.fn` — 이 탭은 구독 0회(§2). `SettingsApp.test.tsx`는 프리셋 래퍼를 일반 함수(`listPresets` = `[]`)로 둔다(타이머 래퍼 선례). 재조회 응답은 `mockResolvedValueOnce` 대기열로 **마운트 뒤에** 쌓는다. 가짜 시계 없음(시간 의존 동작 없음) — 완료 대기는 상태 줄 문구·포커스·호출 횟수 `waitFor`
+- **Red(예정)**: `presetValues.ts` · `PresetsTab.tsx` · `PresetSaveCard.tsx` · `PresetCard.tsx` · i18n 36키 · errors 12 · `TabIcon` `presets` · `Shell` 다섯째 탭이 없으면 새 스펙 전부와 개정 TC(TC-031 · 032 · 093 · 094 · 099 · 100 · 101 · 153 · 154 · 156 · 246 · 286)가 실패한다 — 정상
+
+### v30 신규 TC
+
+#### 순수 모듈 — `test/presetValues.test.ts`
+
+### TC-315 · missingRequiredSlots · 종류: 자동 · 요구: R-65 · 설계: presets-tab §3 `missingRequiredSlots` · 스펙: `test/presetValues.test.ts`
+- Given `REQUIRED_SLOTS`(bridge 실물) = `['kb_up','mouse_base']`, 매니페스트 BOTH(배경·kb_up·mouse_base·idle) / NO_KB / NO_ARM(kb_up·kb_down_0) / EMPTY / 배경만
+- When `missingRequiredSlots(m)`
+- Then ⓐ(화면 없음 — 반환값) `[]` · `['kb_up']` · `['mouse_base']` · `['kb_up','mouse_base']` · `['kb_up','mouse_base']`(REQUIRED_SLOTS 순서) ⓑ 입력 매니페스트 불변(JSON 동일) ⓒ bridge 호출 없음(순수 — import는 타입·상수만)
+
+### TC-316 · isPresetNameFilled · canSavePreset · 종류: 자동 · 요구: R-58, R-64, R-65 · 설계: §3 · 스펙: 같음
+- Given 이름 `''` · `'   '` · `'\t \n'` · `'고양이 A'` · `'  A  '` · 51자, 매니페스트 BOTH · NO_KB · NO_ARM · EMPTY
+- When 두 함수 호출
+- Then ⓐ `isPresetNameFilled` = false · false · false · true · true · **true**(상한은 ui 판정 아님 — 입력칸 `maxLength` + core `preset.invalid_name`) ⓑ `canSavePreset` = 이름 채움 AND 필수 누락 없음일 때만 true(BOTH + '고양이 A'), 나머지 false, `PRESET_NAME_MAX` = 50 ⓒ bridge 호출 없음
+
+### TC-317 · formatSavedAt · 종류: 자동 · 요구: R-66 · 설계: §3 `LOCALE_BY_LANGUAGE` · `formatSavedAt` · 스펙: 같음
+- Given `MS` = 2026-09-30 12:34 UTC, 무효 입력 NaN · ±Infinity · 8.64e15 + 1
+- When `formatSavedAt(ms, 'ko'|'ja'|'en')`
+- Then ⓐ 결과 = `Intl.DateTimeFormat(ko-KR|ja-JP|en-US, { dateStyle:'medium', timeStyle:'short' })` 와 정확히 같음, 세 결과가 서로 다르고 비지 않음, `formatSavedAt(0,'en')` 유효 ⓑ 무효 입력은 `''`·던지지 않음, `LOCALE_BY_LANGUAGE` = `{ko:'ko-KR', ja:'ja-JP', en:'en-US'}` ⓒ bridge 호출 없음
+
+### TC-318 · presetErrorForDisplay · 종류: 자동 · 요구: R-62 · 설계: §3 · i18n §4.6 CR-064 「예외 1건」 · 스펙: 같음
+- Given `{code:'preset.export_exists', message:'같은 이름의 폴더가 이미 있습니다.'}`, 다른 code 4건(bad_dir · format · io · unknown)
+- When `presetErrorForDisplay(e)`
+- Then ⓐ export_exists → `{code:'preset.export_exists', message:''}`(새 객체) ⓑ 입력 객체의 message 불변, 다른 code는 **같은 객체**(`toBe`) ⓒ bridge 호출 없음
+
+#### 탭 — `test/PresetsTab.test.tsx` (`PresetsTab` + `PresetSaveCard`, bridge mock)
+
+공통 픽스처: P1 「고양이 A」(12장·알림음 있음) · P2 「고양이 B」(7장·없음) · P3 「강아지」 · NEW 「고양이 C」 · IMP 「가져온 고양이」, 매니페스트 FULL(kb_up · mouse_base) · NO_KB, 가짜 경로 `X:/in/cat-a` · `X:/out`. 문구는 i18n §4.12 ko 열 정확 일치. 카드 조회 = 목록 카드(region 「저장한 프리셋」) 안 `listitem`(접근 이름 = h3 이름), 카드 버튼 = `「{동사}: {이름}」` aria-label.
+
+### TC-319 · 마운트 렌더 — 저장 카드 위 · 목록 아래 · core 순서 · 요약 줄 · 구독 없음 · 종류: 자동 · 요구: R-66, R-59, R-60 · 설계: §1.2 · §2 · §4 `presets` · §5.1 `reload` · 마운트 효과 · §8.1 · 스펙: `test/PresetsTab.test.tsx`
+- Given `listPresets` → [P1, P2, P3], manifest FULL
+- When 마운트
+- Then ⓐ region 「현재 상태를 프리셋으로 저장」이 region 「저장한 프리셋」보다 앞, 설명 `presetSaveDesc`(「들어가지 않습니다」 포함 — R-60)·가져오기 설명, 이름 입력 placeholder 「예: 고양이 A」·`maxlength` 50·빈 값, 상태 줄 `role=status`·`aria-live=polite`·빈 문자열, 이유 줄 없음. 카드 순서 [고양이 A, 고양이 B, 강아지](재정렬 없음), 각 카드 h3 = 이름·요약 줄 `저장 {formatSavedAt} · 그림 {n}장 · 알림음 있음/없음`·버튼 [적용, 내보내기, 이름 바꾸기, 삭제], 빈 문구·확인창·alert 없음 ⓑ onError는 null만(또는 0회) ⓒ `listPresets()` 1회(인자 없음), 쓰기 command 6개·`pickFolder` 0회, `getAlarmSound`·`getSettings`·`setSettings`·`getAssetManifest`·`importAsset`·`removeAsset` 0회, events 구독 7종 0회
+
+### TC-320 · 빈 목록 · 첫 조회 전 · 첫 조회 실패 · 종류: 자동 · 요구: R-66 · 설계: §1.2(presets null) · §4 · §5.1 `reload` 예외 · PR-1 · 스펙: 같음
+- Given ① `[]` ② 해결되지 않는 `listPresets` ③ `listPresets` reject `{preset.io}`
+- When 각각 마운트
+- Then ⓐ ① 「저장한 프리셋이 없습니다.」·카드 0 ② 빈 문구 없음·카드 0 ③ 빈 문구 없음·카드 0 ⓑ ③ 목록 상태 null 유지 ⓒ ③ `onError(err)`, `listPresets` 1회(자동 재시도 없음)
+
+### TC-321 · 필수 그림 없음 → 저장 비활성 + 이유 줄(항상) · 빈 이름 비활성 · 종류: 자동 · 요구: R-65, R-58 · 설계: §5.2 `missing` · `saveEnabled` · §7.1 저장 행 · §8.1 이유 줄 · 스펙: 같음
+- Given manifest NO_KB
+- When 이름 없이 / 「고양이 A」 입력 / 저장 클릭 → props를 FULL로 rerender → 이름 `''` · `'   '`
+- Then ⓐ NO_KB: 이유 줄 `presetSaveNeedsRequired` 입력과 무관하게 보임, 저장 `disabled`·`aria-describedby` = 이유 줄 id(비지 않음). FULL: 이유 줄 없음·`aria-describedby` 없음·「고양이 A」면 활성, `''`·공백만이면 비활성 ⓑ 이름 입력값 유지 ⓒ `savePreset` 0회, `listPresets` 1회
+
+### TC-322 · 저장 성공 · 종류: 자동 · 요구: R-58 · 설계: §5.1 `onSave` · §5.2 `submit` · §8.2 「저장 성공 → 이름 입력」 · PR-2 · 스펙: 같음
+- Given 목록 [P1], 재조회 [NEW, P1], `savePreset` → NEW
+- When 「  고양이 C  」 입력 → 「저장」
+- Then ⓐ 상태 줄 「「고양이 C」 프리셋을 저장했습니다.」, 카드 [고양이 C, 고양이 A], 이름 입력 빈 값·포커스·저장 비활성 ⓑ onError null만 ⓒ `savePreset('고양이 C')` 1회(trim), `listPresets` 2회, 다른 bridge 0회
+
+### TC-323 · Enter 저장 · IME 조합 Enter 무시 · 종류: 자동 · 요구: R-58 · 설계: §5.2 `onNameKeyDown` · §10 ③ · 스펙: 같음
+- Given 목록 [P1], FULL
+- When 빈 이름 Enter → 「고양이 C」 입력 후 `isComposing` Enter → 일반 Enter
+- Then ⓐ 마지막 Enter 뒤 상태 줄 저장 문구, Enter 이벤트 기본 동작 취소(`fireEvent` 반환 false) ⓑ 앞 두 Enter는 상태 변화 없음 ⓒ `savePreset` 앞 두 번 0회 → 마지막에 `('고양이 C')` 1회
+
+### TC-324 · 저장 실패 · 종류: 자동 · 요구: R-58 · 설계: §5.1 `onSave` 예외 · §8.2 「저장 실패 → 저장 버튼」 · 스펙: 같음
+- Given `savePreset` reject `{preset.invalid_name}`
+- When 「고양이 C」 → 저장
+- Then ⓐ 입력값 「고양이 C」 유지, 상태 줄 빈 칸, 포커스 「저장」, 카드 [고양이 A] ⓑ 목록 불변 ⓒ `onError(err)`, `savePreset('고양이 C')`, `listPresets` 1회(재조회 없음)
+
+### TC-325 · 이름 규칙 — maxLength 50 · 빈 편집 이름 저장 불가 · 종류: 자동 · 요구: R-58, R-64 · 설계: §5.3 편집 입력 · §7.1 편집 저장 행 · §8.1 · contract §3.11 `PRESET_NAME_MAX` · 스펙: 같음
+- Given 목록 [P1]
+- When 저장 입력 확인 → 「이름 바꾸기: 고양이 A」 → 편집 초안 `''`·`'   '`에서 각각 Enter
+- Then ⓐ 저장 입력·편집 입력 `maxlength` 50, 편집 「저장」 비활성, 편집 입력 그대로 ⓑ 편집 유지 ⓒ `renamePreset` 0회
+
+### TC-326 · 가져오기 성공 · 종류: 자동 · 요구: R-63 · 설계: §5.1 `onImport` · §8.2 「가져오기 끝 → 가져오기 버튼」 · PR-3 · 스펙: 같음
+- Given `pickFolder` → `X:/in/cat-a`, `importPreset` → `{preset: IMP, problems: []}`, 재조회 [P1, IMP]
+- When 「폴더에서 가져오기」
+- Then ⓐ 상태 줄 「「가져온 고양이」 프리셋을 가져왔습니다.」, 카드 [고양이 A, 가져온 고양이], 문제 블록 없음, 포커스 가져오기 버튼 ⓑ onError null만 ⓒ `pickFolder('가져올 프리셋 폴더 선택')` 1회, `importPreset('X:/in/cat-a')` 1회, `listPresets` 2회
+
+### TC-327 · 가져오기 폴더 선택 취소 · 종류: 자동 · 요구: R-63 · 설계: §5.1 `onImport`(null → end·포커스) · PR-3 오류 열 · 스펙: 같음
+- Given `pickFolder` → null
+- When 「폴더에서 가져오기」
+- Then ⓐ 상태 줄 빈 칸, 포커스·활성 가져오기 버튼 ⓑ 목록 불변 ⓒ `importPreset` 0회, `onError` 0회(오류 줄 불변), `listPresets` 1회
+
+### TC-328 · 가져오기 문제 목록 전부 표시 · 미등록 · 종류: 자동 · 요구: R-63 · 설계: §1.2 문제 블록 · §5.1 `onImport`(preset null) · §7.2 문제 줄 · §8.1 문제 목록 · i18n §4.6 CR-064 보고서 전용 code · 스펙: 같음
+- Given `importPreset` → `{preset:null, problems:[kb_up.png asset.not_rgba, alarm.mp3 sound.too_many_bytes, mouse_base.png preset.file_link, idle.png preset.file_missing, rest.png weird.code]}`, 두 번째 `pickFolder` → null
+- When 가져오기 → (블록 확인) → 다시 가져오기(취소)
+- Then ⓐ 저장 카드 안 `role=alert` 블록: `p` 「가져오지 못했습니다. 아래 파일을 고친 뒤 다시 가져오세요.」 + 같은 문구를 이름으로 가진 `list`, 항목 5개가 순서대로 `{fileName} — {사전 문구}`(모르는 code = 「알 수 없는 오류가 발생했습니다.」), 상태 줄 빈 칸, 포커스 가져오기 버튼. 두 번째 가져오기 시작 시 블록 사라짐(`begin`) ⓑ 카드 [고양이 A, 고양이 B] 불변 ⓒ `importPreset('X:/in/cat-a')` 1회, `onError(null)`만, `listPresets` 1회(재조회 없음)
+
+### TC-329 · 가져오기 폴더 수준 실패 · 종류: 자동 · 요구: R-63 · 설계: §5.1 `onImport` 예외 · §7.2 `preset.not_preset` · 스펙: 같음
+- Given `importPreset` reject `{preset.not_preset}`
+- When 가져오기
+- Then ⓐ 문제 블록 없음, 상태 줄 빈 칸, 포커스 가져오기 버튼 ⓑ 목록 불변 ⓒ `onError(err)`, `listPresets` 1회
+
+### TC-330 · 적용 — 확인창 → applyPreset → 상태 줄 · 재조회·알림음 조회 없음 · 종류: 자동 · 요구: R-61, R-67, R-60 · 설계: §5.1 `onApplyRequest` · `onConfirmOk` · `applyConfirmed` · §6.2 · §6.3 적용 행 · §8.2 · PR-4 · 스펙: 같음
+- Given 목록 [P1, P2], `applyPreset` 해결
+- When 「적용: 고양이 B」 → 확인창 → 「적용」
+- Then ⓐ 확인창 `alertdialog` 이름 「프리셋 적용」·설명 = `confirmPresetApplyMessage`({name} = 고양이 B — 통째 교체·빈 칸·자동 백업 없음·PC별 설정 그대로)·버튼 {적용, 취소}·첫 포커스 「취소」. 확인 뒤 창 닫힘, 상태 줄 「「고양이 B」 프리셋을 적용했습니다.」, 포커스 「적용: 고양이 B」, 카드 [고양이 A, 고양이 B] ⓑ onError null만, 확인 전 `applyPreset` 0회 ⓒ `applyPreset('p2')` 1회, `listPresets` 1회(재조회 없음 — PS-10), `getAlarmSound` · `setSettings` · `getSettings` 0회(낙관적 갱신·알림음 재조회 없음 §6.2), 구독 0회
+
+### TC-331 · 적용 취소 · Esc · 종류: 자동 · 요구: R-61 · 설계: §5.1 `onConfirmCancel` · §8.2 「확인창 취소·Esc」 · 스펙: 같음
+- Given 목록 [P1, P2]
+- When 「적용: 고양이 A」 → 「취소」 / 다시 열어 Esc(확인창 keydown)
+- Then ⓐ 두 경우 모두 확인창 닫힘·포커스 「적용: 고양이 A」·상태 줄 빈 칸 ⓑ 상태 불변 ⓒ `applyPreset` 0회, `onError` 0회
+
+### TC-332 · 적용 실패 · 종류: 자동 · 요구: R-61 · 설계: §5.1 `applyConfirmed` 예외 · §7.2 `preset.damaged` · 스펙: 같음
+- Given `applyPreset` reject `{preset.damaged, message:'…: kb_up.png'}`
+- When 「적용: 고양이 A」 → 확인
+- Then ⓐ 상태 줄 빈 칸, 포커스 「적용: 고양이 A」 ⓑ 목록 불변 ⓒ `applyPreset('p1')`, `onError(err)`(ko 오류 줄은 core message), `listPresets` 1회
+
+### TC-333 · 적용 뒤 「사용 중」 없음 · 새 manifest로 저장 활성 재계산 · 종류: 자동 · 요구: R-67, R-61, R-65 · 설계: §1.2 「사용 중 없음」 · §6.2 그림 매니페스트 행 · PR-4 · 스펙: 같음
+- Given 적용 성공 뒤(이름 입력 「다음 프리셋」)
+- When 카드 검사 → props manifest를 NO_KB로 rerender(`assets://changed` 흉내)
+- Then ⓐ 어느 카드에도 `aria-current`·`aria-selected`·`aria-pressed` 없음·「사용 중/적용됨」 글자 없음·버튼 전부 활성, 이유 줄 나타나고 저장 비활성 ⓑ 목록 [고양이 A, 고양이 B] 그대로 ⓒ `listPresets` 1회
+
+### TC-334 · 내보내기 성공 · 종류: 자동 · 요구: R-62 · 설계: §5.1 `onExport` · §8.2 「내보내기 끝」 · PR-5 · 스펙: 같음
+- Given `pickFolder` → `X:/out`, `exportPreset` → `{folderName:'고양이 A (2)'}`
+- When 「내보내기: 고양이 A」
+- Then ⓐ 상태 줄 「「고양이 A (2)」 폴더로 내보냈습니다.」(반환 폴더 이름), 포커스 「내보내기: 고양이 A」 ⓑ onError null만 ⓒ `pickFolder('내보낼 위치 선택')`, `exportPreset('p1','X:/out')` 1회, `listPresets` 1회
+
+### TC-335 · 내보내기 폴더 선택 취소 · 종류: 자동 · 요구: R-62 · 설계: §5.1 `onExport`(null) · 스펙: 같음
+- Given `pickFolder` → null
+- When 「내보내기: 고양이 A」
+- Then ⓐ 상태 줄 빈 칸, 포커스 「내보내기: 고양이 A」 ⓑ 불변 ⓒ `exportPreset` 0회, `onError` 0회
+
+### TC-336 · 내보내기 실패 — export_exists 사전 문구 · 다른 code 그대로 · 종류: 자동 · 요구: R-62 · 설계: §5.1 `onExport` 예외 · §3 `presetErrorForDisplay` · §7.2 · 스펙: 같음
+- Given `exportPreset` 1번째 reject `{preset.export_exists, '같은 이름의 폴더가 이미 있습니다.'}`, 2번째 reject `{preset.bad_dir, '…: X:/out'}`
+- When 내보내기 두 번
+- Then ⓐ 상태 줄 빈 칸, 포커스 「내보내기: 고양이 A」, ko 오류 줄 문구(`errorText(ko,'ko',{export_exists,''})`) = 「고른 위치에 같은 이름의 폴더가 이미 있습니다. 다른 위치를 고르거나 프리셋 이름을 바꾸세요.」 ⓑ 목록 불변 ⓒ 1번째 `onError({code:'preset.export_exists', message:''})`(원 객체로는 호출 안 됨), 2번째 `onError(bad)` 그대로, `exportPreset` 2회, `listPresets` 1회
+
+### TC-337 · 삭제 성공 — 확인창 → 재조회 → 같은 위치 카드 「적용」 포커스 · 종류: 자동 · 요구: R-64 · 설계: §5.1 `onDeleteRequest` · `deleteConfirmed` · §6.3 삭제 행 · §8.2 삭제 성공 · PR-7 · 스펙: 같음
+- Given 목록 [P1, P2, P3], 재조회 [P1, P3]
+- When 「삭제: 고양이 B」 → 확인창 → 「삭제」
+- Then ⓐ 확인창 이름 「프리셋 삭제」·설명 「「고양이 B」 프리셋을 삭제할까요? 되돌릴 수 없습니다.」·첫 포커스 「취소」. 확인 뒤 상태 줄 「「고양이 B」 프리셋을 삭제했습니다.」, 카드 [고양이 A, 강아지], 포커스 「적용: 강아지」(index 1) ⓑ onError null만, 확인 전 `deletePreset` 0회 ⓒ `deletePreset('p2')` 1회, `listPresets` 2회
+
+### TC-338 · 삭제 뒤 포커스 경계 · 재조회 실패 · 종류: 자동 · 요구: R-64 · 설계: §5.1 `deleteConfirmed`(`rest` · `list[index] ?? list[index − 1]` · 빈 목록 → 이름 입력) · §8.2 · 스펙: 같음(`TC-338(마지막 카드)` · `(유일한 카드)` · `(재조회 실패)`)
+- Given ① [P1,P2,P3]에서 P3 삭제·재조회 [P1,P2] ② [P1]에서 P1 삭제·재조회 [] ③ [P1,P2]에서 P1 삭제·재조회 reject `{preset.io}`
+- When 삭제 → 확인
+- Then ⓐ ① 포커스 「적용: 고양이 B」 ② 빈 목록 문구·포커스 이름 입력·상태 줄 삭제 문구 ③ 카드 [고양이 B](삭제 카드 남지 않음)·포커스 「적용: 고양이 B」·상태 줄 삭제 문구 ⓑ ③ 목록 = 옛 목록 − 삭제 항목 ⓒ ③ 마지막 `onError` = 재조회 오류, `listPresets` 2회
+
+### TC-339 · 삭제 취소 · 삭제 실패 · 종류: 자동 · 요구: R-64 · 설계: §5.1 `onConfirmCancel` · `deleteConfirmed` 예외 · §8.2 삭제 실패 · 스펙: 같음
+- Given 목록 [P1, P2], `deletePreset` reject `{preset.not_found}`
+- When 「삭제: 고양이 A」 → 「취소」 → 다시 → 「삭제」
+- Then ⓐ 취소 뒤 확인창 닫힘·포커스 「삭제: 고양이 A」, 실패 뒤 카드 그대로·상태 줄 빈 칸·포커스 「삭제: 고양이 A」 ⓑ 목록 불변 ⓒ 취소 때 `deletePreset` 0회, 실패 때 `deletePreset('p1')`·`onError(err)`, `listPresets` 1회
+
+### TC-340 · 인라인 이름 바꾸기 — 시작·저장 · 종류: 자동 · 요구: R-64 · 설계: §2.2(h3 DOM 유지) · §5.1 `onStartRename` · `onRenameSave` · §5.3 편집 입력(autoFocus · 전체 선택) · §7.1 · §8.2 · PR-6 · 스펙: 같음
+- Given 목록 [P1, P2], `renamePreset` → `{P1, name:'고양이 A2'}`, 재조회 [A2, P2]
+- When 「이름 바꾸기: 고양이 A」 → 초안 「  고양이 A2 」 → 카드 안 「저장」
+- Then ⓐ 편집 입력(이름 「「고양이 A」의 새 이름」) 값 「고양이 A」·포커스·선택 [0, 5], 카드 h3 DOM에 남음(li 이름 유지), 그 카드 「이름 바꾸기」만 비활성·「취소」 활성. 저장 뒤 입력 사라짐·카드 [고양이 A2, 고양이 B]·상태 줄 빈 칸·포커스 「이름 바꾸기: 고양이 A2」 ⓑ onError null만 ⓒ `renamePreset('p1','고양이 A2')` 1회(trim), `listPresets` 2회
+
+### TC-341 · 편집 키 — Enter 저장 · Esc 취소 · IME 조합 중 무시 · 종류: 자동 · 요구: R-64 · 설계: §5.3 `onDraftKeyDown` · §5.1 `onRenameCancel` · §10 ③ · 스펙: 같음
+- Given 목록 [P1, P2]
+- When 편집 → 초안 「버릴 이름」 Esc → 다시 편집 → 초안 「새 이름」 `isComposing` Enter·Esc → 일반 Enter
+- Then ⓐ Esc: 입력 사라짐·카드 이름 그대로·포커스 「이름 바꾸기: 고양이 A」·기본 동작 취소. 조합 중 두 키: 입력 그대로. Enter: 카드 [새 이름, 고양이 B]·포커스 「이름 바꾸기: 새 이름」 ⓑ 취소 시 초안 버림 ⓒ Esc·조합 키에서 `renamePreset` 0회, Enter에서 `('p1','새 이름')` 1회
+
+### TC-342 · 이름 바꾸기 실패 — 편집 유지 · 포커스 입력칸(클릭·Enter 두 경로) · 종류: 자동 · 요구: R-64 · 설계: §5.1 `onRenameSave` 예외 · §2.2 `'renameInput'` · §8.2 편집 저장 실패 · 스펙: 같음(`it.each` click · enter)
+- Given `renamePreset` reject `{preset.invalid_name}`
+- When 편집 → 초안 「다른 이름」 → 「저장」 클릭 / Enter
+- Then ⓐ 편집 입력 남음·값 「다른 이름」·포커스 입력칸·편집 「저장」 활성 ⓑ 편집 상태 유지 ⓒ `renamePreset('p1','다른 이름')`, `onError(err)`, `listPresets` 1회
+
+### TC-343 · 진행 중 — aria-busy · 모든 프리셋 버튼 비활성 · 재진입 없음 · 종류: 자동 · 요구: R-66 · 설계: §4 `pending` · §5.1 공통(재진입 방지) · §7.1 · §8.1 탭 루트 · 스펙: 같음
+- Given `savePreset` 지연 promise, 이어서 `pickFolder` 지연 promise
+- When 저장 클릭(대기) → Enter 재시도 → 해결 → 가져오기 클릭(대기) → null 해결
+- Then ⓐ 대기 중 탭 루트(렌더 컨테이너 첫 자식) `aria-busy="true"`, 저장·가져오기·카드 버튼 전부 `disabled`, 이름 입력 `readonly`. 해결 뒤 `aria-busy` 없음·버튼 활성·`readonly` 없음. 폴더 선택 대기 중에도 가져오기·카드 버튼 비활성 ⓑ pending true → false ⓒ `savePreset` 1회(재진입 0), 대기 중 `pickFolder` 0회, 취소 뒤 `importPreset` 0회
+
+### TC-344 · 다른 조작 시작 시 편집 버림 · 이름 바꾸기 시작 시 상태 줄 비움 · 종류: 자동 · 요구: R-64 · 설계: §5.1 공통 `begin()`(renamingId = null) · `onApplyRequest` · `onStartRename`(한 번에 한 장 · status = '') · §10 ⑥ · 스펙: 같음
+- Given 목록 [P1, P2], `pickFolder` → `X:/out` 다음 null, `exportPreset` → `{folderName:'고양이 A'}`
+- When ① A 편집 → 「적용: 고양이 B」(취소) ② A 편집(초안 변경) → 「이름 바꾸기: 고양이 B」 ③ 「내보내기: 고양이 A」 ④ 「이름 바꾸기: 고양이 A」 ⑤ 가져오기
+- Then ⓐ ① 편집 입력 사라지고 확인창 ② 편집 입력 = B 것 하나·값 「고양이 B」 ③ 편집 없음·상태 줄 내보내기 문구 ④ 상태 줄 빈 칸 ⑤ 편집 없음·포커스 가져오기 ⓑ 한 번에 한 장 ⓒ `renamePreset` 0회
+
+### TC-345 · 진행 중 언마운트(탭 이동) · 종류: 자동 · 요구: R-66 · 설계: §4 끝 문단(`aliveRef` — setState 없음, 실패는 onError) · 스펙: 같음(`it.each` reject · resolve)
+- Given `savePreset` 지연 promise
+- When 저장 클릭 → 언마운트 → reject `{preset.io}` / resolve NEW
+- Then ⓐ 던지지 않음(테스트 오류 없음) ⓑ 언마운트 뒤 상태 갱신 없음 ⓒ reject: `onError(err)` / resolve: null 아닌 onError 0회. 언마운트 뒤 재조회 여부는 판정 안 함(AC-3)
+
+### TC-346 · ja · en 렌더 · 종류: 자동 · 요구: R-66, R-20 · 설계: §9 · i18n §4.12 ja·en 열(검수 필요 — 사전 값 import 비교) · 스펙: 같음(`it.each` ja · en + `TC-346(en 빈 목록)`)
+- Given `MessagesProvider language` ja|en, 목록 [P1], NO_KB, 가져오기 → 문제 1건(kb_up.png asset.not_rgba)
+- When 렌더 → 적용 확인창 열고 취소 → 가져오기
+- Then ⓐ 카드 제목 2·설명·이유 줄·라벨·placeholder·저장(비활성)·요약 줄(`formatSavedAt(…, lang)`)·카드 버튼 4 aria-label(`format(presetActionAria)`)과 보이는 글자·확인창 제목·설명·취소·문제 머리·문제 줄(`errorText(t, lang, …)`)이 그 사전 값, en 빈 목록 = `en.presetListEmpty` ⓑ — (표시만) ⓒ `pickFolder(t.pickPresetFolderTitle)`
+
+#### 카드 — `test/PresetCard.test.tsx` (props만, bridge 없음)
+
+### TC-347 · 카드 표시 · aria 이름 · 「사용 중」 없음 · 종류: 자동 · 요구: R-59, R-66, R-67 · 설계: §2.2 · §5.3 `meta` · `aria(action)` · §8.1 목록·카드 버튼 · 스펙: `test/PresetCard.test.tsx`
+- Given P(12장·알림음 있음) / P_NO_ALARM(1장·없음), pending·renaming false
+- When 렌더
+- Then ⓐ h3 「고양이 A」 = li 접근 이름, 요약 줄 `저장 {formatSavedAt(savedAt,'ko')} · 그림 12장 · 알림음 있음`(없음 카드는 「그림 1장 · 알림음 없음」), 버튼 글자 [적용, 내보내기, 이름 바꾸기, 삭제]·`type=button`·접근 이름 「{동사}: 고양이 A」·활성, 편집 입력 없음 ⓑ li에 `aria-current` 없음·「사용 중」 없음 ⓒ 콜백 8개 0회(bridge 없음)
+
+### TC-348 · 버튼 콜백 · pending · renaming 활성 규칙 · 종류: 자동 · 요구: R-66, R-64 · 설계: §2.2 · §7.1 카드 행 4개 · 스펙: 같음
+- Given 기본 → pending → renaming(초안 「고양이 A」) → renaming + pending
+- When 버튼 4개 클릭 / rerender
+- Then ⓐ pending: 버튼 4 비활성. renaming: 「이름 바꾸기」만 비활성, 편집 「저장」·「취소」 활성, 입력 `readonly` 없음, h3 DOM 유지. renaming + pending: 입력 `readonly`, 편집 저장·취소·버튼 4 비활성 ⓑ — ⓒ `onApply`·`onExport`·`onStartRename`·`onDelete` 각 1회(인자 없음)
+
+### TC-349 · 편집 키 · 콜백 · 종류: 자동 · 요구: R-64 · 설계: §5.3 `onDraftKeyDown` · 편집 입력 · §7.1 편집 저장 행 · 스펙: 같음
+- Given renaming, 초안 「고양이 A」 → 「   」
+- When 입력 변경 → 조합 중 Enter·Esc → Enter → Esc → 「저장」·「취소」 클릭 → 공백 초안 Enter
+- Then ⓐ 입력값 = 초안·`maxlength` 50, 공백 초안이면 「저장」 비활성, Enter·Esc 기본 동작 취소 ⓑ — ⓒ `onRenameDraft('고양이 A2')`, 조합 중 저장·취소 0회, `onRenameSave` 2회(Enter·클릭), `onRenameCancel` 2회(Esc·클릭), 공백 초안 Enter 뒤 `onRenameSave` 그대로 2회
+
+### TC-350 · 포커스 요청 · 종류: 자동 · 요구: R-66 · 설계: §5.3 포커스 효과 · §8.2 · 스펙: 같음(`it.each` apply · export · rename · delete + `TC-350(renameInput·pending)`)
+- Given focusTarget 각 값 / pending true → false / renaming + `'renameInput'`
+- When 렌더 · rerender
+- Then ⓐ 해당 버튼·편집 입력에 포커스, pending 중에는 포커스 이동 없음 → 풀린 렌더에서 이동 ⓑ 요청 소비 ⓒ `onFocused` 요청마다 1회, pending 중 0회
+
+#### 셸 — `test/SettingsApp.test.tsx`
+
+### TC-351 · 탭 5개 · 다섯째 「프리셋」 · 아이콘 · 떠나면 상태 버림 · 종류: 자동 · 요구: R-66, R-27 · 설계: presets-tab §1.1 · §2 `Shell`·`TabIcon` 행 · §2.4 · §4 끝 문단 · 스펙: `test/SettingsApp.test.tsx`
+- Given 마운트(프리셋 래퍼 일반 함수, `listPresets` → [])
+- When 「프리셋」 클릭 → 이름 입력 → 「기본 설정」 → 다시 「프리셋」 / `TabIcon name="presets"` 단독 렌더
+- Then ⓐ 메뉴 5항목 [기본 설정, 이미지 설정, 어깨축·손 위치, 타이머, 프리셋], 다섯째 `id` `settings-tab-presets`·`aria-controls` `settings-panel-presets`·선택 시 `aria-selected` true·h1 「프리셋」·빈 목록 문구, 돌아오면 이름 입력 빈 값(상태 버림). 아이콘 자식 [rect, path] — rect x 8 · y 3 · w 13 · h 13 · rx 2, path `M16 21H5a2 2 0 0 1-2-2V8`, 공통 svg 속성 ⓑ 탭 전환만 — 설정 불변 ⓒ `getSettings` 1회·`setSettings` 0회
+- 개정(번호 유지, CR-064 — 5항목): TC-031(selected 5) · TC-032(5항목 배열·프리셋 전환) · TC-153(ids 5·`expectPanel(4)`) · TC-154(`shape('presets')`) · TC-156(5항목 순환 — ArrowDown 4번째 뒤 프리셋·End = 프리셋·ArrowUp 처음 = 프리셋) · TC-099(`aside` 글자 5개, 금지 정규식에서 「프리셋」 삭제 — R-19 CR-064 해제, 프리셋 탭 열기 포함) · TC-100 · TC-101 · 1078행(ja·en 5항목)
+
+#### 사전 — `test/i18n.test.ts`
+
+### TC-352 · 프리셋 사전 36키 · errors 12 · preset.forbidden 없음 · 종류: 자동 · 요구: R-66, R-63, R-20 · 설계: i18n §4.12 · §4.6 CR-064 추가분 · 스펙: `test/i18n.test.ts`
+- Given 세 사전 실물
+- When 키·값 대조
+- Then ⓐ ko 36키 §4.12 ko 열 정확, ja·en 36키 존재·비어 있지 않음·자리표시자(`{name}`·`{date}`·`{count}`·`{folder}`·`{action}`) 유지, `ja.tabPresets` 「プリセット」·`en.tabPresets` 「Presets」, `format(presetActionAria)` = 「적용: 고양이 A」 ⓑ `ERROR_CODES` 39·`preset.forbidden` 없음(배열·세 사전), 세 사전 단순 키 173, ko errors 12개 정확, `errorText` ko 빈 message → 사전·core message 우선·en forbidden → unknown ⓒ bridge 호출 없음
+- 개정: TC-093(제목 39 — `EXPECTED_ERROR_CODES` +12, `reset.seed` 뒤·`unknown` 앞) · TC-094(단순 키 137 → 173, ko errors + 12) · TC-246 · TC-286(`ERROR_CODES` 27 → 39, 슬라이스 `… reset.seed, preset.* 12, unknown`)
+
+### TC-FLOW-33 · S-31 ~ S-34: 지금 꾸민 캐릭터를 「고양이 A」로 저장 → USB로 내보내려다 같은 이름 폴더가 있어 이름을 「고양이 A 방송」으로 바꿔 다시 내보냄 → 목록에서 지움 → 내보낸 폴더를 다시 가져와 → 적용 · 종류: 자동 · 요구: R-58, R-61, R-62, R-63, R-64, R-66, R-67 · Steps: TC-322(저장 부분) → TC-336(export_exists 부분) → TC-340(이름 바꾸기 — Enter 경로는 TC-341) → TC-334(내보내기 성공 부분) → TC-337 · TC-338(유일한 카드 — 빈 목록·이름 입력 포커스 부분) → TC-326(가져오기 성공 — 원래 저장 날짜 요약 줄) → TC-330(적용 — 재조회 없음 부분) → M-64a · M-64b · M-64c(실물) · 스펙: `test/PresetsTab.test.tsx` · **신규(CR-064)**
+- 상태 전달: 빈 목록(Given) → Step 1 재조회 [A] → Step 2 이름 바꾸기 재조회 [A2](같은 id `a1`로 두 번 내보냄) → Step 3 재조회 [] → Step 4 재조회 [A_IMP](id `a9`, 날짜 = A) → Step 5 `applyPreset('a9')`. 끝 판정: `listPresets` 5회(마운트 1 + 저장·이름·삭제·가져오기 4, 적용 0), 다른 bridge·구독 0회
+
+### v30 추적표
+
+**요구 → TC**
+
+| 요구ID | TC | TC-FLOW | 수동 |
+|---|---|---|---|
+| R-58 저장 | TC-316, TC-321, TC-322, TC-323, TC-324, TC-325 | TC-FLOW-33 | M-64a |
+| R-59 들어가는 것(표시) | TC-319, TC-347 | — | M-64a |
+| R-60 안 들어가는 것(안내) | TC-319, TC-330 | — | M-64a |
+| R-61 적용 | TC-330, TC-331, TC-332, TC-333 | TC-FLOW-33 | M-64a · M-64e |
+| R-62 내보내기 | TC-318, TC-334, TC-335, TC-336 | TC-FLOW-33 | M-64b |
+| R-63 가져오기 | TC-326, TC-327, TC-328, TC-329, TC-352 | TC-FLOW-33 | M-64b · M-64c · M-64d |
+| R-64 이름 바꾸기·삭제 | TC-316, TC-325, TC-337, TC-338, TC-339, TC-340, TC-341, TC-342, TC-344, TC-348, TC-349 | TC-FLOW-33 | M-64f |
+| R-65 저장 조건 | TC-315, TC-316, TC-321, TC-333 | — | M-64a |
+| R-66 화면 | TC-317, TC-319, TC-320, TC-343, TC-345, TC-346, TC-347, TC-348, TC-350, TC-351, TC-352 | TC-FLOW-33 | M-64f |
+| R-67 적용 후 상태 | TC-330, TC-333, TC-347 | TC-FLOW-33 | M-64a |
+| R-20(3개 국어, 프리셋 문구) | TC-346, TC-352 | — | M-64f |
+| R-27(메뉴 5항목) | TC-351 + 개정 TC-031 · 153 · 154 · 156 · 099 | — | M-64f |
+
+**설계 항목 → TC**
+
+| 설계 항목(presets-tab) | TC |
+|---|---|
+| §1.1 메뉴 5항목·높이·아이콘 | TC-351, TC-153 · TC-156(개정), M-64f |
+| §1.2 본문 배치·목록 순서·사용 중 없음·상태 줄 한 곳 | TC-319, TC-333, TC-344(상태 줄 공유) |
+| §2 `PresetsTab` props·구독 없음 | TC-319, TC-330 |
+| §2.1 `PresetSaveCard` props(pending·status·problems·focusTarget·onSave·onImport) | TC-321 ~ TC-329, TC-343 |
+| §2.2 `PresetCard` props·`useId` aria-labelledby·h3 DOM 유지 | TC-347 ~ TC-350, TC-340 |
+| §2.3 스타일(CSS 모듈) | M-64f(시각) — 자동 판정 없음 |
+| §2.4 `TabIcon` presets | TC-351 |
+| §3 `LOCALE_BY_LANGUAGE`·`missingRequiredSlots`·`isPresetNameFilled`·`canSavePreset`·`formatSavedAt`·`presetErrorForDisplay` | TC-315 ~ TC-318 |
+| §4 상태 9개(presets null·pending·status·problems·confirm·renamingId·renameDraft·focusRequest·name)·언마운트 규범 | TC-320, TC-343, TC-328, TC-330, TC-344, TC-345, TC-322 |
+| §5.1 `reload`·마운트 | TC-319, TC-320 |
+| §5.1 `onSave` | TC-322, TC-324 |
+| §5.1 `onImport` | TC-326 ~ TC-329 |
+| §5.1 `onApplyRequest`·`onConfirmCancel`·`onConfirmOk`·`applyConfirmed` | TC-330 ~ TC-332 |
+| §5.1 `onExport` | TC-334 ~ TC-336 |
+| §5.1 `onStartRename`·`onRenameSave`·`onRenameCancel` | TC-340 ~ TC-342, TC-344 |
+| §5.1 `onDeleteRequest`·`deleteConfirmed` | TC-337 ~ TC-339 |
+| §5.1 공통 `begin`/`end`·재진입 방지 | TC-343, TC-344, TC-328(problems 비움) |
+| §5.2 `missing`·`saveEnabled`·`submit`·`onNameKeyDown`·포커스 효과 | TC-321, TC-322, TC-323, TC-324 |
+| §5.3 `meta`·`aria`·`onDraftKeyDown`·편집 입력·포커스 효과 | TC-347, TC-349, TC-340, TC-350 |
+| §6.1 PR-1 ~ PR-7 | PR-1 TC-319 · 320 / PR-2 TC-322 · 324 / PR-3 TC-326 ~ 329 / PR-4 TC-330 ~ 333 / PR-5 TC-334 ~ 336 / PR-6 TC-340 ~ 342 / PR-7 TC-337 ~ 339 |
+| §6.2 적용 뒤 갱신(재조회 없음·getAlarmSound 없음·manifest props) | TC-330, TC-333, M-64e |
+| §6.3 확인창 문구 | TC-330, TC-337, TC-346 |
+| §7.1 버튼 활성 표 8행 | TC-321, TC-325, TC-343, TC-348 |
+| §7.2 에러 매핑·문제 줄 형식 | TC-324, TC-328, TC-329, TC-332, TC-336, TC-339, TC-342, TC-352 |
+| §8.1 역할·이름 | TC-319, TC-321, TC-328, TC-343, TC-347 |
+| §8.2 포커스 표 13행 | 확인창 열림 TC-330 · 337 / 취소·Esc TC-331 · 339 / 적용 끝 TC-330 · 332 / 삭제 성공 TC-337 · 338 / 삭제 실패 TC-339 / 내보내기 TC-334 ~ 336 / 이름 바꾸기 시작 TC-340 / 편집 성공·취소 TC-340 · 341 / 편집 실패 TC-342 / 저장 성공·실패 TC-322 · 324 / 가져오기 TC-326 ~ 329 |
+| §9 문구(i18n §4.12 · §4.6) | TC-352, TC-346 |
+| §10 추가 수용 ① ~ ⑦ | ① TC-318 · 336 ② TC-317 ③ TC-323 · 341 · 349 ④ TC-331 · 337 · 338 · 340 ⑤ TC-330 ⑥ TC-344 ⑦ TC-351 · TC-156 |
+
+**사용자행 → TC-FLOW**
+
+| 사용자행 | TC-FLOW |
+|---|---|
+| S-31 저장·적용 | TC-FLOW-33 Step 1 · 5 |
+| S-32 내보내기(충돌 → 이름 바꾸기 → 다시) | TC-FLOW-33 Step 2 |
+| S-33 가져오기·적용 | TC-FLOW-33 Step 4 · 5 (문제 목록 분기는 TC-328, 실물 M-64c · M-64d) |
+| S-34 이름 바꾸기·삭제 | TC-FLOW-33 Step 2(이름) · 3(삭제) |
+
+### v30 설계 확인 필요 (관리자 인계 — 문서 수정은 소유자)
+
+- **AC-1(ui-designer)**: 다른 탭 본문은 region(이름 = 탭 이름 — X-1 결정, TC-156 단언)인데 presets-tab §8.1은 탭 루트 `<div aria-busy>`만 적고 region·접근 이름을 정하지 않았다. TC-156 개정은 프리셋 탭에서 region을 판정하지 않는다(임시). region으로 맞출지 결정 필요
+- **AC-2(관리자)**: CR 대장 CR-051 계열 행의 「TC-314 신규(ui-test-designer)」는 scenarios 본문에 없는 번호다. 이 개정은 TC-311 ~ TC-314를 결번으로 두고 TC-315부터 부여했다. CR 대장 기재를 확인해 주길 바람
+- **AC-3(ui-designer)**: §4 「진행 중 command가 언마운트 뒤 끝나면 setState를 하지 않되」 — 성공 경로에서 `reload()`(=`listPresets` 호출)까지 건너뛰는지 불명. TC-345는 onError만 판정
+- **AC-4(ui-designer, 경미)**: 저장 카드 「저장」과 편집 중 카드 「저장」(`presetRenameSave`)이 같은 접근 이름이다. 스펙은 카드 범위(`within`)로 구분하지만 낭독 사용자는 구분이 어렵다 — 편집 저장에도 `presetActionAria` 형식 aria-label을 줄지 검토(요구 밖이면 현행 유지)
+- **AC-5(참고)**: TC-343 탭 루트 = 렌더 컨테이너 첫 자식으로 조회한다(§8.1 「탭 루트 `<div>`」). 구현이 루트를 다른 원소로 감싸면 스펙 조회를 맞춘다(판정 불변)
+
 ## 변경이력
 
 | 일자 | 내용 |
 |---|---|
-| 2026-09-30 | (최신 행) v29 — **뒷머리 내장 기본 없음(🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29 `DEFAULT_ASSET_SLOTS` 6개 · `hasBuiltinDefault('hair')` false, 증분 모드 — 개정만).** 「v29 개정」 절 신설(기준 · 새 기대값 규칙 1 ~ 5 · TC-196/TC-206 번호 판정 · 개정 표 · TC-FLOW-18 본문 · 추적 3종 · 설계 확인 AB-1 ~ AB-5). v28 「제외」(기본 세트 6/7장 · R-35 판정) 해소. 개정: `Hair.test.tsx` 전면(TC-193 · 196 · 200 · 201 · 202 · 206 · 207 · TC-FLOW-18 — 뒷머리 = 단일 비우기 칸 · 버튼 2개 · 한 줄 · 「기본값」 = 비우기, 도우미 `hairClear` · `expectNoRestoreOrEmpty`, TC-203 주석), `imageSlots.test.ts`(TC-133 · 177 · 178 · 192 · 232, `DEFAULT_FILES` 6장 · `FIRST7` 내용 6장), `ImagesTab.test.tsx`(TC-142 · 179 · 182 · 189 · 233 · 234 · TC-FLOW-15 · 17 · 22, 픽스처 `BUILTIN_KEYS` · `BUILTIN_FILES` · `DONE_BUILTIN` · `DESC_BUILTIN_KO` 6칸 — 옛 `DEFAULT_KEYS7` · `DONE7` · `DESC7_KO`), `ResetAllCard.test.tsx` 주석. 폐기 유지 TC-204 · TC-205 · TC-FLOW-19. `manual-checklist.md` v21(「v21 읽는 법」 — M-29 · M-30 · M-32 · M-33 · M-43). 소스 선행: `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`(ui-fixer) 전까지 셋째 버튼 부재 단언 TC는 Red(예정). 수: 자동 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 그대로 |
+| 2026-09-30 | (최신 행) v30 — **CR-064 「프리셋」 탭(R-58 ~ R-67 🔒, requirements v1.28 · presets-tab · i18n §4.12 · §4.6 · contract v0.30, 증분 모드 · TDD 선행).** 「v30 개정」 절 신설(기준 · mock 규약 · 신규 TC · TC-FLOW · 추적 3종 · 설계 확인 AC-1 ~ AC-5). 신규 TC-315 ~ TC-352(38개 — 스펙 `presetValues.test.ts` · `PresetsTab.test.tsx` · `PresetCard.test.tsx` 신규, `SettingsApp.test.tsx` TC-351, `i18n.test.ts` TC-352), TC-FLOW-33(S-31 ~ S-34). TC-311 ~ TC-314 결번(AC-2). 개정: `SettingsApp.test.tsx`(프리셋 래퍼 일반 함수 mock · 메뉴 5항목 — TC-031 · 032 · 099 · 100 · 101 · 153 · 154 · 156 · 1078행), `i18n.test.ts`(TC-093 · 094 · 246 · 286 — `ERROR_CODES` 39 · 단순 키 173). `manual-checklist.md` v22(M-64a ~ M-64f). 수: 자동 번호 352(유효 339 · 폐기 8 · 결번 5) · TC-FLOW 33 · 수동 60 |
+| 2026-09-30 | v29 — **뒷머리 내장 기본 없음(🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29 `DEFAULT_ASSET_SLOTS` 6개 · `hasBuiltinDefault('hair')` false, 증분 모드 — 개정만).** 「v29 개정」 절 신설(기준 · 새 기대값 규칙 1 ~ 5 · TC-196/TC-206 번호 판정 · 개정 표 · TC-FLOW-18 본문 · 추적 3종 · 설계 확인 AB-1 ~ AB-5). v28 「제외」(기본 세트 6/7장 · R-35 판정) 해소. 개정: `Hair.test.tsx` 전면(TC-193 · 196 · 200 · 201 · 202 · 206 · 207 · TC-FLOW-18 — 뒷머리 = 단일 비우기 칸 · 버튼 2개 · 한 줄 · 「기본값」 = 비우기, 도우미 `hairClear` · `expectNoRestoreOrEmpty`, TC-203 주석), `imageSlots.test.ts`(TC-133 · 177 · 178 · 192 · 232, `DEFAULT_FILES` 6장 · `FIRST7` 내용 6장), `ImagesTab.test.tsx`(TC-142 · 179 · 182 · 189 · 233 · 234 · TC-FLOW-15 · 17 · 22, 픽스처 `BUILTIN_KEYS` · `BUILTIN_FILES` · `DONE_BUILTIN` · `DESC_BUILTIN_KO` 6칸 — 옛 `DEFAULT_KEYS7` · `DONE7` · `DESC7_KO`), `ResetAllCard.test.tsx` 주석. 폐기 유지 TC-204 · TC-205 · TC-FLOW-19. `manual-checklist.md` v21(「v21 읽는 법」 — M-29 · M-30 · M-32 · M-33 · M-43). 소스 선행: `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`(ui-fixer) 전까지 셋째 버튼 부재 단언 TC는 Red(예정). 수: 자동 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 그대로 |
 | 2026-09-30 | v28 — **doc-sync 배치(requirements v1.26 · design 2026-09-30 행 · 현행 소스 대조, 증분 모드) + 대기열 Q-02(CR-039) 소진.** ① TC-208/TC-209 중복 해소: CR-039 재시도 스펙 가번호 TC-208 → TC-306 · TC-209 → TC-308 이동(CR-040 alphaMask 쪽이 정식 등록 선행), TC-307 결번, 옛 자리에 이동 한 줄 ② Q-02 전환: TC-306 · TC-308 BDD 본문 + 신규 TC-309(설정·매니페스트 따로 판정) · TC-310(언마운트 취소) — design §6 P-1, 스펙 `SettingsApp.retry.test.tsx` 초안 2건 추가·이름 변경 ③ 색: 추적표 2행·R-19 읽기 규칙의 「초록」 → CR-032 `#BE72AD`·`#F8EBF5` ④ R-18 리셋: TC-089 제목·TC-FLOW-07 상태 전달·추적표 R-17 행의 `penPos` null → `DEFAULT_MOUSE_SETTINGS.penPos` (372,476) ⑤ S-22 v1.26: TC-FLOW-23 현행 본문(셋째 버튼 없음·「기본값」 = 비우기·「이미지 변경」으로 다시) — 원 본문 끝 정정 표시, TC-FLOW-22 점검 불변 ⑥ J-1(11키 실재 — design 표기만 남음)·V-1(기록 갱신)·V-3(해소) ⑦ 스펙 이름·주석: `AlarmSoundCard.test.tsx` TC-283(카드)·`TimerTab.test.tsx` 334·344행·`TimerTab.cr052.test.tsx` 52행(단언 불변) ⑧ `manual-checklist.md` v20. 「doc-sync 개정(v28)」 절 신설(정식 TC·개정 표·색 표·재대조 표·추적 3종·설계 확인 AA-1 ~ AA-5). 제외: 기본 세트 6/7장·R-35·R-41 판정(사용자 결정 대기). 수: 자동 305 → 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 |
 | 2026-09-29 | v27 — **CR-059(타이머 기본값 0.4.0 — (268,402)·7°·음량 44·기본 알림음 번들 mp3) 기대값 동기화 · CR-060(순수 리팩터) 설계↔TC 연결.** ① 본문 정정: TC-283(탭 Given·탭 실패 복귀 44%) · TC-FLOW-30(첫 미리 듣기 0.44) · 「CR-050 개정 TC」 표 TC-248·TC-249(44%)·TC-268(44%) · 「CR-053 개정」 절 제목·기준 줄·픽스처 줄·표 TC-239(7)·TC-269(`DEF` (268,402)·7·44)·TC-249(회전 '7'·268px/402px·음량 44·저장 인자)·설계↔TC 상수 행 ② 「CR-059 · CR-060 개정」 절 신설(판정 규칙·공용 픽스처 `TF` 44 / cr052 `TF` 80 예외·개정 표(TC-269·TC-287 원 본문 대체 포함)·유지 판정 표·CR-060 설계↔TC(`durationMsg` → TC-273·TC-275·TC-276·TC-288·TC-287, `statusTextByPhase` → TC-293 ~ TC-304)·추적 3종·설계 확인 필요 N-1·N-2) ③ 유지: TC-281·TC-282 ②·TC-283(카드)·TC-290 음량 80(명시 픽스처), 공용 `T` (268,403)·5°. 스펙 수정 없음. 수: 자동 305 · TC-FLOW 32 · 수동 54 그대로 |
 | 2026-09-27 | v26 — **CR-057 대기열 Q-08 정식 TC 전환(이동 영역 설명 줄·🔒 문구 교체).** ① 신규 TC-305(`MousePartsTab.test.tsx` `it.each` ko·ja·en — `areaDesc` 설명 줄은 idle에서만, 안내 줄 바로 아래 형제·같은 `.guide`·role/aria-live 없음·버튼 위, pickArea·reviewArea·pickShoulder·review에서는 없음, 안내 줄 role=status 1개 불변, bridge 쓰기 0회) ② 개정(번호 유지, 판정 불변 — 문구·개수만): TC-009(`labels.test.ts` area* 6키 새 ko 문구) · TC-094(`i18n.test.ts` 단순 키 136 → 137·세 사전 `areaDesc` 존재, 「새 키 41개」 불변) · `MousePartsTab.test.tsx`(`AREA_START`·`IDLE_BUTTONS`·`G_AREA`·`G_AREA_REVIEW`·제목) · `DragHit.test.tsx`(TC-222·TC-225) · `SettingsApp.test.tsx`(TC-077·TC-FLOW-02·04·06) ③ 「CR-057 개정」 절(읽기 규칙·개정 표·추적 3종·설계 확인 필요 L-1 ~ L-4) 신설 ④ 대기열 Q-08 → 「TC 전환됨(검증 대기)」. 수: 자동 304 → 305 · TC-FLOW 32 · 수동 54 그대로 |

@@ -172,7 +172,7 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 | `focusRequest` | 다음 렌더 뒤 옮길 포커스(§8.2) | `{ area: 'save'; target: 'name' \| 'save' \| 'import' } \| { area: 'card'; id: string; target: 'apply' \| 'export' \| 'rename' \| 'delete' \| 'renameInput' } \| null` | `null` | `PresetsTab` |
 | `name` | 저장 이름 입력값 | `string` | `''` | `PresetSaveCard`(로컬) |
 
-- 탭을 떠나면(`Shell`이 선택 탭 하나만 렌더) 모든 상태가 버려지고, 다시 들어오면 초기값에서 `listPresets()`부터 한다. 진행 중 command가 언마운트 뒤 끝나면 `setState`를 하지 않되(`aliveRef`), 실패는 `onError`로 창 공통 오류 줄에 보낸다(`ResetAllCard` §7.2 규범과 같음).
+- 탭을 떠나면(`Shell`이 선택 탭 하나만 렌더) 모든 상태가 버려지고, 다시 들어오면 초기값에서 `listPresets()`부터 한다. 진행 중 command가 언마운트 뒤 끝나면 `setState`를 하지 않되(`aliveRef`), 실패는 `onError`로 창 공통 오류 줄에 보낸다(`ResetAllCard` §7.2 규범과 같음). 뜻을 한 문장으로: 흐름은 언마운트와 무관하게 끝까지 진행하고(성공 경로의 `reload()`·`listPresets()` 호출도 그대로 한다), 각 `setPresets`·`setStatus`·`setProblems`·`setPending`·`setFocusRequest` 등 로컬 상태 쓰기만 `aliveRef.current`가 false면 건너뛴다 — `onError` 호출은 건너뛰지 않는다.
 - 설정·매니페스트는 이 탭이 소유하지 않는다. `manifest`는 `SettingsApp` 상태(기존 `assets://changed` 구독)를 props로 받는다.
 
 ## 5. 기능 명세
@@ -218,6 +218,7 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 | 파생 `meta` | `[format(t.presetSavedAt, { date: formatSavedAt(preset.savedAt, language) }), format(t.presetImageCount, { count: preset.imageCount }), preset.hasAlarm ? t.presetHasAlarm : t.presetNoAlarm].join(' · ')` | 한 줄 요약 | R-59, R-66 |
 | 파생 `aria(action)` | `format(t.presetActionAria, { action, name: preset.name })` | 버튼 4개 `aria-label`(보이는 글자는 동사만) | R-66 |
 | `onDraftKeyDown` | `(e: KeyboardEvent<HTMLInputElement>) => void` | 먼저 `e.nativeEvent.isComposing`이면 **아무것도 하지 않고 반환**(Enter·Escape 모두 — 조합 중 Esc는 IME가 조합을 취소하는 키라 편집 취소로 쓰지 않는다. 조합이 끝난 뒤 다시 누른 Esc가 편집 취소). 그 밖: `Enter`·저장 가능 → `preventDefault()`·`onRenameSave()`. `Escape` → `preventDefault()`·`onRenameCancel()` | R-64 |
+| 편집 저장·취소 버튼 | 보이는 글자 = `t.presetRenameSave`·`t.confirmCancel`, `aria-label` = `format(t.presetActionAria, { action: t.presetRenameSave, name: preset.name })`·`format(t.presetActionAria, { action: t.confirmCancel, name: preset.name })`(예 「저장: 고양이 A」·「취소: 고양이 A」) — 저장 카드의 「저장」(접근 이름 「저장」)과 구분된다. 새 키 없음(기존 `presetActionAria` 재사용) | R-64, R-66 |
 | 편집 입력 | `<input autoFocus value={renameDraft} maxLength={PRESET_NAME_MAX} readOnly={pending} aria-label={format(t.presetRenameInputAria, { name: preset.name })} onFocus={e => e.currentTarget.select()} …>` | 편집 시작 때 현재 이름 전체 선택 | R-64 |
 | 포커스 효과 | `useEffect(…, [focusTarget, pending, renaming])` | `focusTarget`이 있고 `!pending`이면 해당 ref(버튼 4개 또는 `'renameInput'` = 편집 입력 ref)에 `focus()` → `onFocused()` | R-66 |
 
@@ -297,7 +298,7 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 
 | 요소 | role·속성 |
 |---|---|
-| 탭 루트 `<div>` | `aria-busy={pending \|\| undefined}` |
+| 탭 루트 | `<section aria-label={t.tabPresets} aria-busy={pending \|\| undefined} className=stack>` — 다른 탭 본문과 같은 방식(`GeneralTab`·`ImagesTab`·`MousePartsTab`·`TimerTab` 모두 `<section aria-label={t.tab…}>`)으로 암묵 `role="region"`, 접근 이름 = 탭 이름(`tabPresets`) |
 | 카드 2장 | `SettingsCard`(`section aria-labelledby` 제목) |
 | 이름 입력 | `<label htmlFor>` = `presetNameLabel`, `placeholder` = `presetNamePlaceholder`, `maxLength={PRESET_NAME_MAX}` |
 | 이유 줄 | `p id={needsId}` — 저장 버튼 `aria-describedby`(필수 누락일 때만) |

@@ -66,6 +66,15 @@ vi.mock('bridge/commands', async importOriginal => {
     importAlarmSound: async () => ({ format: 'wav', bytes: 1024, url: 'asset://alarm.wav' }),
     removeAlarmSound: async () => undefined,
     pickAudioFile: async () => null,
+    // (CR-064, contract v0.30 §5.11) 메뉴 다섯째 「프리셋」을 지나가는 TC(TC-099·TC-153·TC-156·TC-351)가 PresetsTab 을
+    // 마운트한다 — 마운트 때 listPresets 1회. 같은 이유로 일반 함수(빈 목록). 호출·흐름 단언은 PresetsTab.test.tsx
+    listPresets: async () => [],
+    savePreset: async () => ({ id: 'x', name: 'x', savedAt: 0, imageCount: 0, hasAlarm: false }),
+    applyPreset: async () => undefined,
+    exportPreset: async () => ({ folderName: 'x' }),
+    importPreset: async () => ({ preset: null, problems: [] }),
+    renamePreset: async () => ({ id: 'x', name: 'x', savedAt: 0, imageCount: 0, hasAlarm: false }),
+    deletePreset: async () => undefined,
   }
 })
 vi.mock('components/utils/alarmSound', () => ({ defaultAlarmUrl: vi.fn(), playSound: vi.fn(), alarmGain: vi.fn() }))
@@ -256,7 +265,10 @@ const h1Texts = () => screen.queryAllByRole('heading', { level: 1 }).map(h => h.
 const panel = () => screen.getByRole('tabpanel')
 // (CR-045, R-44·R-27 용어 주 ①) 메뉴 4항목 — 4번째 「타이머」. 타이머 탭 본문도 region(X-1 메인 결정 2026-09-26)
 const TIMER_TAB = '타이머'
-const tabNames = () => ['기본 설정', '이미지 설정', MOUSE_TAB, TIMER_TAB]
+// (CR-064, R-66·R-27 용어 주 ②) 메뉴 5항목 — 다섯째(맨 끝) 「프리셋」
+const PRESETS_TAB = '프리셋'
+const tabNames = () => ['기본 설정', '이미지 설정', MOUSE_TAB, TIMER_TAB, PRESETS_TAB]
+const openPresetsTab = () => fireEvent.click(tabBtn(PRESETS_TAB))
 const openTimerTab = () => fireEvent.click(tabBtn(TIMER_TAB))
 const openMouseTab = () => fireEvent.click(tabBtn(MOUSE_TAB))
 const openImagesTab = () => fireEvent.click(tabBtn('이미지 설정'))
@@ -309,7 +321,7 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     expect(screen.queryByRole('navigation')).toBeNull()
     expect(tablist()).toHaveAttribute('aria-orientation', 'vertical')
     expect(tabTexts()).toEqual(tabNames())
-    expect(selected()).toEqual(['true', 'false', 'false', 'false']) // CR-045: 4항목
+    expect(selected()).toEqual(['true', 'false', 'false', 'false', 'false']) // CR-064: 5항목(옛 CR-045 4항목)
     for (const t of allTabs()) {
       expect(t).toHaveAttribute('type', 'button')
       expect(t).not.toHaveAttribute('aria-pressed')
@@ -327,19 +339,25 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
   it('TC-032: 세로 메뉴 항목 클릭으로 본문·섹션 제목이 바뀌고 aria-selected·tabindex 가 따라간다, 탭 전환은 bridge 를 부르지 않는다', async () => {
     await mount()
     openMouseTab()
-    expect(selected()).toEqual(['false', 'false', 'true', 'false']) // CR-045: 4항목
-    expect(tabIndexes()).toEqual(['-1', '-1', '0', '-1'])
+    expect(selected()).toEqual(['false', 'false', 'true', 'false', 'false']) // CR-064: 5항목(옛 CR-045 4항목)
+    expect(tabIndexes()).toEqual(['-1', '-1', '0', '-1', '-1'])
     expect(h1Texts()).toEqual([MOUSE_TAB])
     expect(screen.getByRole('region', { name: MOUSE_TAB })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '기본 설정' })).toBeNull()
     // CR-045: 타이머 탭 — h1 = 「타이머」, 다른 탭 본문 없음
     openTimerTab()
-    expect(selected()).toEqual(['false', 'false', 'false', 'true'])
-    expect(tabIndexes()).toEqual(['-1', '-1', '-1', '0'])
+    expect(selected()).toEqual(['false', 'false', 'false', 'true', 'false'])
+    expect(tabIndexes()).toEqual(['-1', '-1', '-1', '0', '-1'])
     expect(h1Texts()).toEqual([TIMER_TAB])
     expect(screen.queryByRole('region', { name: MOUSE_TAB })).toBeNull()
+    // CR-064: 프리셋 탭 — h1 = 「프리셋」, 다른 탭 본문 없음
+    openPresetsTab()
+    expect(selected()).toEqual(['false', 'false', 'false', 'false', 'true'])
+    expect(tabIndexes()).toEqual(['-1', '-1', '-1', '-1', '0'])
+    expect(h1Texts()).toEqual([PRESETS_TAB])
+    expect(screen.queryByRole('region', { name: TIMER_TAB })).toBeNull()
     openImagesTab()
-    expect(selected()).toEqual(['false', 'true', 'false', 'false'])
+    expect(selected()).toEqual(['false', 'true', 'false', 'false', 'false'])
     expect(h1Texts()).toEqual(['이미지 설정'])
     expect(screen.getByRole('region', { name: '이미지 설정' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: MOUSE_TAB })).toBeNull()
@@ -408,8 +426,8 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     await mount()
     expect(tablist().closest('aside')).not.toBeNull()
     expect(tablist()).toHaveAttribute('aria-orientation', 'vertical')
-    const ids = ['general', 'images', 'mouse', 'timer'] // CR-045: 4번째 timer
-    expect(allTabs()).toHaveLength(4)
+    const ids = ['general', 'images', 'mouse', 'timer', 'presets'] // CR-045: 4번째 timer · CR-064: 5번째 presets
+    expect(allTabs()).toHaveLength(5)
     allTabs().forEach((t, i) => {
       expect(t.tagName).toBe('BUTTON')
       expect(t).toHaveAttribute('id', `settings-tab-${ids[i]}`)
@@ -421,7 +439,7 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
       expect(panel()).toHaveAttribute('aria-labelledby', `settings-tab-${ids[i]}`)
       expect(panel()).toHaveAccessibleName(tabNames()[i])
       expect(panel().closest('main')).not.toBeNull()
-      expect(tabIndexes()).toEqual([0, 1, 2, 3].map(j => (j === i ? '0' : '-1')))
+      expect(tabIndexes()).toEqual([0, 1, 2, 3, 4].map(j => (j === i ? '0' : '-1')))
     }
     expectPanel(0)
     openImagesTab()
@@ -430,6 +448,8 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     expectPanel(2)
     openTimerTab()
     expectPanel(3)
+    openPresetsTab() // CR-064
+    expectPanel(4)
     expect(getSettings).toHaveBeenCalledTimes(1)
     expect(setSettings).not.toHaveBeenCalled()
   })
@@ -446,7 +466,7 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     expect(tabBtn('기본 설정')).toHaveAccessibleName('기본 설정')
     expect(document.querySelectorAll('aside img')).toHaveLength(0)
     const { default: TabIcon } = await import('../components/TabIcon')
-    const shape = (name: 'general' | 'images' | 'mouse' | 'timer') => {
+    const shape = (name: 'general' | 'images' | 'mouse' | 'timer' | 'presets') => {
       const { container, unmount } = render(<TabIcon name={name} className="icon-x" />)
       const svg = container.querySelector('svg') as SVGSVGElement
       expect(svg).toHaveAttribute('viewBox', '0 0 24 24')
@@ -466,6 +486,8 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     expect(shape('mouse')).toEqual(['circle', 'path'])
     // CR-045(timer-tab §2 TabIcon): 스톱워치 = circle(12,13,r8) · path 바늘 · path 꼭지
     expect(shape('timer')).toEqual(['circle', 'path', 'path'])
+    // CR-064(presets-tab §2.4): 겹친 카드 두 장 = rect · path(속성 값 단언은 TC-351)
+    expect(shape('presets')).toEqual(['rect', 'path'])
     {
       const { container, unmount } = render(<TabIcon name="timer" />)
       const svg = container.querySelector('svg') as SVGSVGElement
@@ -512,22 +534,25 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     const press = (key: string) => fireEvent.keyDown(document.activeElement as HTMLElement, { key })
     const expectAt = (i: number) => {
       expect(allTabs()[i]).toHaveFocus()
-      expect(selected()).toEqual([0, 1, 2, 3].map(j => String(j === i)))
-      expect(tabIndexes()).toEqual([0, 1, 2, 3].map(j => (j === i ? '0' : '-1')))
+      expect(selected()).toEqual([0, 1, 2, 3, 4].map(j => String(j === i)))
+      expect(tabIndexes()).toEqual([0, 1, 2, 3, 4].map(j => (j === i ? '0' : '-1')))
       expect(h1Texts()).toEqual([tabNames()[i]])
       expect(panel()).toHaveAccessibleName(tabNames()[i])
       // X-1 메인 결정(2026-09-26): 타이머 탭 본문도 다른 탭처럼 region(이름 = 탭 이름)
+      // CR-064: 프리셋 탭 본문도 region(이름 = tabPresets) — AC-1 ui-designer 확정 예정(presets-tab §8.1 확정 대기)
       expect(screen.getByRole('region', { name: tabNames()[i] })).toBeInTheDocument()
     }
+    // CR-064: 5항목 — 다섯째 = 프리셋(End · ArrowUp 처음 순환 대상)
     const steps: [string, number][] = [
       ['ArrowDown', 1],
       ['ArrowDown', 2],
       ['ArrowDown', 3],
+      ['ArrowDown', 4],
       ['ArrowDown', 0],
+      ['ArrowUp', 4],
       ['ArrowUp', 3],
-      ['ArrowUp', 2],
       ['Home', 0],
-      ['End', 3],
+      ['End', 4],
     ]
     for (const [key, at] of steps) {
       expect(press(key), key).toBe(false) // 처리한 키 = preventDefault
@@ -535,16 +560,47 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     }
     for (const key of ['ArrowLeft', 'ArrowRight', 'a']) {
       expect(press(key), key).toBe(true) // 무반응 = 기본 동작도 막지 않음
-      expectAt(3)
+      expectAt(4)
     }
     expect(getSettings).toHaveBeenCalledTimes(1)
     expect(getAssetManifest).toHaveBeenCalledTimes(1)
     expect(setSettings).not.toHaveBeenCalled()
   })
 
+  // CR-064 · R-66 · R-27(presets-tab §1.1 · §2 Shell·TabIcon · §2.4 · §4 끝 문단) — scenarios.md 「v30 개정」 절
+  it('TC-351: 메뉴 5항목·다섯째 「프리셋」(id·aria-controls·선택·h1·빈 목록), 떠났다 돌아오면 탭 상태 버림, TabIcon presets = 겹친 카드 두 장', async () => {
+    await mount()
+    expect(tabTexts()).toEqual(['기본 설정', '이미지 설정', MOUSE_TAB, TIMER_TAB, PRESETS_TAB])
+    const presets = allTabs()[4]
+    expect(presets).toHaveAttribute('id', 'settings-tab-presets')
+    expect(presets).toHaveAttribute('aria-controls', 'settings-panel-presets')
+    openPresetsTab()
+    expect(selected()).toEqual(['false', 'false', 'false', 'false', 'true'])
+    expect(tabIndexes()).toEqual(['-1', '-1', '-1', '-1', '0'])
+    expect(h1Texts()).toEqual([PRESETS_TAB])
+    expect(panel()).toHaveAttribute('id', 'settings-panel-presets')
+    expect(await screen.findByText('저장한 프리셋이 없습니다.')).toBeInTheDocument() // listPresets → []
+    fireEvent.change(screen.getByRole('textbox', { name: '프리셋 이름' }), { target: { value: '고양이 A' } })
+    fireEvent.click(tabBtn('기본 설정'))
+    expect(screen.queryByRole('textbox', { name: '프리셋 이름' })).toBeNull()
+    openPresetsTab()
+    expect((screen.getByRole('textbox', { name: '프리셋 이름' }) as HTMLInputElement).value).toBe('') // 상태 버림(§4)
+    const { default: TabIcon } = await import('../components/TabIcon')
+    const { container } = render(<TabIcon name="presets" />)
+    const svg = container.querySelector('svg') as SVGSVGElement
+    expect(svg).toHaveAttribute('viewBox', '0 0 24 24')
+    expect(svg).toHaveAttribute('aria-hidden', 'true')
+    expect(Array.from(svg.children).map(c => c.tagName.toLowerCase())).toEqual(['rect', 'path'])
+    const rect = svg.querySelector('rect') as SVGRectElement
+    expect(['x', 'y', 'width', 'height', 'rx'].map(a => rect.getAttribute(a))).toEqual(['8', '3', '13', '13', '2'])
+    expect(svg.querySelector('path')?.getAttribute('d')).toBe('M16 21H5a2 2 0 0 1-2-2V8')
+    expect(getSettings).toHaveBeenCalledTimes(1)
+    expect(setSettings).not.toHaveBeenCalled()
+  })
+
   it('TC-099: 금지 요소 부재 — 「동작」 탭·사이드바 검색창·배지·구분 그룹 제목·크기 4단 버튼·닫기·설명서·프리셋·흔들림·항상 위 없음, h1 은 선택 탭 이름뿐(제품명 없음)', async () => {
     await mount()
-    expect(allTabs()).toHaveLength(4) // CR-045: 4번째 「타이머」
+    expect(allTabs()).toHaveLength(5) // CR-045: 4번째 「타이머」 · CR-064: 5번째 「프리셋」
     expect(within(tablist()).queryByRole('tab', { name: '동작' })).toBeNull()
     const aside = tablist().closest('aside') as HTMLElement
     expect(within(aside).queryByRole('searchbox')).toBeNull()
@@ -554,8 +610,9 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     const general = screen.getByRole('region', { name: '기본 설정' })
     // CR-054(general-tab §1 cardReset): 「전체 초기화」 추가 — 크기 4단 버튼·닫기 등 금지 요소는 여전히 없다
     expect(within(general).getAllByRole('button').map(b => b.textContent)).toEqual(['위치 초기화', '전체 초기화'])
-    const banned = /닫기|설명서|프리셋|흔들림|항상 위|변경한 설정은 바로 적용/
-    const opens = [() => {}, openImagesTab, openMouseTab, openTimerTab] // CR-045
+    // CR-064: 「프리셋」은 금지 목록에서 뺐다(R-19 금지 해제 — requirements 용어 주 CR-064 ①)
+    const banned = /닫기|설명서|흔들림|항상 위|변경한 설정은 바로 적용/
+    const opens = [() => {}, openImagesTab, openMouseTab, openTimerTab, openPresetsTab] // CR-045 · CR-064
     opens.forEach((open, i) => {
       open()
       expect(h1Texts()).toEqual([tabNames()[i]])
@@ -568,7 +625,7 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     vi.mocked(getSettings).mockResolvedValue({ ...SETTINGS, language: 'ja' })
     await mount()
     await waitFor(() =>
-      expect(tabTexts(ja.tabsAria)).toEqual([ja.tabGeneral, ja.tabImages, ja.tabMouse, ja.tabTimer]),
+      expect(tabTexts(ja.tabsAria)).toEqual([ja.tabGeneral, ja.tabImages, ja.tabMouse, ja.tabTimer, ja.tabPresets]),
     )
     expect(h1Texts()).toEqual([ja.tabGeneral])
     const general = screen.getByRole('region', { name: ja.tabGeneral })
@@ -583,7 +640,7 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
     const generalTab = tabBtn('기본 설정')
     generalTab.focus()
     act(() => emitSettings({ ...SETTINGS, language: 'en' }))
-    expect(tabTexts(en.tabsAria)).toEqual([en.tabGeneral, en.tabImages, en.tabMouse, en.tabTimer])
+    expect(tabTexts(en.tabsAria)).toEqual([en.tabGeneral, en.tabImages, en.tabMouse, en.tabTimer, en.tabPresets])
     expect(generalTab).toHaveFocus()
     expect(generalTab.textContent).toBe(en.tabGeneral)
     expect(h1Texts()).toEqual([en.tabGeneral]) // CR-031 섹션 제목도 즉시 교체
@@ -614,7 +671,7 @@ describe('SettingsApp — 창 열기·탭 (R-01·R-19·R-20)', () => {
       en.timerTextTitle,
     ])
     act(() => emitSettings(SETTINGS))
-    expect(tabTexts()).toEqual(['기본 설정', '이미지 설정', MOUSE_TAB, TIMER_TAB])
+    expect(tabTexts()).toEqual(['기본 설정', '이미지 설정', MOUSE_TAB, TIMER_TAB, PRESETS_TAB])
     expect(document.documentElement.lang).toBe('ko')
     expect(setSettings).not.toHaveBeenCalled()
   })
@@ -1075,7 +1132,7 @@ describe('TC-FLOW (CR-028 기본 설정 탭)', () => {
     expect(vi.mocked(setSettings).mock.calls[0][0]).toStrictEqual(jaSettings)
     await act(async () => {})
     act(() => emitSettings(jaSettings)) // TC-101
-    expect(tabTexts(ja.tabsAria)).toEqual([ja.tabGeneral, ja.tabImages, ja.tabMouse, ja.tabTimer]) // CR-045
+    expect(tabTexts(ja.tabsAria)).toEqual([ja.tabGeneral, ja.tabImages, ja.tabMouse, ja.tabTimer, ja.tabPresets]) // CR-045
     expect(document.documentElement.lang).toBe('ja')
     await waitFor(() => expect(titles().at(-1)).toBe(ja.windowTitle))
     fireEvent.click(tabBtn(ja.tabMouse, ja.tabsAria))
