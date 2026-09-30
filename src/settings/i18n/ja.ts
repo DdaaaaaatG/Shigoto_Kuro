@@ -168,6 +168,43 @@ export const ja: Messages = {
   areaCorner2: '右上',
   areaCorner3: '右下',
   areaCorner4: '左下',
+  // ─── §4.12 CR-064 프리셋(36키) — ja·en 초안, 검수 필요
+  tabPresets: 'プリセット',
+  cardPresetSave: '現在の状態をプリセットとして保存',
+  presetSaveDesc: '現在登録している画像すべて・通知音・倍率・休憩時間・「肩の軸・手の位置」タブの設定(肩軸・移動範囲・腕の位置・手の位置・ペンの手の使用)・タイマー設定をまとめて保存します。ウィンドウ位置・言語・自動起動・タスクバー・位置ロックは含まれません。',
+  presetNameLabel: 'プリセット名',
+  presetNamePlaceholder: '例: ねこ A',
+  presetSave: '保存',
+  presetSaveNeedsRequired: 'キーボード基本画像と腕の画像がないと保存できません。先に「画像設定」で登録してください。',
+  presetSaved: '「{name}」を保存しました。',
+  presetImport: 'フォルダーから読み込む',
+  presetImportDesc: '書き出したプリセットのフォルダー(preset.json があるフォルダー)を選んでください。',
+  presetImported: '「{name}」を読み込みました。',
+  presetImportFailed: '読み込めませんでした。次のファイルを直してからもう一度読み込んでください。',
+  pickPresetFolderTitle: '読み込むプリセットフォルダーを選択',
+  pickExportFolderTitle: '書き出し先を選択',
+  cardPresetList: '保存したプリセット',
+  presetListEmpty: '保存したプリセットはありません。',
+  presetSavedAt: '保存 {date}',
+  presetImageCount: '画像 {count}枚',
+  presetHasAlarm: '通知音あり',
+  presetNoAlarm: '通知音なし',
+  presetApply: '適用',
+  presetExport: '書き出し',
+  presetRename: '名前を変更',
+  presetDelete: '削除',
+  presetRenameSave: '保存',
+  presetApplied: '「{name}」を適用しました。',
+  presetExported: '「{folder}」フォルダーに書き出しました。',
+  presetDeleted: '「{name}」を削除しました。',
+  confirmPresetApplyTitle: 'プリセットの適用',
+  confirmPresetApplyMessage: '現在の画像・通知音・設定がすべて「{name}」のものに置き換わります。プリセットにない画像の枠は空になります。現在の状態は自動では残りません。残すには先に「現在の状態をプリセットとして保存」してください。ウィンドウ位置・言語・自動起動・タスクバー・位置ロックはそのままです。',
+  confirmPresetApplyOk: '適用',
+  confirmPresetDeleteTitle: 'プリセットの削除',
+  confirmPresetDeleteMessage: '「{name}」を削除しますか?元に戻せません。',
+  confirmPresetDeleteOk: '削除',
+  presetActionAria: '{action}:{name}',
+  presetRenameInputAria: '「{name}」の新しい名前',
   slots: {
     background: { title: '背景', desc: '一番下に常に表示される画像' },
     // CR-037 · R-34
@@ -227,6 +264,18 @@ export const ja: Messages = {
     'sound.io': '通知音ファイルを読み書きできませんでした。',
     'reset.io': 'データをすべて初期化できませんでした(一部だけ初期化された可能性があります)。次にアプリを起動したときにもう一度試します。',
     'reset.seed': '基本画像を戻せませんでした。次にアプリを起動したときにもう一度試します。',
+    'preset.not_found': 'プリセットが見つかりません。', // 검수 필요(사용자)
+    'preset.invalid_name': 'プリセット名は1〜50文字で入力してください。', // 검수 필요(사용자)
+    'preset.missing_required': '必須画像(キーボード基本・腕)がありません。', // 검수 필요(사용자)
+    'preset.not_preset': 'プリセットのフォルダーではありません。preset.json があるフォルダーを選んでください。', // 검수 필요(사용자)
+    'preset.format': 'プリセットファイルの形式が正しくありません。', // 검수 필요(사용자)
+    'preset.invalid_settings': 'プリセットの設定値が正しくありません。', // 검수 필요(사용자)
+    'preset.damaged': '保存されたプリセットが壊れているため適用しませんでした。現在の状態はそのままです。', // 검수 필요(사용자)
+    'preset.bad_dir': 'フォルダーが見つかりません。', // 검수 필요(사용자)
+    'preset.export_exists': '選んだ場所に同じ名前のフォルダーがあります。別の場所を選ぶか名前を変えてください。', // 검수 필요(사용자)
+    'preset.io': 'プリセットファイルを読み書きできませんでした。', // 검수 필요(사용자)
+    'preset.file_missing': 'ファイルがありません。', // 검수 필요(사용자)
+    'preset.file_link': 'ショートカット・リンクは使えません。', // 검수 필요(사용자)
     unknown: '不明なエラーが発生しました。',
   },
 }

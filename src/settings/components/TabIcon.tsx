@@ -6,7 +6,7 @@
 import type { ReactNode } from 'react'
 
 export type TabIconProps = {
-  name: 'general' | 'images' | 'mouse' | 'timer'
+  name: 'general' | 'images' | 'mouse' | 'timer' | 'presets'
   className?: string
 }
 
@@ -37,6 +37,13 @@ const SHAPES: Record<TabIconProps['name'], ReactNode> = {
       <circle cx="12" cy="13" r="8" />
       <path d="M12 9v4l2.5 2.5" />
       <path d="M10 2h4M12 2v3" />
+    </>
+  ),
+  // CR-064 — 겹친 카드 두 장(앞 카드 + 뒤 카드 테두리, design/presets-tab.md §2.4)
+  presets: (
+    <>
+      <rect x="8" y="3" width="13" height="13" rx="2" />
+      <path d="M16 21H5a2 2 0 0 1-2-2V8" />
     </>
   ),
 }

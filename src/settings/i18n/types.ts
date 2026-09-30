@@ -41,7 +41,7 @@ export type SlotMessageKey =
  * 삭제(계약 v0.22 §6 폐기 — 자동 실행이 일반 권한이라 UAC 취소가 없다). CR-050: `sound.not_audio`·
  * `sound.too_many_bytes`·`sound.io` 추가(`timer.disabled` 바로 뒤·`unknown` 앞, 이 순서로 확정 —
  * design/i18n.md §4.9 끝 문단). CR-054: `reset.io`·`reset.seed` 추가(`sound.io` 바로 뒤·`unknown` 앞,
- * design/i18n.md §4.6 CR-054 주). 27개.
+ * design/i18n.md §4.6 CR-054 주). CR-064: `preset.*` 12개 추가(`reset.seed` 뒤·`unknown` 앞, i18n §4.6 CR-064 표 순서). 39개.
  */
 export type ErrorCode =
   | 'asset.not_png'
@@ -70,6 +70,18 @@ export type ErrorCode =
   | 'sound.io' // CR-050
   | 'reset.io' // CR-054
   | 'reset.seed' // CR-054
+  | 'preset.not_found' // CR-064
+  | 'preset.invalid_name' // CR-064
+  | 'preset.missing_required' // CR-064
+  | 'preset.not_preset' // CR-064
+  | 'preset.format' // CR-064
+  | 'preset.invalid_settings' // CR-064
+  | 'preset.damaged' // CR-064
+  | 'preset.bad_dir' // CR-064
+  | 'preset.export_exists' // CR-064
+  | 'preset.io' // CR-064
+  | 'preset.file_missing' // CR-064
+  | 'preset.file_link' // CR-064
   | 'unknown'
 
 export const ERROR_CODES: readonly ErrorCode[] = [
@@ -99,6 +111,18 @@ export const ERROR_CODES: readonly ErrorCode[] = [
   'sound.io', // CR-050
   'reset.io', // CR-054
   'reset.seed', // CR-054
+  'preset.not_found', // CR-064
+  'preset.invalid_name', // CR-064
+  'preset.missing_required', // CR-064
+  'preset.not_preset', // CR-064
+  'preset.format', // CR-064
+  'preset.invalid_settings', // CR-064
+  'preset.damaged', // CR-064
+  'preset.bad_dir', // CR-064
+  'preset.export_exists', // CR-064
+  'preset.io', // CR-064
+  'preset.file_missing', // CR-064
+  'preset.file_link', // CR-064
   'unknown',
 ]
 
@@ -253,6 +277,43 @@ export interface Messages {
   areaCorner2: string
   areaCorner3: string
   areaCorner4: string
+  // ─── §4.12 CR-064 프리셋(36키)
+  tabPresets: string
+  cardPresetSave: string
+  presetSaveDesc: string
+  presetNameLabel: string
+  presetNamePlaceholder: string
+  presetSave: string
+  presetSaveNeedsRequired: string
+  presetSaved: string
+  presetImport: string
+  presetImportDesc: string
+  presetImported: string
+  presetImportFailed: string
+  pickPresetFolderTitle: string
+  pickExportFolderTitle: string
+  cardPresetList: string
+  presetListEmpty: string
+  presetSavedAt: string
+  presetImageCount: string
+  presetHasAlarm: string
+  presetNoAlarm: string
+  presetApply: string
+  presetExport: string
+  presetRename: string
+  presetDelete: string
+  presetRenameSave: string
+  presetApplied: string
+  presetExported: string
+  presetDeleted: string
+  confirmPresetApplyTitle: string
+  confirmPresetApplyMessage: string
+  confirmPresetApplyOk: string
+  confirmPresetDeleteTitle: string
+  confirmPresetDeleteMessage: string
+  confirmPresetDeleteOk: string
+  presetActionAria: string
+  presetRenameInputAria: string
   // ─── §4.4 슬롯 카드 문구 · §4.6 오류 문구 ──────────────────────────────
   slots: Record<SlotMessageKey, SlotText>
   errors: Record<ErrorCode, string>

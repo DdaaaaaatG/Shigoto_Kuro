@@ -552,10 +552,13 @@ describe('ResetAllCard — ja·en·사전 (i18n §4.11 · §4.6 CR-054)', () => 
         expect(dict.errors[c], c).not.toBe(ko.errors[c])
       }
     }
-    expect(ERROR_CODES).toHaveLength(27)
-    expect(ERROR_CODES.filter(c => c !== 'unknown')).toHaveLength(26) // 계약 v0.25 §6 code 26
+    // CR-064: preset.* 12개가 reset.seed 뒤·unknown 앞에 더해져 39개(i18n §4.6 CR-064)
+    expect(ERROR_CODES).toHaveLength(39)
+    expect(ERROR_CODES.filter(c => c !== 'unknown')).toHaveLength(38) // 계약 v0.25 §6 code 26 + preset 12
     const i = ERROR_CODES.indexOf('sound.io')
-    expect(ERROR_CODES.slice(i)).toEqual(['sound.io', 'reset.io', 'reset.seed', 'unknown'])
+    expect(ERROR_CODES.slice(i, i + 3)).toEqual(['sound.io', 'reset.io', 'reset.seed'])
+    expect(ERROR_CODES.slice(i + 3)).toHaveLength(13)
+    expect(ERROR_CODES[ERROR_CODES.length - 1]).toBe('unknown')
     for (const dict of [ko, ja, en]) {
       expect(Object.keys(dict.errors).sort()).toEqual([...ERROR_CODES].sort())
     }

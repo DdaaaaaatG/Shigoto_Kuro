@@ -380,11 +380,35 @@ describe('PresetsTab — 저장 (R-58 · R-65)', () => {
     expect(input).toHaveAttribute('maxlength', '50')
     for (const v of ['', '   ']) {
       fireEvent.change(input, { target: { value: v } })
-      expect(within(card('고양이 A')).getByRole('button', { name: KO.renameSave })).toBeDisabled()
+      expect(within(card('고양이 A')).getByRole('button', { name: aria(KO.renameSave, '고양이 A') })).toBeDisabled()
       fireEvent.keyDown(input, { key: 'Enter' })
     }
     expect(renamePreset).not.toHaveBeenCalled()
     expect(within(card('고양이 A')).getByRole('textbox', { name: renameAria('고양이 A') })).toBeInTheDocument() // 편집 유지
+  })
+})
+
+// ─── 이름 중복 허용 (R-64 · PS-07) ─────────────────────────────────────────
+describe('PresetsTab — 이름 중복 허용 (R-64)', () => {
+  it('TC-353: 기존 카드와 같은 이름으로 저장·이름 바꾸기 → 버튼 활성·savePreset/renamePreset 호출됨(중복 검사 없음)', async () => {
+    vi.mocked(savePreset).mockResolvedValueOnce({ ...NEW, name: '고양이 A' })
+    vi.mocked(renamePreset).mockResolvedValueOnce({ ...P2, name: '고양이 A' })
+    await renderTab([P1, P2])
+    vi.mocked(listPresets).mockResolvedValueOnce([{ ...NEW, name: '고양이 A' }, P1, P2])
+    typeName('고양이 A')
+    expect(saveBtn()).toBeEnabled()
+    fireEvent.click(saveBtn())
+    await waitFor(() => expect(savePreset).toHaveBeenCalledWith('고양이 A'))
+    await waitFor(() => expect(status().textContent).toBe(saved('고양이 A')))
+    await waitFor(() => expect(cardNames()).toEqual(['고양이 A', '고양이 A', '고양이 B']))
+    vi.mocked(listPresets).mockResolvedValueOnce([{ ...NEW, name: '고양이 A' }, P1, { ...P2, name: '고양이 A' }])
+    fireEvent.click(cardBtn('고양이 B', '이름 바꾸기'))
+    fireEvent.change(within(card('고양이 B')).getByRole('textbox'), { target: { value: '고양이 A' } })
+    const save = within(card('고양이 B')).getByRole('button', { name: aria(KO.renameSave, '고양이 B') })
+    expect(save).toBeEnabled()
+    fireEvent.click(save)
+    await waitFor(() => expect(renamePreset).toHaveBeenCalledWith('p2', '고양이 A'))
+    expect(nonNullErrors()).toEqual([])
   })
 })
 
@@ -556,10 +580,10 @@ describe('PresetsTab — 적용 (R-61 · R-67 · R-60)', () => {
 describe('PresetsTab — 내보내기 (R-62)', () => {
   it('TC-334: 「내보내기」 → pickFolder(내보낼 위치 선택) → exportPreset(id, dir) → 상태 줄 「「{folderName}」 폴더로 내보냈습니다.」·재조회 없음·포커스 그 카드 「내보내기」', async () => {
     vi.mocked(pickFolder).mockResolvedValueOnce(DIR_OUT)
-    vi.mocked(exportPreset).mockResolvedValueOnce({ folderName: '고양이 A (2)' })
+    vi.mocked(exportPreset).mockResolvedValueOnce({ folderName: '고양이 A' })
     await renderTab([P1, P2])
     fireEvent.click(cardBtn('고양이 A', '내보내기'))
-    await waitFor(() => expect(status().textContent).toBe(exported('고양이 A (2)')))
+    await waitFor(() => expect(status().textContent).toBe(exported('고양이 A')))
     expect(pickFolder).toHaveBeenCalledWith(KO.pickExport)
     expect(exportPreset).toHaveBeenCalledTimes(1)
     expect(exportPreset).toHaveBeenCalledWith('p1', DIR_OUT)
@@ -694,9 +718,9 @@ describe('PresetsTab — 이름 바꾸기 (R-64)', () => {
     expect(within(card('고양이 A')).getByRole('heading', { level: 3, hidden: true }).textContent).toBe('고양이 A')
     expect(cardBtn('고양이 A', '이름 바꾸기')).toBeDisabled()
     expect(cardBtn('고양이 B', '이름 바꾸기')).toBeEnabled()
-    expect(within(card('고양이 A')).getByRole('button', { name: KO.cancel })).toBeEnabled()
+    expect(within(card('고양이 A')).getByRole('button', { name: aria(KO.cancel, '고양이 A') })).toBeEnabled()
     fireEvent.change(input, { target: { value: '  고양이 A2 ' } })
-    fireEvent.click(within(card('고양이 A')).getByRole('button', { name: KO.renameSave }))
+    fireEvent.click(within(card('고양이 A')).getByRole('button', { name: aria(KO.renameSave, '고양이 A') }))
     await waitFor(() => expect(cardNames()).toEqual(['고양이 A2', '고양이 B']))
     expect(renamePreset).toHaveBeenCalledTimes(1)
     expect(renamePreset).toHaveBeenCalledWith('p1', '고양이 A2')
@@ -742,7 +766,7 @@ describe('PresetsTab — 이름 바꾸기 (R-64)', () => {
       await renderTab([P1, P2])
       fireEvent.click(cardBtn('고양이 A', '이름 바꾸기'))
       fireEvent.change(renameInput('고양이 A'), { target: { value: '다른 이름' } })
-      if (path === 'click') fireEvent.click(within(card('고양이 A')).getByRole('button', { name: KO.renameSave }))
+      if (path === 'click') fireEvent.click(within(card('고양이 A')).getByRole('button', { name: aria(KO.renameSave, '고양이 A') }))
       else fireEvent.keyDown(renameInput('고양이 A'), { key: 'Enter' })
       await waitFor(() => expect(onError).toHaveBeenCalledWith(err))
       expect(renamePreset).toHaveBeenCalledWith('p1', '다른 이름')
@@ -750,7 +774,7 @@ describe('PresetsTab — 이름 바꾸기 (R-64)', () => {
       expect(input.value).toBe('다른 이름')
       await waitFor(() => expect(input).toHaveFocus())
       expect(listPresets).toHaveBeenCalledTimes(1)
-      expect(within(card('고양이 A')).getByRole('button', { name: KO.renameSave })).toBeEnabled()
+      expect(within(card('고양이 A')).getByRole('button', { name: aria(KO.renameSave, '고양이 A') })).toBeEnabled()
     },
   )
 })
@@ -832,9 +856,16 @@ describe('PresetsTab — 진행 중·공통 규칙 (R-66 · R-64)', () => {
       r.unmount()
       const err: BridgeError = { code: 'preset.io', message: '프리셋 파일을 쓰지 못했습니다.' }
       await act(async () => (outcome === 'reject' ? d.reject(err) : d.resolve(NEW)))
-      if (outcome === 'reject') expect(onError).toHaveBeenCalledWith(err)
-      else expect(nonNullErrors()).toEqual([])
-      // 언마운트 뒤 재조회 여부는 판정하지 않는다(§4 은 setState 금지만 규정 — scenarios 「설계 확인 필요」 AC-3)
+      if (outcome === 'reject') {
+        expect(onError).toHaveBeenCalledWith(err)
+        expect(listPresets).toHaveBeenCalledTimes(1)
+      }
+      else {
+        expect(nonNullErrors()).toEqual([])
+        // §4 끝 문단: 흐름은 언마운트와 무관하게 끝까지 — 성공 경로 reload()(listPresets 재호출)·onError(null) 그대로, 로컬 setState 만 건너뜀
+        expect(onError).toHaveBeenCalledWith(null)
+        expect(listPresets).toHaveBeenCalledTimes(2)
+      }
     },
   )
 })

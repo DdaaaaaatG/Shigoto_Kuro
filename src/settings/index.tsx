@@ -1,7 +1,7 @@
 /**
  * 설정 화면 — design.md §1·§2·§2.1·§3·§5.3(CR-031). 왼쪽 세로 메뉴(role=tablist, vertical) +
- * 오른쪽 내용 영역(h1 섹션 제목 → 오류 줄 → 탭 패널)으로 구성한다(R-27). 탭 4개(기본 설정 / 이미지 설정 /
- * 어깨축·손 위치, R-19 이어받음 / 타이머, CR-045 R-44). `MessagesProvider`가 언어를 감싸고, 안의 `Shell`이
+ * 오른쪽 내용 영역(h1 섹션 제목 → 오류 줄 → 탭 패널)으로 구성한다(R-27). 탭 5개(기본 설정 / 이미지 설정 /
+ * 어깨축·손 위치, R-19 이어받음 / 타이머, CR-045 R-44 / 프리셋, CR-064 R-66). `MessagesProvider`가 언어를 감싸고, 안의 `Shell`이
  * 세로 메뉴·오류 줄·본문을 그린다(R-20).
  */
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
@@ -21,22 +21,24 @@ import { fetchWithRetry } from 'components/utils/fetchWithRetry'
 import GeneralTab from './components/GeneralTab'
 import ImagesTab from './components/ImagesTab'
 import MousePartsTab from './components/MousePartsTab'
+import PresetsTab from './components/PresetsTab'
 import TabIcon from './components/TabIcon'
 import TimerTab from './components/TimerTab'
 import { errorText } from './i18n/index'
 import { MessagesProvider, useLanguage, useMessages } from './i18n/MessagesContext'
 import styles from './settings.module.css'
 
-type Tab = 'general' | 'images' | 'mouse' | 'timer'
+type Tab = 'general' | 'images' | 'mouse' | 'timer' | 'presets'
 
-/** 세로 메뉴 순서(고정). 문구 키 = design.md §2.1 「TAB_KEY」. 4번째 = 타이머(CR-045, design/timer-tab.md §1.1) */
-const TAB_IDS: readonly Tab[] = ['general', 'images', 'mouse', 'timer']
+/** 세로 메뉴 순서(고정). 문구 키 = design.md §2.1 「TAB_KEY」. 4번째 = 타이머(CR-045, design/timer-tab.md §1.1), 5번째 = 프리셋(CR-064, design/presets-tab.md §1.1) */
+const TAB_IDS: readonly Tab[] = ['general', 'images', 'mouse', 'timer', 'presets']
 
-const TAB_KEY: Record<Tab, 'tabGeneral' | 'tabImages' | 'tabMouse' | 'tabTimer'> = {
+const TAB_KEY: Record<Tab, 'tabGeneral' | 'tabImages' | 'tabMouse' | 'tabTimer' | 'tabPresets'> = {
   general: 'tabGeneral',
   images: 'tabImages',
   mouse: 'tabMouse',
   timer: 'tabTimer',
+  presets: 'tabPresets',
 }
 
 type ShellProps = {
@@ -115,6 +117,7 @@ const Shell = ({ tab, onTabChange, settings, manifest, error, onError }: ShellPr
           {tab === 'images' && <ImagesTab settings={settings} manifest={manifest} onError={onError} />}
           {tab === 'mouse' && <MousePartsTab settings={settings} manifest={manifest} onError={onError} />}
           {tab === 'timer' && <TimerTab settings={settings} manifest={manifest} onError={onError} />}
+          {tab === 'presets' && <PresetsTab manifest={manifest} onError={onError} />}
         </div>
       </main>
     </div>

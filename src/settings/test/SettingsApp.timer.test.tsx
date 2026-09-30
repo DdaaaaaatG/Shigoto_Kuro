@@ -219,7 +219,7 @@ const soundStatus = () => screen.getByText(/^지금:/).textContent
 describe('SettingsApp — 「타이머」 탭 (R-44·R-27·R-48, T-1)', () => {
   it('TC-247 (CR-050 개정): 메뉴 4번째 「타이머」 — 열면 h1·패널·카드 3장, 구독 먼저 → getTimer 1회(TimerTab 한 곳) → 00:00:00, 알림음 조회 1회, 다른 탭으로 가면 구독 해제, bridge 저장·조작 없음', async () => {
     await mount()
-    expect(allTabs().map(t => t.textContent)).toEqual(['기본 설정', '이미지 설정', '어깨축·손 위치', '타이머'])
+    expect(allTabs().map(t => t.textContent)).toEqual(['기본 설정', '이미지 설정', '어깨축·손 위치', '타이머', '프리셋']) // CR-064: 다섯째 프리셋
     const timerTab = allTabs()[3]
     expect(timerTab).toHaveAttribute('id', 'settings-tab-timer')
     expect(timerTab).toHaveAttribute('aria-controls', 'settings-panel-timer')
@@ -248,7 +248,8 @@ describe('SettingsApp — 「타이머」 탭 (R-44·R-27·R-48, T-1)', () => {
     await act(async () => {})
     expect(unlistenTimer).toHaveBeenCalledTimes(1)
     tabBtn('기본 설정').focus()
-    fireEvent.keyDown(document.activeElement as HTMLElement, { key: 'End' })
+    // CR-064: End 는 이제 다섯째(프리셋)로 가므로 ArrowDown 3번으로 넷째 타이머에 간다
+    for (let i = 0; i < 3; i += 1) fireEvent.keyDown(document.activeElement as HTMLElement, { key: 'ArrowDown' })
     await waitFor(() => expect(getTimer).toHaveBeenCalledTimes(2))
     expect(h1Texts()).toEqual(['타이머'])
     expect(allTabs()[3]).toHaveFocus()

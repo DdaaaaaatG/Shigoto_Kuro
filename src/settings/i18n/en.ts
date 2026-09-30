@@ -169,6 +169,43 @@ export const en: Messages = {
   areaCorner2: 'Top right',
   areaCorner3: 'Bottom right',
   areaCorner4: 'Bottom left',
+  // ─── §4.12 CR-064 프리셋(36키) — ja·en 초안, 검수 필요
+  tabPresets: 'Presets',
+  cardPresetSave: 'Save current setup as a preset',
+  presetSaveDesc: 'Saves all current images, the alarm sound, scale, rest time, the "Shoulder & hand" tab settings (shoulder axis, movement area, arm position, hand position, pen hand) and timer settings as one set. Window position, language, autostart, taskbar and position lock are not included.',
+  presetNameLabel: 'Preset name',
+  presetNamePlaceholder: 'e.g. Cat A',
+  presetSave: 'Save',
+  presetSaveNeedsRequired: 'A keyboard base image and an arm image are required. Add them in "Images" first.',
+  presetSaved: 'Saved preset "{name}".',
+  presetImport: 'Import from folder',
+  presetImportDesc: 'Choose an exported preset folder (the one containing preset.json).',
+  presetImported: 'Imported preset "{name}".',
+  presetImportFailed: 'Import failed. Fix the files below and try again.',
+  pickPresetFolderTitle: 'Choose a preset folder to import',
+  pickExportFolderTitle: 'Choose where to export',
+  cardPresetList: 'Saved presets',
+  presetListEmpty: 'No saved presets.',
+  presetSavedAt: 'Saved {date}',
+  presetImageCount: '{count} images',
+  presetHasAlarm: 'Alarm sound',
+  presetNoAlarm: 'No alarm sound',
+  presetApply: 'Apply',
+  presetExport: 'Export',
+  presetRename: 'Rename',
+  presetDelete: 'Delete',
+  presetRenameSave: 'Save',
+  presetApplied: 'Applied preset "{name}".',
+  presetExported: 'Exported to folder "{folder}".',
+  presetDeleted: 'Deleted preset "{name}".',
+  confirmPresetApplyTitle: 'Apply preset',
+  confirmPresetApplyMessage: 'Your current images, alarm sound and settings will all be replaced by "{name}". Image slots not in the preset will be cleared. The current setup is not backed up automatically — save it as a preset first if you want to keep it. Window position, language, autostart, taskbar and position lock stay as they are.',
+  confirmPresetApplyOk: 'Apply',
+  confirmPresetDeleteTitle: 'Delete preset',
+  confirmPresetDeleteMessage: 'Delete preset "{name}"? This cannot be undone.',
+  confirmPresetDeleteOk: 'Delete',
+  presetActionAria: '{action}: {name}',
+  presetRenameInputAria: 'New name for "{name}"',
   slots: {
     background: { title: 'Background', desc: 'Always shown at the very bottom' },
     // CR-037 · R-34
@@ -231,6 +268,18 @@ export const en: Messages = {
     'sound.io': 'Could not read or write the sound file.',
     'reset.io': 'Could not reset all data (some of it may already be reset). The app will try again the next time it starts.',
     'reset.seed': 'Could not restore the default images. The app will try again the next time it starts.',
+    'preset.not_found': 'Preset not found.', // 검수 필요(사용자)
+    'preset.invalid_name': 'Enter a preset name of 1–50 characters.', // 검수 필요(사용자)
+    'preset.missing_required': 'Required image (keyboard base / arm) is missing.', // 검수 필요(사용자)
+    'preset.not_preset': 'Not a preset folder. Choose the folder containing preset.json.', // 검수 필요(사용자)
+    'preset.format': 'The preset file format is invalid.', // 검수 필요(사용자)
+    'preset.invalid_settings': 'The preset contains invalid settings.', // 검수 필요(사용자)
+    'preset.damaged': 'The saved preset is damaged and was not applied. Nothing changed.', // 검수 필요(사용자)
+    'preset.bad_dir': 'Folder not found.', // 검수 필요(사용자)
+    'preset.export_exists': 'A folder with the same name already exists there. Choose another location or rename the preset.', // 검수 필요(사용자)
+    'preset.io': 'Could not read or write the preset files.', // 검수 필요(사용자)
+    'preset.file_missing': 'File is missing.', // 검수 필요(사용자)
+    'preset.file_link': 'Shortcuts or links are not allowed.', // 검수 필요(사용자)
     unknown: 'An unknown error occurred.',
   },
 }
