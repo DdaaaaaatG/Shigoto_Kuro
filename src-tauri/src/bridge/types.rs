@@ -48,7 +48,8 @@ pub use crate::assets::{AssetEntry, AssetManifest, AssetSlot, CanvasSize, Simple
 pub use crate::error::BridgeError;
 pub use crate::hook::SpecialKey;
 pub use crate::presets::{
-    PresetExportResult, PresetImportReport, PresetProblem, PresetSummary, NAME_MAX_CHARS,
+    PresetExportResult, PresetImportReport, PresetPreview, PresetPreviewLayer, PresetProblem,
+    PresetSummary, NAME_MAX_CHARS,
 };
 pub use crate::settings::timer::TimerMode;
 pub use crate::settings::{Language, MouseSettings, OverlaySettings, Settings, TimerSettings};

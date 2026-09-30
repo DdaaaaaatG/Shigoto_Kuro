@@ -295,9 +295,20 @@ describe('프리셋 타입(v0.30, §3.11)', () => {
     expect(rejected.preset).toBeNull()
     expect(rejected.problems[0]).toEqual({ fileName: 'kb_up.png', code: 'asset.not_rgba' })
     const summary: PresetSummary = JSON.parse(
-      '{"id":"1790000000000","name":"고양이 A","savedAt":1790000000000,"imageCount":7,"hasAlarm":true}',
+      '{"id":"1790000000000","name":"고양이 A","savedAt":1790000000000,"imageCount":7,"hasAlarm":true,' +
+        '"preview":{"canvas":{"width":900,"height":700},"layers":[{"slot":"kb_up","url":"http://x/a.png","width":900,"height":700}],"partPos":{"x":411,"y":464},"penPos":null}}',
     )
     expect(summary.savedAt).toBe(1790000000000)
     expect(summary.hasAlarm).toBe(true)
+    // (v0.31) preview — camelCase 키, penPos null 허용
+    expect(summary.preview.canvas).toEqual({ width: 900, height: 700 })
+    expect(summary.preview.layers[0]).toEqual({
+      slot: 'kb_up',
+      url: 'http://x/a.png',
+      width: 900,
+      height: 700,
+    })
+    expect(summary.preview.partPos).toEqual({ x: 411, y: 464 })
+    expect(summary.preview.penPos).toBeNull()
   })
 })

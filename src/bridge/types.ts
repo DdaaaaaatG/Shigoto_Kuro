@@ -345,6 +345,26 @@ export interface Position {
 }
 
 // ─── 프리셋 (v0.30, contract.md §3.11 — PS-01·05·06·07·09) ─────────────────
+/** (v0.31, PS-09 개정 CR-065) 카드 미리보기 재료 한 장 = 프리셋 폴더의 그림 1장. url은 불투명 문자열 — 그대로 <img src>. */
+export interface PresetPreviewLayer {
+  slot: AssetSlot
+  url: string
+  width: number
+  height: number
+}
+
+/** (v0.31) 카드 미리보기 재료. 겹침 순서·슬롯 선택·배치·축소는 ui 몫(오버레이 합성 규칙 재사용). */
+export interface PresetPreview {
+  /** 첫 캔버스 레이어 크기(AssetManifest.canvas와 같은 규칙). 캔버스 레이어가 없으면 null */
+  canvas: CanvasSize | null
+  /** 프리셋의 그림 전부(헤더를 읽지 못한 그림은 빠짐). 순서에 의미 없음 — ui는 slot으로 찾는다 */
+  layers: PresetPreviewLayer[]
+  /** 프리셋 설정 mouse.partPos(캔버스 좌표). mouse가 없으면 core 기본값 */
+  partPos: Point
+  /** 프리셋 설정 mouse.penPos(캔버스 좌표, 쉬는 자세). null 의미는 MouseSettings.penPos와 같다 */
+  penPos: Point | null
+}
+
 /** 프리셋 목록 카드(PS-01·PS-09). savedAt = Unix ms(로컬 날짜로 표시는 ui 몫). id는 불투명 문자열. */
 export interface PresetSummary {
   id: string
@@ -352,6 +372,8 @@ export interface PresetSummary {
   savedAt: number
   imageCount: number
   hasAlarm: boolean
+  /** (v0.31) 필수 */
+  preview: PresetPreview
 }
 
 /** 가져오기 파일별 문제(PS-06). code = 기존 asset.*·sound.* 또는 preset.file_missing·preset.file_link·

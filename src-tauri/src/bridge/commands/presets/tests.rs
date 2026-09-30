@@ -119,6 +119,15 @@ fn do_save_then_list_returns_summary() {
     assert_eq!(saved.image_count, 2);
     assert!(!saved.has_alarm);
     assert_eq!(saved.saved_at, 1_790_000_000_000);
+    assert_eq!(saved.preview.layers.len(), 2);
+    assert_eq!(
+        saved.preview.canvas.map(|c| (c.width, c.height)),
+        Some((300, 200))
+    );
+    for layer in &saved.preview.layers {
+        assert!(layer.url.contains("presets"), "{}", layer.url);
+        assert!(!layer.url.contains(".staging-"), "{}", layer.url);
+    }
     assert_eq!(do_list(&paths).expect("list"), vec![saved]);
 }
 

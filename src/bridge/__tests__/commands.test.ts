@@ -404,7 +404,14 @@ describe('bridge/commands — 프리셋(v0.30)', () => {
     mockedInvoke.mockReset()
   })
 
-  const summary = { id: '1790000000000', name: 'A', savedAt: 1, imageCount: 2, hasAlarm: false }
+  const summary = {
+    id: '1790000000000',
+    name: 'A',
+    savedAt: 1,
+    imageCount: 2,
+    hasAlarm: false,
+    preview: { canvas: null, layers: [], partPos: { x: 411, y: 464 }, penPos: null },
+  }
 
   it.each([
     ['listPresets', () => listPresets(), 'list_presets', undefined, []],
