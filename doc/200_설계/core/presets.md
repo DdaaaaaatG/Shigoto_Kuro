@@ -7,7 +7,7 @@
 |---|---|---|---|
 | 2026-09-30 | 1차(신규) | 새 모듈 `presets`(`mod`·`format`·`load`·`scan`·`write`·`apply` 6파일). 공개 API 7개·보고서 타입 4개·`AppliedPreset`·`PresetError`(변형 11개, preset code 10개 + 설정 위임). 정본 인계 패킷 `doc/200_설계/architecture/presets-03-packet-core.md`, 근거 `presets-02-design.md` §2·§3·§5. 짝 변경: [assets.md](assets.md) §3.18(가시성 4곳), [settings.md](settings.md) §3.12(사용처), [data_reset.md](data_reset.md) §3.4(U-1). 패킷 대비 델타는 §11.1 | 적용(cb6ce1d 이전) |
 | 2026-09-30 | 2차(리뷰 반영) | SEC-001 `parse_preset` 슬롯 순번 상한(`index < MAX_IMAGES`, `Format("슬롯 순번이 범위를 벗어났습니다")`) · SEC-005 결정(`preset.json` 모르는 필드 무시) — §3.2. CORE-005 적용 최악 메모리 추정 — §3.7.3. SEC-001 테스트 `import_rejects_out_of_range_index`(§8.1) | 적용(cb6ce1d) |
-| 2026-09-30 | 4차(PS-11 내장 프리셋, 🔒 버전 0.5.0) | 새 파일 `builtin.rs`: 내장 프리셋 표 `builtin_presets() -> [BuiltinPreset; 2]`(①「세바시에-기본」·②「게님드림」), 공개 `seed_builtin(presets_dir) -> Result<SeedOutcome, PresetError>`·`SeedOutcome`·`SeedSkip`(§2·§3.10). 바이트 재사용: ① PNG 6장·② `background.png` = `assets::defaults::DEFAULT_ASSETS` 바이트, 알림음 = `static BUILTIN_ALARM_MP3` 1개(두 프리셋 공용). 시딩 = `presets/`가 **없을 때만** 형제 임시 폴더 `.presets-seed`에 다 쓰고 검증(`load_dir`) 뒤 rename 한 번. `lib.rs` setup에서 기본 이미지 시딩 뒤 1회(실패는 경고). 테스트 7개(§8.1·§8.2). 짝 문서 한 줄: [assets.md](assets.md) 변경이력 17차, [data_reset.md](data_reset.md) §3.4. 결정 D-P9~D-P12, 확인 필요 C-7~C-10 | 설계(소스 미적용) |
+| 2026-09-30 | 4차(PS-11 내장 프리셋, 🔒 버전 0.5.0) | 새 파일 `builtin.rs`: 내장 프리셋 표 `builtin_presets() -> [BuiltinPreset; 2]`(①「세바시에-기본」·②「게님드림」), 공개 `seed_builtin(presets_dir) -> Result<SeedOutcome, PresetError>`·`SeedOutcome`·`SeedSkip`(§2·§3.10). 바이트 재사용: ① PNG 6장·② `background.png` = `assets::defaults::DEFAULT_ASSETS` 바이트, 알림음 = `static BUILTIN_ALARM_MP3` 1개(두 프리셋 공용). 시딩 = `presets/`가 **없을 때만** 형제 임시 폴더 `.presets-seed`에 다 쓰고 검증(`load_dir`) 뒤 rename 한 번. `lib.rs` setup에서 기본 이미지 시딩 뒤 1회(실패는 경고). 테스트 7개(§8.1·§8.2). 짝 문서 한 줄: [assets.md](assets.md) 변경이력 17차, [data_reset.md](data_reset.md) §3.4. 결정 D-P9~D-P12, 확인 필요 C-7~C-10. **실물 동기화**: C-7 확정(알림음 원본 `doc/assets/presets/1/alarm.mp3`, ui 기본음과 분리), `parse_preset` `pub(super)`, 내장 증가 약 379KB, §3.1·§8·§10·§11.3 반영 | 적용(실물 대조) |
 | 2026-09-30 | 3차(PS-09 개정, CR-065, 계약 v0.31) | 카드 미리보기: 공개 타입 `PresetPreview`·`PresetPreviewLayer` 신규, `PresetSummary.preview` 필드, `PresetSummary`·`PresetImportReport` derive `Eq` 제거(§2). 비공개 `summary(id, file)` → `summary(preset_dir, id, file)`, 새 비공개 `preview(preset_dir, file)`(§3.9). `list`·`rename`·`save`·`import_from` 반환에 `preview`(§3.7). 테스트 7개(통합 `tests/presets_preview.rs`, §8.2). 공개 함수 시그니처 불변. 새 결정 D-P5~D-P8, 확인 필요 C-5·C-6. 실물 대조 정정: `preview(preset_dir, id, file)`·`read_size`·`HEADER_BYTES`·`PresetPreviewLayer` Eq 없음 | 적용(실물 대조) |
 
 - 요구ID 표기: `PS-01`~`PS-10` = 아키텍처 횡단 ID(`doc/000_프로젝트_확정사항.md` §6 「프리셋」, `presets-02-design.md` §6 RTM). `U-1`~`U-7` = 사용자 결정, `A-1`~`A-11` = 아키텍트 결정(02-design §5a). `doc/100_요구조건/`에는 없다.
@@ -200,8 +200,9 @@ impl AppPaths {
 | `src-tauri/src/presets/preview.rs` (v0.31 신규) | 공개 타입 `PresetPreview`·`PresetPreviewLayer`(mod.rs 재노출), `pub(super) preview(preset_dir, id, file)`, 비공개 `read_size(path) -> Option<(u32, u32)>`, 상수 `HEADER_BYTES: u64 = 29`(§3.9). 단위 테스트 없음(통합 `tests/presets_preview.rs`) | 95 (실측) |
 | `src-tauri/tests/presets_preview.rs` (v0.31 신규) | 미리보기 통합 테스트 7개(§8.2) | — |
 | `src-tauri/src/presets/apply.rs` (신규) | `apply`, `FileBackup::{capture, restore}`, `backup_names`, `commit_files`, `build_manifest` | 약 220 |
-| `src-tauri/src/presets/builtin.rs` (4차 신규) | 내장 프리셋 표 `BuiltinPreset`·`builtin_presets()`, `static BUILTIN_ALARM_MP3`, 매크로 `preset2_png!`, 공개 `seed_builtin`·`SeedOutcome`·`SeedSkip`(mod.rs 재노출), 비공개 `prepare_staging`·`write_one`, 상수 `SEED_STAGING = ".presets-seed"`. 단위 테스트 3개(§8.1) | 약 200 |
-| `src-tauri/tests/presets_builtin.rs` (4차 신규) | 시딩 통합 테스트 4개(§8.2) | 약 150 |
+| `src-tauri/src/presets/builtin.rs` (4차 신규, **구현됨**) | 내장 프리셋 표 `BuiltinPreset`·`builtin_presets()`, `static BUILTIN_ALARM_MP3`·`PRESET1_JSON`·`PRESET2_JSON`, 매크로 `preset2_png!`, 공개 `seed_builtin`·`SeedOutcome`·`SeedSkip`(mod.rs 재노출), 비공개 `defaults_bytes`·`alarm_entry`·`prepare_staging`·`write_one`·`remove_best_effort`, 상수 `SEED_STAGING = ".presets-seed"`(임시 폴더 = `presets_dir.with_file_name(SEED_STAGING)`). 단위 테스트 3개(§8.1, 도우미 `expected_names`) | 실물 |
+| `src-tauri/tests/presets_builtin.rs` (4차 신규, **구현됨**) | 시딩 통합 테스트 4개(§8.2, 이름 설계대로) | 실물 |
+| `src-tauri/src/presets/format.rs` (4차) | `parse_preset` 가시성 `fn` → **`pub(super)`**(builtin 단위 테스트 `expected_names`가 원문 JSON에서 `images`·`alarm`을 읽는다). 동작 불변 | ±0 |
 | `src-tauri/src/lib.rs` | `pub mod presets;`, `//!` [계층]에 `presets` 추가, `AppPaths::presets_dir`(§2) | +10 |
 | `src-tauri/src/assets/mod.rs`·`assets/url.rs` | 가시성만 4곳([assets.md](assets.md) §3.18). **동작 불변** | ±0 |
 | `src-tauri/tests/presets.rs` (신규) | 통합 테스트(§8.2). 800줄을 넘으면 적용 영역을 `tests/presets_apply.rs`로 나눈다(§11.1 Δ5) | 약 700~900 |
@@ -546,7 +547,7 @@ fn read_size(path: &Path) -> Option<(u32, u32)>;
 
 | 프리셋 | id(폴더) | 원본 | `preset.json` | PNG | 알림음 |
 |---|---|---|---|---|---|
-| ① 세바시에-기본 (`savedAt` 1790764144068) | `builtin-1` | `doc/assets/presets/1/` | `include_bytes!` 원문 | 6장 = `doc/assets/defaults/`와 **바이트 동일** → `DEFAULT_ASSETS` 바이트 재사용(새 내장 0) | `alarm.mp3` = 기본 알림음과 동일 → `BUILTIN_ALARM_MP3` |
+| ① 세바시에-기본 (`savedAt` 1790764144068) | `builtin-1` | `doc/assets/presets/1/` | `include_bytes!` 원문 | 6장 = `doc/assets/defaults/`와 **바이트 동일** → `DEFAULT_ASSETS` 바이트 재사용(새 내장 0) | `alarm.mp3` → `BUILTIN_ALARM_MP3`(원본 `doc/assets/presets/1/alarm.mp3`, C-7 확정 — ui 기본음과 분리) |
 | ② 게님드림 (`savedAt` 1790765304848) | `builtin-2` | `doc/assets/presets/2/` | `include_bytes!` 원문 | 7장: `background.png`는 defaults와 동일 → `DEFAULT_ASSETS` 재사용, 나머지 6장(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`, 342 506바이트)만 새 `include_bytes!` | `BUILTIN_ALARM_MP3`(①과 같은 static) |
 
 - exe 증가분 = ② 신규 PNG 6장(약 335KiB) + 알림음 1벌(34 061바이트) + JSON 2개(각 약 1.5KiB). 목록 `doc/assets/presets/_inventory.txt`가 바이트 동일 근거다.
@@ -570,9 +571,13 @@ pub(super) struct BuiltinPreset {
     pub files: Vec<BuiltinFile>,
 }
 
-/// 기본 알림음(ui 번들 `src/assets/sounds/default-alarm.mp3`와 같은 파일, 34 061바이트). ①·② 공용 — static이라 exe에 1벌.
+/// C-7 확정: doc/assets/presets/1/alarm.mp3(34 061바이트 — 현재 ui 기본음과 바이트 동일이지만 분리,
+/// 내장 프리셋은 「그때 모습 그대로」). ①·② 공용 — static이라 exe에 1벌.
 static BUILTIN_ALARM_MP3: &[u8] =
-    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../src/assets/sounds/default-alarm.mp3"));
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/1/alarm.mp3"));
+/// preset.json 원문 2개(static).
+static PRESET1_JSON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/1/preset.json"));
+static PRESET2_JSON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/2/preset.json"));
 
 /// ② 신규 그림(doc/assets/presets/2/). defaults.rs `default_png!`와 같은 모양.
 macro_rules! preset2_png {
@@ -860,7 +865,7 @@ impl PresetError {
 | PS-09 (core 부분) | §3.7.4 `list`·`PresetSummary` | `list_sorted_newest_first`·`list_skips_broken_and_staging`·`list_skips_link_dirs` | ✅ 설계 · 소스 미적용 (탭 UI는 ui) |
 | PS-09 개정 (core, CR-065) | §2 `PresetPreview`·`PresetPreviewLayer`·`PresetSummary.preview`, §3.9, §3.7.1·§3.7.2·§3.7.4·§3.7.5 | `tests/presets_preview.rs` 7개(`preview_layers_have_url_and_size`·`preview_canvas_from_first_canvas_layer`·`preview_uses_default_mouse_when_none`·`preview_skips_unreadable_png`·`list_summary_includes_preview`·`rename_keeps_preview_urls`·`import_summary_has_preview`) | ✅ 설계 · 소스 구현됨 (합성은 ui) |
 | PS-10 | §3.7.3 「프리셋 폴더는 읽기만」 | `apply_then_edit_does_not_touch_preset` | ✅ 설계 · 소스 미적용 |
-| PS-11 (4차, 0.5.0) | §2 `seed_builtin`·`SeedOutcome`·`SeedSkip`, §3.10(내장 표·시딩·`lib.rs` 호출·초기화 관계), §3.8 | `builtin_presets_parse_and_validate`·`seed_ids_valid`·`builtin_bytes_match_source_folder`·`seed_creates_two_when_dir_missing`·`seed_skips_when_dir_exists_even_if_empty`·`seed_output_listed_and_applicable`·`seed_clears_leftover_staging` | ✅ 설계 · 소스 미적용 |
+| PS-11 (4차, 0.5.0) | §2 `seed_builtin`·`SeedOutcome`·`SeedSkip`, §3.10(내장 표·시딩·`lib.rs` 호출·초기화 관계), §3.8 | `builtin_presets_parse_and_validate`·`seed_ids_valid`·`builtin_bytes_match_source_folder`·`seed_creates_two_when_dir_missing`·`seed_skips_when_dir_exists_even_if_empty`·`seed_output_listed_and_applicable`·`seed_clears_leftover_staging` | ✅ 설계 · 소스 구현됨 |
 
 ## 11. 설계 결정 노트
 
@@ -902,7 +907,7 @@ impl PresetError {
 - (v0.31) 비공개 `summary(id, file)` → `summary(preset_dir, id, file)`: 호출 3곳 `scan.rs:100`(list)·`scan.rs:115`(rename)·`write.rs:88`(`commit_staging` — rename 뒤로 순서 확인). 공개 함수 시그니처 불변.
 - (v0.31) `PresetSummary`·`PresetImportReport` derive `Eq` 제거: `Eq`에 기대는 곳(`assert_eq!`은 `PartialEq`만 필요, `HashSet`·`BTreeSet` 키 사용 없음 — 구현 때 `cargo check`로 확인). bridge `types.rs` 재노출·`commands/presets/tests.rs`, TS `types.ts`·픽스처는 계약 §9 v0.31 인계대로(bridge·ui 소관).
 - (v0.31) `assets`·`settings`: 가시성·동작 변경 없음(§3.8 끝).
-- (4차 PS-11) 기존 공개 API·`PresetError` 변형·code **불변**(새 에러 없음 — 시딩 실패 code는 기존 `preset.*`·`asset.*`·`sound.*`). 바뀌는 곳: `presets/mod.rs`(`mod builtin;`·재노출·`//!`), 새 `builtin.rs`·`tests/presets_builtin.rs`, `lib.rs`(setup 1줄 + `seed_builtin_presets` 함수). `assets/defaults.rs`·`data_reset`·bridge·ui·계약 변경 없음. `mod.rs`의 `//!` [테스트] 줄에 `tests/presets_builtin.rs` 추가.
+- (4차 PS-11) 기존 공개 API·`PresetError` 변형·code **불변**(새 에러 없음 — 시딩 실패 code는 기존 `preset.*`·`asset.*`·`sound.*`). 바뀌는 곳(실물 반영): `presets/mod.rs`(`mod builtin;`·재노출·`//!`), 새 `builtin.rs`·`tests/presets_builtin.rs`, `format.rs` `parse_preset` → `pub(super)`(가시성만), `lib.rs`(setup 1줄 `seed_builtin_presets(&paths.presets_dir())` + 같은 이름 함수). exe 내장 바이트 증가 약 379KB(② 신규 PNG 6장 + 알림음 1벌 + JSON 2개). `assets/defaults.rs`·`data_reset`·bridge·ui·계약 변경 없음. `mod.rs`의 `//!` [테스트] 줄에 `tests/presets_builtin.rs` 추가.
 
 ### 11.4 확인 필요
 
@@ -911,7 +916,7 @@ impl PresetError {
 - **C-3** 02-design §7 위험 ① — 적용 순간 WebView2가 기존 PNG를 읽는 중이면 `write_atomic`의 rename이 공유 위반으로 실패할 수 있다(되돌림 후 `preset.io`, 데이터 안전). 실측은 verify 단계.
 - **C-4** U-1이 B(초기화 때 프리셋도 삭제)로 바뀌면 [data_reset.md](data_reset.md) §3.4와 이 문서 §3.8을 다시 받는다.
 - **C-5** (v0.31) 미리보기 헤더 읽기로 `list` 30개 ≤ 50 ms 목표가 유지되는지 verify 단계 실측. 넘으면 계약 §9 v0.31 확인 필요 (b)(`layers`를 미리보기 슬롯만으로 줄이기 — 합성 규칙 일부가 core로 들어온다)를 사용자 판단으로 올린다.
-- **C-7** (4차) 알림음 원본 경로 — `BUILTIN_ALARM_MP3`는 ui 번들 파일 `src/assets/sounds/default-alarm.mp3`를 빌드 때 읽는다(코드 의존이 아니라 파일 의존, 기본 알림음 단일 소스). ui가 기본음을 바꾸면 내장 프리셋 알림음도 같이 바뀐다. 「내장 프리셋은 스냅숏」으로 보려면 `doc/assets/presets/1/alarm.mp3`(바이트 동일)를 원본으로 바꾸면 된다(코드 한 줄). 사용자·아키텍트 판단.
+- **C-7 (확정 2026-09-30)** 알림음 원본 = `doc/assets/presets/1/alarm.mp3`. ui 기본음(`src/assets/sounds/default-alarm.mp3`)과 **분리** — 내장 프리셋은 「그때 모습 그대로」이고, ui가 기본음을 바꿔도 내장 프리셋 알림음은 바뀌지 않는다. core가 ui 폴더 파일에 빌드 의존하지 않는다. 실물 `builtin.rs:42-47`.
 - **C-8** (4차) 기본 세트(`DEFAULT_ASSETS`)가 나중에 바뀌면 ①「세바시에-기본」·② 배경도 따라 바뀐다(바이트를 빌리므로). 그때는 `builtin_bytes_match_source_folder`가 깨져 결정을 강제한다 — 원본 폴더 갱신 또는 ①을 독립 `include_bytes!`로 분리.
 - **C-9** (4차, 요구 밖 — 만들지 않음) 설정 창 「내장 프리셋 복원」 버튼·내장 표시 배지·삭제 금지는 PS-11에 없다. 두 카드를 지우면 되살릴 방법은 `presets\` 폴더를 지우고 재시작뿐이다. 필요하면 요구로 승격 후 `restore_builtin(presets_dir, id)`(기존 폴더 없을 때만 해당 id 쓰기) 형태가 후보.
 - **C-10** (4차) 사용자 데이터 폴더에 이미 `presets\`가 있는 개발 PC(0.5.0 이전 개발본으로 저장해 봄)에는 내장 프리셋이 나타나지 않는다(규칙대로). 검증 때는 `presets\`를 치운 뒤 확인한다(§8.3).
