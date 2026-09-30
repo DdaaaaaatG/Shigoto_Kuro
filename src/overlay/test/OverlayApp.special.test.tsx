@@ -203,16 +203,17 @@ describe('P-2 특수 키 — 전용 그림·젤리 짝 교대 (design.md §10.3�
     loadedOnce()
   })
 
-  it('TC-145: 규칙 2~7 — 스페이스 → a → Enter → Enter 뗌 → 스페이스 뗌 → a 뗌: 그림 복귀·젤리 짝 교대(같은 래퍼)', async () => {
+  // CR-066: 새 누름(자동 반복 아님)은 다른 키를 누른 채여도 매번 젤리를 다시 시작한다 — 아래 TC-145~148 개정
+  it('TC-145: 규칙 2~7 — 스페이스 → a → Enter → Enter 뗌 → 스페이스 뗌 → a 뗌: 그림 복귀·젤리 짝 교대(같은 래퍼, a 누름도 교대 CR-066)', async () => {
     const { container } = await mount()
     const el = kbImg(container)
     const j = jelly(container)
     const steps: Array<[() => Promise<void>, string, string]> = [
       [() => key(true, 1, 'space'), 'u:key_space', 'jellyAlt'],
-      [() => key(true, 2, null), 'u:key_space', 'jellyAlt'],
-      [() => key(true, 3, 'enter'), 'u:key_enter', 'jelly'],
-      [() => key(false, 2, 'enter'), 'u:key_space', 'jelly'],
-      [() => key(false, 1, 'space'), 'u:kb_down_0', 'jelly'],
+      [() => key(true, 2, null), 'u:key_space', 'jelly'],
+      [() => key(true, 3, 'enter'), 'u:key_enter', 'jellyAlt'],
+      [() => key(false, 2, 'enter'), 'u:key_space', 'jellyAlt'],
+      [() => key(false, 1, 'space'), 'u:kb_down_0', 'jellyAlt'],
     ]
     for (const [step, src, phase] of steps) {
       await step()
@@ -226,7 +227,7 @@ describe('P-2 특수 키 — 전용 그림·젤리 짝 교대 (design.md §10.3�
     expect(setSettings).not.toHaveBeenCalled()
   })
 
-  it('TC-146: 규칙 8·12·13 — key_z 미등록 Z → 누름 프레임+젤리, Ctrl+Z(undo) → key_undo+재생, Ctrl+C(null) → 속성 변경 없음', async () => {
+  it('TC-146: 규칙 8·12·13 — key_z 미등록 Z → 누름 프레임+젤리, Ctrl+Z(undo) → key_undo+재생, Ctrl+C(null) → 그림 변경 없음·젤리 재생(CR-066)', async () => {
     const { container } = await mount()
     await key(true, 1, 'z')
     expect(kb(container)).toEqual({ src: 'u:kb_down_1', cls: 'layer', jelly: 'jellyWrap jellyAlt' })
@@ -239,27 +240,28 @@ describe('P-2 특수 키 — 전용 그림·젤리 짝 교대 (design.md §10.3�
     const el = kbImg(container)
     const mo = new MutationObserver(() => undefined)
     mo.observe(el, { attributes: true, attributeFilter: ['class', 'src'] })
-    mo.observe(jelly(container), { attributes: true, attributeFilter: ['class'] })
     await key(true, 3, null)
     expect(mo.takeRecords()).toHaveLength(0)
     mo.disconnect()
-    expect(kb(container)).toEqual({ src: 'u:key_undo', cls: 'layer', jelly: 'jellyWrap jellyAlt' })
+    expect(kb(container)).toEqual({ src: 'u:key_undo', cls: 'layer', jelly: 'jellyWrap jelly' })
     await key(false, 0, null)
     expect(kb(container)).toEqual({ src: 'u:kb_up', cls: 'layer', jelly: 'jellyWrap' })
     expect(setSettings).not.toHaveBeenCalled()
   })
 
-  it('TC-147: 규칙 9 — 같은 특수 키 자동 반복은 재생 없음(class 변경 0), [space, enter]에서 스페이스 반복 → key_space로 바뀌되 재생 없음', async () => {
+  // CR-066: repeat 플래그 없는 재누름은 새 누름 — 젤리는 교대, 키보드 img class는 변경 0(자동 반복 repeat:true는 OverlayApp.shiver)
+  it('TC-147: 규칙 9 — 같은 특수 키 재누름(repeat 없음)은 그림 유지·젤리 교대(CR-066), [space, enter]에서 스페이스 재누름 → key_space로 바뀌고 교대', async () => {
     const { container } = await mount()
     await key(true, 1, 'space')
     const el = kbImg(container)
     const j = jelly(container)
-    const mo = classWatch(el, j)
+    const mo = classWatch(el)
     for (let i = 0; i < 3; i++) await key(true, 1, 'space')
     expect(mo.takeRecords()).toHaveLength(0)
-    expect(kb(container)).toEqual({ src: 'u:key_space', cls: 'layer', jelly: 'jellyWrap jellyAlt' })
+    expect(jelly(container)).toBe(j)
+    expect(kb(container)).toEqual({ src: 'u:key_space', cls: 'layer', jelly: 'jellyWrap jelly' })
     await key(true, 2, 'enter')
-    expect(kb(container)).toEqual({ src: 'u:key_enter', cls: 'layer', jelly: 'jellyWrap jelly' })
+    expect(kb(container)).toEqual({ src: 'u:key_enter', cls: 'layer', jelly: 'jellyWrap jellyAlt' })
     mo.takeRecords()
     await key(true, 2, 'space')
     expect(mo.takeRecords()).toHaveLength(0)
@@ -269,17 +271,17 @@ describe('P-2 특수 키 — 전용 그림·젤리 짝 교대 (design.md §10.3�
     expect(setSettings).not.toHaveBeenCalled()
   })
 
-  it('TC-148: bridge special 누락·undefined·7종 밖 값은 null — 전용 그림 없음, 누름 유지 중 재생 없음', async () => {
+  it('TC-148: bridge special 누락·undefined·7종 밖 값은 null — 전용 그림 없음, 누름 유지 중 새 누름은 젤리 교대(CR-066)', async () => {
     const { container } = await mount()
     await emit('keyboard', { pressed: true, heldCount: 1, ts: Date.now() })
     expect(kb(container)).toEqual({ src: 'u:kb_down_1', cls: 'layer', jelly: 'jellyWrap jellyAlt' })
-    const mo = classWatch(kbImg(container), jelly(container))
+    const mo = classWatch(kbImg(container))
     await emit('keyboard', { pressed: true, heldCount: 2, special: 'bogus', ts: Date.now() })
     await emit('keyboard', { pressed: true, heldCount: 3, special: 'Space', ts: Date.now() })
     await emit('keyboard', { pressed: true, heldCount: 4, special: undefined, ts: Date.now() })
     expect(mo.takeRecords()).toHaveLength(0)
     mo.disconnect()
-    expect(kb(container)).toEqual({ src: 'u:kb_down_1', cls: 'layer', jelly: 'jellyWrap jellyAlt' })
+    expect(kb(container)).toEqual({ src: 'u:kb_down_1', cls: 'layer', jelly: 'jellyWrap jelly' })
     expect(container.querySelector('img[src^="u:key_"]')).toBeNull()
     await emit('keyboard', { pressed: false, heldCount: 0, special: 'bogus', ts: Date.now() })
     expect(kb(container)).toEqual({ src: 'u:kb_up', cls: 'layer', jelly: 'jellyWrap' })

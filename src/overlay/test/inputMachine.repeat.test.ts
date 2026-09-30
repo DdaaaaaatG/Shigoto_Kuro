@@ -90,15 +90,16 @@ describe('reduce — 자동 반복 누름 (design/functions.md §5.2 자동 반�
     expect([zero.repeating, zero.kbDown, zero.specialHeld, zero.bounceSeq, zero.kbFrame]).toEqual([false, false, [], 1, 1])
   })
 
-  it('TC-162: 반복 아닌 key(뗌·새 일반 키·pressed false+repeat true·새 특수 키·repeat 없음·repeat false) → repeating false, lastRepeatAt·shiverSeq 불변', () => {
+  // CR-066: 반복 아닌 새 누름은 부르르 중이어도 bounceSeq +1 — shiverSeq와 달라져 젤리가 다시 산다
+  it('TC-162: 반복 아닌 key(뗌·새 일반 키·pressed false+repeat true·새 특수 키·repeat 없음·repeat false) → repeating false, lastRepeatAt·shiverSeq 불변, 새 누름은 젤리 재시작(CR-066)', () => {
     const b = repeatingZ()
     const cases: Array<[MachineInput, Partial<MachineState>, WrapMotion]> = [
       [key(false, 0, 'z', T0 + 600), { kbDown: false, heldCount: 0, specialHeld: [], bounceSeq: 1 }, null],
-      [key(true, 2, null, T0 + 600), { kbDown: true, heldCount: 2, specialHeld: ['z'], bounceSeq: 1, kbFrame: 2 }, null],
+      [key(true, 2, null, T0 + 600), { kbDown: true, heldCount: 2, specialHeld: ['z'], bounceSeq: 2, kbFrame: 2 }, 0],
       [key(false, 0, 'z', T0 + 600, true), { kbDown: false, heldCount: 0, specialHeld: [], bounceSeq: 1 }, null],
       [key(true, 2, 'space', T0 + 600), { kbDown: true, specialHeld: ['z', 'space'], bounceSeq: 2, kbFrame: 2 }, 0],
-      [key(true, 1, 'z', T0 + 600), { kbDown: true, specialHeld: ['z'], bounceSeq: 1, kbFrame: 2 }, null],
-      [key(true, 1, 'z', T0 + 600, false), { kbDown: true, specialHeld: ['z'], bounceSeq: 1, kbFrame: 2 }, null],
+      [key(true, 1, 'z', T0 + 600), { kbDown: true, specialHeld: ['z'], bounceSeq: 2, kbFrame: 2 }, 0],
+      [key(true, 1, 'z', T0 + 600, false), { kbDown: true, specialHeld: ['z'], bounceSeq: 2, kbFrame: 2 }, 0],
     ]
     for (const [input, expected, motion] of cases) {
       const s = reduce(b, input, config)
@@ -180,21 +181,21 @@ describe('wrapMotion (design/functions.md §5.2, design.md §10.3 부르르 규�
     }
   })
 
-  it('TC-167: shiverSeq — 부르르가 끝나도 같은 번호의 젤리는 되살아나지 않고, 모두 뗀 뒤 첫 누름은 새 젤리', () => {
+  it('TC-167: shiverSeq — 부르르가 끝나도 같은 번호의 젤리는 되살아나지 않고, 새 누름(CR-066: 누른 채여도)은 새 젤리', () => {
     const b = repeatingZ() // bounceSeq 1 · shiverSeq 1
     // ① 500ms 방어로 꺼짐 — bouncePhase는 1이지만 wrapMotion은 null
     const off = reduce(b, tick(T0 + 1010), config)
     expect([bouncePhase(off), wrapMotion(off)]).toEqual([1, null])
-    // ② 반복 키 누른 채 일반 키 새 누름 → 그 키 뗌
+    // ② 반복 키 누른 채 일반 키 새 누름 → 새 번호 젤리(CR-066) → 그 키 뗌(젤리 유지)
     const plus = reduce(b, key(true, 2, null, T0 + 600), config)
-    expect([plus.bounceSeq, bouncePhase(plus), wrapMotion(plus)]).toEqual([1, 1, null])
+    expect([plus.bounceSeq, bouncePhase(plus), wrapMotion(plus)]).toEqual([2, 0, 0])
     const minus = reduce(plus, key(false, 1, null, T0 + 650), config)
-    expect(wrapMotion(minus)).toBeNull()
+    expect(wrapMotion(minus)).toBe(0)
     // ③ 모두 뗌 → 새 첫 누름 = 새 번호 젤리
     const released = reduce(minus, key(false, 0, 'z', T0 + 700), config)
     expect(wrapMotion(released)).toBeNull()
     const again = reduce(released, key(true, 1, null, T0 + 800), config)
-    expect([again.bounceSeq, again.shiverSeq, wrapMotion(again)]).toEqual([2, 1, 0])
+    expect([again.bounceSeq, again.shiverSeq, wrapMotion(again)]).toEqual([3, 1, 1])
   })
 })
 

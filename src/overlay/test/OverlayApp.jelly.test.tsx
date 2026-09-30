@@ -239,13 +239,15 @@ describe('젤리 래퍼 구조 (design.md §2, design/components.md 렌더 조�
 })
 
 describe('젤리 클래스 교대 (design/functions.md §5.1 jellyClass, design.md §10.3 재생 조건)', () => {
-  it('TC-154: 일반 키 — 첫 누름 jellyAlt, 뗌 해제, 다음 첫 누름 jelly, 누름 유지 중 추가 누름·뗌은 class 변경 0건, 같은 노드', async () => {
+  // CR-066: 누름 유지 중 새 누름도 젤리를 다시 시작한다(짝 교대) — 뗌만 class 변경 0건
+  it('TC-154: 일반 키 — 첫 누름 jellyAlt, 뗌 해제, 다음 첫 누름 jelly, 누름 유지 중 추가 누름은 교대(CR-066)·뗌은 class 변경 0건, 같은 노드', async () => {
     const { container } = await mount()
     const j = jelly(container)
     const seq: Array<[() => Promise<void>, string, string]> = [
       [() => key(true, 1), 'jellyWrap jellyAlt', 'u:kb_down_1'],
       [() => key(false, 0), 'jellyWrap', 'u:kb_up'],
       [() => key(true, 1), 'jellyWrap jelly', 'u:kb_down_2'],
+      [() => key(true, 2), 'jellyWrap jellyAlt', 'u:kb_down_0'],
     ]
     for (const [act_, cls, src] of seq) {
       await act_()
@@ -255,11 +257,8 @@ describe('젤리 클래스 교대 (design/functions.md §5.1 jellyClass, design.
       expect(kbImg(container).className).toBe('layer')
     }
     const mo = classWatch(j)
-    await key(true, 2)
-    expect(j.className).toBe('jellyWrap jelly')
-    expect(kbImg(container).getAttribute('src')).toBe('u:kb_down_0')
     await key(false, 1)
-    expect(j.className).toBe('jellyWrap jelly')
+    expect(j.className).toBe('jellyWrap jellyAlt')
     expect(kbImg(container).getAttribute('src')).toBe('u:kb_down_0')
     expect(mo.takeRecords()).toHaveLength(0)
     mo.disconnect()
@@ -272,7 +271,8 @@ describe('젤리 클래스 교대 (design/functions.md §5.1 jellyClass, design.
     loadedOnce()
   })
 
-  it('TC-155: 특수 키 새 누름마다 교대(다른 키 누른 채여도), 같은 특수 키 자동 반복·뗌은 class 변경 0건', async () => {
+  // CR-066: repeat 플래그 없는 같은 특수 키 재누름은 새 누름이라 교대한다(자동 반복 repeat:true는 부르르 — TC-169~173)
+  it('TC-155: 특수 키 새 누름마다 교대(다른 키 누른 채여도), 같은 특수 키 재누름(repeat 없음)도 교대(CR-066)·뗌은 class 변경 0건', async () => {
     const { container } = await mount()
     const j = jelly(container)
     const arm = container.querySelector('.armWrap') as HTMLElement
@@ -282,11 +282,11 @@ describe('젤리 클래스 교대 (design/functions.md §5.1 jellyClass, design.
     expect([j.className, kbImg(container).getAttribute('src')]).toEqual(['jellyWrap jelly', 'u:key_space'])
     await key(true, 3, 'enter')
     expect([j.className, kbImg(container).getAttribute('src')]).toEqual(['jellyWrap jellyAlt', 'u:key_enter'])
+    await key(true, 3, 'enter') // 재누름(repeat 없음) = 새 누름
+    expect([j.className, kbImg(container).getAttribute('src')]).toEqual(['jellyWrap jelly', 'u:key_enter'])
     const mo = classWatch(j)
-    await key(true, 3, 'enter') // 자동 반복
-    expect([j.className, kbImg(container).getAttribute('src')]).toEqual(['jellyWrap jellyAlt', 'u:key_enter'])
     await key(false, 2, 'enter')
-    expect([j.className, kbImg(container).getAttribute('src')]).toEqual(['jellyWrap jellyAlt', 'u:key_space'])
+    expect([j.className, kbImg(container).getAttribute('src')]).toEqual(['jellyWrap jelly', 'u:key_space'])
     expect(mo.takeRecords()).toHaveLength(0)
     mo.disconnect()
     await key(false, 0, null)

@@ -76,7 +76,8 @@ describe('특수 키 분류값·보조 함수 (design/functions.md §5.2)', () =
 })
 
 describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
-  it('TC-129: 규칙 1~3 — [] → 스페이스 누름 [space]·bounceSeq +1 → 스페이스 누른 채 a 누름: 목록·bounceSeq 그대로(프레임만 순환)', () => {
+  // CR-066: 새 누름(자동 반복 아님)은 다른 키를 누른 채여도 매번 bounceSeq +1 — CR-027 「이미 누르고 있으면 재생 안 함」 대체
+  it('TC-129: 규칙 1~3 — [] → 스페이스 누름 [space]·bounceSeq +1 → 스페이스 누른 채 a 누름: 목록 그대로·bounceSeq +1(CR-066)·프레임 순환', () => {
     let s = init()
     expect(view(s)).toEqual({ held: [], seq: 0, phase: null, kbDown: false, heldCount: 0 })
     s = run(s, key(true, 1, 'space'))
@@ -84,7 +85,7 @@ describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
     expect(currentSpecial(s)).toBe('space')
     expect(s.kbFrame).toBe(1)
     s = run(s, key(true, 2, null))
-    expect(view(s)).toEqual({ held: ['space'], seq: 1, phase: 1, kbDown: true, heldCount: 2 })
+    expect(view(s)).toEqual({ held: ['space'], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
     expect(currentSpecial(s)).toBe('space')
     expect(s.kbFrame).toBe(2)
   })
@@ -92,11 +93,11 @@ describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
   it('TC-130: 규칙 4·5 — 이어서 Enter 누름 [space, enter]·bounceSeq +1(다른 키 눌린 채 새 특수 키), Enter 뗌 [space]·bounceSeq 그대로', () => {
     let s = run(init(), key(true, 1, 'space'), key(true, 2, null))
     s = run(s, key(true, 3, 'enter'))
-    expect(view(s)).toEqual({ held: ['space', 'enter'], seq: 2, phase: 0, kbDown: true, heldCount: 3 })
+    expect(view(s)).toEqual({ held: ['space', 'enter'], seq: 3, phase: 1, kbDown: true, heldCount: 3 })
     expect(currentSpecial(s)).toBe('enter')
     expect(s.kbFrame).toBe(0)
     s = run(s, key(false, 2, 'enter'))
-    expect(view(s)).toEqual({ held: ['space'], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
+    expect(view(s)).toEqual({ held: ['space'], seq: 3, phase: 1, kbDown: true, heldCount: 2 })
     expect(currentSpecial(s)).toBe('space')
     expect(s.kbFrame).toBe(0)
   })
@@ -104,13 +105,13 @@ describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
   it('TC-131: 규칙 6·7 — 스페이스 뗌(a 눌림, heldCount 1) → [], kbDown 유지·bounceSeq 그대로, a 뗌(heldCount 0) → kbDown false·bouncePhase null', () => {
     let s = run(init(), key(true, 1, 'space'), key(true, 2, null), key(true, 3, 'enter'), key(false, 2, 'enter'))
     s = run(s, key(false, 1, 'space'))
-    expect(view(s)).toEqual({ held: [], seq: 2, phase: 0, kbDown: true, heldCount: 1 })
+    expect(view(s)).toEqual({ held: [], seq: 3, phase: 1, kbDown: true, heldCount: 1 })
     expect(currentSpecial(s)).toBeNull()
     s = run(s, key(false, 0, null))
-    expect(view(s)).toEqual({ held: [], seq: 2, phase: null, kbDown: false, heldCount: 0 })
+    expect(view(s)).toEqual({ held: [], seq: 3, phase: null, kbDown: false, heldCount: 0 })
   })
 
-  it('TC-132: 규칙 8·조건 ⓐⓑ — 모두 뗀 상태의 Z 누름은 ⓐⓑ 동시 참이어도 +1 한 번, 일반 키 첫 누름 +1(ⓐ), 누름 유지 중 일반 키·뗌은 그대로', () => {
+  it('TC-132: 규칙 8·조건 ⓐⓑ — 모두 뗀 상태의 Z 누름은 ⓐⓑ 동시 참이어도 +1 한 번, 일반 키 첫 누름 +1(ⓐ), 누름 유지 중 일반 키 +1(CR-066)·뗌은 그대로', () => {
     let s = run(init(), key(true, 1, 'z'))
     expect(view(s)).toEqual({ held: ['z'], seq: 1, phase: 1, kbDown: true, heldCount: 1 })
     s = run(s, key(false, 0, 'z'))
@@ -118,24 +119,25 @@ describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
     s = run(s, key(true, 1, null))
     expect(view(s)).toEqual({ held: [], seq: 2, phase: 0, kbDown: true, heldCount: 1 })
     s = run(s, key(true, 2, null))
-    expect(s.bounceSeq).toBe(2)
+    expect(s.bounceSeq).toBe(3)
     s = run(s, key(false, 1, null), key(false, 0, null))
-    expect(s.bounceSeq).toBe(2)
+    expect(s.bounceSeq).toBe(3)
   })
 
-  it('TC-133: 규칙 9 — 같은 특수 키 자동 반복 누름은 빼고 맨 뒤에 추가(중복 없음)·bounceSeq 그대로, 프레임은 누름마다 순환', () => {
+  // CR-066: repeat 플래그 없는 같은 특수 키 누름은 새 누름이다 — bounceSeq +1(진짜 자동 반복 repeat:true는 TC-161·TC-FIX66-3)
+  it('TC-133: 규칙 9 — 같은 특수 키 재누름(repeat 없음)은 빼고 맨 뒤에 추가(중복 없음)·bounceSeq +1(CR-066), 프레임은 누름마다 순환', () => {
     let s = run(init(), key(true, 1, 'space'))
     const frames: number[] = [s.kbFrame]
     for (let i = 0; i < 3; i++) {
       s = run(s, key(true, 1, 'space'))
       frames.push(s.kbFrame)
-      expect(view(s)).toEqual({ held: ['space'], seq: 1, phase: 1, kbDown: true, heldCount: 1 })
+      expect(view(s)).toEqual({ held: ['space'], seq: 2 + i, phase: (2 + i) % 2, kbDown: true, heldCount: 1 })
     }
     expect(frames).toEqual([1, 2, 0, 1])
     s = run(s, key(true, 2, 'enter'))
-    expect(view(s)).toEqual({ held: ['space', 'enter'], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
+    expect(view(s)).toEqual({ held: ['space', 'enter'], seq: 5, phase: 1, kbDown: true, heldCount: 2 })
     s = run(s, key(true, 2, 'space'))
-    expect(view(s)).toEqual({ held: ['enter', 'space'], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
+    expect(view(s)).toEqual({ held: ['enter', 'space'], seq: 6, phase: 0, kbDown: true, heldCount: 2 })
     expect(currentSpecial(s)).toBe('space')
   })
 
@@ -157,16 +159,16 @@ describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
     expect(view(s)).toEqual({ held: ['space'], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
   })
 
-  it('TC-136: 규칙 12·13 — Ctrl 누른 채 Z(undo) → [undo]·+1, 이어서 Ctrl+C(null) → 그대로. Ctrl → C만이면 [] 그대로·C는 재생 없음', () => {
+  it('TC-136: 규칙 12·13 — Ctrl 누른 채 Z(undo) → [undo]·+1, 이어서 Ctrl+C(null) → 목록 그대로·+1(CR-066). Ctrl → C만이면 [] 그대로·C도 재생(CR-066)', () => {
     let s = run(init(), key(true, 1, null))
     expect(s.bounceSeq).toBe(1)
     s = run(s, key(true, 2, 'undo'))
     expect(view(s)).toEqual({ held: ['undo'], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
     expect(currentSpecial(s)).toBe('undo')
     s = run(s, key(true, 3, null))
-    expect(view(s)).toEqual({ held: ['undo'], seq: 2, phase: 0, kbDown: true, heldCount: 3 })
+    expect(view(s)).toEqual({ held: ['undo'], seq: 3, phase: 1, kbDown: true, heldCount: 3 })
     const c = run(init(), key(true, 1, null), key(true, 2, null))
-    expect(view(c)).toEqual({ held: [], seq: 1, phase: 1, kbDown: true, heldCount: 2 })
+    expect(view(c)).toEqual({ held: [], seq: 2, phase: 0, kbDown: true, heldCount: 2 })
   })
 
   it('TC-137: mouseMove·mouseButton·tick은 specialHeld·bounceSeq 불변, 특수 키 누름은 쉬는중을 깨운다, 목록은 매번 새 배열(불변)', () => {

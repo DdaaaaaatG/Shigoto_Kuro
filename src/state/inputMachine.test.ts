@@ -88,3 +88,36 @@ describe('inputMachine', () => {
     expect(s.kbDown).toBe(true)
   })
 })
+
+// CR-066: 새 누름(자동 반복 아님)은 무엇을 누른 채여도 매번 바운스를 다시 시작한다 — CR-027 조건 대체
+describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
+  it('TC-FIX66-1: Shift 누른 채(held 1→2) 새 키 → bounceSeq +1', () => {
+    let s = reduce(createInitialState(0), key(true, 1, 10), config)
+    expect(s.bounceSeq).toBe(1)
+    s = reduce(s, key(true, 2, 20), config)
+    expect(s.bounceSeq).toBe(2)
+    expect(s.heldCount).toBe(2)
+  })
+
+  it('TC-FIX66-2: 펜 모드 클릭 누른 채 새 키 → bounceSeq +1', () => {
+    const pen: MachineConfig = { ...config, clickPress: true }
+    let s = reduce(
+      createInitialState(0),
+      { type: 'mouseButton', button: 'left', pressed: true, ts: 10 },
+      pen,
+    )
+    expect(s.bounceSeq).toBe(1)
+    expect(s.clickHeld).toEqual(['left'])
+    s = reduce(s, key(true, 1, 20), pen)
+    expect(s.bounceSeq).toBe(2)
+    expect(s.clickHeld).toEqual(['left'])
+  })
+
+  it('TC-FIX66-3: 자동 반복(repeat && pressed) → bounceSeq 불변, shiverSeq = bounceSeq', () => {
+    let s = reduce(createInitialState(0), key(true, 1, 10), config)
+    s = reduce(s, { ...key(true, 1, 510), repeat: true }, config)
+    expect(s.bounceSeq).toBe(1)
+    expect(s.shiverSeq).toBe(1)
+    expect(s.repeating).toBe(true)
+  })
+})

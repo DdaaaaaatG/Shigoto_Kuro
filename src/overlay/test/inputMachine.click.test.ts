@@ -161,7 +161,8 @@ describe('비펜 모드·모드 전환 (design.md §10.8 적용 조건·규칙�
 })
 
 describe('일반 키와 교차 (design.md §10.8 규칙표 4~7, design/functions.md §5.2 ⓐ isPressing·wrapMotion ②)', () => {
-  it('TC-208: 키 누른 채 클릭 → 프레임만(재생 없음), 키만 뗌 → 누름 유지, 버튼 뗌 → 해제, 클릭 누른 채 키 → 프레임만', () => {
+  // CR-066: 클릭 누른 채 새 키 누름은 바운스를 다시 시작한다(CR-027 「프레임만」 대체). 키 누른 채 클릭은 그대로 재생 없음
+  it('TC-208: 키 누른 채 클릭 → 프레임만(재생 없음), 키만 뗌 → 누름 유지, 버튼 뗌 → 해제, 클릭 누른 채 키 → 프레임+재생(CR-066)', () => {
     const r4a = run(PEN, s0(), key(true, 1, null, T0 + 10))
     expect(view(r4a)).toMatchObject({ kbFrame: 1, bounceSeq: 1, phase: 1 })
     const r4 = run(PEN, r4a, btn('left', true, T0 + 20))
@@ -177,8 +178,8 @@ describe('일반 키와 교차 (design.md §10.8 규칙표 4~7, design/functions
     const r7 = run(PEN, r7a, key(true, 1, null, T0 + 60))
     expect(r7.kbDown).toBe(true)
     expect(r7.heldCount).toBe(1)
-    expect(view(r7)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
-    // 대조: 비펜 모드에서 같은 순서면 키 누름이 첫 누름이라 재생된다
+    expect(view(r7)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 3, button: 'left', pressing: true, phase: 1, motion: 1 })
+    // 대조: 비펜 모드에서 같은 순서면 클릭은 세지 않고 키 누름만 재생된다
     const c7 = run(PLAIN, r6, btn('left', true, T0 + 50), key(true, 1, null, T0 + 60))
     expect(view(c7)).toMatchObject({ clickHeld: [], kbFrame: 1, bounceSeq: 2 })
   })

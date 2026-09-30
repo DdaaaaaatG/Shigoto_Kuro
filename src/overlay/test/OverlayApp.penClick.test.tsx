@@ -250,7 +250,8 @@ describe('펜 모드 클릭 = 누름 (design.md §10.8 규칙표 1·2·3·§10.1
 })
 
 describe('일반 키와 겹침 (design.md §10.8 규칙표 4~7)', () => {
-  it('TC-215: 키 누른 채 클릭 → 재생 없음, 키만 뗌 → 유지, 버튼 뗌 → pen_up, 클릭 누른 채 키 → 재생 없음 — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
+  // CR-066: 클릭 누른 채 새 키 누름은 젤리를 다시 시작한다(CR-027 「재생 없음」 대체). 키 누른 채 클릭은 그대로 재생 없음
+  it('TC-215: 키 누른 채 클릭 → 재생 없음, 키만 뗌 → 유지, 버튼 뗌 → pen_up, 클릭 누른 채 키 → 재생(CR-066) — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
     const { container } = await mount()
     const check = penChecker(container)
     await key(true, 1)
@@ -264,9 +265,9 @@ describe('일반 키와 겹침 (design.md §10.8 규칙표 4~7)', () => {
     await click('left', true) // 7
     check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await key(true, 1)
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await key(false, 0)
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await click('left', false)
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     expect(setSettings).not.toHaveBeenCalled()

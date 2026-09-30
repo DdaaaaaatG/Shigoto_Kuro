@@ -12,13 +12,15 @@
  * - 마우스 이동: 좌표 갱신 / 버튼: 누르는 동안만 button 유지
  * - 특수 키(CR-021, R-22): `specialHeld`가 지금 눌린 특수 키 분류값을 누른 순서로 담는다(길이 ≤ 7).
  *   키 정보는 이 분류값뿐이며 이력·횟수·시각은 남기지 않는다(design.md §10.6 기록 금지).
- * - 바운스(CR-021 추가 결정): `bounceSeq`는 모든 키가 떼진 상태의 첫 누름 또는 특수 키의 새 누름마다 +1되는
- *   신호일 뿐 어떤 키였는지는 담지 않는다. 렌더는 `bouncePhase`(짝홀)로 두 keyframe을 번갈아 재생한다.
+ * - 바운스(CR-021 추가 결정 · CR-066): `bounceSeq`는 새 키 누름(자동 반복 아님)마다 +1되는 신호일 뿐 어떤
+ *   키였는지는 담지 않는다 — 다른 키나 마우스 버튼을 누른 채여도 매번 다시 시작한다(CR-066이 CR-027의
+ *   「이미 누르고 있으면 재생 안 함」을 대체). 렌더는 `bouncePhase`(짝홀)로 두 keyframe을 번갈아 재생한다.
  * - 자동 반복(CR-023, R-24): `repeat && pressed`인 `key` 입력은 프레임·특수 키 목록·바운스 신호를 바꾸지 않고
  *   `repeating`만 켠다. `tick`은 마지막 반복 뒤 REPEAT_TIMEOUT_MS(500ms)가 지나면 `repeating`을 끈다(뗌 누락
  *   방어). 렌더는 `wrapMotion`(부르르 우선, 그 다음 `bouncePhase`)으로 젤리와 부르르 중 하나만 고른다.
  * - 펜 모드 클릭(CR-027, R-26): `config.clickPress`가 `true`(펜 모드)면 클릭 누름도 키 누름처럼 센다
- *   (`clickHeld`에 추가, `kbFrame` 순환, 아무것도 안 눌린 상태의 첫 누름만 바운스 재생 — `isPressing` 기준).
+ *   (`clickHeld`에 추가, `kbFrame` 순환, 클릭 누름은 아무것도 안 눌린 상태의 첫 누름만 바운스 재생 — `isPressing`
+ *   기준. 클릭을 누른 채 새로 누른 키는 CR-066에 따라 바운스를 다시 시작한다).
  *   뗌은 모드와 무관하게 항상 `clickHeld`에서 제거한다. 이 파일은 「펜」을 모른다 — 스위치 하나만 받는다.
  */
 import type { KeyboardInputEvent } from 'bridge/types'
@@ -182,18 +184,6 @@ const nextSpecialHeld = (
 }
 
 /**
- * 바운스 시작 조건(design/functions.md §5.2 ⓐⓑ, 갱신 전 state 기준) —
- * ⓐ 모든 키가 떼진 상태에서 첫 누름 ⓑ 특수 키가 새로 눌림(다른 키를 누르고 있어도)
- */
-const startsBounce = (state: MachineState, special: SpecialKey | null, held: number): boolean => {
-  // CR-027: 옛 `!state.kbDown`을 `!isPressing(state)`로 — 펜 모드에서 클릭 버튼을 누른 채 첫 키를
-  // 눌러도 이미 누르고 있는 것이라 재생하지 않는다(design/functions.md §5.2 ⓐ)
-  const firstPress = !isPressing(state) && held > 0
-  const newSpecial = special !== null && !state.specialHeld.includes(special)
-  return firstPress || newSpecial
-}
-
-/**
  * 자동 반복 누름(CR-023, design/functions.md §5.2 자동 반복 행) — `repeat && pressed`일 때만.
  * kbFrame·specialHeld 순서·bounceSeq는 바꾸지 않는다(젤리 재시작 없음). `specialHeld`는 held===0일 때만 비운다.
  */
@@ -226,7 +216,9 @@ const onKey = (
   const held = Math.max(0, heldCount)
   const frames = Math.max(1, config.kbFrames)
   const kbFrame = pressed ? (state.kbFrame + 1) % frames : state.kbFrame
-  const bounceSeq = pressed && startsBounce(state, special, held) ? state.bounceSeq + 1 : state.bounceSeq
+  // CR-066(design/functions.md §5.2 ⓐ): 새 누름(자동 반복은 위에서 걸렀다)은 다른 키·마우스 버튼을 누른 채여도
+  // 매번 바운스를 다시 시작한다 — CR-027의 `!isPressing(state)` 조건을 대체. 특수 키 새 누름(ⓑ)도 여기에 포함된다
+  const bounceSeq = pressed ? state.bounceSeq + 1 : state.bounceSeq
 
   return {
     ...woke,

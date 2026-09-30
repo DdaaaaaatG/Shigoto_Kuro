@@ -471,7 +471,8 @@ describe('P-2 키 입력 · P-3 시간 경과', () => {
     expect(getSettings).toHaveBeenCalledTimes(1)
   })
 
-  it('TC-100: 누름 유지 중 추가 누름 — 같은 키보드 img·.jellyWrap 노드, class 속성 변경 없음(젤리 재생 안 됨)', async () => {
+  // CR-066: 누름 유지 중 새 누름도 젤리를 다시 시작한다(CR-027 「재생 안 됨」 대체) — 키보드 img class는 그대로
+  it('TC-100: 누름 유지 중 추가 누름 — 같은 키보드 img·.jellyWrap 노드, 키보드 img class 변경 없음, 젤리는 짝 교대로 재시작(CR-066)', async () => {
     const { container } = await mount()
     await key(true, 1)
     const kbImg = container.querySelector('img[src^="u:kb_down_"]') as HTMLImageElement
@@ -481,7 +482,6 @@ describe('P-2 키 입력 · P-3 시간 경과', () => {
     expect(jelly.className).toBe('jellyWrap jellyAlt')
     const mo = new MutationObserver(() => undefined)
     mo.observe(kbImg, { attributes: true, attributeFilter: ['class'] })
-    mo.observe(jelly, { attributes: true, attributeFilter: ['class'] })
     await key(true, 2)
     const classChanges = mo.takeRecords()
     mo.disconnect()
@@ -489,7 +489,7 @@ describe('P-2 키 입력 · P-3 시간 경과', () => {
     expect(kbImg.getAttribute('src')).toBe('u:kb_down_2')
     expect(kbImg.className).toBe('layer')
     expect(container.querySelector('.jellyWrap')).toBe(jelly)
-    expect(jelly.className).toBe('jellyWrap jellyAlt')
+    expect(jelly.className).toBe('jellyWrap jelly')
     expect(classChanges).toHaveLength(0)
     expect(setSettings).not.toHaveBeenCalled()
   })
