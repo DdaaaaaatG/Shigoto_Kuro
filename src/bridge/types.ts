@@ -344,6 +344,36 @@ export interface Position {
   y: number
 }
 
+// ─── 프리셋 (v0.30, contract.md §3.11 — PS-01·05·06·07·09) ─────────────────
+/** 프리셋 목록 카드(PS-01·PS-09). savedAt = Unix ms(로컬 날짜로 표시는 ui 몫). id는 불투명 문자열. */
+export interface PresetSummary {
+  id: string
+  name: string
+  savedAt: number
+  imageCount: number
+  hasAlarm: boolean
+}
+
+/** 가져오기 파일별 문제(PS-06). code = 기존 asset.*·sound.* 또는 preset.file_missing·preset.file_link·
+ *  preset.missing_required·preset.io. fileName = 폴더 안 파일 이름(경로 없음). */
+export interface PresetProblem {
+  fileName: string
+  code: string
+}
+
+/** 불변식: preset !== null ⇔ problems.length === 0. 문제가 있으면 아무것도 등록되지 않았다. */
+export interface PresetImportReport {
+  preset: PresetSummary | null
+  problems: PresetProblem[]
+}
+
+export interface PresetExportResult {
+  folderName: string
+}
+
+/** Rust presets::NAME_MAX_CHARS와 1:1(U-7, v0.30). 앞뒤 공백 제거 후 1~50자, 제어 문자 금지(판정은 core). */
+export const PRESET_NAME_MAX = 50
+
 // ─── 규격 상수 (doc/000_프로젝트_확정사항.md §3) ───────────────────────────
 export const SCALE_MIN = 0.25
 export const SCALE_MAX = 2

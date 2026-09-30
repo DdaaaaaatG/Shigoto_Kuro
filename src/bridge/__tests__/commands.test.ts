@@ -23,7 +23,14 @@ import {
   pickAudioFile,
   pickFolder,
   pickPngFile,
+  applyPreset,
+  deletePreset,
+  exportPreset,
+  importPreset,
+  listPresets,
+  renamePreset,
   resetAppData,
+  savePreset,
   resetOverlayPosition,
   restoreDefaultAsset,
   setSettingsWindowTitle,
@@ -388,5 +395,63 @@ describe('bridge/commands — setSettingsWindowTitle(v0.14, D-6)', () => {
       code: 'unknown',
       message: '권한 없음',
     })
+  })
+})
+
+// contract.md §5.11 「테스트」 — 래퍼 7개는 정확한 command 이름·인자 객체로 invoke를 1회 부른다.
+describe('bridge/commands — 프리셋(v0.30)', () => {
+  beforeEach(() => {
+    mockedInvoke.mockReset()
+  })
+
+  const summary = { id: '1790000000000', name: 'A', savedAt: 1, imageCount: 2, hasAlarm: false }
+
+  it.each([
+    ['listPresets', () => listPresets(), 'list_presets', undefined, []],
+    ['savePreset', () => savePreset('A'), 'save_preset', { name: 'A' }, summary],
+    ['applyPreset', () => applyPreset('p1'), 'apply_preset', { id: 'p1' }, null],
+    [
+      'exportPreset',
+      () => exportPreset('p1', 'D:/out'),
+      'export_preset',
+      { id: 'p1', dir: 'D:/out' },
+      { folderName: 'A' },
+    ],
+    [
+      'importPreset',
+      () => importPreset('D:/in'),
+      'import_preset',
+      { dir: 'D:/in' },
+      { preset: null, problems: [{ fileName: 'kb_up.png', code: 'asset.not_rgba' }] },
+    ],
+    [
+      'renamePreset',
+      () => renamePreset('p1', 'B'),
+      'rename_preset',
+      { id: 'p1', name: 'B' },
+      summary,
+    ],
+    ['deletePreset', () => deletePreset('p1'), 'delete_preset', { id: 'p1' }, null],
+  ])(
+    '%s 는 %s 를 인자 객체로 1회 호출하고 반환을 그대로 resolve 한다',
+    async (_n, run, cmd, args, ret) => {
+      mockedInvoke.mockResolvedValueOnce(ret)
+      const result = await run()
+      expect(mockedInvoke).toHaveBeenCalledTimes(1)
+      expect(mockedInvoke).toHaveBeenCalledWith(cmd, args)
+      expect(result).toEqual(ret)
+    },
+  )
+
+  it('실패(preset.export_exists)는 BridgeError 형태 그대로 reject 된다', async () => {
+    const err = { code: 'preset.export_exists', message: '같은 이름의 폴더가 이미 있습니다.' }
+    mockedInvoke.mockRejectedValueOnce(err)
+    await expect(exportPreset('p1', 'D:/out')).rejects.toEqual(err)
+  })
+
+  it('실패(preset.forbidden)도 그대로 reject 된다', async () => {
+    const err = { code: 'preset.forbidden', message: '프리셋은 설정 창에서만 바꿀 수 있습니다.' }
+    mockedInvoke.mockRejectedValueOnce(err)
+    await expect(applyPreset('p1')).rejects.toEqual(err)
   })
 })

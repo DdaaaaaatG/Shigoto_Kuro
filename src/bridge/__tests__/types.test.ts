@@ -9,6 +9,7 @@ import {
   isMousePartSlot,
   isPenDownSlot,
   isRequiredSlot,
+  PRESET_NAME_MAX,
   slotKey,
   TIMER_ALARM_VOLUME_MAX,
   TIMER_COUNTDOWN_SECS_MAX,
@@ -19,6 +20,8 @@ import {
   TIMER_ROTATION_MIN,
   type AlarmSound,
   type AssetSlot,
+  type PresetImportReport,
+  type PresetSummary,
 } from '../types'
 
 // contract.md §3.1 「TS 슬롯 도우미」 v0.13 고정 테스트.
@@ -277,5 +280,24 @@ describe('AlarmSound (v0.23 신규, CR-048)', () => {
       url: 'http://asset.localhost/x/assets/alarm.mp3?v=1758870000000',
     }
     expect(sound.format).toBe('mp3')
+  })
+})
+
+describe('프리셋 타입(v0.30, §3.11)', () => {
+  it('PRESET_NAME_MAX는 Rust NAME_MAX_CHARS와 같은 50', () => {
+    expect(PRESET_NAME_MAX).toBe(50)
+  })
+
+  it('가져오기 보고서 JSON 형태(camelCase, preset null ⇔ problems 있음)', () => {
+    const rejected: PresetImportReport = JSON.parse(
+      '{"preset":null,"problems":[{"fileName":"kb_up.png","code":"asset.not_rgba"}]}',
+    )
+    expect(rejected.preset).toBeNull()
+    expect(rejected.problems[0]).toEqual({ fileName: 'kb_up.png', code: 'asset.not_rgba' })
+    const summary: PresetSummary = JSON.parse(
+      '{"id":"1790000000000","name":"고양이 A","savedAt":1790000000000,"imageCount":7,"hasAlarm":true}',
+    )
+    expect(summary.savedAt).toBe(1790000000000)
+    expect(summary.hasAlarm).toBe(true)
   })
 })

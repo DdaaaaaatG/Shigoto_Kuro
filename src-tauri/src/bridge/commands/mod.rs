@@ -25,6 +25,8 @@ use crate::tray::{self, autostart};
 use crate::window::{self, Point, ScreenBounds};
 use crate::AppState;
 
+pub mod presets;
+
 fn lock_settings<'a>(
     state: &'a State<'_, AppState>,
 ) -> Result<std::sync::MutexGuard<'a, Settings>, BridgeError> {
@@ -613,19 +615,30 @@ pub(crate) fn do_timer_config_side_effect(
 
 // ─── 데이터 초기화 ─────────────────────────────────────────────────────────
 
-/// (v0.26, SEC-002) `reset_app_data` 호출 창 제한 — contract.md §5.10 「호출 창 제한」.
+/// (v0.30, A-5) 호출 창 제한 공용 판정 — contract.md §5.11 「호출 창 제한 일반화」.
 /// tauri 타입을 받지 않는 순수 함수라 `#[cfg(test)]`에서 그대로 부른다(스킬 §10).
-/// `label`이 설정 창(`window::SETTINGS_LABEL`)과 정확히 같을 때만 `Ok`. message에 라벨·경로를
-/// 넣지 않는다(입력값을 그대로 실어 보내지 않는다).
-fn ensure_reset_caller(label: &str) -> Result<(), BridgeError> {
+/// `label`이 설정 창(`window::SETTINGS_LABEL`)과 정확히 같을 때만 `Ok`. 아니면 넘겨받은
+/// `code`·`message`로 거부한다. message에 라벨·경로를 넣지 않는다(입력값을 그대로 싣지 않는다).
+fn ensure_settings_caller(
+    label: &str,
+    code: &'static str,
+    message: &'static str,
+) -> Result<(), BridgeError> {
     if label == window::SETTINGS_LABEL {
         Ok(())
     } else {
-        Err(BridgeError::new(
-            "reset.forbidden",
-            "전체 초기화는 설정 창에서만 할 수 있습니다.",
-        ))
+        Err(BridgeError::new(code, message))
     }
+}
+
+/// (v0.26, SEC-002) `reset_app_data` 호출 창 제한 — contract.md §5.10 「호출 창 제한」.
+/// (v0.30) `ensure_settings_caller`에 위임만 한다 — code·문구·거부 조건 불변.
+fn ensure_reset_caller(label: &str) -> Result<(), BridgeError> {
+    ensure_settings_caller(
+        label,
+        "reset.forbidden",
+        "전체 초기화는 설정 창에서만 할 수 있습니다.",
+    )
 }
 
 /// [계약] contract.md §5·§5.10 reset_app_data [요구] R-B2, R-B3, R-A2 [에러] reset.forbidden,

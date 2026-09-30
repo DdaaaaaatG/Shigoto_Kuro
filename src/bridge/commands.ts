@@ -13,6 +13,9 @@ import type {
   BridgeError,
   ExportReport,
   Position,
+  PresetExportResult,
+  PresetImportReport,
+  PresetSummary,
   ScreenBounds,
   Settings,
   Point,
@@ -130,6 +133,22 @@ export const removeAlarmSound = () => call<void>('remove_alarm_sound')
  * `reset.forbidden`으로 거부된다.
  */
 export const resetAppData = () => call<void>('reset_app_data')
+
+// ─── 프리셋 (v0.30, contract.md §5.11 — settings 창 전용, list_presets 제외 6개는 다른 창이면 preset.forbidden) ─
+/** 저장된 프리셋 목록(savedAt 내림차순). 부수 효과 없음. */
+export const listPresets = () => call<PresetSummary[]>('list_presets')
+/** 지금 그림·알림음·설정 4필드를 새 프리셋으로 저장한다. 이벤트 없음 — 목록은 재조회. */
+export const savePreset = (name: string) => call<PresetSummary>('save_preset', { name })
+/** 프리셋을 통째로 적용한다. 새 상태는 반환값이 아니라 settings://changed·assets://changed 등 이벤트로 받는다. */
+export const applyPreset = (id: string) => call<void>('apply_preset', { id })
+/** dir(절대 경로 — pickFolder 결과) 아래 새 폴더로 내보낸다. */
+export const exportPreset = (id: string, dir: string) =>
+  call<PresetExportResult>('export_preset', { id, dir })
+/** 폴더를 검증해 새 프리셋으로 등록한다. 파일별 문제는 reject가 아니라 report.problems. */
+export const importPreset = (dir: string) => call<PresetImportReport>('import_preset', { dir })
+export const renamePreset = (id: string, name: string) =>
+  call<PresetSummary>('rename_preset', { id, name })
+export const deletePreset = (id: string) => call<void>('delete_preset', { id })
 
 const PICK_PNG_DEFAULT_TITLE = 'PNG 이미지 선택'
 

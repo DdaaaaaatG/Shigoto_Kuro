@@ -47,6 +47,9 @@ pub use crate::assets::sound::{AlarmFormat, AlarmSound};
 pub use crate::assets::{AssetEntry, AssetManifest, AssetSlot, CanvasSize, SimpleSlot};
 pub use crate::error::BridgeError;
 pub use crate::hook::SpecialKey;
+pub use crate::presets::{
+    PresetExportResult, PresetImportReport, PresetProblem, PresetSummary, NAME_MAX_CHARS,
+};
 pub use crate::settings::timer::TimerMode;
 pub use crate::settings::{Language, MouseSettings, OverlaySettings, Settings, TimerSettings};
 pub use crate::timer::{TimerAction, TimerSnapshot, TimerStatus};
@@ -88,6 +91,15 @@ impl From<crate::assets::sound::SoundError> for BridgeError {
 /// `Seed` → `reset.seed` / `Settings(e)` → `e.code()` 그대로(`state.poisoned`·`settings.io` 등).
 impl From<crate::data_reset::ResetError> for BridgeError {
     fn from(e: crate::data_reset::ResetError) -> Self {
+        BridgeError::new(e.code(), e.to_string())
+    }
+}
+
+/// (v0.30, PS-01~PS-09) `crate::presets::PresetError` → `BridgeError`(계약 §6.1 — 위와 같은 이유로
+/// 이 파일에 둔다). code는 core `code()` 그대로(`Settings{source}` 변형은 `SettingsError` code 위임),
+/// message는 core `Display`(경로·OS 원문 없음).
+impl From<crate::presets::PresetError> for BridgeError {
+    fn from(e: crate::presets::PresetError) -> Self {
         BridgeError::new(e.code(), e.to_string())
     }
 }

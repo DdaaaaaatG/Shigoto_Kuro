@@ -470,3 +470,20 @@ fn ensure_reset_caller_allows_settings_only() {
         }
     }
 }
+
+/// contract.md §5.11 「호출 창 제한 일반화」 — `ensure_settings_caller`: `"settings"` → `Ok`, 그 밖은
+/// 넘긴 code·message로 거부하고 message에 입력 라벨이 섞이지 않는다.
+#[test]
+fn ensure_settings_caller_table() {
+    assert!(ensure_settings_caller("settings", "x.forbidden", "거부").is_ok());
+
+    for label in ["overlay", "", "Settings", "settings "] {
+        let err = ensure_settings_caller(label, "x.forbidden", "거부")
+            .expect_err("설정 창이 아니면 거부해야 한다");
+        assert_eq!(err.code, "x.forbidden");
+        assert_eq!(err.message, "거부");
+        if !label.is_empty() {
+            assert!(!err.message.contains(label));
+        }
+    }
+}
