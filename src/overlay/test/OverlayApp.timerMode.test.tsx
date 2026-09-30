@@ -5,7 +5,9 @@
  *   requirements R-37~R-39·§2 S-19·S-20.
  * 대상: src/overlay/index.tsx(OverlayApp, 불변) + TimerText(개정)·useAlarmOnFinish·alarmSound·timerClock(CR-050) — 구현 전 red(정상).
  * bridge mock(vi.mock 'bridge/commands'·'bridge/events') — 실제 Tauri API import 없음. core의 카운트다운 판정(0 도달·10초 뒤 stopped)은
- *   흉내 내지 않는다: 테스트가 core가 보냈을 timer://changed를 직접 넣는다. Audio는 전역 스텁(FakeAudio), URL.createObjectURL stub.
+ *   흉내 내지 않는다: 테스트가 core가 보냈을 timer://changed를 직접 넣는다. Audio는 전역 스텁(FakeAudio).
+ *   (CR-058, doc-sync 2026-09-30) 기본음은 번들 mp3 자산 URL(src/components/utils/alarmSound.ts `defaultAlarmUrl`)이라
+ *   옛 URL.createObjectURL stub은 삭제했다 — 어떤 코드도 부르지 않고 어떤 TC도 관찰하지 않았다(기대 불변).
  *   가짜 시계(performance 포함). 실제 sleep 없음.
  * 시나리오: src/overlay/test/scenarios.md TC-307 ~ TC-309, TC-313(음량 배선 — TimerSettings.alarmVolume → alarmGain → Audio.volume)
  */
@@ -172,7 +174,6 @@ const advance = async (ms: number) => {
 const pomo = (c: HTMLElement) => c.querySelector('.pomodoro') as HTMLElement | null
 const textEl = (c: HTMLElement) => c.querySelector('.pomodoro > div') as HTMLElement
 
-let origCreate: unknown
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'setTimeout', 'clearTimeout', 'Date', 'performance'] })
   vi.setSystemTime(T0)
@@ -180,8 +181,6 @@ beforeEach(() => {
   for (const k of Object.keys(h.handlers)) delete h.handlers[k]
   fa.instances = []
   vi.stubGlobal('Audio', FakeAudio)
-  origCreate = (URL as unknown as { createObjectURL?: unknown }).createObjectURL
-  Object.defineProperty(URL, 'createObjectURL', { value: vi.fn(() => 'blob:default'), configurable: true, writable: true })
   vi.mocked(getSettings).mockResolvedValue(withTimer(CD_ON))
   vi.mocked(getAssetManifest).mockResolvedValue(M_NONE)
   vi.mocked(getMonitors).mockResolvedValue(MONITORS)
@@ -195,7 +194,6 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   vi.unstubAllGlobals()
-  Object.defineProperty(URL, 'createObjectURL', { value: origCreate, configurable: true, writable: true })
   vi.restoreAllMocks()
 })
 

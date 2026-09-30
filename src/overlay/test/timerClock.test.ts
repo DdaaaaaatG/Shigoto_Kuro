@@ -1,8 +1,9 @@
 /**
  * 뽀모도 타이머 공용 유틸 TC — CR-045(R-34·R-35·R-36) + CR-050(R-37·R-38, 타이머 모드).
  * 근거: design.md §10.14 14.4(nowMs·elapsedNow·formatElapsed·timerTextStyle)·14.8 ①, design/functions.md §5.6,
- *   contract v0.21 §5.8-2(표시식 — 계약은 식만 고정), requirements R-34(표기 00:00:00, 기본 268,403·5°·36px·#333333,
- *   Segoe UI 굵게·등폭 숫자).
+ *   contract v0.21 §5.8-2(표시식 — 계약은 식만 고정), requirements R-34(표기 00:00:00, 글자 기본 (268,402)·7°·36px·#333333
+ *   — CR-058 🔒 0.4.0 기본 세트, Segoe UI 굵게·등폭 숫자). 아래 `DEF`(268,403·5°)는 식 검증용 픽스처일 뿐 제품 기본값을
+ *   단언하지 않는다(제품 기본값 단언은 TC-286 ② `DEFAULT_TIMER_SETTINGS` — doc-sync 2026-09-30 주석 정정, 기대 불변).
  *   CR-050: design.md §10.15 15.1(표시 규칙 표 1~8행), design/functions.md §5.7 ①(snapshotMode·timerDisplayMs·
  *   formatRemaining·timerText·isTimerBlinking), contract v0.23 §3.9(TimerSnapshot mode?·durationMs? — 없으면 'stopwatch'·0).
  * 대상: src/components/utils/timerClock.ts(CR-050 함수 5개는 구현 전이라 import 실패로 이 파일 전체가 red — 정상).

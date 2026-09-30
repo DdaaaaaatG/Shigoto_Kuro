@@ -375,7 +375,8 @@ describe('AlarmSoundCard — 미리 듣기 (R-53·R-54, §14.7.3 onPreview·stop
 })
 
 describe('AlarmSoundCard — 음량 (R-54, §14.7.3 commitVolume · useSliderDraft · T-16)', () => {
-  it('TC-283(카드): 0 ~ 100·step 1·기본 80%, 끄는 동안 {n}% 만·저장 0회, 놓을 때 onCommitVolume 1회(정수), 같은 값 0회, 키 이동 300ms 뒤 1회(가짜 시계), blur 즉시', async () => {
+  // 음량 80 은 명시 픽스처(props)다. 현행 기본 음량은 44(단일 소스 DEFAULT_ALARM_VOLUME — CR-059·CR-060), 기본값 표시는 TimerTab TC-283(탭)·TC-249에서 판정.
+  it('TC-283(카드): 0 ~ 100·step 1·픽스처 80% 표시(현행 기본 44 = DEFAULT_ALARM_VOLUME), 끄는 동안 {n}% 만·저장 0회, 놓을 때 onCommitVolume 1회(정수), 같은 값 0회, 키 이동 300ms 뒤 1회(가짜 시계), blur 즉시', async () => {
     const { update } = await mount(80)
     // ⓐ 초기
     expect(vol()).toHaveAttribute('min', '0')

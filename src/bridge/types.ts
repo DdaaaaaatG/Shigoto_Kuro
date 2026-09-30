@@ -1,5 +1,5 @@
 /**
- * bridge 계약 타입 (v0.21) — doc/200_설계/bridge/contract.md 와 src-tauri/src/bridge/types.rs 의 TS 쪽 거울.
+ * bridge 계약 타입 (v0.29) — doc/200_설계/bridge/contract.md 와 src-tauri/src/bridge/types.rs 의 TS 쪽 거울.
  * 셋 중 하나가 바뀌면 나머지도 같은 패스에서 맞춘다(bridge-implementer 소관).
  * Rust 쪽은 #[serde(rename_all = "camelCase")] 이므로 여기 필드명은 전부 camelCase.
  */
@@ -19,11 +19,11 @@ export type SimpleAssetSlot =
   | 'pen_key_space' | 'pen_key_z' | 'pen_key_question'    // 특수 키 = 'pen_key_' + SpecialKey(§3.7)
   | 'pen_key_exclamation' | 'pen_key_enter' | 'pen_key_backspace'
   | 'pen_key_undo'
-  // (v0.17, CR-037) 머리카락 — 캔버스 레이어, 선택. v0.20~v0.22: 내장 기본 없음. v0.23(CR-053)부터
-  // 다시 내장 기본 있음(hasBuiltinDefault('hair') === true, 배포용 기본 세트 3차).
+  // (v0.17, CR-037) 머리카락 — 캔버스 레이어, 선택. v0.29부터 내장 기본 없음(0.4.0 유지,
+  // hasBuiltinDefault('hair') === false).
   | 'hair'
   // (v0.21, CR-045 · PT-01) 뽀모도 인물·말풍선 — 캔버스 레이어, 선택. 각 1장 고정.
-  // pomo_char는 v0.23(CR-053)부터 내장 기본 있음. pomo_bubble은 내장 기본 없음(변경 없음).
+  // pomo_char는 v0.24(CR-053)부터 내장 기본 있음. pomo_bubble은 내장 기본 없음(변경 없음).
   | 'pomo_char' | 'pomo_bubble'
 
 export interface KbDownSlot {
@@ -66,16 +66,16 @@ export const isRequiredSlot = (slot: AssetSlot): boolean =>
   REQUIRED_SLOTS.some(r => slotKey(r) === slotKey(slot))
 
 /**
- * (v0.23, CR-053 · 🔒 사용자 확정 · 배포용 기본 세트 3차) 내장 기본 그림이 있는 슬롯 7개. 원본은 Rust
+ * (v0.29 · 🔒 사용자 결정 2026-09-30) 내장 기본 그림이 있는 슬롯 6개. 원본은 Rust
  * `assets::defaults::DEFAULT_ASSETS`(순서 동일) — 이 배열은 사본이라 항목·순서 불일치는 bridge 결함.
- * 순서: 캔버스 레이어(kb_up → background → hair → pomo_char) → mouse_base → pen_up → pen_down_0.
- * v0.20~v0.22: 6개(hair 제외, kb_down_0 포함). v0.18~v0.19: 7개(hair 포함, kb_down_0도 포함).
- * v0.17까지 15개(idle·rest·key_* 7종 포함). CR-053부터 kb_down_0은 다시 내장 기본 없음.
+ * 순서: 캔버스 레이어(kb_up → background → pomo_char) → mouse_base → pen_up → pen_down_0.
+ * 이력: hair는 v0.29(0.4.0~)부터 제외. v0.24~v0.28: 7개(hair 포함). v0.20~v0.22: 6개(hair 제외,
+ * kb_down_0 포함). v0.18~v0.19: 7개(hair·kb_down_0 포함). v0.17까지 15개(idle·rest·key_* 7종 포함).
+ * CR-053부터 kb_down_0은 내장 기본 없음.
  */
 export const DEFAULT_ASSET_SLOTS: readonly AssetSlot[] = [
   'kb_up',
   'background',
-  'hair',
   'pomo_char',
   'mouse_base',
   'pen_up',
@@ -154,28 +154,28 @@ export interface MouseSettings {
    */
   area: [Point, Point, Point, Point]
   /**
-   * (v0.8, OV-R-18) 마우스 파츠 그림(mouse_base·mouse_left·mouse_right 공통, 같은 크기·같은 위치)의
-   * 왼쪽 위 모서리를 놓는 캔버스 좌표. 전체 캔버스 크기 그림이면 {0,0}. 기본 {x:389, y:492}.
+   * (v0.8, OV-R-18) 마우스 파츠 그림(mouse_base·mouse_left·mouse_right 공통 위치, 크기는 자유 — CR-036)의
+   * 왼쪽 위 모서리를 놓는 캔버스 좌표. 전체 캔버스 크기 그림이면 {0,0}. 기본 {x:411, y:464}(v0.20~, CR-044).
    * 손 기준점(§3.6) 재계산의 입력. 검증 없음(범위·캔버스 안 여부 검사 안 함).
    */
   partPos: Point
   /**
    * 회전 기준점의 폴백(캔버스 좌표, CR-007). 1순위는 자동 계산(getHandAnchor,
-   * §3.6), 그것이 null일 때만 이 값을, 이것도 null이면 패드 중심을 쓴다.
+   * §3.6), 그것이 null일 때만 이 값을, 이것도 null이면 이동 영역 중심(v0.9)을 쓴다.
    */
   hand: Point | null
   /**
    * (v0.13, CR-024 · OV-R-25 · ST-R-18) 캔버스 좌표. 펜 쥔 손 그림(pen_up·pen_down_N·pen_key_* 공통)의
    * 왼쪽 위 모서리를 놓는 자리 — 쉬는 자세(팔 회전 0°·늘어남 없음) 기준. null = 아직 놓지 않음
    * (옛 settings.json 호환 경로 — pen_up 첫 등록 때 ui가 기본 위치를 정해 set_settings로 저장).
-   * (v0.16, CR-035 · DA-07 · 🔒 U-2 = B) 기본 {x:380, y:496}(v0.15까지 null) — 기본 세트 pen_up
+   * (v0.16, CR-035 · DA-07 · 🔒 U-2 = B) 기본 {x:372, y:476}(v0.15까지 null, v0.16~v0.19는 {380,496} 등에서 조정 — 현재값은 CR-044) — 기본 세트 pen_up
    * 자리. 검증 없음. 필수 필드(penPos? 아님) — Rust가 항상 키를 보낸다.
    */
   penPos: Point | null
   /**
    * (v0.15, CR-033) 펜 손 사용 토글. true = 키보드 입력(·클릭) 때 펜 손 그림 교체 +
    * 키보드 레이어 kb_up 고정. false = pen_up 그림은 팔 끝에 붙어 따라다니되 바뀌지 않고
-   * 키보드 그림은 기존대로. 기본 false. 필수 필드(penMode? 아님) — Rust가 항상 키를 보낸다.
+   * 키보드 그림은 기존대로. 기본 true(v0.18~). 필수 필드(penMode? 아님) — Rust가 항상 키를 보낸다.
    */
   penMode: boolean
 }

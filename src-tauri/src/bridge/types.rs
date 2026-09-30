@@ -1,4 +1,4 @@
-//! bridge 계약 타입 표면 (v0.17 — contract.md §3).
+//! bridge 계약 타입 표면 (v0.28 — contract.md §3).
 //!
 //! 타입의 정의는 각 core 모듈이 소유하고(단일 정의), 여기서는 계약에 노출되는 것만 재수출한다.
 //! TS 거울: src/bridge/types.ts. 문서: doc/200_설계/bridge/contract.md.
@@ -16,9 +16,9 @@
 //! | AssetSlot(`background` 포함, v0.6; 특수 키 7종, v0.11; 펜 쥔 손 8종+순번, v0.13 CR-024) | assets::AssetSlot | `"background"`/`"body"` … / `{"kind":"kb_down","index":N}` / `{"kind":"pen_down","index":N}` |
 //! | AssetEntry / AssetManifest / CanvasSize | assets::* | camelCase |
 //! | ExportReport / ExportFailure(v0.16, CR-035 · DA-05) | assets::export::* | camelCase, 반환 전용(Deserialize 없음) |
-//! | Settings(v0.14: `language`·`positionLock`·`showInTaskbar` 추가, SV2-02~04; v0.21: `timer: TimerSettings` 추가, CR-045) / OverlaySettings / MouseSettings(v0.13: `penPos: Option<Point>` 추가, CR-024; v0.15: `penMode: bool` 추가, CR-033; v0.16: `penPos` 기본값 `None`→`Some(380,496)`, DA-07) / TimerSettings(v0.21, CR-045) / Point / Language(v0.14) | settings::* | camelCase (v0.10: `SlamSettings`·`Settings.slam` 삭제, v0.9: `Rect` 삭제, `MouseSettings.area: [Point; 4]`) |
+//! | Settings(v0.14: `language`·`positionLock`·`showInTaskbar` 추가, SV2-02~04; v0.21: `timer: TimerSettings` 추가, CR-045) / OverlaySettings / MouseSettings(v0.13: `penPos: Option<Point>` 추가, CR-024; v0.15: `penMode: bool` 추가, CR-033; v0.16: `penPos` 기본값 `None`→`Some(380,496)`, DA-07; 현재 `penPos` 기본 `Some(372,476)`, v0.18부터 `penMode` 기본 `true`) / TimerSettings(v0.21, CR-045) / Point / Language(v0.14) | settings::* | camelCase (v0.10: `SlamSettings`·`Settings.slam` 삭제, v0.9: `Rect` 삭제, `MouseSettings.area: [Point; 4]`) |
 //! | TimerStatus / TimerSnapshot / TimerAction(v0.21, CR-045) | timer::* | camelCase — `TimerStatus`는 `"restPaused"`(여러 단어도 camelCase, snake_case 아님) |
-//! | ScreenBounds / Point(i32, = 계약 Position) | window::* | camelCase |
+//! | ScreenBounds / WindowPoint(= `window::Point`, i32, = 계약 Position) | window::* | camelCase |
 //! | BridgeError | error::BridgeError | `{code, message}` |
 //! | KeyboardPayload / MouseMovePayload / MouseButtonPayload / HandAnchorPayload(v0.3) | events::* | camelCase |
 //! | SpecialKey(v0.11, CR-021) | hook::SpecialKey | `"space"` … `"backspace"`/`"undo"` |

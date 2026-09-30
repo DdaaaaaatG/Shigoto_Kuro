@@ -68,12 +68,12 @@ const slotSpecs = (m: AssetManifest) =>
     .filter((c): c is SlotCardSpec => c.type === 'slot')
 
 /**
- * 내장 기본 7장 파일명 — CR-053(확정사항 CR-053 줄 3차, contract v0.24: hair·pomo_char 추가, kb_down_0 제외.
- * CR-044 6장 · CR-038 7장(kb_down_0·hair) · CR-035 15장 대체). bridge 상수 DEFAULT_ASSET_SLOTS 를 베끼지 않은 리터럴(독립 대조).
+ * 내장 기본 6장 파일명 — v29(사용자 결정 2026-09-30 🔒 「뒷머리 기본 그림 없음(0.4.0 유지)」, contract v0.29: CR-053 7장에서 hair 제외.
+ * CR-053 7장 · CR-044 6장(kb_down_0 포함) · CR-038 7장 · CR-035 15장 대체). bridge 상수 DEFAULT_ASSET_SLOTS 를 베끼지 않은 리터럴(독립 대조).
+ * v29 개정 TC: TC-133·TC-177·TC-178(픽스처 연동 6장)·TC-192·TC-232 — hair = 단일 비우기 칸(resetKind clear, canReset = 등록),
+ * EMPTYABLE_SLOT_KEYS = ['pomo_char'](hair emptyable·canEmpty 늘 false). scenarios.md 「v29 개정」 절.
  */
-const DEFAULT_FILES = ['kb_up', 'background', 'hair', 'pomo_char', 'mouse_base', 'pen_up', 'pen_down_0'].map(
-  k => `${k}.png`,
-)
+const DEFAULT_FILES = ['kb_up', 'background', 'pomo_char', 'mouse_base', 'pen_up', 'pen_down_0'].map(k => `${k}.png`)
 /**
  * CR-038 기본 7장(kb_down_0·hair 포함)이 채워진 매니페스트 — 이제는 「사용자가 kb_down_0 을 넣은 설치」 예로만 쓴다
  * (필수 판정 TC-229). CR-053 첫 실행 매니페스트는 FIRST7.
@@ -90,13 +90,15 @@ const DEFAULT7: AssetManifest = {
     entry(penDown(0), 136, 196),
   ],
 }
-/** CR-053 첫 실행(시딩 7장 — kb_down_0 없음, mouse_base 168×150·pen_down_0 143×189) */
+/**
+ * 첫 실행(시딩) 매니페스트 — v29 6장(hair·kb_down_0 없음, mouse_base 168×150·pen_down_0 143×189).
+ * 이름 FIRST7 은 CR-053(7장) 때 붙인 것 — 개수만 옛 표기(W-8 관례, 판정과 무관).
+ */
 const FIRST7: AssetManifest = {
   canvas: CANVAS,
   entries: [
     entry('kb_up'),
     entry('background'),
-    entry('hair'),
     entry('pomo_char'),
     entry('mouse_base', 168, 150),
     entry('pen_up', 143, 189),
@@ -164,12 +166,20 @@ describe('imageSlots (images-tab.md §3)', () => {
     const bg = slotCard(KB3, 'background', 'background', null)
     expect(bg).toMatchObject({ required: false, resetKind: 'restore', canReset: true, lastOnlyBlocked: false, n: null })
     expect(bg.entry).toBeUndefined()
-    // CR-053: hair·pomo_char 는 내장 기본이 생겨 복원 칸 — 미등록이어도 canReset true(CR-044·CR-045 기대 clear·false 대체)
-    for (const key of ['hair', 'pomo_char'] as const) {
-      const s = slotCard(KB3, key, key, null)
-      expect(s, key).toMatchObject({ required: false, resetKind: 'restore', canReset: true, lastOnlyBlocked: false, n: null })
-      expect(s.entry, key).toBeUndefined()
-    }
+    // CR-053: pomo_char 는 내장 기본이 있어 복원 칸 — 미등록이어도 canReset true(CR-045 기대 clear·false 대체)
+    const pomo = slotCard(KB3, 'pomo_char', 'pomo_char', null)
+    expect(pomo).toMatchObject({ required: false, resetKind: 'restore', canReset: true, lastOnlyBlocked: false, n: null })
+    expect(pomo.entry).toBeUndefined()
+    // v29(사용자 결정 2026-09-30 🔒, contract v0.29): hair 는 내장 기본이 없어 단일 비우기 칸 — 미등록이면 canReset false
+    // (CR-053 「restore·true」 대체, CR-044 기대로 복귀)
+    const hair = slotCard(KB3, 'hair', 'hair', null)
+    expect(hair).toMatchObject({ required: false, resetKind: 'clear', canReset: false, lastOnlyBlocked: false, n: null })
+    expect(hair.entry).toBeUndefined()
+    expect(slotCard({ ...KB3, entries: [...KB3.entries, entry('hair')] }, 'hair', 'hair', null)).toMatchObject({
+      resetKind: 'clear',
+      canReset: true, // 등록되면 「기본값」(= 비우기) 활성
+      lastOnlyBlocked: false,
+    })
     // pomo_bubble 은 변경 없음 — 비우기 칸, 미등록이면 false
     expect(slotCard(KB3, 'pomo_bubble', 'pomo_bubble', null)).toMatchObject({ resetKind: 'clear', canReset: false })
     const emptyDown = slotCard(EMPTY, kbDown(0), 'kb_down', 0)
@@ -272,16 +282,17 @@ describe('imageSlots (images-tab.md §3)', () => {
       canReset: true,
       lastOnlyBlocked: false,
     })
-    // 예 4: 빈 매니페스트의 복원 칸 7개·비우기 칸 5개
-    // (CR-053: hair·pomo_char 는 비우기 → 복원, kb_down_0 은 복원 → 비우기, pomo_bubble 은 비우기 그대로)
-    for (const key of ['pen_up', 'pen_down_0', 'mouse_base', 'kb_up', 'background', 'hair', 'pomo_char']) {
+    // 예 4: 빈 매니페스트의 복원 칸 6개·비우기 칸 6개
+    // (CR-053: pomo_char 는 비우기 → 복원, kb_down_0 은 복원 → 비우기, pomo_bubble 은 비우기 그대로
+    //  · v29: hair 는 복원 → 비우기 — CR-053 「복원 칸 7개·비우기 칸 5개」 대체)
+    for (const key of ['pen_up', 'pen_down_0', 'mouse_base', 'kb_up', 'background', 'pomo_char']) {
       expect(emptySpec(key), key).toMatchObject({ resetKind: 'restore', canReset: true, lastOnlyBlocked: false })
     }
-    for (const key of ['mouse_right', 'key_space', 'idle', 'kb_down_0', 'pomo_bubble']) {
+    for (const key of ['mouse_right', 'key_space', 'idle', 'kb_down_0', 'pomo_bubble', 'hair']) {
       expect(emptySpec(key), key).toMatchObject({ resetKind: 'clear', canReset: false, lastOnlyBlocked: false })
     }
     expect(emptySpec('pen_key_space')).toBeUndefined() // CR-042: 손 특수 키 카드 없음(옛 비우기 칸 예)
-    // resetKind 의 출처는 bridge 상수 — 20장 모두 hasBuiltinDefault 와 일치, 복원 칸 7장(CR-053, CR-044 6장·CR-038 7장·옛 15장)
+    // resetKind 의 출처는 bridge 상수 — 20장 모두 hasBuiltinDefault 와 일치, 복원 칸 6장(v29, CR-053 7장·CR-044 6장·CR-038 7장·옛 15장)
     const all = buildSlotGroups(EMPTY)
       .flatMap(g => g.cards)
       .filter((c): c is SlotCardSpec => c.type === 'slot')
@@ -290,9 +301,9 @@ describe('imageSlots (images-tab.md §3)', () => {
     expect(all.filter(c => c.resetKind === 'restore').map(c => `${c.key}.png`).sort()).toEqual([...DEFAULT_FILES].sort())
   })
 
-  it('TC-178 (CR-038·CR-044·CR-053 픽스처 연동): exportResult — 실패 없음 = done(written 수), 실패 있음 = partial(ok·실패 파일명), 충돌 판정은 하지 않는다', () => {
+  it('TC-178 (CR-038·CR-044·CR-053·v29 픽스처 연동): exportResult — 실패 없음 = done(written 수), 실패 있음 = partial(ok·실패 파일명), 충돌 판정은 하지 않는다', () => {
     const done: ExportReport = { written: DEFAULT_FILES, conflicts: [], failed: [] }
-    expect(exportResult(done)).toStrictEqual({ kind: 'done', count: 7 }) // CR-053: 내장 기본 7장(CR-044 6 · CR-038 7 · 옛 15)
+    expect(exportResult(done)).toStrictEqual({ kind: 'done', count: 6 }) // v29: 내장 기본 6장(CR-053 7 · CR-044 6 · CR-038 7 · 옛 15)
     const partial: ExportReport = {
       written: ['a.png'],
       conflicts: [],
@@ -304,9 +315,10 @@ describe('imageSlots (images-tab.md §3)', () => {
   })
 
   // ─── CR-037 · R-34 헤어(뒷머리) — images-tab §3 buildSlotGroups ①·검증 예 · §15.1(CR-053) ───
-  // CR-038: 복원 칸 → CR-044: 비우기 칸(M-2 emptyable false) → CR-053: 다시 복원 칸 + 「비우기」 칸(emptyable true, canEmpty = 등록).
-  it('TC-192 (CR-038·CR-042·CR-043·CR-044·CR-053 개정): 배경 그룹 = [background, hair, pomo_char, pomo_bubble] — hair 는 단일·선택·복원 칸(내장 기본 있음)·「비우기」 칸, canReset 늘 true, emptyable true·canEmpty = 등록, 다른 그룹 불변', () => {
-    expect(hasBuiltinDefault('hair')).toBe(true) // bridge 상수(v0.24, CR-053 — CR-044 v0.20 false 대체) — 화면이 다시 적지 않는다
+  // CR-038: 복원 칸 → CR-044: 비우기 칸(M-2 emptyable false) → CR-053: 다시 복원 칸 + 「비우기」 칸 →
+  // v29(사용자 결정 2026-09-30 🔒, contract v0.29): 다시 단일 비우기 칸(내장 기본 없음, emptyable·canEmpty 늘 false).
+  it('TC-192 (CR-038·CR-042·CR-043·CR-044·CR-053·v29 개정): 배경 그룹 = [background, hair, pomo_char, pomo_bubble] — hair 는 단일·선택·비우기 칸(내장 기본 없음), canReset = 등록, emptyable·canEmpty 늘 false(셋째 버튼 없음), 다른 그룹 불변', () => {
+    expect(hasBuiltinDefault('hair')).toBe(false) // bridge 상수(v0.29, v29 — CR-053 v0.24 true 대체) — 화면이 다시 적지 않는다
     // ① 빈 매니페스트
     const emptyGroups = buildSlotGroups(EMPTY)
     expect(emptyGroups[0].id).toBe('background')
@@ -319,11 +331,11 @@ describe('imageSlots (images-tab.md §3)', () => {
       n: null,
       entry: undefined,
       required: false,
-      resetKind: 'restore', // CR-053: CR-044 'clear' 대체
-      canReset: true, // 복원 칸 — 빈 칸이어도 활성
+      resetKind: 'clear', // v29: CR-053 'restore' 대체
+      canReset: false, // 비우기 칸 — 비울 것이 없다
       lastOnlyBlocked: false,
-      emptyable: true, // CR-053: EMPTYABLE_SLOT_KEYS = ['hair','pomo_char'] — CR-044 M-2 false 대체
-      canEmpty: false, // 비울 것이 없다
+      emptyable: false, // v29: EMPTYABLE_SLOT_KEYS = ['pomo_char'] — CR-053 true 대체
+      canEmpty: false,
     })
     expect(slotCard(EMPTY, 'hair', 'hair', null)).toStrictEqual(emptyGroups[0].cards[1])
     expect(slotSpec(emptyGroups[0].cards, 'background')).toMatchObject({ emptyable: false, canEmpty: false })
@@ -335,12 +347,12 @@ describe('imageSlots (images-tab.md §3)', () => {
     expect(slotSpec(groups[0].cards, 'hair')).toMatchObject({
       entry: hairEntry,
       required: false,
-      resetKind: 'restore',
-      canReset: true,
+      resetKind: 'clear', // v29
+      canReset: true, // 등록됨 → 「기본값」(= 비우기) 활성
       lastOnlyBlocked: false,
       n: null,
-      emptyable: true,
-      canEmpty: true, // 등록됨 → 「비우기」 활성
+      emptyable: false, // v29: 셋째 버튼 없음
+      canEmpty: false,
     })
     expect(slotSpec(groups[0].cards, 'background')).toMatchObject({
       entry: undefined,
@@ -461,10 +473,10 @@ describe('imageSlots (images-tab.md §3)', () => {
   })
 
   // ─── CR-043 R-41 → CR-053 · 「비우기」 대상 칸 — images-tab §12.2(옛)·§15.1 검증 예 ───
-  it('TC-232 (CR-044·CR-053 개정): EMPTYABLE_SLOT_KEYS = [hair, pomo_char] — 두 칸 emptyable 늘 true·canEmpty = 등록(§15.1 검증 예), kb_down_0 은 대상 아님(emptyable·canEmpty false, 「기본값」 = 비우기 칸 — 검증 예 4행 canReset·lastOnlyBlocked), kb_down_1+·추가 카드는 필드 없음·대상 아님', () => {
-    // ② 상수 값 — CR-053(CR-044 ['kb_down_0'] · CR-043 ['hair','kb_down_0'] 대체)
-    expect([...EMPTYABLE_SLOT_KEYS]).toEqual(['hair', 'pomo_char'])
-    // ① §15.1 검증 예 — hair·pomo_char
+  it('TC-232 (CR-044·CR-053·v29 개정): EMPTYABLE_SLOT_KEYS = [pomo_char] — pomo_char emptyable 늘 true·canEmpty = 등록, hair 는 대상 아님(emptyable·canEmpty 늘 false, 「기본값」 = 비우기 칸 canReset = 등록), kb_down_0 은 대상 아님(검증 예 4행 canReset·lastOnlyBlocked), kb_down_1+·추가 카드는 필드 없음·대상 아님', () => {
+    // ② 상수 값 — v29(CR-053 ['hair','pomo_char'] · CR-044 ['kb_down_0'] · CR-043 ['hair','kb_down_0'] 대체)
+    expect([...EMPTYABLE_SLOT_KEYS]).toEqual(['pomo_char'])
+    // ① 검증 예 — pomo_char(복원 칸 + 「비우기」 칸) · hair(v29: 단일 비우기 칸, 셋째 버튼 없음)
     const both: AssetManifest = { canvas: CANVAS, entries: [entry('kb_up'), entry('hair'), entry('pomo_char')] }
     const hairOnly: AssetManifest = { canvas: CANVAS, entries: [entry('kb_up'), entry('hair')] }
     const pomoRows: [string, AssetManifest, boolean, boolean][] = [
@@ -472,26 +484,31 @@ describe('imageSlots (images-tab.md §3)', () => {
       ['두 칸 등록', both, true, true],
       ['hair 만', hairOnly, true, false],
     ]
-    for (const [label, m, hairCan, pomoCan] of pomoRows) {
-      for (const [key, can] of [
-        ['hair', hairCan],
-        ['pomo_char', pomoCan],
-      ] as const) {
-        const direct = slotCard(m, key, key, null)
-        expect(direct, `${label} ${key}`).toMatchObject({
-          emptyable: true,
-          canEmpty: can,
-          resetKind: 'restore',
-          canReset: true,
-          lastOnlyBlocked: false,
-          required: false,
-        })
-        expect(slotSpecs(m).find(c => c.key === key), `${label} ${key}`).toStrictEqual(direct)
-      }
-      expect(slotSpecs(m).filter(c => c.emptyable).map(c => c.key), label).toEqual(['hair', 'pomo_char'])
+    for (const [label, m, hairReg, pomoCan] of pomoRows) {
+      const pomo = slotCard(m, 'pomo_char', 'pomo_char', null)
+      expect(pomo, `${label} pomo_char`).toMatchObject({
+        emptyable: true,
+        canEmpty: pomoCan,
+        resetKind: 'restore',
+        canReset: true,
+        lastOnlyBlocked: false,
+        required: false,
+      })
+      expect(slotSpecs(m).find(c => c.key === 'pomo_char'), `${label} pomo_char`).toStrictEqual(pomo)
+      const hair = slotCard(m, 'hair', 'hair', null)
+      expect(hair, `${label} hair`).toMatchObject({
+        emptyable: false,
+        canEmpty: false,
+        resetKind: 'clear',
+        canReset: hairReg, // 등록돼 있을 때만 「기본값」(= 비우기) 활성
+        lastOnlyBlocked: false,
+        required: false,
+      })
+      expect(slotSpecs(m).find(c => c.key === 'hair'), `${label} hair`).toStrictEqual(hair)
+      expect(slotSpecs(m).filter(c => c.emptyable).map(c => c.key), label).toEqual(['pomo_char'])
     }
-    expect(slotSpecs(both).filter(c => c.canEmpty).map(c => c.key)).toEqual(['hair', 'pomo_char'])
-    expect(slotSpecs(hairOnly).filter(c => c.canEmpty).map(c => c.key)).toEqual(['hair'])
+    expect(slotSpecs(both).filter(c => c.canEmpty).map(c => c.key)).toEqual(['pomo_char'])
+    expect(slotSpecs(hairOnly).filter(c => c.canEmpty).map(c => c.key)).toEqual([])
     expect(slotSpecs(EMPTY).filter(c => c.canEmpty).map(c => c.key)).toEqual([])
     // ③ kb_down_0 검증 예 4행 — 셋째 버튼 대상 아님, 「기본값」 = 비우기 칸(마지막 장 규칙)
     const rows: [string, AssetManifest, boolean, boolean][] = [
@@ -520,10 +537,11 @@ describe('imageSlots (images-tab.md §3)', () => {
       expect(slotCard(three, kbDown(i), 'kb_down', 3), `kb_down_${i}`).toMatchObject({ emptyable: false, canEmpty: false })
     }
     // 그 밖의 카드(첫 실행 매니페스트 — 키보드·팔·손·배경·말풍선)는 false
-    for (const c of slotSpecs(FIRST7).filter(s => s.key !== 'hair' && s.key !== 'pomo_char')) {
+    // v29: 첫 실행에 hair 가 없다 — hair 포함 pomo_char 외 모든 카드 false
+    for (const c of slotSpecs(FIRST7).filter(s => s.key !== 'pomo_char')) {
       expect(c, c.key).toMatchObject({ emptyable: false, canEmpty: false })
     }
-    expect(slotSpecs(FIRST7).filter(c => c.canEmpty).map(c => c.key)).toEqual(['hair', 'pomo_char'])
+    expect(slotSpecs(FIRST7).filter(c => c.canEmpty).map(c => c.key)).toEqual(['pomo_char'])
     // 추가 카드(type 'add')에는 필드가 없다(§11.3)
     const adds = buildSlotGroups(three)
       .flatMap(g => g.cards)

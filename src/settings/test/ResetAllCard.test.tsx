@@ -148,7 +148,7 @@ const entry = (slot: AssetSlot, v: string): AssetEntry => {
 }
 const CUSTOM_SLOTS: AssetSlot[] = ['background', 'kb_up', 'mouse_base', 'idle', 'rest']
 const CUSTOM_MANIFEST: AssetManifest = { canvas: CANVAS, entries: CUSTOM_SLOTS.map(s => entry(s, 'c')) }
-/** 기본 그림 7장(contract v0.24 DEFAULT_ASSET_SLOTS — 실물 상수) */
+/** 기본 그림 6장(contract v0.29 DEFAULT_ASSET_SLOTS — 실물 상수, v29: hair 없음 · 옛 v0.24 7장) */
 const DEFAULT_MANIFEST: AssetManifest = { canvas: CANVAS, entries: DEFAULT_ASSET_SLOTS.map(s => entry(s, 'd')) }
 const defaultUrls = () => DEFAULT_ASSET_SLOTS.map(s => `asset://${slotKey(s)}.png?v=d`)
 

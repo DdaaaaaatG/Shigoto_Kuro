@@ -3,8 +3,9 @@
  * 기준: src/settings/design/timer-tab.md §13 · design/images-tab.md §14(§1 ASCII·§3 buildSlotGroups ①·검증 예·§7 I-2·I-3 대체)
  *       · §15(CR-053 — pomo_char 내장 기본 있음: 「기본값」 = 복원(I-3R) + 셋째 버튼 「비우기」(I-11), pomo_bubble 은 §14 그대로)
  *       · design/i18n.md §4.9(slots.pomo_char·pomo_bubble)·§4.3 imagesNote(CR-045)·§4.6 asset.canvas_mismatch(CR-045)·§4.8 emptyImage*
- *       · contract v0.24 `DEFAULT_ASSET_SLOTS` 7개(pomo_char 포함)·`remove_asset`·`restore_default_asset`
- *       · scenarios.md 「CR-045」 절 TC-241 ~ TC-245 · TC-FLOW-25 · 「CR-053 개정」 절 TC-291 · TC-292.
+ *       · contract v0.29 `DEFAULT_ASSET_SLOTS` 6개(pomo_char 포함 · hair 없음 — CR-063)·`remove_asset`·`restore_default_asset`
+ *       · scenarios.md 「CR-045」 절 TC-241 ~ TC-245 · TC-FLOW-25 · 「CR-053 개정」 절 TC-291 · TC-292
+ *       · 「v29 개정」 절 TC-241(`EMPTYABLE_SLOT_KEYS` = ['pomo_char'] — hair 는 셋째 버튼 없는 비우기 칸, images-tab §16).
  * bridge 는 mock(importOriginal — toBridgeError 실물). 카드 판정 상수(hasBuiltinDefault·isRequiredSlot)는 bridge/types 실물 —
  * 목록을 화면에 다시 적지 않는다(timer-tab §13 판정). 미리보기 교체는 props(manifest) 재렌더로 흉내 낸다(assets://changed).
  * 시간 의존 없음(deferred promise + act·waitFor 조건).
@@ -159,13 +160,14 @@ const CHAR_NAME = CHAR_KO.title
 const BUBBLE_NAME = BUBBLE_KO.title
 
 describe('imageSlots — 배경 그룹 뽀모도 두 칸 (R-42, timer-tab §13 · images-tab §15)', () => {
-  it('TC-241 (CR-053 개정): buildSlotGroups 배경 그룹 = [background, hair, pomo_char, pomo_bubble] — pomo_char 는 단일·선택·복원 칸(canReset 늘 true)·「비우기」 칸(canEmpty = 등록), pomo_bubble 은 단일·선택·비우기 칸(canReset = 등록·emptyable false), 필수 2장·다른 그룹 불변', () => {
-    // bridge 상수(contract v0.24) — 화면이 다시 적지 않는다
+  it('TC-241 (CR-053 · v29 개정): buildSlotGroups 배경 그룹 = [background, hair, pomo_char, pomo_bubble] — pomo_char 는 단일·선택·복원 칸(canReset 늘 true)·「비우기」 칸(canEmpty = 등록), pomo_bubble 은 단일·선택·비우기 칸(canReset = 등록·emptyable false), EMPTYABLE_SLOT_KEYS = [pomo_char](hair 제외), 필수 2장·다른 그룹 불변', () => {
+    // bridge 상수(contract v0.29) — 화면이 다시 적지 않는다
     expect(hasBuiltinDefault('pomo_char')).toBe(true) // CR-053: v0.21 false 대체
     expect(hasBuiltinDefault('pomo_bubble')).toBe(false)
     expect(isRequiredSlot('pomo_char')).toBe(false)
     expect(isRequiredSlot('pomo_bubble')).toBe(false)
-    expect([...EMPTYABLE_SLOT_KEYS]).toEqual(['hair', 'pomo_char']) // CR-053(images-tab §15.1 — §14 ['kb_down_0'] 대체)
+    // v29(CR-063 · contract v0.29 · images-tab §16): hair 내장 기본 없음 → 셋째 버튼 칸은 pomo_char 뿐(CR-053 ['hair','pomo_char'] 대체)
+    expect([...EMPTYABLE_SLOT_KEYS]).toEqual(['pomo_char'])
     // ① 빈 매니페스트
     const groups = buildSlotGroups(EMPTY)
     expect(groups).toHaveLength(4)

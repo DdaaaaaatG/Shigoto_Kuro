@@ -5,8 +5,9 @@
   (마우스 버튼 보강)은 **core-implementer가 같은 원리로 추가 구현·소스 반영 완료**, 단 설계
   자체는 core-designer·사용자 재확인 대기(아래 8차 항목). §3.8(CR-047)은 초안(실측 게이트
   G1·G2 통과 조건부) · §3.9·§3.10(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6 반영) 기준
-  확정 · **소스 미적용** · 최종 갱신: 2026-09-29(R-40)
+  확정 · **소스 반영**(커밋 2be41ce — `hook/right_click.rs`·`hook/foreground.rs`) · 최종 갱신: 2026-09-30(doc-sync)
 - 변경이력:
+  - 2026-09-30 (13차, doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) §3.9·§3.10(overlay R-40)의 「소스 미적용」을 걷어냈다. 대조 결과는 다음과 같다. `pub fn start(tx: Sender<InputEvent>, clicks: Sender<RightClick>) -> Result<HookHandle, HookError>`(`hook/mod.rs:678`)가 §2와 같다. 재노출 `pub use foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect}; pub use right_click::{RightClick, ScreenPoint};`(`mod.rs:88-89`)가 있다. `right_click.rs` `//!`(스레드·unsafe·에러·설정 없음, 테스트 RC1~RC6)와 `foreground.rs` `//!`(unsafe U12~U19 8종, fail-open `None`, 훅 콜백 안에서는 부르지 않음, 테스트 FG1~FG6)는 §3.9·§3.10과 어긋나지 않는다. 12차 ② 호출 순서(Idle + 두 점이 사각형 안일 때만 전경 조회)는 `tray/popup.rs` `//!` [스레드]와 같다. §10 R-40 두 행을 「소스 반영」으로 바꿨다. §3.8(CR-047, 실측 게이트)·§3.7 E-U/E-M 행·1291행의 「소스 미적용」은 이번에 구현을 확인하지 못해 그대로 둔다.
   - 2026-09-29 (12차, R-40 감사 반영 — 리뷰 CORE-302(LOW)·SEC-301(LOW). 공개 API·동작·unsafe 블록 수·테스트 불변) ① §3.10.3: 핸들 유효성 공통 전제를 코드 SAFETY 주석(U13~U18 첫 문장)에도 넣으라는 구현 인계 한 줄. U13 근거 문구를 "실패 시 pid는 쓰지 않는다(tid 0이면 버림)"로 교체(옛 문구는 API가 출력 포인터를 건드리지 않는다고 단정 — 문서화된 보장 아님). ② §3.10.2 스레드 줄: `foreground_snapshot()` 호출 조건이 "뗌마다"에서 "메뉴 Idle + 두 점이 오버레이 사각형 안일 때만"으로 좁아짐(호출자 순서 변경 — 정본 [tray.md](tray.md) §3.7.3 PU-h·§11 T17). **소스 미적용**(`foreground.rs` 주석만).
   - 2026-09-29 (11차, overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1·U-3 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.4·§2.8·§2.14·§4) ① **오른쪽 클릭 신호**: 신규 `hook/right_click.rs`(unsafe 없음) — `ScreenPoint`·`RightClick { down, up }`·비공개 `RightClickTracker`. 훅이 실제로 본 오른쪽 누름→뗌 한 쌍을 **두 번째 채널 `Sender<RightClick>`**으로 내보낸다. **`start` 시그니처 변경** `start(tx)` → `start(tx, clicks)`(호출자 `lib.rs` 1곳). 합성 뗌(CR-046 정리)이면 기억한 누름을 버린다. `InputEvent`·`input://mouse-button` **불변**. ② **전경 창 조회 안전 래퍼**: 신규 `hook/foreground.rs` — `ScreenRect`(+순수 `covers`)·`ForegroundSnapshot`·`pub fn foreground_snapshot() -> Option<ForegroundSnapshot>`, 새 unsafe **U12~U19**(Win32 조회 8종, 훅 콜백·훅 스레드와 무관). `mod.rs`에는 새 unsafe 없음. 개인정보 P7 신설. 테스트 RC1~RC6·FG1~FG6(각 새 파일 안 — `tests.rs`는 792줄). §1·§1.1·§2·§3·§3.9(신설)·§3.10(신설)·§4·§5·§8·§10·§11 갱신. 새 크레이트·feature 없음. 상대 문서 [tray.md](tray.md) §3.7, [window.md](window.md) §3.1.
   - 2026-09-29 (10차, 소스 동기화 — **설계 변경 아님, 소스가 정본**, 근거 `doc/300_검증/verify-20260929-1928.md` CORE-201) **테스트 격리**: 전역 `KEYS`를 거치는 테스트가 W1(`keyboard_event_wires_message_table_and_class`)과 CR-046 증분 `keyboard_event_recovery_increment`(§3.7.7 「W1 증분」을 별도 테스트로 구현) **둘**이라, `hook/tests.rs`의 `static KEYS_TEST_LOCK: Mutex<()>`로 직렬화하고 각 테스트 시작 때 `reset_keys`로 표를 비운다(poison은 `PoisonError::into_inner`). 프로덕션 코드·공개 API·unsafe·스레드 불변. §8.1 전역 상태 원칙에 반영. 8·9차의 소스 반영 여부는 이번 동기화 범위 밖.
@@ -1290,8 +1291,8 @@ fn is_shell_class(name: &[u16]) -> bool {
 | **R-tmp-1 (CR-023) — 개인정보 P1~P6 유지** | §1.1 P1·P3·P6, §3.3, §8.3 P-1, §9.2 RB7 | ✅ 설계 · 소스 반영(정적 상태 `KEYS`만 유지, 로그 호출 0건) |
 | **R-tmp-2 (CR-046) — 키 뗌 유실 복구(누름·클릭 때 남은 칸 대조·정리 + 칸마다 뗌 이벤트)** | §1, §3.7(세부 추적 §3.7.9), §4 그림, §5 U11, §11 D2·D18 개정·D20~D24 | 설계 · 소스 미적용(한/영·한자 키는 K1 실측 전 부분) |
 | 마우스 이동·좌우 클릭 | §2, §4 | ✅(기존, 영향 없음. CR-046: 버튼 누름이 정리 트리거 — 마우스 이벤트 자체는 불변. R-40: `InputEvent`·`input://mouse-button` 불변) |
-| **overlay R-40 (CR-062) — 실제 오른쪽 누름·뗌 좌표 한 쌍 전달(🔒 U-1의 입력), 잠금 무관·입력 통과(AC-3), 합성 뗌 제외(AC-7)** | §1, §1.1 P7, §2 `start`·`RightClick`·`ScreenPoint`, §3.9, §4, §8 RC1~RC6 | 설계 확정 · 소스 미적용 |
-| **overlay R-40 AC-8 (🔒 U-3) — 전체 화면 판정용 전경 창 조회 안전 래퍼(fail-open)** | §2 `foreground_snapshot`·`ForegroundSnapshot`·`ScreenRect`, §3.10, §5 U12~U19, §8 FG1~FG6 | 설계 확정 · 소스 미적용(생략 판정은 [tray.md](tray.md) §3.7) |
+| **overlay R-40 (CR-062) — 실제 오른쪽 누름·뗌 좌표 한 쌍 전달(🔒 U-1의 입력), 잠금 무관·입력 통과(AC-3), 합성 뗌 제외(AC-7)** | §1, §1.1 P7, §2 `start`·`RightClick`·`ScreenPoint`, §3.9, §4, §8 RC1~RC6 | 설계 확정 · 소스 반영 |
+| **overlay R-40 AC-8 (🔒 U-3) — 전체 화면 판정용 전경 창 조회 안전 래퍼(fail-open)** | §2 `foreground_snapshot`·`ForegroundSnapshot`·`ScreenRect`, §3.10, §5 U12~U19, §8 FG1~FG6 | 설계 확정 · 소스 반영(생략 판정은 [tray.md](tray.md) §3.7) |
 
 ## 11. 설계 결정 노트
 

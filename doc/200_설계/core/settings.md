@@ -1,7 +1,8 @@
 # settings 모듈 설계
 
-- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · 최종 갱신 2026-09-29(소스 동기화)
+- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · 최종 갱신 2026-09-30(doc-sync)
 - 변경이력:
+  - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 2026-09-29 행 ②에서 「옛 기록」으로 남긴 코드 조각·테스트 기대값을 현재 소스 값으로 고쳤다. §3.7: `default_mouse().pen_pos` 조각 (380, 496) → **(372, 476)**(CR-044, `mod.rs:196-198`), 동작 표 첫 두 행, 현재 값 안내(N1′ 현재 이름 `default_pen_pos_is_372_476`). §3.8.1 `impl Default`: `text_pos` (142, 458) → **(268, 402)**, `rotation` 9 → **7**(주석 = `timer.rs:87-90`). §3.8.4 S-T1·S-T10·S-T12 기대값. §3.10.1 `DEFAULT_ALARM_VOLUME` 80 → **44**. §3.10.2·§3.10.4·§3.10.5(S-T13·S-T14·S-T18·S-T12 갱신) 음량 기본 80 → **44**, 좌표·회전 (268, 402)·7. 공개 API·스키마·검증 규칙 불변. **코드 주석 불일치 발견(수정 안 함)**: `settings/mod.rs:84-87` `MouseSettings.pen_pos` 문서주석이 「기본값 (356, 504) = pen_up(136×196, CR-038)」로 남아 있다 — 실제 기본은 (372, 476)(CR-044, `:198`). **추가(같은 날 2차):** §3.7 동작 표 「기본값으로 리셋」 행과 N1′ 행(`default_pen_pos_is_372_476`, (372, 476))·안내 줄, §8 N1 대체 표기, §10 TM-10(기본 44)을 고쳤다. §10·§3.7 요구 추적의 「✅ 설계 · 소스 미적용」 전부와 §3.9 추적 줄을 「소스 반영」으로 바꿨다. 근거는 2026-09-29 행 ③의 확인과 이번 대조다: `SlamSettings`·`slam` 필드 없음, `pen_pos_tests.rs`·`pen_mode_tests.rs`, `Language`·`position_lock`·`show_in_taskbar` 필드, `window/placement.rs:256` `keep_core_owned`, `timer.rs` CR-048 필드, `store.rs:28` `update`, `atomic.rs:39` `write_atomic`. DA-07 첫 행에는 값 대체 이력을 붙였다.
   - 2026-09-29 (소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **SEC-205 텍스트 크기 상한**: `settings/atomic.rs`에 `pub fn read_capped_string(path: &Path, max_bytes: u64) -> std::io::Result<String>`·`pub const MAX_TEXT_FILE_BYTES: u64 = 1024 * 1024`(1MiB), `mod.rs`가 `pub use atomic::{read_capped_string, write_atomic, MAX_TEXT_FILE_BYTES};`로 재노출. `load`는 이 함수로 읽는다 — `fs::metadata` 길이가 상한을 넘으면 읽지 않고 `ErrorKind::InvalidData` → `SettingsError::Io` → `load_or_default`가 기존 손상 파일 경로(기본값 대체 + 경고, 로그에는 파일 이름만)를 그대로 탄다. 같은 상한을 assets `load_manifest`·data_reset `read_marker`·`read_attempts`가 공유한다. 테스트: atomic.rs AW7(`aw7_read_capped_string_rejects_oversized_file`), `mod.rs` 1MiB 초과 settings.json → 기본값. §2 표 반영. ② **0.4.0 기본값**(`settings/timer.rs:80-96`, 계약 v0.27 §3.3과 일치): `timer.textPos` (142, 458) → **(268, 402)**, `timer.rotation` 9 → **7**, `timer.alarmVolume` 80 → **44**(`DEFAULT_ALARM_VOLUME`), `fontSize` 36·`countdownSecs` 1500(`DEFAULT_COUNTDOWN_SECS`)·`color` `"#333333"`·`enabled` false·`mode` Stopwatch 불변. `default_mouse()` 좌표(CR-044, §11 확인 필요 14): `shoulder` (582, 484)·`partPos` (411, 464)(키 없음 serde 기본은 여전히 (389, 492))·`penPos` (372, 476)·`penMode` **true**. §2·§3.1 표 반영. §3.7·§3.8·§3.10의 코드 조각과 테스트 기대값(S-T1·S-T10·S-T12·S-T13·S-T14·S-T17·S-T18의 (142, 458)·9·80, N1′의 (380, 496))은 **옛 기록** — 현재 값은 §3.1·소스. ③ **표기 정리**: 아래 변경이력·§3.x·§10의 「소스 미적용」(CR-017·019·024·033·035·045·047·048, SV2, data-reset, CR-053)은 모두 소스에 반영됨(`settings/{mod,timer,atomic,store,pen_mode_tests,pen_pos_tests}.rs`). CR-053 값은 0.4.0에서 다시 바뀌었다(②). `save`는 CR-047 ③단계대로 **비공개**(§2 행 정정). `idleSeconds` 검증은 60~3600(`IDLE_SECONDS_MIN/MAX`, 읽기는 보정 — §3.1 행 정정).
   - 2026-09-27 (data-reset, 🔒 사용자 결정 R-A·R-B·D-2(언어 유지)·D-3, 새 모듈 문서 [data_reset.md](data_reset.md)) **앱 시작 순서 변경**: settings `load_or_default`가 시딩보다 **앞으로** 오고, 그 값을 담은 `Mutex<Settings>`로 `data_reset::run_startup`이 돈다. 세대가 다르거나 없으면 `settings::update` 한 번으로 설정 전체를 `Settings::default()`로 바꾸되 `autostart`·`language`만 유지한다. 세대 표식은 settings 스키마 밖의 별도 파일 `data-generation.json`(`version` 필드 추가 없음 — D19 유지). **settings 공개 API·스키마·검증 불변**(호출자만 늘어남). 증분 **§3.11**. **소스 미적용.**
   - 2026-09-27 (CR-053 배포용 기본 세트 3차 — CR-044 대체, 🔒 사용자 지정, 확정사항 §6 CR-053 줄) **타이머 기본값 `timer.textPos` (268, 403) → (142, 458), `timer.rotation` 5 → 9.** 나머지 타이머 기본값(`enabled` 꺼짐·`fontSize` 36·`color` `"#333333"`·`countdownSecs` 1500(25분)·`alarmVolume` 80 등)과 범위·보정 규칙, 좌표 기본값(`shoulder`·`partPos`·`penPos`·`penMode`, CR-044 그대로)은 불변. 공개 API 시그니처·JSON 키 불변. 이미 저장된 `settings.json`의 값은 그대로 읽힌다(기본값은 키가 없을 때만 쓰인다). 갱신 위치: §2 `TimerSettings` 행, §3 필드 표 `timer.textPos`·`timer.rotation`, §3.8.1 `impl Default`, 테스트 S-T1·S-T10·S-T12(§3.8·§3.10 갱신본). 짝 문서 [assets.md](assets.md) §3.16(기본 그림 7장). **소스 미적용**(`settings/timer.rs:88·90`, 단위 테스트 `:241`·`:465`).
@@ -523,28 +524,32 @@ pub struct MouseSettings {
 /// (이력: 2026-09-23 재조정 근거는 예시 mouse_pen_hand.png 를 part_pos (389, 492)에 둘 때의 기준점
 /// (435.06, 575.27)과 배율 1.287 / 0.657 / 0.825 / 1.38 — I1 실측.)
 
-// default_mouse() 의 pen_pos 두 줄(:160-161) 교체
-        // CR-035(U-2 = B): 기본 세트 pen_up(90×154)을 사용자가 끌어다 놓은 자리(2026-09-24 settings.json).
-        // 이전 기본값(CR-024): None — 첫 등록 때 ui 가 정함.
-        pen_pos: Some(Point { x: 380.0, y: 496.0 }),
+// default_mouse() 의 pen_pos 두 줄 — 현재 소스(settings/mod.rs:196-198, CR-044)
+        // CR-044: 배포용 기본 세트 2차 교체 pen_up(119×196)을 사용자가 끌어다 놓은 자리(사용자 확정).
+        // 이전 기본값(CR-038): Some(356.0, 504.0) — 이전 pen_up(136×196) 기준.
+        pen_pos: Some(Point { x: 372.0, y: 476.0 }),
+// (이력: CR-024 None → CR-035 (380, 496) → CR-038 (356, 504) → CR-044 (372, 476).
+//  default_part_pos·default_area 문서주석은 현재 소스 mod.rs:98-113 이 정본 — CR-038 「바꾸지 않는다」 근거로 교체됨.)
 ```
+
+- **현재 값(2026-09-30 doc-sync):** 이 절의 (380, 496)은 CR-035 당시 값이다. 현재 `default_mouse().pen_pos` = **`Some(372, 476)`**(CR-044), 단위 테스트 N1′ 이름은 **`default_pen_pos_is_372_476`**(`pen_pos_tests.rs:8`). 아래 동작 표(「기본값으로 리셋」 행 포함)와 테스트 표 N1′ 행은 현재 값으로 고쳤다. bridge 요구 표(#1·#2·#4)·요구 추적 DA-07 첫 행·결정 D-S35-1·확인 필요 1의 (380, 496)은 CR-035 당시 기록이다 — 현재 값은 이 줄의 (372, 476), 현재 TS 기본값은 계약 §3.3.
 
 동작 표:
 
 | 입력 | `mouse.pen_pos` |
 |---|---|
-| settings.json 없음(첫 실행) | `Some(380, 496)` — `Settings::default()` |
-| `mouse` 키 없음 | `Some(380, 496)` — 컨테이너 default가 `default_mouse()` |
+| settings.json 없음(첫 실행) | `Some(372, 476)` — `Settings::default()` |
+| `mouse` 키 없음 | `Some(372, 476)` — 컨테이너 default가 `default_mouse()` |
 | `mouse`에 `penPos` 키 없음(CR-024 이전 파일) | `None` — 필드 `#[serde(default)]`는 `Option` 기본값이다(D-S35-1) |
 | `"penPos": null` | `None`(N4·N6) |
 | `"penPos": {"x":…, "y":…}` | 그 값 |
-| 어깨축 탭 「기본값으로 리셋」 | ui가 TS `DEFAULT_MOUSE_SETTINGS.penPos`(380, 496)를 `set_settings`로 저장(bridge 몫) |
+| 어깨축 탭 「기본값으로 리셋」 | ui가 TS `DEFAULT_MOUSE_SETTINGS.penPos`(현재 (372, 476), CR-044 — Rust `default_mouse`와 1:1)를 `set_settings`로 저장(bridge 몫) |
 
 **테스트 (§8 증분).** `settings/mod.rs`가 783줄이라 penPos 테스트(현 `mod.rs:568-636`, N1~N5)를 새 자식 파일 `src-tauri/src/settings/pen_pos_tests.rs`로 **옮긴다**(`pen_mode_tests.rs`와 같은 머리 — `use super::*;`, `mod.rs` 끝에 `#[cfg(test)] mod pen_pos_tests;`). N2~N5는 글자 그대로 옮긴다. 적용 후 `mod.rs`는 약 720줄이다.
 
 | # | 이름 | 준비·호출 | 기대 |
 |---|---|---|---|
-| N1′ (N1 대체) | `default_pen_pos_is_380_496` | `default_mouse()`, `serde_json::to_string(&Settings::default())` | `pen_pos == Some(Point { x: 380.0, y: 496.0 })`, 직렬화에 `"penPos":{"x":380.0,"y":496.0}` 포함·`"pen_pos"` 없음 |
+| N1′ (N1 대체) | `default_pen_pos_is_372_476`(`pen_pos_tests.rs:8`, CR-044 — 이력: CR-035 때 `default_pen_pos_is_380_496`) | `default_mouse()`, `serde_json::to_string(&Settings::default())` | `pen_pos == Some(Point { x: 372.0, y: 476.0 })`, 직렬화에 `"penPos":{"x":372.0,"y":476.0}` 포함·`"pen_pos"` 없음 |
 | N6 | `existing_file_pen_pos_null_stays_null` (tempdir) | 파일 `{"mouse":{"shoulder":{"x":620.0,"y":530.0},"penPos":null}}` → `load` | `Ok(Some(s))`, `s.mouse.unwrap().pen_pos == None`(기본값 (380,496)으로 바뀌지 않음) |
 
 - 회귀: 기존 테스트 전건 PASS. `pen_mode_tests.rs` P4는 `pen_pos`를 명시해 영향이 없다. `tests/mouse_area_defaults.rs`는 `shoulder`·`part_pos`·`area`만 쓰고, `examples/import_sample.rs`의 리터럴은 `pen_pos: None`을 명시해 영향이 없다. 구현자는 `pen_pos`·`penPos`를 Grep해 `None` 기본을 가정한 단언이 더 없는지 확인한다.
@@ -563,9 +568,9 @@ pub struct MouseSettings {
 
 | 요구ID | 반영 | 상태 |
 |---|---|---|
-| DA-07 — `penPos` 기본값 (380, 496) | §3.1, §3.7, N1′ | ✅ 설계 · 소스 미적용 |
-| DA-07 — 기존 파일 `"penPos": null` 유지 | §3.7 동작 표, N4·N6 | ✅ 설계 · 소스 미적용 |
-| DA-07 — `area`·`partPos` 근거 주석 정정(값 불변) | §3.7 | ✅ 설계 · 소스 미적용 |
+| DA-07 — `penPos` 기본값 (380, 496) | §3.1, §3.7, N1′ | ✅ 설계 · 소스 반영(값은 이후 CR-038 (356, 504) → CR-044 (372, 476)으로 대체, `mod.rs:198`) |
+| DA-07 — 기존 파일 `"penPos": null` 유지 | §3.7 동작 표, N4·N6 | ✅ 설계 · 소스 반영 |
+| DA-07 — `area`·`partPos` 근거 주석 정정(값 불변) | §3.7 | ✅ 설계 · 소스 반영 |
 | DA-07 — 기본 `mouse_base` 손 기준점 실측 | [assets.md](assets.md) §3.10.5 M1 | 설계(assets 몫) |
 | U-3 — `penMode` 기본 false 유지 | 변경 없음(§3.6) | ✅ |
 
@@ -635,10 +640,12 @@ impl Default for TimerSettings {
     fn default() -> Self {
         Self {
             enabled: false,
-            // CR-045 U-6: 참고 그림(뽀도모셉찬.png, 900×700) 말풍선 흰 몸통 x≈148~388, y≈338~468의 중심.
-            text_pos: Point { x: 142.0, y: 458.0 },
-            // 말풍선 오른쪽이 약 5° 내려가 있다(시계 방향 +).
-            rotation: 9.0,
+            // (CR-048 필드 mode·countdown_secs·alarm_volume 의 기본값은 §3.10.1 — 현재 전문은 timer.rs:80-97)
+            // 0.4.0(🔒 사용자 지정 2026-09-28): 새 pomo_char.png 말풍선 기준.
+            // (이력: CR-045 (268, 403)·5° → CR-053 (142, 458)·9° → 0.4.0 (268, 402)·7°)
+            text_pos: Point { x: 268.0, y: 402.0 },
+            // 말풍선 기울기(시계 방향 +).
+            rotation: 7.0,
             // 안쪽 폭 약 225px에 "00:00:00"(굵은 표 숫자 약 4.8em)이 들어가는 크기.
             font_size: 36.0,
             // 흰 말풍선 위 진회색.
@@ -740,7 +747,7 @@ fn is_hex_color(s: &str) -> bool {
 
 | # | 테스트 이름(권고) | 조건 | 기대 |
 |---|---|---|---|
-| S-T1 | `timer_settings_default_values` | `TimerSettings::default()`, `Settings::default().timer` | `false`·(142, 458)·9·36·`"#333333"`(CR-053), 둘 같음, `Settings::default().validate()` Ok |
+| S-T1 | `timer_settings_default_values` | `TimerSettings::default()`, `Settings::default().timer` | `false`·**(268, 402)·7**·36·`"#333333"`(0.4.0, `timer.rs:241-244`) + CR-048 필드 `Stopwatch`·1500·**44**, 둘 같음, `Settings::default().validate()` Ok |
 | S-T2 | `old_settings_without_timer_load_with_defaults` | `timer` 키 없는 JSON(`scale` 1.5·`idleSeconds` 120 등 포함) | 다른 필드 보존 + `timer == TimerSettings::default()` |
 | S-T3 | `partial_timer_object_fills_defaults` | `{"timer":{"enabled":true}}` | `enabled` true, 나머지 기본값 |
 | S-T4 | `out_of_range_timer_clamped_on_load` | rotation 999, fontSize 1, textPos (−5, 9999), `scale` 1.5 | 180·12·(0, 700), `scale` 1.5 유지(전체 기본값으로 돌아가지 않음), `Ok(Some)` |
@@ -749,9 +756,9 @@ fn is_hex_color(s: &str) -> bool {
 | S-T7 | `validate_rejects_out_of_range_timer` | 경계 밖(x −0.01·900.01, y 700.01, rotation ±180.01, fontSize 11.99·200.01) / 경계값(x 0·900, y 0·700, rotation ±180, fontSize 12·200) | 밖은 `Invalid` / 경계값은 Ok |
 | S-T8 | `validate_rejects_bad_color` | `"#12345"`·`"123456"`·`"#12345g"`·`"#1234567"` / `"#ABCDEF"`·`"#abcdef"` | `Invalid` / Ok |
 | S-T9 | `validate_rejects_non_finite` | 위치·회전·크기에 NaN·∞ 각각 | `Invalid` |
-| S-T10 | `normalize_non_finite_uses_field_default` | `normalize`에 x NaN, rotation ∞, fontSize −∞ | x 142(y는 원값 유지), rotation 9, fontSize 36(CR-053 기본값) |
+| S-T10 | `normalize_non_finite_uses_field_default` | `normalize`에 x NaN, rotation ∞, fontSize −∞ | x = 기본 **268**(y는 원값 10 유지), rotation = 기본 **7**, fontSize = 기본 36(0.4.0 기본값 — 테스트는 `TimerSettings::default()` 필드로 단언) |
 | S-T11 | `timer_text_pos_max_matches_canvas_max` (`src-tauri/tests/default_assets.rs` 통합 — assets·settings 조합) | 상수 비교 | `TEXT_POS_MAX_X == assets::CANVAS_MAX_WIDTH as f64`, `…_Y == CANVAS_MAX_HEIGHT as f64` |
-| S-T12 | `timer_serializes_camel_case` | `serde_json::to_string(&Settings::default())` | `"timer":{"enabled":false,"textPos":{"x":142.0,"y":458.0},"rotation":9.0,"fontSize":36.0,"color":"#333333"}` 키 포함 |
+| S-T12 | `timer_serializes_camel_case` | `serde_json::to_string(&Settings::default())` | (CR-048 갱신본 — 현재 기대 문자열은 §3.10.5 「S-T12 갱신」 행, `timer.rs:463-467`) `"timer":{"enabled":false,"mode":"stopwatch","countdownSecs":1500,"alarmVolume":44,"textPos":{"x":268.0,"y":402.0},"rotation":7.0,"fontSize":36.0,"color":"#333333"}` 포함 |
 
 - `timer.rs` 줄 수: 코드 ~100 + 테스트 ~170 ≈ 270. `mod.rs` 약 750줄(800 미만 유지).
 - 완료 기준: `cargo fmt --check`·`cargo clippy -- -D warnings` 0·`cargo test` 전건 PASS.
@@ -941,7 +948,7 @@ where
 
 - **D47-1** 잠금 안 저장(§3.9.7). **D47-2** 창구를 settings에 둔다 — `window → settings`·`assets → settings`·`tray → settings` 의존 방향을 지키는 위치, 새 모듈 없음. **D47-3** `sync_all` 포함 — 없으면 정전 때 rename만 반영되고 내용이 비어 settings.json 전체가 기본값으로 대체될 수 있다(잠금 시간 수 ms 증가 수용). **D47-4** 반환은 위임문의 `Result<Settings, _>` 대신 `SaveOutcome { settings, changed }` — 드래그 저장·자동 실행 보정이 「바뀐 경우만 emit」을 유지하려면 변경 여부가 필요하다.
 - 후보(만들지 않음): C47-1 비정상 종료로 남은 `*.tmp` 청소 · C47-2 rename `PermissionDenied` 재시도(50ms × 3).
-- 추적: CORE-001 → §3.9.2·§3.9.3·§3.9.6 ✅(설계) · CORE-002 → §3.9.4 ✅(설계). 소스 미적용. bridge 3곳(S5~S7)은 bridge-manager 인계.
+- 추적: CORE-001 → §3.9.2·§3.9.3·§3.9.6 ✅(설계) · CORE-002 → §3.9.4 ✅(설계). 소스 반영(`store.rs:28` `update`·`SaveOutcome`, `atomic.rs:39` `write_atomic`, `save` 비공개). bridge 3곳(S5~S7)은 bridge-manager 인계.
 
 ### 3.10 CR-048 — 타이머 모드 설정 `timer.mode`·`countdownSecs`·`alarmVolume` (TM-01·02·04·10·13, 🔒 패킷 §2.1, 사용자 결정 D-1·D-2·D-3·D-10, 구현자가 그대로 옮길 것)
 
@@ -965,7 +972,8 @@ pub const COUNTDOWN_SECS_MIN: u32 = 1;
 pub const COUNTDOWN_SECS_MAX: u32 = 359_999; // 99:59:59
 pub const DEFAULT_COUNTDOWN_SECS: u32 = 1_500; // 00:25:00 (D-2)
 pub const ALARM_VOLUME_MAX: u32 = 100;
-pub const DEFAULT_ALARM_VOLUME: u32 = 80; // (D-10)
+/// 기본 음량 44%(0.4.0, 사용자 확정 배포 기본값 — 옛 D-10 80).
+pub const DEFAULT_ALARM_VOLUME: u32 = 44;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)] // 유지
@@ -999,8 +1007,8 @@ pub struct TimerSettings {
 | `mode` | 다른 문자열·수·`null`·객체·배열 | `Stopwatch`(경고 로그 권장) |
 | `countdownSecs`·`alarmVolume` | 0 이상 정수 | 그 값(u32를 넘으면 `u32::MAX`로 포화) → 뒤이어 `normalize` |
 | 〃 | 0 이상 소수(`12.7`) | 내림(`12`) → `normalize` |
-| 〃 | 음수·문자열·`null`·bool·객체 | 기본값(`1500` / `80`) |
-| 세 키 없음 | — | 컨테이너 default(`Stopwatch` / `1500` / `80`) — `deserialize_with`는 키가 있을 때만 불린다 |
+| 〃 | 음수·문자열·`null`·bool·객체 | 기본값(`1500` / `44`) |
+| 세 키 없음 | — | 컨테이너 default(`Stopwatch` / `1500` / `44`) — `deserialize_with`는 키가 있을 때만 불린다 |
 
 - 권장 방식: 필드별 `#[serde(deserialize_with = "…")]`에서 `serde_json::Value`로 받아 판정(§3.5 `Language` 관용 읽기와 같은 계열). 두 수 필드는 판정 함수 하나(`fn lenient_u32(v: &Value) -> Option<u32>`)를 같이 쓴다.
 - 파일 읽기와 `set_settings` 입력이 같은 타입이라 **IPC에도 같은 규칙**이 걸린다 — 알 수 없는 `mode`는 `settings.invalid`가 아니라 `Stopwatch`로 읽힌다(ui는 두 값만 보낸다, §3.10.7 S-D10).
@@ -1023,7 +1031,7 @@ pub struct TimerSettings {
 
 | 입력 | 동작 |
 |---|---|
-| `{"timer":{"enabled":true}}`(CR-045 파일) | `enabled` true, `Stopwatch`, 1500, 80 → **스톱워치 켜짐** |
+| `{"timer":{"enabled":true}}`(CR-045 파일) | `enabled` true, `Stopwatch`, 1500, 44 → **스톱워치 켜짐** |
 | `timer` 없음 | 전체 기본값(둘 다 꺼짐) |
 | 새 필드 타입 오류 | 그 필드만 기본값, 설정 나머지 보존(§3.10.2) |
 | 기존 필드 타입 오류(`"rotation":"5"`) | 여전히 `Format` → 전체 기본값(S-D3 유지) |
@@ -1037,14 +1045,14 @@ pub struct TimerSettings {
 
 | # | 이름 | 조건 | 기대 |
 |---|---|---|---|
-| S-T13 | `timer_mode_default_is_stopwatch` | `TimerSettings::default()`, `Settings::default().timer` | `Stopwatch`, 1500, 80, `Settings::default().validate()` Ok |
-| S-T14 | `old_timer_enabled_true_reads_as_stopwatch` (TM-02) | tempdir `{"timer":{"enabled":true}}` → `load` | `enabled` true, `Stopwatch`, 1500, 80 |
+| S-T13 | `timer_mode_default_is_stopwatch` | `TimerSettings::default()`, `Settings::default().timer` | `Stopwatch`, 1500, 44, `Settings::default().validate()` Ok |
+| S-T14 | `old_timer_enabled_true_reads_as_stopwatch` (TM-02) | tempdir `{"timer":{"enabled":true}}` → `load` | `enabled` true, `Stopwatch`, 1500, 44 |
 | S-T15 | `unknown_mode_falls_back_to_stopwatch` | `{"scale":1.5,"timer":{"enabled":true,"mode":"pomodoro","countdownSecs":60}}` / `"mode":5` | `Stopwatch`, `enabled` true, `countdownSecs` 60, `scale` 1.5(나머지 보존) |
 | S-T16 | `countdown_secs_validate_bounds` | 0·1·359999·360000 | 0·360000 → `Invalid`(§3.10.3 문구), 1·359999 → Ok |
 | S-T17 | `countdown_secs_normalize_on_load` | 파일 값 0 / 999999 / -5 / `"abc"` / 12.7 | 1500 / 359999 / 1500 / 1500 / 12. 다른 필드(`scale`·`timer.color`) 보존 |
-| S-T18 | `alarm_volume_validate_and_normalize` | `validate` 101 / 100 / 0, 파일 101 / `"loud"` | `Invalid` / Ok / Ok, 100 / 80 |
+| S-T18 | `alarm_volume_validate_and_normalize` | `validate` 101 / 100 / 0, 파일 101 / `"loud"` | `Invalid` / Ok / Ok, 100 / 44(`DEFAULT_ALARM_VOLUME`) |
 | S-T19 | `timer_settings_new_fields_round_trip` | `Countdown`·3661·0으로 `save` → `load` | 같음 |
-| S-T12 갱신 | `timer_serializes_camel_case` | `Settings::default()` 직렬화 | `"timer":{"enabled":false,"mode":"stopwatch","countdownSecs":1500,"alarmVolume":80,"textPos":{"x":142.0,"y":458.0},"rotation":9.0,"fontSize":36.0,"color":"#333333"}` 포함 |
+| S-T12 갱신 | `timer_serializes_camel_case` | `Settings::default()` 직렬화 | `"timer":{"enabled":false,"mode":"stopwatch","countdownSecs":1500,"alarmVolume":44,"textPos":{"x":268.0,"y":402.0},"rotation":7.0,"fontSize":36.0,"color":"#333333"}` 포함(0.4.0, `timer.rs:463-467`) |
 | S-T12b 갱신 | `timer_round_trips_through_save_load` | `TimerSettings { … }` 리터럴(`..` 없음, `timer.rs:358`)에 새 3필드 추가 | 컴파일·왕복 통과 |
 
 - 기존 S-T1~S-T12b 유지·통과. `timer.rs` 370줄 → 약 600줄(800 미만). 넘으면 새 테스트를 `settings/timer_tests.rs`로 뺀다.
@@ -1157,7 +1165,7 @@ pub struct TimerSettings {
 
 | # | 이름(안) | 준비·호출 | 기대 |
 |---|---|---|---|
-| ~~N1~~ | ~~`default_pen_pos_is_none`~~ | — | **CR-035로 대체 → §3.7 N1′ `default_pen_pos_is_380_496`.** N1~N5는 `settings/pen_pos_tests.rs`로 이동(§3.7) |
+| ~~N1~~ | ~~`default_pen_pos_is_none`~~ | — | **CR-035로 대체 → §3.7 N1′(현재 `default_pen_pos_is_372_476`, CR-044 — 당시 이름 `default_pen_pos_is_380_496`).** N1~N5는 `settings/pen_pos_tests.rs`로 이동(§3.7) |
 | N2 | `old_mouse_json_without_pen_pos_reads_none` | `mouse`에 `shoulder`·`partPos`만 있는 JSON | `Ok`, `pen_pos == None`, 다른 필드 기존 기대 그대로(U4와 같은 픽스처에 단언 추가해도 됨) |
 | N3 | `pen_pos_round_trips` (tempdir) | `pen_pos = Some(Point { x: 410.5, y: 505.25 })` → `save` → `load` | 같은 값, 파일 텍스트에 `"penPos"` 있음 |
 | N4 | `pen_pos_null_reads_none` | `"penPos": null` | `Ok`, `None`, `validate` = `Ok` |
@@ -1222,9 +1230,9 @@ pub struct TimerSettings {
 
 | 요구ID | 반영 절 | 상태 |
 |---|---|---|
-| **CR-019 / ST-R-05·OV-R-06 폐기 — `slam`·`SlamSettings` 삭제, 쾅 검증 삭제** | §2, §3.1, §3.4, §6 | ✅ 설계 · 소스 미적용 |
-| **CR-019 — 옛 settings.json `slam` 무시(읽기 실패 금지)** | §3.3, §8.3 C3·C4·C5 | ✅ 설계 · 소스 미적용(serde 기본 동작이라 코드 변경 없음, 테스트로 증명) |
-| **CR-019 — 파급 수리(window K4, examples, bridge 재노출)** | §8.3, §11 CR-019 파급 | ✅ 설계 · 소스 미적용 |
+| **CR-019 / ST-R-05·OV-R-06 폐기 — `slam`·`SlamSettings` 삭제, 쾅 검증 삭제** | §2, §3.1, §3.4, §6 | ✅ 설계 · 소스 반영 |
+| **CR-019 — 옛 settings.json `slam` 무시(읽기 실패 금지)** | §3.3, §8.3 C3·C4·C5 | ✅ 설계 · 소스 반영(serde 기본 동작이라 코드 변경 없음, 테스트로 증명) |
+| **CR-019 — 파급 수리(window K4, examples, bridge 재노출)** | §8.3, §11 CR-019 파급 | ✅ 설계 · 소스 반영 |
 | R-tmp-3 — 자유 사각형 이동 영역 `area`, 네 점 저장 | §3.1, §3.2, §8 U2·U3·U9·U10·U12 | ✅(구현 완료, 요구ID 확인 필요) |
 | R-tmp-3 — 기본 영역(실측 손 기준점 중심, 늘어나기 0.5~1.6 안) | §3.2 `default_area`, §11 D8, §8 U11·I1 | ✅(구현 완료) |
 | R-tmp-3 — `pad` 폐기, 옛 파일 호환 | §3.3, §8 U4·U7 | ✅(구현 완료) |
@@ -1234,24 +1242,24 @@ pub struct TimerSettings {
 | OV-R-14 / ST-R-09 — 기본 `hand` 없음 | §3.2 | ✅(구현 완료) |
 | OV-R-13 — 위치 필드·저장 | §3.1, §2 `save` | ✅(기존) |
 | ST-R-03·04·06, ST-R-10 | §3.1 | ✅(기존) |
-| **R-tmp-4 (CR-024) — `MouseSettings.pen_pos: Option<Point>`(JSON `penPos`, 🔒 이름·타입)** | §3.1, §3.1.1, §8.4 N1·N3 | ✅ 설계 · 소스 미적용 |
-| **R-tmp-4 — 기본 `None`, 옛 파일 호환(serde default)** | §3.1.1, §8.4 N1·N2·N4 | ✅ 설계 · 소스 미적용 |
+| **R-tmp-4 (CR-024) — `MouseSettings.pen_pos: Option<Point>`(JSON `penPos`, 🔒 이름·타입)** | §3.1, §3.1.1, §8.4 N1·N3 | ✅ 설계 · 소스 반영 |
+| **R-tmp-4 — 기본 `None`, 옛 파일 호환(serde default)** | §3.1.1, §8.4 N1·N2·N4 | ✅ 설계 · 소스 반영 |
 | **R-tmp-4 — 첫 등록 시 기본 위치 결정·드래그 조정** | [assets.md](assets.md) §9.7 UI-M8(요구만) | 부분(ui 몫) |
-| **SV2-02 — `language` 저장, 기본 ko, 알 수 없는 값 → ko(읽기 실패 금지)** | §3.5 코드·§8 V1·V2·V3 | ✅ 설계 · 소스 미적용 |
-| **SV2-03·04 — `positionLock`·`showInTaskbar` 저장(기본 false)** | §3.5, §8 V1·V3·V4·V5 | ✅ 설계 · 소스 미적용(적용은 window) |
-| **SV2-05 — `autostart` core 소유(쓰기 주체 제한)** | §3.5 문서주석·§9-4, [window.md](window.md) §2.4, [tray.md](tray.md) §7 | ✅ 설계 · 소스 미적용 |
-| **SV2 — 옛 settings.json 호환(새 키 없음 → 기본값, 나머지 보존)** | §3.5, §8 V1 | ✅ 설계 · 소스 미적용 |
+| **SV2-02 — `language` 저장, 기본 ko, 알 수 없는 값 → ko(읽기 실패 금지)** | §3.5 코드·§8 V1·V2·V3 | ✅ 설계 · 소스 반영 |
+| **SV2-03·04 — `positionLock`·`showInTaskbar` 저장(기본 false)** | §3.5, §8 V1·V3·V4·V5 | ✅ 설계 · 소스 반영(적용은 window) |
+| **SV2-05 — `autostart` core 소유(쓰기 주체 제한)** | §3.5 문서주석·§9-4, [window.md](window.md) §2.4, [tray.md](tray.md) §7 | ✅ 설계 · 소스 반영 |
+| **SV2 — 옛 settings.json 호환(새 키 없음 → 기본값, 나머지 보존)** | §3.5, §8 V1 | ✅ 설계 · 소스 반영 |
 | **SV2-11·12(D-7) — 배율·유휴 검증 그대로** | §3.4 `validate`(불변) | ✅(기존, 변경 없음) |
-| **R-tmp-5 (CR-033) — `MouseSettings.pen_mode: bool`(JSON `penMode`, 🔒 이름·타입)** | §3.1, §3.6, §8 P1·P3 | ✅ 설계 · 소스 미적용 |
-| **R-tmp-5 — 기본 false, 옛 파일 false(serde default), 검증 없음** | §3.6 호환, §8 P2·P4·P5 | ✅ 설계 · 소스 미적용 |
-| **R-tmp-5 — ui 소유 필드(`set_settings` 저장, `keep_core_owned` 불변)** | §3.6 파급·§9-5 | ✅ 설계 · 소스 미적용 |
+| **R-tmp-5 (CR-033) — `MouseSettings.pen_mode: bool`(JSON `penMode`, 🔒 이름·타입)** | §3.1, §3.6, §8 P1·P3 | ✅ 설계 · 소스 반영 |
+| **R-tmp-5 — 기본 false, 옛 파일 false(serde default), 검증 없음** | §3.6 호환, §8 P2·P4·P5 | ✅ 설계 · 소스 반영 |
+| **R-tmp-5 — ui 소유 필드(`set_settings` 저장, `keep_core_owned` 불변)** | §3.6 파급·§9-5 | ✅ 설계 · 소스 반영 |
 | **R-tmp-5 — 토글·안내 상자·확인창·`pen_up` 첫 등록 확인창·모드 해석** | §3.6 §9(요구만) | 부분(ui 몫) |
-| **TM-01 (CR-048) — `timer.mode`(stopwatch·countdown), `enabled` 의미 확장(D-1 A)** | §3.10.1, §3.10.5 S-T13·S-T15 | ✅ 설계 · 소스 미적용 |
-| **TM-02 — 옛 `enabled:true` → 스톱워치 켜짐(이행 코드 없음)** | §3.10.4, §3.10.5 S-T14 | ✅ 설계 · 소스 미적용 |
-| **TM-04 — `countdownSecs` 1~359999, 기본 1500(D-2·D-3), 읽기 보정·관대한 역직렬화** | §3.10.1~§3.10.3, S-T16·S-T17 | ✅ 설계 · 소스 미적용 |
-| **TM-10 — `alarmVolume` 0~100, 기본 80(D-10)** | §3.10.1~§3.10.3, S-T18 | ✅ 설계 · 소스 미적용 |
+| **TM-01 (CR-048) — `timer.mode`(stopwatch·countdown), `enabled` 의미 확장(D-1 A)** | §3.10.1, §3.10.5 S-T13·S-T15 | ✅ 설계 · 소스 반영 |
+| **TM-02 — 옛 `enabled:true` → 스톱워치 켜짐(이행 코드 없음)** | §3.10.4, §3.10.5 S-T14 | ✅ 설계 · 소스 반영 |
+| **TM-04 — `countdownSecs` 1~359999, 기본 1500(D-2·D-3), 읽기 보정·관대한 역직렬화** | §3.10.1~§3.10.3, S-T16·S-T17 | ✅ 설계 · 소스 반영 |
+| **TM-10 — `alarmVolume` 0~100, 기본 44(0.4.0 — 옛 D-10 80)** | §3.10.1~§3.10.3, S-T18 | ✅ 설계 · 소스 반영 |
 | **TM-13 — core 검증 문구 2개(원문 ko)** | §3.10.3 | ✅ 설계 (3개 국어는 ui) |
-| **CR-048 — 새 필드 직렬화·왕복** | §3.10.5 S-T12 갱신·S-T12b 갱신·S-T19 | ✅ 설계 · 소스 미적용 |
+| **CR-048 — 새 필드 직렬화·왕복** | §3.10.5 S-T12 갱신·S-T12b 갱신·S-T19 | ✅ 설계 · 소스 반영 |
 
 ## 11. 설계 결정 노트
 

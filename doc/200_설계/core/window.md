@@ -1,7 +1,8 @@
 # window 모듈 설계
 
-- 상태: 확정(사용자) — §3.1(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정 · **소스 미적용** · 최종 갱신 2026-09-29
+- 상태: 확정(사용자) — §3.1(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정 · **소스 반영**(커밋 2be41ce) · 최종 갱신 2026-09-30(doc-sync)
 - 변경이력:
+  - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) §3.1(overlay R-40)의 「소스 미적용」을 걷어냈다. 대조 결과: `pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, WindowError>`(`window/mod.rs:157`)와 `ScreenBounds::contains(&self, x: i32, y: i32) -> bool`(`:108`)이 있고, 호출자는 `tray/popup.rs`다(`should_popup`:125, 조회는 `overlay-menu` 스레드에서 상태가 Idle일 때만 — PU-h). §10 R-40 행을 「소스 반영」으로 바꿨다. 같은 날 2차로 §10(SV2-03~06, CR-017 `list_monitors`, OV-R-13 위치 불간섭·이동 감지, OV-R-03 표시 크기)의 「✅ 설계 · 소스 미적용」 8곳도 「소스 반영」으로 바꿨다. 근거 공개 함수: `window/mod.rs` `list_monitors`:134·`apply_overlay_settings`:194·`default_overlay_position`:200·`apply_overlay_window`:208, `window/placement.rs` `watch_overlay_moves`:198·`persist_overlay_position`:224·`keep_overlay_position`:240·`keep_core_owned`:256·`reset_overlay_position`:265, `window/sizing.rs` `overlay_display_size`:54. 「(요구ID 확인 필요)」 꼬리는 그대로 둔다.
   - 2026-09-29 (R-40 감사 반영, 리뷰 SEC-301 — 문서 주석만, 시그니처·본문·에러 불변) `overlay_screen_rect`의 호출자가 tray `popup_now`(메인)에서 **tray `overlay-menu` 스레드(비메인)**로 바뀐다. 전경 창 조회보다 먼저 사각형을 판정하기 위해서다. 비메인 호출 안전 근거(tauri-runtime-wry 2.12.0 getter = 메인 스레드 동기 왕복)와 호출 조건(메뉴 상태 Idle일 때만)을 §3.1 문서 주석·스레드 줄에 적었다. 정본 [tray.md](tray.md) §3.7.3 PU-h·§11 T17. **소스 미적용**(`window/mod.rs:151-153` 문서 주석 교체).
   - 2026-09-29 (overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.3·§4.2) **신규 공개 항목 2개**: `impl ScreenBounds { pub fn contains(&self, x: i32, y: i32) -> bool }`(반열림 `[x, x+w) × [y, y+h)`, i64 계산, 순수)·`pub fn overlay_screen_rect(app) -> Result<Option<ScreenBounds>, WindowError>`(보이는 오버레이 창의 바깥 사각형, 물리 px — 숨김이면 `Ok(None)`). 호출자는 [tray.md](tray.md) §3.7 `popup_now`(메인 스레드). 새 에러 변형·unsafe·스레드·설정 없음. 테스트 WR1~WR3(`mod.rs` 테스트). 증분 전체 **§3.1**, §1·§2·§5·§6·§8.8·§10·§11 갱신.
   - 2026-09-24 (R-set-v2 SV2-03·04·05·06, 🔒 사용자 결정 D-1~D-10, 확정사항 §6 「설정 창 개편」) **신규 공개 함수 4개**: `apply_overlay_window(app, &Settings)`(표시/숨김 + 작업표시줄 `set_skip_taskbar(!show_in_taskbar)` + 클릭 통과 `set_ignore_cursor_events(position_lock)`, 멱등, **호출마다 재적용**), `keep_core_owned(incoming, &current)`(`overlay.x/y` + `autostart` 유지 — 기존 `keep_overlay_position` 재사용), `default_overlay_position()`((100,100) 단일 출처 = `Settings::default().overlay`), `reset_overlay_position(app, &Mutex<Settings>, &Path)`(기본 위치로 이동·저장, 반환 = 저장 후 설정). **옛 `apply_overlay_settings(&OverlaySettings)`는 bridge 전환까지 유지**(core만 먼저 들어가도 `cargo check`가 깨지지 않게 — §2.4 D27). 시작 순서에 창 속성 적용·자동 실행 보정 추가. 이번 변경의 §1·§2·§4·§7·§8·§9·§10·§11 증분은 **§2.4에 모아 적었다.** 사용자 결정 완료로 바로 확정. **소스 미적용.**
@@ -313,10 +314,10 @@ pub fn reset_overlay_position(
 
 | 요구ID | 반영 | 상태 |
 |---|---|---|
-| SV2-03 — 위치 잠금(클릭 통과·끌기 불가, 재시작 유지) | §2.4 `apply_overlay_window`, 시작 3단계, W1·W2·W9 | ✅ 설계 · 소스 미적용 |
-| SV2-04 — 작업표시줄 표시(숨김→표시 후 유지) | §2.4 `apply_overlay_window`, 호출 지점 ①~④, W3~W5 | ✅ 설계 · 소스 미적용 |
-| SV2-05 — `set_settings`의 `autostart` 무시 | §2.4 `keep_core_owned`, K6·K7, §9 증분 | ✅ 설계 · 소스 미적용 |
-| SV2-06 — 위치 초기화(숨김·잠금 중 가능, 디바운스와 겹쳐도 기본 위치) | §2.4 `default_overlay_position`·`reset_overlay_position`, D1·D2, W6~W8 | ✅ 설계 · 소스 미적용 |
+| SV2-03 — 위치 잠금(클릭 통과·끌기 불가, 재시작 유지) | §2.4 `apply_overlay_window`, 시작 3단계, W1·W2·W9 | ✅ 설계 · 소스 반영 |
+| SV2-04 — 작업표시줄 표시(숨김→표시 후 유지) | §2.4 `apply_overlay_window`, 호출 지점 ①~④, W3~W5 | ✅ 설계 · 소스 반영 |
+| SV2-05 — `set_settings`의 `autostart` 무시 | §2.4 `keep_core_owned`, K6·K7, §9 증분 | ✅ 설계 · 소스 반영 |
+| SV2-06 — 위치 초기화(숨김·잠금 중 가능, 디바운스와 겹쳐도 기본 위치) | §2.4 `default_overlay_position`·`reset_overlay_position`, D1·D2, W6~W8 | ✅ 설계 · 소스 반영 |
 
 **§11 증분 — 설계 결정**
 
@@ -741,20 +742,20 @@ ui 영향(ui-manager 인계, 참고): overlay 초기 로드 P-1의 `getScreenBou
 
 | 요구ID | 반영 절 | 상태 |
 |---|---|---|
-| R-tmp-4 — 커서가 있는 모니터 기준 매핑용 모니터 목록 (CR-017) | §2 `list_monitors`, §2.3, §3, §8.7 L1~L6, §9.4 | ✅ 설계 · 소스 미적용 (요구ID 확인 필요) |
-| OV-R-13 — `set_settings` 위치 불간섭(사용자 신고 2026-09-23) | §2 `keep_overlay_position`·`apply_overlay_settings` 재정의, §2.1.1, §4, §7, §8.6 K1~K5·P1~P5, §9.3 | ✅ 설계 · 소스 미적용 |
-| OV-R-13 — 이동 감지·저장 | §2 `watch_overlay_moves`·`persist_overlay_position`, §4, §8 | ✅ 설계 · 소스 미적용 |
+| R-tmp-4 — 커서가 있는 모니터 기준 매핑용 모니터 목록 (CR-017) | §2 `list_monitors`, §2.3, §3, §8.7 L1~L6, §9.4 | ✅ 설계 · 소스 반영 (요구ID 확인 필요) |
+| OV-R-13 — `set_settings` 위치 불간섭(사용자 신고 2026-09-23) | §2 `keep_overlay_position`·`apply_overlay_settings` 재정의, §2.1.1, §4, §7, §8.6 K1~K5·P1~P5, §9.3 | ✅ 설계 · 소스 반영 |
+| OV-R-13 — 이동 감지·저장 | §2 `watch_overlay_moves`·`persist_overlay_position`, §4, §8 | ✅ 설계 · 소스 반영 |
 | OV-R-13 — 연속 쓰기 방지 | §2 `MOVE_SAVE_DEBOUNCE`, §3 `MoveDebounce`, §4 | ✅ 설계 |
 | OV-R-13 — 시작 시 복원 | §2 `restore_overlay_position`, §4 시작 순서 | ✅ 설계 |
 | OV-R-13 — 모니터 밖이면 기본 위치 | §2.1 `resolve_overlay_position`, U3~U7, M4 | ✅ 설계 |
-| OV-R-03 — 창 크기 = 표시 크기(계산식) | §2.2 `overlay_display_size`, S1~S12 | ✅ 설계 · 소스 미적용 |
+| OV-R-03 — 창 크기 = 표시 크기(계산식) | §2.2 `overlay_display_size`, S1~S12 | ✅ 설계 · 소스 반영 |
 | OV-R-03 — 배율 변경 시 리사이즈 | §2.2 `resize_overlay`, §4 리사이즈 흐름 ②, §9.1 `set_settings`, R2~R4 | ✅ 설계 |
 | OV-R-03 — 시작 시 저장 배율 복원 | §4 시작 순서 0단계, R7, R10 | ✅ 설계 |
 | OV-R-03 — 캔버스 변경 시 리사이즈 | §4 ③, §9.1 `import_asset`·`remove_asset`, R5·R6 | ✅ 설계 |
 | OV-R-03 — 드래그 영역이 창 전체 | §9.2 UI-1 | 부분(ui 인계 필요) |
 | OV-R-12 | §1(ui 내장 드래그, 결과만 수신) | ✅(기존) |
 | OV-R-01 | §1(`tauri.conf.json`) | ✅(기존) |
-| **overlay R-40 (CR-062) — "오버레이 위" = 보이는 창 사각형(투명 포함), 누름·뗌 두 점 판정의 재료(🔒 U-1)·숨김이면 없음(AC-4)** | §1, §2 `contains`·`overlay_screen_rect`, §3.1, §6, §8.8 WR1~WR3 | 설계 확정 · 소스 미적용(두 점 조합 판정 `should_popup`은 [tray.md](tray.md) §3.7) |
+| **overlay R-40 (CR-062) — "오버레이 위" = 보이는 창 사각형(투명 포함), 누름·뗌 두 점 판정의 재료(🔒 U-1)·숨김이면 없음(AC-4)** | §1, §2 `contains`·`overlay_screen_rect`, §3.1, §6, §8.8 WR1~WR3 | 설계 확정 · 소스 반영(두 점 조합 판정 `should_popup`은 [tray.md](tray.md) §3.7) |
 
 ## 11. 설계 결정 노트
 

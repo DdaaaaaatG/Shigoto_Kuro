@@ -1,7 +1,22 @@
 {
-  "lastSyncedSha": null,
-  "syncedAt": null,
-  "note": "초기 상태. 첫 /doc-sync 실행 시 HEAD로 채워진다.",
-  "syncedTargets": [],
-  "openItems": {}
+  "lastSyncedSha": "b5ff65b",
+  "syncedAt": "2026-09-30",
+  "note": "첫 /doc-sync. 기준 99fe564..b5ff65b + next-session §2-3·§2-4 잔여 목록. 산출물은 미커밋(/sync 대상). vitest 805/805·tsc·lint 0. Rust 툴체인 설치 후 cargo fmt 0·clippy 0·cargo test 466/466.",
+  "syncedTargets": [
+    "src/overlay (requirements·design·design/*·scenarios v2.6·manual-checklist·스펙 주석 3파일)",
+    "src/settings (requirements v1.26·design·design/*·scenarios v28·manual-checklist v20·스펙 4파일, TC-309·310 신규)",
+    "doc/200_설계/core (settings·data_reset·timer·assets·hook·tray·window)",
+    "doc/200_설계/bridge/contract.md v0.28 (표기 정정, 계약 변경 없음)",
+    "주석 정정: src/bridge/{types,commands}.ts, src-tauri/src/bridge/types.rs, src-tauri/src/settings/mod.rs, src-tauri/src/assets/slot.rs"
+  ],
+  "openItems": {
+    "settings-R35-R41-R56": "R-35는 CR-063으로 다시 폐기, R-36·R-56 「7장」은 비고로 6장 명시(v1.27). 남은 것: R-41 「기본값=비우기」 해석 사용자 확인, scenarios v29 AB-3(뒷머리 「기본값」으로 비운 뒤 포커스 — kb_down_0과 같은 현 동작 유지), AB-5 픽스처 이름(FIRST7·d7·DEFAULT_KEYS7 주석)",
+    "window-bridge-error": "window::apply_overlay_settings가 BridgeError 반환 — core→bridge 역참조 여부 core-analyst 판단",
+    "core-CR047": "hook.md §3.8·527·528·1292행, tray.md §3.5·340행 — CR-047 실측 게이트 절 정리",
+    "contract-open": "§6.2 묶음 행 분리 여부, L1508 테스트 실패 34건 기록 재판정, L185·187 CR-053 v0.23/v0.24 엇갈림, 머리 「초안」→v1 (사용자)",
+    "main-tsx-boundary": "src/main.tsx:11 bridge 밖 @tauri-apps/api import (BRG-004)",
+    "overlay-docs": "RTM R-13 비고 core 적용 확인, RTM R-23~25 예정 TC 칸, requirements §3 「미확정 계약」 문구, scenarios v2.6 개정표 내용을 TC 본문(TC-043~046·054·080·105·142·143·198·213·322)에 직접 반영, §0.2 558,500",
+    "settings-docs": "scenarios v28 AA-1~AA-5(i18n §4.3 10키, RTM R-01 TC-306·308~310, CR 대장 TC-307·314 표기, kb_down_0 비우기 후 포커스 G-1), DragHit·mouseWizard 스펙 「기본 그림」 주석",
+    "manual": "두 화면 manual.md 미작성"
+  }
 }

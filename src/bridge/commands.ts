@@ -59,7 +59,7 @@ export const restoreDefaultAsset = (slot: AssetSlot) =>
   call<AssetManifest>('restore_default_asset', { slot })
 
 /**
- * (v0.16, CR-035 · DA-05) 내장 기본 그림 15장을 dir(절대 경로)에 원본 바이트 그대로 쓴다.
+ * (v0.16, CR-035 · DA-05) 내장 기본 그림 6장을 dir(절대 경로)에 원본 바이트 그대로 쓴다.
  * overwrite: false이고 충돌이 있으면 아무것도 쓰지 않고 conflicts만 채워 반환한다
  * (contract.md §5·§5.7 — 「덮어쓸까요?」 확인 뒤 true로 다시 부른다). 부수 효과 없음.
  */
@@ -123,9 +123,11 @@ export const removeAlarmSound = () => call<void>('remove_alarm_sound')
 // ─── 데이터 초기화 (contract.md §5·§5.10, v0.25 신규 · data-reset) ──────────
 /**
  * 🔒 베타 전용(02-design §0 R-A·R-B). 앱 데이터(그림·매니페스트·알림음)를 전부 지우고 내장
- * 기본 7장으로 되돌린다. 언어·자동 실행은 유지, 오버레이 위치는 기본값으로. 결과는 반환값이
+ * 기본 6장으로 되돌린다. 언어·자동 실행은 유지, 오버레이 위치는 기본값으로. 결과는 반환값이
  * 아니라 settings://changed·assets://changed 이벤트와 오버레이 새로고침으로 받는다 — 설정 창은
- * 확인 창(ui 몫) 뒤에 호출하고, 응답 전까지 다른 조작을 막는다(02-design §2 resetPhase).
+ * 확인 창(ui 몫) 뒤에 호출하고, 응답 전까지 초기화 버튼 재진입만 막는다(CR-003, 02-design §2
+ * resetPhase — 다른 조작은 막지 않는다). settings 창에서만 호출할 수 있다 — 다른 창이면
+ * `reset.forbidden`으로 거부된다.
  */
 export const resetAppData = () => call<void>('reset_app_data')
 

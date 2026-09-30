@@ -1,8 +1,9 @@
 # data_reset 모듈 설계
 
-- 상태: 감사 반영(범위·정책은 사용자 확정 🔒 2026-09-27, 배포 전 검증 WARN 6건 반영 🔒 2026-09-27) · 최종 갱신: 2026-09-29(소스 동기화)
+- 상태: 감사 반영(범위·정책은 사용자 확정 🔒 2026-09-27, 배포 전 검증 WARN 6건 반영 🔒 2026-09-27) · 최종 갱신: 2026-09-30(doc-sync)
 - 변경이력:
-  - 2026-09-29 (3차, 소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **세대 5·내장 6장**: `pub const DATA_GENERATION: u32 = 5`(주석: 1=defaults-v1 CR-035, 2=defaults-v2 CR-038, 3=defaults-v3 CR-044, 4=defaults-v4 CR-053 hair 포함 7장, 5 = 0.4.0 사용자 확정 배포 세트 hair 제외 6장), `#[cfg(test)] const DEFAULT_ASSETS_FINGERPRINT: (usize, u64, u64) = (6, 336_217, 0x4522_7552_5289_deea)`(실측 2026-09-28 — §11.4 C-6 해소). 이 문서의 「`DATA_GENERATION`(=4)」「세대 4」「표식 4」「내장 7장」「(7, 376_708, 0x0…)」「376 708」은 작성 시점 값이다 — 현재는 각각 `DATA_GENERATION`(5)·`DEFAULT_ASSETS.len()`(6)·위 지문으로 읽는다. 통합 테스트(`tests/data_reset.rs`)는 리터럴이 아니라 두 상수로 단언하고, `mod.rs` `//!` [순서] ③도 「내장 기본 전부(`DEFAULT_ASSETS.len()`) 시딩」이다. 표 내용은 [assets.md](assets.md) §3.16.0. ② **SEC-205 텍스트 크기 상한**: `generation::read_marker`·`attempts::read_attempts`가 `fs::read_to_string` 대신 `crate::settings::read_capped_string(…, crate::settings::MAX_TEXT_FILE_BYTES)`(1MiB)로 읽는다 — 상한 초과는 다른 읽기 실패와 같은 경로로 **표식 없음(`None`) / 시도 0**. §3.5 「읽기」·§3.6.1 `read_attempts` 주석을 이 뜻으로 읽는다. 새 단위 테스트 `marker_over_size_cap_is_none`(generation.rs)·`attempts_over_size_cap_is_zero`(attempts.rs) — §8.1 증분(attempts.rs 단위 테스트는 3개). 공개 API·`ResetError`·`code()` 불변. ③ **표기 정리**: 1·2차의 「소스 미적용」은 모두 소스에 반영됨(`data_reset/{mod,generation,wipe,attempts}.rs`, `tests/data_reset.rs`). C-5(데이터 폴더 경로 `com.kuro.keyviewer`)는 2026-09-28 해소 그대로.
+  - 2026-09-30 (4차, doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 3차 ①에서 「작성 시점 값」으로 남겨 둔 본문 값을 현재 소스 값으로 고쳤다: §2 `DATA_GENERATION` 표 행·§2 코드 조각(`= 5`, 세대 주석 1~5, `DEFAULT_ASSETS_FINGERPRINT` = `(6, 336_217, 0x4522_7552_5289_deea)` — `data_reset/mod.rs:39-52`)·§2 지문 설명, §3 `//!` 조각 [순서] ③(「내장 기본 전부(`DEFAULT_ASSETS.len()`) 시딩」 — `mod.rs:8`과 일치), R-A 표 `(=5)`, §6 `Seed` 원인·§11.2 DR-3(「내장 전부 성공」), 비용 목표(내장 6장), §8.2 통합 테스트 기대값(표식 5·내장 6장·`DEFAULT_ASSETS` 6개·`["generation"] == DATA_GENERATION`), 수동 M3 로그(세대 5). v3 픽스처(`defaults-v3` 6장)·§11.4 C-6 이력 문구는 옛 세트 서술이라 그대로 둔다. 공개 API·`ResetError`·`code()` 불변.
+  - 2026-09-29 (3차, 소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **세대 5·내장 6장**: `pub const DATA_GENERATION: u32 = 5`(주석: 1=defaults-v1 CR-035, 2=defaults-v2 CR-038, 3=defaults-v3 CR-044, 4=defaults-v4 CR-053 hair 포함 7장, 5 = 0.4.0 사용자 확정 배포 세트 hair 제외 6장), `#[cfg(test)] const DEFAULT_ASSETS_FINGERPRINT: (usize, u64, u64) = (6, 336_217, 0x4522_7552_5289_deea)`(실측 2026-09-28 — §11.4 C-6 해소). 이 문서의 「`DATA_GENERATION`(=4)」「세대 4」「표식 4」「내장 7장」「(7, 376_708, 0x0…)」「376 708」은 작성 시점 값이다(→ 4차 변경이력에서 본문을 현재 값으로 고침) — 현재는 각각 `DATA_GENERATION`(5)·`DEFAULT_ASSETS.len()`(6)·위 지문으로 읽는다. 통합 테스트(`tests/data_reset.rs`)는 리터럴이 아니라 두 상수로 단언하고, `mod.rs` `//!` [순서] ③도 「내장 기본 전부(`DEFAULT_ASSETS.len()`) 시딩」이다. 표 내용은 [assets.md](assets.md) §3.16.0. ② **SEC-205 텍스트 크기 상한**: `generation::read_marker`·`attempts::read_attempts`가 `fs::read_to_string` 대신 `crate::settings::read_capped_string(…, crate::settings::MAX_TEXT_FILE_BYTES)`(1MiB)로 읽는다 — 상한 초과는 다른 읽기 실패와 같은 경로로 **표식 없음(`None`) / 시도 0**. §3.5 「읽기」·§3.6.1 `read_attempts` 주석을 이 뜻으로 읽는다. 새 단위 테스트 `marker_over_size_cap_is_none`(generation.rs)·`attempts_over_size_cap_is_zero`(attempts.rs) — §8.1 증분(attempts.rs 단위 테스트는 3개). 공개 API·`ResetError`·`code()` 불변. ③ **표기 정리**: 1·2차의 「소스 미적용」은 모두 소스에 반영됨(`data_reset/{mod,generation,wipe,attempts}.rs`, `tests/data_reset.rs`). C-5(데이터 폴더 경로 `com.kuro.keyviewer`)는 2026-09-28 해소 그대로.
   - 2026-09-27 (2차, 배포 전 검증 WARN 6건 — 사용자 승인 2026-09-27: HIGH·MEDIUM 전부 + core LOW 2건) **SEC-001**(R-A4 보강: ⓪ 시작 폴더 자체가 링크·재분석 지점이면 아무것도 안 하고 `reset.io`, §3.4.1) · **CORE-001**(R-A7 신설: 시작 경로 연속 실패 상한 3회, 새 파일 `data-reset-attempts.json`, §3.6.1) · **CORE-002**(R-A8 신설: `tauri-plugin-single-instance` 첫 플러그인, 두 번째 실행 = 설정 창 표시, §3.10) · **CORE-003**(항목별 NotFound 건너뜀, §3.4) · **CORE-004**(확장자 판정 `Path::extension`, §3.4) · **CORE-005**(시작 실패 로그에 단계·`io::ErrorKind`, 비공개 `Stage`, §3.6). **공개 API·`ResetError` 변형·`code()` 문자열 불변**(bridge 영향 없음). `assets/defaults.rs`는 바꾸지 않는다(§11.2 DR-12). 델타는 §11.5, 한계는 §11.6. **소스 미적용.**
   - 2026-09-27 (1차, 신규 문서, 🔒 사용자 결정 R-A·R-B·R-C, D-1~D-6(D-2 = **언어 유지**로 확정), 인계 패킷 `doc/200_설계/architecture/data-reset-03-packet-core.md`, 근거 `data-reset-02-design.md` §0·§4·§5·§8, 현황 `.claude/reports/core-survey-20260927-1400.md`) **새 모듈 `data_reset`**(`mod.rs`·`generation.rs`·`wipe.rs`). 세대 표식 `data-generation.json`, 판정 `decide` 한 곳, 공통 초기화 `reset_data`(순서 ①~⑤), 시작 진입점 `run_startup`, 에러 `ResetError`(`reset.io`·`reset.seed`, 설정 실패는 `SettingsError::code()` 그대로). `lib.rs` 시작 순서 변경(§3.7), `tray::refresh_overlay` `pub(crate)`(§3.8), 버전 0.1.1(§3.9). **패킷 대비 델타는 §11.1**(언어 유지, `settings.json` 본체를 지우지 않음, 실패 주입 테스트 교체, 테스트 3건 추가). **소스 미적용.**
 - 요구ID 표기: `R-A1`~`R-A6`·`R-A2'`·`R-B2`·`R-B3`·`R-C1` = 아키텍처 횡단 ID(`doc/200_설계/architecture/data-reset-02-design.md` §0). `R-A7`·`R-A8` = 배포 전 검증 WARN(CORE-001·CORE-002)에서 이 문서가 R-A 체계 다음 번호로 신설(사용자 승인 2026-09-27, 02-design에는 없음). 모두 `doc/100_요구조건/`에는 없다(§11.4 C-2).
@@ -33,7 +34,7 @@
 
 | ID | 결정 | 반영 |
 |---|---|---|
-| R-A 베타 정책 | 표식이 없거나 `DATA_GENERATION`(=4)과 다르면(큰 값 포함) 전체 초기화 | §3.1 `decide` |
+| R-A 베타 정책 | 표식이 없거나 `DATA_GENERATION`(=5)과 다르면(큰 값 포함) 전체 초기화 | §3.1 `decide` |
 | D-1 | 수동 세대 번호 + 지문 가드 테스트 | §2 `DATA_GENERATION`, §8 `generation_fingerprint_guard` |
 | D-2 | **언어 유지** | §3.2 `reset_settings` |
 | D-3 | `autostart` 값·작업 스케줄러 등록 유지 | §3.2(값), §3.4(스케줄러는 건드리지 않음) |
@@ -47,7 +48,7 @@
 
 | 이름 | 인자 | 반환 | 실패 조건 | 요구ID |
 |---|---|---|---|---|
-| `pub const DATA_GENERATION: u32 = 4` | — | 현재 exe의 데이터 세대 | — | R-A1·R-A2, D-1 |
+| `pub const DATA_GENERATION: u32 = 5` | — | 현재 exe의 데이터 세대 | — | R-A1·R-A2, D-1 |
 | `pub const MARKER_FILE: &str = "data-generation.json"` | — | 표식 파일 이름(데이터 폴더 루트) | — | R-A1 |
 | `pub enum ResetPolicy { WipeAll }` | — | 정책(변형 1개만. 미리 늘리지 않음) | — | R-A6 |
 | `pub const POLICY: ResetPolicy = ResetPolicy::WipeAll` | — | 현재 정책 | — | R-A6 |
@@ -79,15 +80,20 @@ mod wipe;
 /// 시작 경로 연속 실패 상한(R-A7, CORE-001). 비공개. 이 횟수 이상이면 run_startup이 지우지 않는다.
 const MAX_STARTUP_ATTEMPTS: u32 = 3;
 
-/// 앱 데이터 세대. doc/assets/defaults/ = 내장 DEFAULT_ASSETS = 세대 4 (CR-053).
-/// 1=defaults-v1(CR-035), 2=defaults-v2(CR-038), 3=defaults-v3(CR-044).
-/// 기본 그림을 바꾸면: 옛 폴더를 doc/assets/defaults-v{N}으로 옮기고, 이 값을 +1 하고,
-/// 아래 DEFAULT_ASSETS_FINGERPRINT를 새로 잰 값으로 바꾼다(generation_fingerprint_guard가 강제).
-pub const DATA_GENERATION: u32 = 4;
+/// 앱 데이터 세대. doc/assets/defaults/ = 내장 DEFAULT_ASSETS = 세대 5 (0.4.0, 사용자 확정 배포
+/// 세트 — hair 제외 6장). 1=defaults-v1(CR-035), 2=defaults-v2(CR-038), 3=defaults-v3(CR-044),
+/// 4=defaults-v4(CR-053, hair 포함 7장). 기본 그림을 바꾸면: 옛 폴더를 doc/assets/defaults-v{N}으로
+/// 옮기고, 이 값을 +1 하고, 아래 DEFAULT_ASSETS_FINGERPRINT를 새로 잰 값으로 바꾼다
+/// (generation_fingerprint_guard가 강제).
+pub const DATA_GENERATION: u32 = 5;
 
 /// 내장 기본 그림 지문(장수, 바이트 합, FNV-1a 64 — generation::fingerprint). 테스트 전용.
 #[cfg(test)]
-const DEFAULT_ASSETS_FINGERPRINT: (usize, u64, u64) = (7, 376_708, 0x0000_0000_0000_0000 /* 구현 때 실측 */);
+const DEFAULT_ASSETS_FINGERPRINT: (usize, u64, u64) = (
+    6,
+    336_217,
+    0x4522_7552_5289_deea, /* 실측(2026-09-28) */
+);
 
 pub const MARKER_FILE: &str = "data-generation.json";
 
@@ -117,7 +123,7 @@ pub fn run_startup(paths: &AppPaths, settings: &Mutex<Settings>);
 ```
 
 - `AppPaths`(lib.rs:34, 필드 3개 모두 `pub`)를 그대로 받는다. 테스트는 `AppPaths { data_dir, assets_dir, settings_file }`를 tempdir로 직접 만든다.
-- `DEFAULT_ASSETS_FINGERPRINT`의 바이트 합 376 708은 core-survey Q9의 파일 크기 합(34202+22179+145979+11971+21887+19500+120990)이다. FNV 값은 구현 때 가드 테스트를 한 번 돌려 얻은 값으로 채운다(§11.4 C-6). `#[cfg(test)]`인 이유는 §11.2 DR-5.
+- `DEFAULT_ASSETS_FINGERPRINT`는 세대 5 내장 6장(`assets/defaults.rs` `DEFAULT_ASSETS: [DefaultAsset; 6]`)의 실측값 (6장, 바이트 합 336 217, FNV-1a 64 `0x4522_7552_5289_deea`, 2026-09-28)이다. (이력: 1차 설계 때는 세대 4·7장·바이트 합 376 708(core-survey Q9 크기 합)에 FNV 미정이었다 — §11.4 C-6, 해소.) `#[cfg(test)]`인 이유는 §11.2 DR-5.
 
 ## 3. 내부 구조
 
@@ -147,7 +153,7 @@ pub fn run_startup(paths: &AppPaths, settings: &Mutex<Settings>);
 //! [정책] ★ 베타 정책, 정식 배포 전 재결정. 판정은 decide()/POLICY 한 곳. 정식 배포 전환안
 //!        (옛 기본 그대로인 칸·좌표만 교체)은 doc/200_설계/architecture/data-reset-02-design.md §8 메모 — 미구현.
 //! [순서] ⓪ 시작 폴더 검사(data_dir·assets_dir 자체가 링크·재분석 지점이면 중단) → ① 표식 삭제
-//!        → ② 화이트리스트 삭제 → ③ 내장 기본 7장 시딩 → ④ settings::update(보존 규칙)
+//!        → ② 화이트리스트 삭제 → ③ 내장 기본 전부(`DEFAULT_ASSETS.len()`) 시딩 → ④ settings::update(보존 규칙)
 //!        → ⑤ 표식 기록(원자적) → ⑥ 시도 기록 삭제(실패해도 경고만). 어디서 끊겨도 표식이 없으므로
 //!        다음 시작 때 처음부터 다시 한다.
 //! [상한] 시작 경로만: 연속 실패 시도(data-reset-attempts.json)가 3회 이상이면 지우지 않고 경고만.
@@ -575,7 +581,7 @@ emit:   없음(이벤트는 bridge가 잠금 밖에서 보낸다)
 - 2차에도 `data_reset`에는 새 스레드·채널·정적 상태가 없다. 시도 기록(§3.6.1)은 파일이고 시작 경로의 setup 스레드에서만 쓴다(버튼 경로는 ⑥ 삭제만). 단일 인스턴스 콜백은 `lib.rs` 소관이다(§3.10).
 
 - 시작 경로에는 아직 AppState·창·훅이 없으므로 파일 작업만 한다(core-survey Q2).
-- 비용 목표(02-design §7): Keep 경로 ≤ 5 ms(작은 파일 1개 읽기), 초기화 1회 ≤ 300 ms(삭제 + 7장 시딩 + 설정·표식 원자 쓰기). 측정은 로그의 ms와 테스트 `reset_elapsed_under_budget` 출력으로 한다(단언하지 않음).
+- 비용 목표(02-design §7): Keep 경로 ≤ 5 ms(작은 파일 1개 읽기), 초기화 1회 ≤ 300 ms(삭제 + 내장 6장 시딩 + 설정·표식 원자 쓰기). 측정은 로그의 ms와 테스트 `reset_elapsed_under_budget` 출력으로 한다(단언하지 않음).
 
 ## 5. unsafe
 
@@ -588,7 +594,7 @@ emit:   없음(이벤트는 bridge가 잠금 밖에서 보낸다)
 | 변형 | 한국어 메시지 | 원인 | `code()` |
 |---|---|---|---|
 | `Io(#[from] std::io::Error)` | 앱 데이터를 초기화하지 못했습니다. 다음에 앱을 시작할 때 다시 시도합니다. | ⓪ 시작 폴더가 링크·재분석 지점이거나 메타데이터 조회 실패(2차), ① 표식 삭제, ② 파일 삭제·폴더 읽기(NotFound 제외 — 2차), ⑤ 표식 기록 실패. 시작 경로 전용으로 시도 기록 쓰기 실패(로그만, 밖으로 안 나감) | **`reset.io`** |
-| `Seed` | 기본 그림을 다시 채우지 못했습니다. 다음에 앱을 시작할 때 다시 시도합니다. | ③ 시딩 결과가 「7장 전부 성공」이 아님(`Skipped`·일부 실패) | **`reset.seed`** |
+| `Seed` | 기본 그림을 다시 채우지 못했습니다. 다음에 앱을 시작할 때 다시 시도합니다. | ③ 시딩 결과가 「내장 전부(`DEFAULT_ASSETS.len()` = 6장) 성공」이 아님(`Skipped`·일부 실패) | **`reset.seed`** |
 | `Settings(#[from] SettingsError)` | `#[error(transparent)]` — `SettingsError`의 메시지 그대로 | ④ `settings::update` 실패 | **`SettingsError::code()` 그대로**(`settings.io`·`settings.invalid`·`settings.format`·`state.poisoned`) |
 
 ```rust
@@ -640,7 +646,7 @@ impl ResetError {
 - **v3 세트 설치**: `doc/assets/defaults-v3/*.png` 6장을 `concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/defaults-v3/", …)`로 읽어(`tests/sample_assets.rs` 전례) `assets::import_bytes`로 등록한다. 파일명 = 슬롯 file_key. manifest가 만들어진다.
 - **커스텀 settings.json**: shoulder (1,2), part_pos (3,4), pen_pos (5,6), pen_mode false, timer.text_pos (7,8)·rotation 0, scale 1.5, **language `ja`**, **autostart true**, overlay x/y 지정. `serde_json`으로 써 둔다.
 - 잡동사니: `assets/alarm.wav`(아무 바이트), `assets/kb_up.png.123-1.tmp`, `data/settings.json.123-1.tmp`, `assets/keep_me.txt`, `assets/sub/x.png`(하위 폴더), `data/EBWebView/x`(루트 하위 폴더), `tmp/outside.png`(데이터 폴더 밖 감시 파일).
-- 표식 값 확인: 통합 테스트는 `data/data-generation.json`을 `serde_json::Value`로 읽어 `["generation"] == 4`를 본다(`generation`은 비공개 모듈, §11.2 DR-4).
+- 표식 값 확인: 통합 테스트는 `data/data-generation.json`을 `serde_json::Value`로 읽어 `["generation"] == DATA_GENERATION`(5)를 본다(`generation`은 비공개 모듈, §11.2 DR-4).
 
 ### 8.1 단위 (`#[cfg(test)] mod tests`)
 
@@ -665,23 +671,23 @@ impl ResetError {
 
 | 테스트 | 절차 | 단언 |
 |---|---|---|
-| `reset_from_v3_with_custom_settings` | 픽스처 전부 + 표식 없음 → `m = Mutex::new(load_or_default)` → `run_startup(&paths, &m)` | assets 폴더 바로 아래 png가 **정확히 내장 7장**이고 각 바이트가 `DEFAULT_ASSETS`와 같다. v3에만 있던 `kb_down_0.png`가 없다. manifest 항목 슬롯 = `DEFAULT_ASSETS` 7개. `alarm.wav`·`.tmp` 두 개가 없다. **메모리 값과 `load_or_default(settings_file)` 모두 == `reset_settings(커스텀)` — 즉 language `ja`·autostart true 유지, 나머지 기본값.** 표식 = 4 |
+| `reset_from_v3_with_custom_settings` | 픽스처 전부 + 표식 없음 → `m = Mutex::new(load_or_default)` → `run_startup(&paths, &m)` | assets 폴더 바로 아래 png가 **정확히 내장 6장**이고 각 바이트가 `DEFAULT_ASSETS`와 같다. v3에만 있던 `kb_down_0.png`가 없다. manifest 항목 슬롯 = `DEFAULT_ASSETS` 6개. `alarm.wav`·`.tmp` 두 개가 없다. **메모리 값과 `load_or_default(settings_file)` 모두 == `reset_settings(커스텀)` — 즉 language `ja`·autostart true 유지, 나머지 기본값.** 표식 = 5 |
 | `wipe_keeps_unknown_files_and_subdirs` | 위와 같은 실행 뒤 | `keep_me.txt`·`assets/sub/x.png`·`data/EBWebView/x` 그대로 |
 | `wipe_never_touches_outside_data_dir` | 위와 같은 실행 뒤 | `tmp/outside.png` 바이트 그대로 |
 | `startup_skips_when_generation_matches` | 초기화 뒤 사용자가 `import_bytes`로 커스텀 kb_up을 넣고 `settings::update`로 scale을 바꿈 → `run_startup` 재실행 | 둘 다 그대로(Keep) |
-| `fresh_empty_dir_is_seeded` | 빈 폴더 → `run_startup` | 7장, 표식 4, 메모리·`load_or_default` 모두 `Settings::default()` |
-| `failure_leaves_no_marker_and_retries` (**실패 주입 교체**, §11.1 Δ3) | 픽스처 + `data/data-generation.json`을 **폴더로**(안에 파일 1개) 만든다(① 실패) → `reset_data` | `Err`, `code() == "reset.io"`. v3 파일·커스텀 settings.json이 그대로(아무것도 안 지움). 그 폴더를 `remove_dir_all`한 뒤 `run_startup` → 표식 4, 7장 |
+| `fresh_empty_dir_is_seeded` | 빈 폴더 → `run_startup` | 내장 6장, 표식 5, 메모리·`load_or_default` 모두 `Settings::default()` |
+| `failure_leaves_no_marker_and_retries` (**실패 주입 교체**, §11.1 Δ3) | 픽스처 + `data/data-generation.json`을 **폴더로**(안에 파일 1개) 만든다(① 실패) → `reset_data` | `Err`, `code() == "reset.io"`. v3 파일·커스텀 settings.json이 그대로(아무것도 안 지움). 그 폴더를 `remove_dir_all`한 뒤 `run_startup` → 표식 5, 내장 6장 |
 | `startup_never_panics_on_failure` | 위 실패 상태에서 `run_startup` | 반환한다(패닉 없음). 표식 폴더가 그대로라 `read_marker`는 여전히 `None` |
-| **`seed_failure_leaves_no_marker_and_retries`** (신규) | 픽스처 설치 뒤 `assets/kb_up.png` **파일을 지우고 같은 이름의 폴더**를 만든다(②는 폴더라 건너뜀 → ③ `seed_if_empty`가 `exists()`로 `FilesPresent`, defaults.rs:118) → `reset_data` | `Err`, `code() == "reset.seed"`. 표식 없음. 다른 png·manifest는 이미 지워짐(부분 삭제). 그 폴더를 지운 뒤 `run_startup` → 표식 4, 7장 |
-| **`language_defaults_when_settings_unreadable`** (신규, 🔒 사용자 지정) | `data/settings.json` = `{`(손상) + 표식 없음 → `m = Mutex::new(load_or_default)` → `run_startup` | 메모리 `language == Language::default()`(Ko), `load_or_default(settings_file) == Settings::default()`, 표식 4 |
+| **`seed_failure_leaves_no_marker_and_retries`** (신규) | 픽스처 설치 뒤 `assets/kb_up.png` **파일을 지우고 같은 이름의 폴더**를 만든다(②는 폴더라 건너뜀 → ③ `seed_if_empty`가 `exists()`로 `FilesPresent`, defaults.rs:118) → `reset_data` | `Err`, `code() == "reset.seed"`. 표식 없음. 다른 png·manifest는 이미 지워짐(부분 삭제). 그 폴더를 지운 뒤 `run_startup` → 표식 5, 내장 6장 |
+| **`language_defaults_when_settings_unreadable`** (신규, 🔒 사용자 지정) | `data/settings.json` = `{`(손상) + 표식 없음 → `m = Mutex::new(load_or_default)` → `run_startup` | 메모리 `language == Language::default()`(Ko), `load_or_default(settings_file) == Settings::default()`, 표식 5 |
 | **`reset_twice_keeps_language_on_disk`** (신규, §11.1 Δ2 회귀 방지) | 커스텀(language `ja`) → `reset_data` 성공 → 곧바로 `reset_data` 한 번 더(메모리가 이미 보존 결과와 같음) | 두 번째도 `Ok`. `load_or_default(settings_file).language == Language::Ja`(디스크에 남음), 메모리와 같다 |
 | `reset_elapsed_under_budget` (측정만) | 픽스처 → `reset_data` | `ResetOutcome`의 `removed`·`seeded`·`elapsed_ms`를 `println!`. 단언하지 않는다(목표 ≤ 300 ms). 완료 보고에 실측값을 싣는다 |
 | **`start_dir_link_data_is_refused`** (2차, SEC-001) | `tmp/real_data/`에 v3 세트(`assets/`)·커스텀 settings.json·`assets/alarm.wav`를 둔다. `tmp/data` → `tmp/real_data` 링크(`make_dir_link`). `AppPaths`는 링크 경로로 직접 조립(`make_paths`가 폴더를 먼저 만들면 링크를 못 만든다). 스냅숏 → `reset_data` → `run_startup` | `reset_data`가 `Err`, `code() == "reset.io"`. 두 호출 뒤 `real_data` 아래 **파일 목록·바이트가 스냅숏과 같다**(삭제·시딩·설정·표식·시도 기록 모두 없음). 메모리 language `Ja` 그대로 |
 | **`start_dir_link_assets_is_refused`** (2차, SEC-001) | `tmp/data`는 실제 폴더(커스텀 settings.json). `tmp/real_assets`에 v3 세트·`alarm.wav`. `tmp/data/assets` → `tmp/real_assets` 링크. 스냅숏 → `reset_data` → `run_startup` | `Err(reset.io)`. `real_assets` 스냅숏 동일. `tmp/data`에 `data-generation.json`·`data-reset-attempts.json`이 없다(⓪이 시도 기록 쓰기보다 먼저). settings.json 바이트 그대로 |
 | **`startup_counts_failed_attempts_up_to_limit`** (2차, R-A7) | 픽스처(v3) + `assets/kb_up.png`를 폴더로 바꿔 ③ 실패 주입(`seed_failure_…`와 같은 방법 — ②가 도는 실패라 시도 기록이 ②를 살아남는지도 본다) → `run_startup` 3회 → `assets/sentinel.png` 생성 → 4번째 `run_startup` | 1·2·3회 뒤 시도 값 = 1·2·3. 4번째 뒤에도 3이고 **`sentinel.png`가 남아 있다**(②가 돌지 않음). 표식 없음 |
 | **`startup_skips_wipe_at_limit`** (2차, R-A7) | 픽스처 전부(v3·커스텀 settings·잡동사니) + `data/data-reset-attempts.json` = `{"attempts":3}`, 표식 없음, 실패 주입 없음 → `run_startup` | v3 6장·`alarm.wav`·`.tmp` 그대로, 메모리·디스크 language `ja`·커스텀 값 그대로, 표식 없음, 시도 값 3 그대로 |
-| **`success_clears_attempts`** (2차, R-A7) | 픽스처 + `{"attempts":2}`, 표식 없음 → `run_startup` | 표식 4, 내장 7장, **시도 기록 파일 없음** |
-| **`button_reset_ignores_limit_and_clears`** (2차, R-A7) | 픽스처 + `{"attempts":3}`, 표식 없음 → `reset_data` 직접 → `run_startup` | `reset_data`가 `Ok`(상한 무관), 표식 4, 시도 기록 파일 없음. 이어진 `run_startup`은 Keep(내장 7장 그대로) |
+| **`success_clears_attempts`** (2차, R-A7) | 픽스처 + `{"attempts":2}`, 표식 없음 → `run_startup` | 표식 5, 내장 6장, **시도 기록 파일 없음** |
+| **`button_reset_ignores_limit_and_clears`** (2차, R-A7) | 픽스처 + `{"attempts":3}`, 표식 없음 → `reset_data` 직접 → `run_startup` | `reset_data`가 `Ok`(상한 무관), 표식 5, 시도 기록 파일 없음. 이어진 `run_startup`은 Keep(내장 6장 그대로) |
 
 - 2차 도우미(tests/data_reset.rs 안, 비공개):
   - `fn make_dir_link(link: &Path, target: &Path) -> bool` — ① `cmd /C mklink /J <link> <target>`(정션, 관리자 권한 불필요) ② 실패하면 `std::os::windows::fs::symlink_dir(target, link)`(개발자 모드·관리자) ③ 만든 뒤 `symlink_metadata(link)`의 `file_attributes() & 0x400 != 0`을 확인. 셋 다 안 되면 `false`. 테스트는 `false`면 `println!("SKIP {테스트 이름}: 디렉터리 링크를 만들 수 없음(권한)")`을 남기고 반환한다(경로는 출력하지 않는다). 완료 보고에 SKIP 여부를 싣는다.
@@ -700,7 +706,7 @@ impl ResetError {
 |---|---|---|
 | M1 | 백업 뒤 첫 실행, 로그(stderr) 확인 | `data-reset: 저장 세대 None → 4, 정책 WipeAll, 삭제 N · 기본 그림 7 (… ms)`. 오버레이에 기본 그림, 위치 (100,100) |
 | M2 | 설정 창 언어가 초기화 전과 같다(예: 일본어) | D-2 |
-| M3 | 앱 재시작 | `data-reset: 세대 4 일치 — 건너뜀`. 데이터 그대로 |
+| M3 | 앱 재시작 | `data-reset: 세대 5 일치 — 건너뜀`. 데이터 그대로 |
 | M4 | 로그 전체에서 데이터 폴더 경로·사용자 이름 검색 | 0건(R-A5) |
 | M5 | 설정 창 「전체 초기화」(bridge·ui 구현 뒤) | 즉시 기본 그림·기본 위치. 실패하면 `reset.io` 문구, 다음 시작 때 재시도 로그 |
 | M6 (2차, R-A8) | 0.1.1 실행 중에 같은 exe를 한 번 더 실행 | 두 번째 프로세스가 곧바로 끝난다(작업 관리자에 `kuro-keyviewer` 1개). 기존 인스턴스의 설정 창이 앞으로 나온다. 트레이 아이콘 1개 |
@@ -764,7 +770,7 @@ core가 새로 **내보내는 사건은 없다.** 받을 명령과 core 쪽 사�
 |---|---|---|---|
 | DR-1 | 판정을 `decide` 한 곳, `ResetPolicy` 변형 1개 | 정식 배포 변형을 미리 추가 | 🔒 사용자 결정·스킬 §10. 전환은 02-design §8 메모대로 이 함수와 상수만 바꾼다 |
 | DR-2 | ② `settings.json` 본체 제외, ④ `update`가 덮어씀 | (a) 패킷대로 지움 → D-2 위반(Δ2) (b) settings에 「같아도 저장」 공개 함수 추가 → 손상 파일까지 정리되지만 settings 공개 API 변경(이번 자원 경계 밖) (c) `reset_data`가 `write_atomic`으로 settings.json을 직접 씀 → CR-047 단일 저장 창구 위반·직렬화 중복 | 값의 정확성을 settings 변경 없이 보장한다. 대가는 손상 파일이 한 경우에 남는 것(§3.3, 값은 기본값으로 정확) — (b)를 원하면 §11.4 C-1로 사용자 판단 |
-| DR-3 | ③은 「`Seeded` + 7장 전부 성공」만 성공 | 일부 성공 허용 | 표식은 완전한 초기화의 증거다. 일부만 채운 채 표식을 쓰면 재시도 기회가 사라진다 |
+| DR-3 | ③은 「`Seeded` + 내장 전부(`DEFAULT_ASSETS.len()`) 성공」만 성공 | 일부 성공 허용 | 표식은 완전한 초기화의 증거다. 일부만 채운 채 표식을 쓰면 재시도 기회가 사라진다 |
 | DR-4 | 자식 모듈 비공개. 통합 테스트는 표식 JSON을 직접 읽는다 | `generation`을 `pub mod`로 | 테스트만을 위한 공개 항목을 만들지 않는다(스킬 §10) |
 | DR-5 | 지문 함수·상수는 `#[cfg(test)]` | 공개 상수·함수 | 비공개 모듈의 미사용 항목은 `dead_code` 경고 → `clippy -D warnings` 실패. 가드 테스트만 쓰므로 테스트 빌드에만 둔다. 상수는 `DATA_GENERATION` 바로 아래에 둬 함께 고치게 한다 |
 | DR-6 | `ResetError` `Display`에 `{0}` 없음, 로그는 `code`만 | `AssetError::Io`처럼 원문 포함 | 경로·사용자 이름 금지(적용 메모리·R-A5). 원인은 `#[source]`로 남는다 |

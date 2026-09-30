@@ -12,9 +12,9 @@
 //! [펜 슬롯] R-tmp-4(CR-024) — 펜 쥔 손 파츠 그룹(`pen_up`·`pen_down_N`·`pen_key_*` 7개). 캔버스
 //!        레이어도 마우스 파츠도 아닌 세 번째 그룹(`is_pen_part`)이라 `is_canvas_layer`가 이 그룹을
 //!        제외한다. 크기 규칙(펜 그림끼리만 같은 크기)은 `mod.rs`의 `group_size`·`validate`가 처리한다.
-//! [헤어 슬롯] CR-037 — "hair" 1장, 캔버스 레이어·선택·내장 기본 없음(DEFAULT_ASSETS 비포함).
-//! [뽀모도 슬롯] CR-045(PT-01) — "pomo_char"·"pomo_bubble" 각 1장, 캔버스 레이어·선택·내장 기본
-//!        없음(DEFAULT_ASSETS 비포함).
+//! [헤어 슬롯] CR-037 — "hair" 1장, 캔버스 레이어·선택·내장 기본 없음(0.4.0 에서 DEFAULT_ASSETS 제외).
+//! [뽀모도 슬롯] CR-045(PT-01) — "pomo_char"·"pomo_bubble" 각 1장, 캔버스 레이어·선택. pomo_char 는
+//!        내장 기본 있음(DEFAULT_ASSETS 포함), pomo_bubble 은 없음.
 //! [테스트] K1~K6(§8.9) — 직렬화·분류·검증 규칙·import/remove(tempdir). P1·P2(§8.10) — 펜 슬롯
 //!        직렬화·분류·untagged 해석 순서. H1~H4(§3.12.5) — 헤어 슬롯 직렬화·분류·load_manifest·
 //!        import/remove(tempdir). PM1~PM3(§3.13.5) — 뽀모도 슬롯 직렬화·file_key·분류.
@@ -27,10 +27,11 @@ pub enum SimpleSlot {
     /// 배경(OV-R-17, CR-014) — 맨 아래 캔버스 레이어, 선택. `is_canvas_layer() == true`.
     Background,
     /// 헤어(뒷머리, CR-037) — 캔버스 레이어(배경·키보드와 같은 크기), 1장 고정, 선택,
-    /// 내장 기본 없음. 직렬화 "hair". 겹침 순서(배경 → 헤어 → 팔·손 → 본체)는 ui 몫.
+    /// 내장 기본 없음(0.4.0 에서 제외). 직렬화 "hair". 겹침 순서(CR-051: 헤어 → 배경 → 뽀모도 → 팔 →
+    /// 본체 묶음 → 펜 손)는 ui 몫.
     Hair,
     /// 뽀모도 인물(두 번째 캐릭터, CR-045 PT-01) — 캔버스 레이어(배경과 같은 크기), 1장 고정, 선택,
-    /// 내장 기본 없음. 직렬화 "pomo_char". 겹침(배경 → 인물 → 말풍선 → 시간 글자 → 본체)·고정 표시는
+    /// 내장 기본 있음(DEFAULT_ASSETS 포함). 직렬화 "pomo_char". 겹침(배경 → 인물 → 말풍선 → 시간 글자 → 본체)·고정 표시는
     /// ui 몫.
     PomoChar,
     /// 뽀모도 말풍선(CR-045 PT-01) — 캔버스 레이어, 1장 고정, 선택, 내장 기본 없음. 직렬화 "pomo_bubble".

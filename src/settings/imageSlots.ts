@@ -34,12 +34,12 @@ export type SlotGroupId = 'background' | 'keyboard' | 'arm' | 'hand'
 export type ResetKind = 'restore' | 'clear'
 
 /**
- * (CR-038, R-35 / CR-053) 「기본값」(내장 기본 그림 복원)과 별개로 「비우기」 버튼을 따로 두는 칸.
- * 'hair' = 뒷머리 · 'pomo_char' = 뽀모도 인물 — 둘 다 단일 슬롯이고 CR-053에서 내장 기본이 생겼다
- * (「기본값」 = 복원, 「비우기」 = removeAsset). 'kb_down_0'은 CR-053에서 내장 기본이 없어져 「기본값」
- * 자체가 비우기(resetKind 'clear')가 됐으므로 중복되는 셋째 버튼을 없앴다(CR-043 대체).
+ * (CR-038, R-35 / CR-053 / CR-063) 「기본값」(내장 기본 그림 복원)과 별개로 「비우기」 버튼을 따로 두는 칸.
+ * 'pomo_char' = 뽀모도 인물 — 단일 슬롯이고 내장 기본이 있다(「기본값」 = 복원, 「비우기」 = removeAsset).
+ * 'hair'(뒷머리)는 계약 v0.29에서 내장 기본이 없으므로(CR-063) 「기본값」 자체가 비우기(resetKind 'clear')라
+ * 셋째 버튼을 두지 않는다. 'kb_down_0'도 같은 이유로 셋째 버튼이 없다(CR-043 대체).
  */
-export const EMPTYABLE_SLOT_KEYS: readonly string[] = ['hair', 'pomo_char']
+export const EMPTYABLE_SLOT_KEYS: readonly string[] = ['pomo_char']
 
 export type SlotCardSpec = {
   type: 'slot'
@@ -118,7 +118,7 @@ export const slotCard = (
   const resetKind: ResetKind = hasBuiltinDefault(slot) ? 'restore' : 'clear'
   const n = frames === null || typeof slot !== 'object' ? null : slot.index + 1
   const emptyable = EMPTYABLE_SLOT_KEYS.includes(key)
-  // 여러 장 슬롯이 비우기 칸이면 뒤 장이 남아 있을 때 앞 장을 비울 수 없다 — 현재 비우기 칸(hair·pomo_char)은
+  // 여러 장 슬롯이 비우기 칸이면 뒤 장이 남아 있을 때 앞 장을 비울 수 없다 — 현재 비우기 칸(pomo_char)은
   // frames가 항상 null이라 이 조건이 걸리지 않는다(방어 규칙으로 유지).
   const laterFrameExists = frames !== null && typeof slot === 'object' && slot.index + 1 < frames
   const canEmpty = emptyable && entry !== undefined && !laterFrameExists
@@ -216,8 +216,8 @@ const buildHandCards = (manifest: AssetManifest): CardSpec[] => [
  * 카드 그룹 4개(배경·키보드·팔·손)를 화면에 표시할 순서 그대로 만든다. 몸통(body) 카드는 없다(🔒 D-8).
  * (CR-037, R-34) 배경 그룹 둘째 카드 = `hair`(뒷머리, 캔버스 레이어·선택 — images-tab.md §3.1).
  * (CR-045, R-42) 배경 그룹 셋째·넷째 카드 = `pomo_char`·`pomo_bubble`(뽀모도 인물·말풍선, 캔버스 레이어·선택 —
- * design/timer-tab.md §13·images-tab.md §14). (CR-053) hair·pomo_char는 내장 기본이 있다(「기본값」 = 복원 +
- * 「비우기」), pomo_bubble은 없다(「기본값」 = 비우기).
+ * design/timer-tab.md §13·images-tab.md §14). (CR-053 / CR-063) pomo_char는 내장 기본이 있다(「기본값」 = 복원 +
+ * 「비우기」), hair(계약 v0.29)·pomo_bubble은 없다(「기본값」 = 비우기).
  */
 export const buildSlotGroups = (manifest: AssetManifest): SlotGroup[] => [
   {

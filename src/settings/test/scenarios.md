@@ -1,5 +1,6 @@
 # settings 테스트 시나리오
 
+- **v28 기준(2026-09-30 doc-sync — 이 줄이 아래 모든 기준 줄보다 우선)**: `src/settings/requirements.md` **v1.26** · `src/settings/design.md` 변경이력 2026-09-30 doc-sync 행 · contract v0.27 · 현행 소스. 상태: **개정 v28**(증분 모드, 대기열 Q-02 전환). 개정 내용·수·제외 범위는 TC 목록 끝 「doc-sync 개정(v28)」 절. 수: 자동 TC 번호 310개(TC-001 ~ TC-310) 중 유효 301 · 폐기 8 · 결번 1(TC-307) · TC-FLOW 32 · 수동 54
 - 기준: `src/settings/design.md`(2026-09-24, 변경이력 마지막 행 CR-026) / `src/settings/requirements.md` v1.6 / `doc/200_설계/bridge/contract.md` v0.8 + CR-018 미확정 계약(`MouseSettings.area: [Point, Point, Point, Point]` 추가·`pad` 삭제. 기본 `area` = `DEFAULT_AREA` [(375,525), (495,525), (495,625), (375,625)] — 관리자 전달 core 기본값, 손 기준점 435,575 중심) + CR-020 미확정 계약(`Settings.slam`·`AssetSlot` `'slam'` 삭제) + **CR-026 미확정 계약**(`MouseSettings.penPos: Point | null` 기본 `null` = `DEFAULT_MOUSE_SETTINGS.penPos`, `AssetSlot` 펜 슬롯 — 이 화면은 `slotKey` `'pen_up'`만) + overlay CR-025 `resolvePenPos`(`src/state/mouseMapping.ts` import — overlay `design/functions.md` `defaultPenPos`: `penPos` null이면 손 그림 중심을 `mouse.hand ?? 이동 영역 중심`에 두고 정수 반올림) / CR 대장 `test/change-requests.md`(CR-003~006, CR-016, CR-018, CR-020, CR-026)
 - **CR-028 기준(v8, 이 줄이 위 줄보다 우선)**: `src/settings/design.md`(변경이력 마지막 행 CR-028) + `design/general-tab.md` · `design/images-tab.md` · `design/i18n.md` / `src/settings/requirements.md` **v1.7** / `doc/200_설계/bridge/contract.md` **v0.14**(소스 미적용 — 스펙은 v0.14 이름으로 쓰고 bridge는 mock) / 수용 기준 U-1 ~ U-13(`doc/200_설계/architecture/settings-v2-03-packet-ui.md` §6) / 결정: `idleSeconds` 정본 범위 60 ~ 3600초(1 ~ 60분), 표준 HTML 원소 직접 사용(D-3) 수용
 - **CR-031 기준(v9, 이 줄이 위 두 기준 줄보다 우선)**: `src/settings/design.md`(변경이력 마지막 행 CR-031 — §2·§2.1·§3·§4 `tabRefs`·§5.3 `onTabKeyDown`·렌더 골격 개정·§9·§11 D-4·RTM R-27·R-28) + `design/images-tab.md` §1·§6(2′·3′·6′·`AddSlotCard`)·§6.1 + `design/general-tab.md` §2.2 / `src/settings/requirements.md` **v1.8**(R-19 폐기 → R-27·R-28) / contract v0.14(변경 없음) / CR 대장 CR-031
@@ -644,7 +645,7 @@
 - Then ⓐ 화면: 실패 뒤 펜 손·「손 위치」 `(350, 520)`, 팔 파츠 `(100, 200)` ⓑ 상태: `onError` 1회차 `IO_ERR`(정확히 1회) → 재시도 뒤 마지막 호출 `null` ⓒ bridge: `setSettings` 2회, 두 인자 모두 `withPen((450,560))`
 - 선행: CR-026 화면 · 스펙: `test/MousePartsTab.test.tsx`
 
-### TC-089 · 리셋 → penPos null·수신 뒤 기본 위치 · 종류: 자동 · 요구: R-18, R-17 · 설계: §5.2 `onReset`(CR-026 — `DEFAULT_MOUSE_SETTINGS.penPos = null`), §4 `penHome`(기본 위치 규칙) · CR-026 · **신규**
+### TC-089 · 리셋 → penPos 기본값·수신 뒤 그 자리 (**v28 정정** — 옛 제목 「리셋 → penPos null·수신 뒤 기본 위치」. 현행 기대 `DEFAULT_MOUSE_SETTINGS.penPos` = (372,476), 아래 본문의 `null`·(385,535)는 CR-026 당시 기록 — 「doc-sync 개정(v28)」 절 표가 대체) · 종류: 자동 · 요구: R-18, R-17 · 설계: §5.2 `onReset`(CR-026 — `DEFAULT_MOUSE_SETTINGS.penPos = null`), §4 `penHome`(기본 위치 규칙) · CR-026 · **신규**
 - Given `withPen((500,100))`, `PEN_HAND`, `setSettings`는 인자를 그대로 resolve
 - When 「기본값으로 리셋」 → (settings://changed 흉내) props `{ ...SETTINGS, mouse: DEFAULT_MOUSE_EXPECTED }`로 재렌더
 - Then ⓐ 화면: 클릭 전·수신 전 펜 손 `(500, 100)`, 수신 뒤 `(385, 535)`(`left 192.5px · top 267.5px` — `hand` null → 기본 이동 영역 중심 (435,575) − (50,40)) ⓑ 상태: `onError(null)` ⓒ bridge: `setSettings` 정확히 1회, 인자 `toStrictEqual` `{ ...SETTINGS, mouse: DEFAULT_MOUSE_EXPECTED }`, `mouse.penPos` `null`, 키 정렬 `['area','hand','partPos','penPos','shoulder']`
@@ -912,7 +913,7 @@
 
 - 기준(v9): `src/settings/requirements.md` **v1.8**(R-19 폐기 → R-27·R-28) / `design.md` CR-031(§2·§2.1·§3·§4 `tabRefs`·§5.3 `onTabKeyDown`·렌더 골격 개정·§9·§11 D-4·RTM) / `design/images-tab.md` §1·§6(2′·3′·6′·`AddSlotCard`)·§6.1 / `design/general-tab.md` §2.2 / CR 대장 CR-031. bridge 계약 변경 없음.
 - 수(v9): 자동 TC 번호 158개(TC-001 ~ TC-158) 중 유효 152 · 폐기 6, TC-FLOW 13개, 수동 26개(M-01 ~ M-26).
-- R-19는 폐기 — 앞 TC의 「요구: R-19」(TC-094·TC-104 ~ TC-106·TC-130·TC-136·TC-151 등)는 R-27로 읽는다(탭 3개·카드형·초록 강조·토글·금지 조건 승계, 단언 불변).
+- R-19는 폐기 — 앞 TC의 「요구: R-19」(TC-094·TC-104 ~ TC-106·TC-130·TC-136·TC-151 등)는 R-27로 읽는다(탭 3개·카드형·강조색(v28: CR-032 포인트색 `#BE72AD` — 옛 초록)·토글·금지 조건 승계, 단언 불변).
 
 | TC | 개정 내용(앞 본문 대체) | 스펙 |
 |---|---|---|
@@ -1137,7 +1138,7 @@ CR ↔ TC: CR-033 → 개정 TC-025(사례 추가), TC-027·TC-067·TC-089(키·
 
 설계 확인 필요 (CR-033, 관리자 인계)
 
-- **J-1. 문구 키 수 불일치.** `design/i18n.md` §4.3 주 「위 10키」·「`Messages` 단순 키 수 +10」, `design.md` 변경이력 CR-033 「문구 10키」 ↔ 표는 **11행**(`penModeLabel`·`penModeDesc`·`penModeNoteOn`·`penModeNoteOff`·`penEnableTitle`·`penEnableMessage`·`penEnableOk`·`penFirstTitle`·`penFirstMessage`·`penFirstYes`·`penFirstNo`). 스펙은 **표(11키, ko 단순 키 80개)**를 따랐다(TC-094·TC-174). 10이 맞다면 어느 키가 빠지는지 알려 달라 — ui-designer 몫.
+- **J-1. 문구 키 수 불일치.** `design/i18n.md` §4.3 주 「위 10키」·「`Messages` 단순 키 수 +10」, `design.md` 변경이력 CR-033 「문구 10키」 ↔ 표는 **11행**(`penModeLabel`·`penModeDesc`·`penModeNoteOn`·`penModeNoteOff`·`penEnableTitle`·`penEnableMessage`·`penEnableOk`·`penFirstTitle`·`penFirstMessage`·`penFirstYes`·`penFirstNo`). 스펙은 **표(11키, ko 단순 키 80개)**를 따랐다(TC-094·TC-174). 10이 맞다면 어느 키가 빠지는지 알려 달라 — ui-designer 몫. **v28 소스 대조(2026-09-30)**: `src/settings/i18n/types.ts`에 위 11키가 모두 있다 → 11이 맞고 스펙(TC-094·TC-174)은 정합. 남은 것은 `design/i18n.md` §4.3 주 「위 10키」·「+10」 표기 정정뿐(design 소유자 몫 — 「doc-sync 개정(v28)」 설계 확인 AA-1). 이 문서 판정 불변.
 - **J-2. 포커스 복귀 대상이 비활성일 수 있음.** `onPenDialogConfirm/Cancel`은 `#pen-mode-toggle`에 포커스를 주지만 ① 저장 중에는 `ToggleSwitch`가 `disabled={disabled || busy}`라 포커스된 토글이 곧 비활성이 된다(HTML focus fixup 규칙상 실물 WebView2에서 포커스가 body로 빠질 수 있음 — jsdom은 유지) ② 첫 등록에서 `assets://changed`보다 먼저 대답하면 `hasPenUp` false라 토글이 비활성이어서 `focus()`가 무효다. 스펙은 「수신이 대답보다 먼저」를 전제하고 저장 완료 뒤 포커스를 단언한다(TC-163·TC-168). 실물은 M-27 3)에서 확인. 대체 대상(예: `pen_up` 카드 「이미지 변경」) 규칙이 필요한지 결정 필요.
 - **J-3. 스펙이 고정한 해석.** ① TC-163·TC-173: `tone` 판정 = 확인 버튼 클래스 이름에 `accent`/`danger` 포함(CSS Modules 클래스 이름 규약, 색 실물은 M-27) ② TC-161: `pen_up`이 props로만(외부 등록) 다시 들어오면 확인창 없이 저장값대로 켜짐 표시 — 첫 등록 판정은 `onChangeImage`에서만 ③ TC-172: 창 닫기 = 언마운트로 흉내 ④ TC-176: 포커스 순서 = DOM 순서 ⑤ TC-168: 첫 등록 확인창이 떠 있는 동안 `slotBusy`는 해제(카드 버튼 활성 — 배경막이 가림). 다르게 의도했다면 알려 달라.
 - **J-4. design RTM R-29·R-30 「예정 TC」 동기화**(이 번호 TC-159 ~ TC-176·TC-FLOW-14·M-27·M-28, 개정 TC-025·TC-094·TC-148·TC-149) — ui-designer 몫. `design/images-tab.md` 머리 계약 줄(v0.14)·§7 I-4 행은 §9가 대체한다고만 적혀 있어 v0.15·I-6 참조로 정리 권고.
@@ -1627,6 +1628,8 @@ CR ↔ TC: CR-038(R-35) → 개정 TC-192·TC-094(전사 대기)·TC-193(주석)
 - When `isOpaqueAt(mask, x, y)`
 - Then ⓐ 화면: 해당 없음 ⓑ 반환: (설계 예) (0,0) false · (1,0) true · (2,0) false · (−1,0) false; (1.9, 0.99) true · (0.99, 0) false · (−0.5, 0) false · (1,1) false · (1,−1) false; `m32` (2,0) true(알파 1도 칠함) · (1,0) false(열 우선 색인이면 true — 행 우선 구분) · (0,1) false ⓒ bridge: 없음
 
+- (v28 번호 정리) 위 TC-208·TC-209(CR-040 `alphaMask.test.ts`)가 정식 번호다. CR-039 재시도 스펙 `SettingsApp.retry.test.tsx`가 가번호로 쓰던 TC-208 → **TC-306으로 이동**, TC-209 → **TC-308로 이동**(「doc-sync 개정(v28)」 절, TC-307 결번)
+
 ### TC-210 · hitOpaque — 사각형 예비 판정 뒤 픽셀, 마스크 없음·크기 다름 → 사각형 대체 · 종류: 자동 · 요구: R-37 · 설계: drag-hit §5.2 `DragCandidate`·`hitOpaque` ①②③, §2.3 · 스펙: `test/mouseWizard.test.ts` · **신규(CR-040)**
 - Given `c` = pos (10,20) · size 3×2(사각형 [10,13)×[20,22)) · mask 3×2(그림 기준 (1,0) 알파 255 · (2,1) 알파 1)
 - When `hitOpaque(point, c)` / 같은 사각형에 mask `null`·키 없음·2×2(전부 0)·3×3(전부 0) / 크기 폭 0(mask null)·높이 −1(칠한 마스크)
@@ -1966,6 +1969,7 @@ CR ↔ TC: CR-042 → 신규 TC-226 ~ TC-228·TC-FLOW-21 / 개정 TC-132·TC-134
 - Given `TWO` = `d7()` + `kb_down_1`, `removeAsset` 1회째 → `d7()`·2회째 → `NO0`, `restoreDefaultAsset` → `BACK`
 - When 「비우기」 비활성 확인 → `타자 입력 2 그림 지우기` → 「지우기」 → 재렌더 → 「타자 입력 1 그림 비우기」 → 「지우기」 → 재렌더 → `타자 입력 1 기본 그림으로 되돌리기` → 「기본 그림으로」 → 재렌더
 - Then ⓐ Step 1 「비우기」 비활성 / Step 3 `slot-card-kb_down_1` 없음·「비우기」 활성 / Step 4 확인창 설명 `‘타자 입력 1’ 그림을 지울까요? 되돌릴 수 없습니다.` / Step 5 포커스 `타자 입력 1 이미지 변경`, 재렌더 뒤 `img` 없음·「등록된 그림 없음」·「비우기」 비활성·추가 카드 0 / Step 6 재렌더 뒤 `img` src `asset://kb_down_0.png?v=d`·「비우기」 활성 ⓑ 매니페스트 `TWO` → `d7()` → `NO0` → `BACK`, 각 단계 끝 `slotBusy` null ⓒ `removeAsset` 1회째 `{kind:'kb_down',index:1}`·2회째 `{kind:'kb_down',index:0}`(총 2회), `restoreDefaultAsset({kind:'kb_down',index:0})` 1회, `importAsset`·`setSettings` 0회, `onError` 0회
+- **v28 정정(S-22 requirements v1.26 · CR-053 · 현행 소스)**: 위 TC-FLOW-23 제목·Given·When·Then의 「잠긴 「비우기」」·「타자 입력 1 그림 비우기」·Step 6 복원(TC-179·`restoreDefaultAsset` 1회·`?v=d`)은 폐기 서술이다. 「타자 입력 1」 카드는 셋째 버튼 없이 「기본값」이 곧 비우기이고, 되돌릴 내장 기본이 없어 다시 필요하면 「이미지 변경」으로 넣는다 — 현행 본문은 「doc-sync 개정(v28)」 절 TC-FLOW-23
 
 v17 추적 — 요구 ↔ TC (앞 표와 겹치면 이 표 우선)
 
@@ -2007,9 +2011,9 @@ CR ↔ TC: CR-043 → 신규 TC-229 ~ TC-237·TC-FLOW-22·TC-FLOW-23 / 개정 TC
 
 설계 확인 필요 (v17, 관리자 인계 — 문서 수정은 소유자)
 
-- **V-1. 영향 TC 목록 정정(CR 대장 CR-043 · `design.md` RTM R-40·R-41 「영향 예상」).** 실제로 기대가 바뀐 TC는 TC-133·TC-134·TC-135·TC-192·TC-136·TC-094·TC-200·TC-201뿐이다. 「TC-132·TC-177·TC-178」·「TC-137 ~ TC-152」·「TC-093·TC-095 ~ TC-098」은 필수 수·`kb_down` 설명을 단언하지 않아 불변(회귀 감시만). R-41 「CR-038 뒷머리 비우기 TC 회귀」는 TC-200(`EMPTYABLE_SLOT_KEYS` 값·`kb_down_0` 기대)·TC-201(카드 수 17 → 16·「비우기」 버튼 1 → 2)이 실제로 바뀐다. ui-designer·CR 대장 동기화 권고.
+- **V-1. 영향 TC 목록 정정(CR 대장 CR-043 · `design.md` RTM R-40·R-41 「영향 예상」).** 실제로 기대가 바뀐 TC는 TC-133·TC-134·TC-135·TC-192·TC-136·TC-094·TC-200·TC-201뿐이다. 「TC-132·TC-177·TC-178」·「TC-137 ~ TC-152」·「TC-093·TC-095 ~ TC-098」은 필수 수·`kb_down` 설명을 단언하지 않아 불변(회귀 감시만). R-41 「CR-038 뒷머리 비우기 TC 회귀」는 TC-200(`EMPTYABLE_SLOT_KEYS` 값·`kb_down_0` 기대)·TC-201(카드 수 17 → 16·「비우기」 버튼 1 → 2)이 실제로 바뀐다. ui-designer·CR 대장 동기화 권고. **v28 대조**: 이 목록은 CR-043 시점 기록이다. 이후 CR-044(v18)·CR-053(v23)으로 실제 개정 TC가 TC-133·TC-135·TC-177·TC-192·TC-200·TC-201·TC-229·TC-232 ~ TC-237·TC-FLOW-22·TC-FLOW-23으로 바뀌었다(「CR-053 개정」 표·추적 R-41 행). R-41 해석은 사용자 결정 대기(requirements v1.26 ①)라 추적 재편은 보류 — 판정 불변.
 - **V-2. 스펙이 고정한 해석.** ① 실패 뒤 포커스도 「이미지 변경」(TC-237 — 뒷머리 N-1과 같은 `onConfirmClear` 경로) ② TC-231은 ja·en 초안을 정확 비교하지 않되 토글 이름 표기(`「ペンの手を使う」`·`"Use pen hand"`) 포함을 단언한다(i18n §4.4 CR-043 머리 문단 규칙) — 검수에서 표기를 바꾸면 그 두 줄만 고친다 ③ TC-233은 ja·en aria 결과 리터럴(`押下 1の画像を削除`·`Clear image: Press 1`)을 i18n §4.4 R-41 줄에서 옮겼다 ④ `kb_down_1`만 있는 매니페스트(0 비어 있음)의 `kb_down_0`은 `emptyable` true·`canEmpty` false(§12.2 표 4행).
-- **V-3. TC-201 스펙 제목 미개정.** `Hair.test.tsx` TC-201의 it 이름 「뒷머리 카드만 버튼 3개 …, 다른 슬롯 카드는 2개」가 개정된 본문(타자 입력 1 카드도 3개)과 어긋난다. 단언은 반영했고 제목만 예산으로 남았다 — 다음 위임에서 「뒷머리·타자 입력 1 카드 버튼 3개」로 고친다.
+- **V-3. TC-201 스펙 제목 미개정.** `Hair.test.tsx` TC-201의 it 이름 「뒷머리 카드만 버튼 3개 …, 다른 슬롯 카드는 2개」가 개정된 본문(타자 입력 1 카드도 3개)과 어긋난다. 단언은 반영했고 제목만 예산으로 남았다 — 다음 위임에서 「뒷머리·타자 입력 1 카드 버튼 3개」로 고친다. **v28 해소**: 현행 `Hair.test.tsx` TC-201 it 이름은 「(CR-044·CR-053 개정): 뒷머리 카드 버튼 3개(이미지 변경 → 기본값 → 비우기)·두 줄 배치(cardEmptyable·actions2), 셋째 버튼은 뒷머리·뽀모도 인물 카드뿐」으로 현행 본문(「CR-053 개정」 표 TC-201 — 「타자 입력 1」은 버튼 2개)과 일치한다. 옛 권고 「뒷머리·타자 입력 1 카드 버튼 3개」는 CR-053으로 무효.
 - **V-4. ko 설명 길이 경계.** i18n §4.4 CR-043의 ko 55자는 카드 설명 2줄 한도(약 28자 × 2)에 거의 닿는다. 넘치면 말줄임 + `title` 툴팁이 정해져 있어 결함은 아니고, 실물은 M-43 1)에서 본다.
 
 ### CR-044 개정 (v18 — 배포용 기본 세트 2차 교체 🔒 · 뒷머리 「비우기」 버튼 삭제, 증분 모드)
@@ -2418,7 +2422,7 @@ CR ↔ TC: CR-045 → 신규 TC-238 ~ TC-268 · TC-FLOW-24 ~ TC-FLOW-27, 개정 
 Steps는 **실제 조작 순서**이고, 괄호는 그 TC의 해당 부분만 쓴다는 뜻이다. 괄호 없는 TC는 흐름 스펙이 그 TC의 ⓐ 단언을 모두 다시 확인한다. 흐름의 호출 횟수 기대는 이 Steps에서 일어나는 저장만 센다.
 
 ### TC-FLOW-07 · S-8: 펜 쥔 손 그림이 팔 끝과 어긋나 끌어 붙이고 「손 위치」로 확인한 뒤, 잘못 놓아 기본값으로 되돌린다 · 종류: 자동 · 요구: R-18 · Steps: TC-080(기본 위치 표시 부분) → TC-082(누름·끌기·놓기·저장 인자·수신 부분) → TC-089(리셋 인자·수신 뒤 기본 위치 부분) · **신규(CR-026)** — 번호 순서가 아니라 추가 순서로 둔다
-- 상태 전달: 마운트(`SETTINGS`·`PEN_HAND`) → 펜 손·「손 위치」 `(350, 520)` → 누름 (200,280)·이동 (250,300) → `(450, 560)` → 놓기 → 저장 인자 `withPen((450,560))` → 저장 완료 → props `withPen((450,560))` 재렌더(수신) → `(450, 560)` 표시가 리셋의 Given → 「기본값으로 리셋」 → 인자 `{ ...SETTINGS, mouse: DEFAULT_MOUSE_EXPECTED }`(`penPos` null) → props 재렌더(수신) → `(385, 535)`.
+- 상태 전달: 마운트(`SETTINGS`·`PEN_HAND`) → 펜 손·「손 위치」 `(350, 520)` → 누름 (200,280)·이동 (250,300) → `(450, 560)` → 놓기 → 저장 인자 `withPen((450,560))` → 저장 완료 → props `withPen((450,560))` 재렌더(수신) → `(450, 560)` 표시가 리셋의 Given → 「기본값으로 리셋」 → 인자 `{ ...SETTINGS, mouse: DEFAULT_MOUSE_EXPECTED }`(`penPos` null — **v28 정정: 현행 인자 `{ ...SETTINGS, mouse: RESET_EXPECTED }`, `penPos` = `DEFAULT_MOUSE_SETTINGS.penPos` (372,476)·`penMode` 현재 값 보존**) → props 재렌더(수신) → `(385, 535)`(**v28 정정: `(372, 476)`**).
 - 기대(통합): `setSettings` 총 2회, `onError` 호출은 모두 `null`. 실물 반영(settings.json `penPos`·오버레이 손 자리)은 수동 M-16(미반영 — 「CR-026 개정 요약」).
 - 선행: CR-026 화면 · bridge CR-026 · overlay CR-025
 - 스펙: `test/MousePartsTab.test.tsx` `it('TC-FLOW-07: …')` — 컴포넌트 수준 통합(`settings://changed`는 props 재렌더로 흉내. SettingsApp 경유 수신 경로는 TC-036·TC-076이 이미 검증한 같은 전달 경로)
@@ -3160,6 +3164,110 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 
 ---
 
+### doc-sync 개정 (v28 — 2026-09-30, 증분 모드, 대기열 Q-02 소진)
+
+비유: 오래 쓴 요리책에 「소금 한 줌」이라고 적혀 있는데 지금 쓰는 계량컵은 「5g」이다. 요리법(판정)은 그대로 두고, 낡은 표기에 지금 값을 덧써 넣는 정리다. 새 요리(요구 밖 TC)는 넣지 않는다.
+
+- **v28 기준(이 절이 앞 모든 기준 줄·CR 절보다 우선)**: `src/settings/requirements.md` **v1.26**(요구 증감 없음 — S-22 현행 정정, R-19·R-27 색 비고 CR-032) · `src/settings/design.md` 변경이력 2026-09-30 doc-sync 행(§6 P-1 CR-039 재시도 실제 동작) · `design/i18n.md`·`design/images-tab.md`·`design/timer-tab.md` 2026-09-30 줄 · contract v0.27 · 현행 소스(`src/bridge/types.ts` `DEFAULT_MOUSE_SETTINGS` shoulder (582,484)·partPos (411,464)·penPos (372,476)·penMode true / `DEFAULT_TIMER_SETTINGS` textPos (268,402)·rotation 7·alarmVolume 44, `src/settings/settings.module.css` `--st-accent #BE72AD`·`--st-accent-hover #A85A97`·`--st-nav-active #F8EBF5`, `src/settings/index.tsx` `fetchWithRetry` 두 개, `src/settings/i18n/types.ts` 펜 문구 11키, `src/settings/components/ImagesTab.tsx` `focusAfter`)
+- **판정 규칙**: 번호 보존. 이 절의 표·본문은 같은 번호의 앞 본문을 대체한다. 앞 본문에는 필요한 곳에 「v28 정정」 한 줄만 덧붙였다(TC-089 제목·TC-FLOW-07 상태 전달·TC-FLOW-23 끝·추적표 R-17 추가 행·색 3곳·J-1·V-1·V-3·TC-208 뒤 이동 표시). **스펙 단언 변경 없음**(신규 TC-309·TC-310 초안 추가와 이름·주석 정정만)
+- **제외(위임 지시 — 사용자 결정 대기, 불변)**: 기본 세트 6장/7장(TS `DEFAULT_ASSET_SLOTS` `hair` 잔존 — `ImagesTab.test.tsx` `d7()`·`toHaveLength(7)`, `Hair.test.tsx` 207행, `imageSlots.test.ts` `hasBuiltinDefault('hair')`, `ResetAllCard.test.tsx` 「기본 그림 7장」, TC-FLOW-15·TC-FLOW-22 Given 7장, TC-182·TC-189)과 R-35·R-41 관련 TC의 판정. CR 「적용·미검증」 상태 불변
+- **수(v28)**: 자동 TC 번호 310개(TC-001 ~ TC-310) 중 **유효 301 · 폐기 8 · 결번 1**(TC-307) — 이 절에서 정식 등록 4(TC-306 · TC-308 이동, TC-309 · TC-310 신규) · TC-FLOW 32(유효 31 · 폐기 1, 새 TC-FLOW 없음) · 수동 54(`manual-checklist.md` v20, 행 수 불변)
+- **번호 정리(TC-208/TC-209 중복)**: 정식 등록 순서로 판정했다 — CR-040 `alphaMask.test.ts` TC-208·TC-209는 v15에서 이 문서에 본문·추적표·설계↔TC로 먼저 등록됐고, CR-039 `SettingsApp.retry.test.tsx`의 TC-208·TC-209는 ui-fixer 가번호로 이 문서에 한 번도 등록되지 않았다(대기열 Q-02 「TC-ID 부여 필요」). 그래서 뒤에 등록되는 쪽 = 재시도 스펙을 옮긴다: TC-208 → **TC-306**, TC-209 → **TC-308**. TC-307은 CR 대장 CR-052 검증 칸이 이미 「TC-307」을 적고 있어(이 문서·스펙에 없는 번호) 충돌 방지로 결번(대기열 Q-06 건너뜀과 같은 방식). 옛 번호 자리(TC-209 본문 뒤)에 「→ TC-306·TC-308로 이동」 한 줄, 스펙 머리 주석에 이동 기록
+
+#### v28 정식 TC (대기열 Q-02 · CR-039 초기 조회 재시도)
+
+### TC-306 · 초기 조회 첫 실패 → 200ms 뒤 재시도 성공 → 오류 줄 없음 · 종류: 자동 · 요구: R-01 · 설계: design.md §6 P-1(CR-039 — `fetchWithRetry(getSettings, setSettings, setError)`, 첫 시도 + `RETRY_DELAYS_MS` 200·500·1000ms, 성공 시 `onOk` 1회·재시도 중단·오류 줄 건드리지 않음) · CR-039 · Q-02 · 스펙: `test/SettingsApp.retry.test.tsx` · **이동(옛 가번호 TC-208)**
+- Given 가짜 시계(`vi.useFakeTimers({ toFake: ['setTimeout','clearTimeout'] })`), `getSettings` 1회째 reject `{ code: 'settings.io', message: '설정 파일을 읽지 못했습니다.' }` → 2회째부터 resolve `{ ...DEFAULT_SETTINGS, language: 'ko' }`, `getAssetManifest` → `{ canvas: null, entries: [] }`, `setSettingsWindowTitle` resolve
+- When `SettingsApp` 렌더 → 199ms → 1ms → 5000ms 진행(각 진행 뒤 마이크로태스크 비움)
+- Then ⓐ 화면: 전 과정 `role=alert`(오류 줄) 없음 ⓑ 상태: 2번째 조회 성공으로 재시도 중단(이후 5초 동안 조회 없음), 오류 상태 `null` 그대로 ⓒ bridge: `getSettings` 199ms 시점 1회 → 200ms 시점 2회 → 5200ms 시점에도 2회, `getAssetManifest` 1회(설정 재시도와 무관), `setSettings` 0회
+
+### TC-308 · 계속 실패 → 최대 4번 시도 뒤에만 오류 줄 · 종류: 자동 · 요구: R-01 · 설계: §6 P-1 오류 흐름(한 조회가 4번 모두 실패할 때만 그 마지막 오류로 `setError` 1회, 재시도 중(약 1.7초) 오류 줄 없음, 설정 = `DEFAULT_SETTINGS` 유지) · CR-039 · Q-02 · 스펙: `test/SettingsApp.retry.test.tsx` · **이동(옛 가번호 TC-209)**
+- Given TC-306과 같은 시계·mock, 단 `getSettings` 항상 reject(같은 `settings.io` 오류)
+- When 렌더 → 200ms → 500ms → 1000ms → 5000ms 진행
+- Then ⓐ 화면: 700ms 시점(3번 시도) `role=alert` 없음, 1700ms 시점 `role=alert` 텍스트 정확히 `오류: 설정 파일을 읽지 못했습니다.`(ko = core message) ⓑ 상태: 설정은 초기값(`DEFAULT_SETTINGS`) 유지, 4번째 실패 뒤 재시도 멈춤 ⓒ bridge: `getSettings` 3회(700ms) → 4회(1700ms) → 4회(6700ms), `getAssetManifest` 1회, `setSettings` 0회
+
+### TC-309 · 설정·매니페스트는 따로 판정 — 매니페스트만 실패해도 설정은 즉시 반영 · 종류: 자동 · 요구: R-01 · 설계: §6 P-1(두 `fetchWithRetry`를 **독립으로** 시작, 「다른 조회의 성공·실패와 무관(각자 판정)」, 성공 = 저장된 언어로 `<html lang>`) · CR-039 · Q-02 · 스펙: `test/SettingsApp.retry.test.tsx` · **신규(v28 — 스펙 초안 추가)**
+- Given `document.documentElement.lang` = 빈 값, `getSettings` → `{ ...DEFAULT_SETTINGS, language: 'ja' }`, `getAssetManifest` 항상 reject `{ code: 'asset.manifest', message: '이미지 목록을 읽지 못했습니다.' }`
+- When 렌더 → 200ms → 500ms → 1000ms → 5000ms 진행
+- Then ⓐ 화면: 700ms 시점까지 `role=alert` 없음, 1700ms 시점 `role=alert` 정확히 1개(문구는 ja 사전 code 문구 — 언어별 문구 판정은 TC-102 몫이라 여기서는 개수만) ⓑ 상태: 첫 렌더 직후 `document.documentElement.lang` = `ja`(매니페스트 재시도 중에도 설정 반영), 매니페스트는 초기값 유지 ⓒ bridge: `getSettings` 1회(재조회 없음), `getAssetManifest` 3회(700ms) → 4회(1700ms) → 4회(6700ms), `setSettings` 0회
+
+### TC-310 · 재시도 대기 중 언마운트 → 대기 타이머 취소 · 종류: 자동 · 요구: R-01 · 설계: §6 P-1(effect 정리 때 두 취소 함수 호출 — 대기 타이머 지우고 이후 결과 버림) · CR-039 · Q-02 · 스펙: `test/SettingsApp.retry.test.tsx` · **신규(v28 — 스펙 초안 추가)**
+- Given `getSettings` 항상 reject(`settings.io`), `getAssetManifest` resolve 빈 매니페스트
+- When 렌더 → 첫 실패(200ms 대기 중) → `unmount()` → 5000ms 진행
+- Then ⓐ 화면: 문서에 `role=alert` 없음 ⓑ 상태: 대기 타이머 취소 — 언마운트 뒤 재시도·`setError` 없음 ⓒ bridge: `getSettings` 1회(5초 뒤에도), `getAssetManifest` 1회, `setSettings` 0회
+
+#### v28 개정 TC (앞 본문을 대체 — 번호 유지, 스펙 단언 불변)
+
+| 개정 TC | 스펙 | Given / When 변화 | Then ⓐ 화면 · ⓑ 상태 · ⓒ bridge (현행 기대) | 스펙 반영 |
+|---|---|---|---|---|
+| TC-089 | `MousePartsTab.test.tsx` | 불변 — `withPen((500,100))` + `PEN_HAND` → 「기본값으로 리셋」 → 수신 재렌더 | ⓐ 수신 전 펜 손 (500,100), 수신 뒤 `DEFAULT_PEN_POS` = **(372,476)**(옛 기본 위치 규칙 자리 (385,535) 아님) ⓑ `onError(null)` ⓒ `setSettings` 정확히 1회 `{ ...s0, mouse: RESET_EXPECTED }` — `penPos` = `DEFAULT_MOUSE_SETTINGS.penPos` (372,476)(옛 `null` 대체)·`penMode` 현재 값(false) 보존·키 정렬 `['area','hand','partPos','penMode','penPos','shoulder']` 6개 | 이미 현행(CR-044 it 이름) — 불변 |
+| TC-025 | `MousePartsTab.test.tsx` · `SettingsApp.test.tsx` | 불변 | ⓒ 리셋 인자 `mouse` = `shoulder` (582,484) · `area` 불변 · `hand` null · `partPos` (411,464) · `penPos` (372,476) · `penMode` 보존(키 6개) — 원 본문 ⓒ의 `penPos: null`·키 5개 대체 ⓐ·ⓑ 불변 | 이미 현행 — 불변 |
+| TC-FLOW-07 | `MousePartsTab.test.tsx` | 불변 | 리셋 Step 인자 `{ ...SETTINGS, mouse: RESET_EXPECTED }`(`penPos` (372,476)), 수신 뒤 펜 손·「손 위치」 `(372, 476)` — 원 상태 전달의 「`penPos` null → (385,535)」 대체. `setSettings` 총 2회·`onError` 모두 null 불변 | 이미 현행 — 불변 |
+| 공통 픽스처 `DEFAULT_MOUSE_EXPECTED` · 추적표 R-17 추가 행 · §5.2 `onReset`(`penPos` null) 행 · 「CR-026 개정 요약」 표 | — | — | 「`penPos` null·키 5개」는 CR-026 당시 기록. 현행 = `DEFAULT_MOUSE_SETTINGS` 값(위 TC-025 행)·키 6개 | — |
+| TC-FLOW-23 | `ImagesTab.test.tsx` | 아래 본문 | 아래 본문 | 이미 현행(CR-053 it 이름) — 불변 |
+| TC-283(카드) | `AlarmSoundCard.test.tsx` | 불변(`mount(80)` — 명시 픽스처) | 판정 불변. it 이름 「기본 80%」 → 「픽스처 80% 표시(현행 기본 44 = `DEFAULT_ALARM_VOLUME`)」 + 주석 1줄. 기본 44% 표시는 TC-283(탭)·TC-249가 판정 | **이름·주석** |
+| TC-249 | `TimerTab.test.tsx` | 불변 | 판정 불변(이미 (268,402)·7·44). 334행 주석 「공용 픽스처 T·TF 는 옛 값」 → 「T·TF의 (268,403)·5는 기본값과 일부러 다른 명시값」, 344행 주석 → 「TF 위에 현행 기본 (268,402)·7·44를 덮어씀」 | **주석** |
+| TC-288 ~ TC-290(파일 공통) | `TimerTab.cr052.test.tsx` | 불변 | 판정 불변. 52행 픽스처 주석 「TimerTab.test.tsx 와 같은 값」 → 명시값 설명(`alarmVolume` 80은 이 파일 예외, 현행 기본 (268,402)·7·44는 단언하지 않음) | **주석** |
+
+### TC-FLOW-23 · S-22(requirements v1.26): 펜 손만 쓰는 사용자가 「타자 입력 1」을 없애려다 「기본값」(비우기)이 잠긴 것을 보고 타자 입력 2부터 비운 뒤 「타자 입력 1」 「기본값」으로 비우고, 다시 필요해지면 「이미지 변경」으로 넣는다 · 종류: 자동 · 요구: R-41, R-40, R-25 · Steps: TC-233(잠김 부분) → TC-143(뒤 장 「기본값」 = 비우기 부분, 대상 `kb_down_1`) → TC-233(활성 부분) → TC-235(확인창 설명 부분) → TC-236(확정·빈 칸 부분) → TC-139(「이미지 변경」 등록 부분, 대상 `kb_down_0`) · 스펙: `test/ImagesTab.test.tsx` · **v28 정정(원 본문 대체 — 판정은 CR-053 스펙 그대로)**
+- 상태 전달: `TWO`(= `d7()` + `kb_down_0` + `kb_down_1`) → Step 2 응답 `ONE`(= `d7()` + `kb_down_0`) → props 재렌더 = Step 3 Given(`kb_down_1` 없음) → Step 5 응답 `NO0`(= `withoutDown0(ONE)`) → 재렌더 = Step 6 Given(빈 칸) → `importAsset` 응답 `ONE` → 재렌더
+- Given `TWO`, `SETTINGS`, `removeAsset` 1회째 → `ONE`·2회째 → `NO0`, `pickPngFile` → `PATH`, `importAsset` → `ONE`
+- When 「기본값」 잠김 확인 → `타자 입력 2 그림 지우기` → 「지우기」 → 재렌더 → `타자 입력 1 그림 지우기` → 「지우기」 → 재렌더 → `타자 입력 1 이미지 변경` → 재렌더
+- Then ⓐ 화면: Step 1 `kb_down_0` 카드 버튼 정확히 2개(셋째 「비우기」 없음), 「기본값」(aria `타자 입력 1 그림 지우기`) 비활성·`title` `마지막 장부터 지울 수 있습니다.` / Step 3 `slot-card-kb_down_1` 없음, 「기본값」 활성·`title` 없음 / Step 4 확인창 설명 `‘타자 입력 1’ 그림을 지울까요? 되돌릴 수 없습니다.` / Step 5 응답 뒤 포커스 = 누른 「기본값」, 재렌더 뒤 `img` 없음·`등록된 그림 없음`·「기본값」 비활성·`타자 입력 1 기본 그림으로 되돌리기` 버튼 없음·`add-card-*` 0개 / Step 6 재렌더 뒤 `img` src `asset://kb_down_0.png`·「기본값」 활성 ⓑ 상태: 매니페스트 `TWO` → `ONE` → `NO0` → `ONE`, 각 단계 끝 카드 버튼 활성(`slotBusy` null) ⓒ bridge: `removeAsset` 1회째 `{kind:'kb_down',index:1}`·2회째 `{kind:'kb_down',index:0}`(총 2회), `pickPngFile('PNG 이미지 선택')` → `importAsset({kind:'kb_down',index:0}, PATH)` 1회, `restoreDefaultAsset` 0회, `setSettings` 0회, `onError` 0회
+- 점검(TC-FLOW-22 · S-21): 스펙 it은 셋째 버튼을 단언하지 않아 S-22 정정 영향 없음 — 불변(Given 7장 표기는 위 「제외」)
+
+#### v28 색 정정 (CR-032 🔒 포인트 컬러)
+
+| 위치 | 옛 서술 | 현행(`src/settings/settings.module.css` `:root`) |
+|---|---|---|
+| 추적표 「design §1 탭 3개 … §2 탭 바」 행 · 「design §11 D-4」 행 · 「CR-031 개정」 R-19 읽기 규칙 | 초록 강조·초록 토큰 | 포인트색 `--st-accent #BE72AD`·hover `--st-accent-hover #A85A97`·선택 배경 `--st-nav-active #F8EBF5`(옅은 분홍) — 앞 본문 3곳에 v28 덧씀 |
+| `manual-checklist.md` M-23 | 옅은 초록 `#e6f6f3`·초록 강조 `#16b39a` | 본문 직접 정정(v20) |
+| `manual-checklist.md` M-19 · M-26 · M-27 | 토글 초록 · 포커스 링 초록 · 「예」 초록 강조색 | v20 「읽는 법」 블록 |
+| TC-217 | — | 이미 `--st-accent: #BE72AD` 대조 — 불변 |
+
+#### v28 설계 확인 필요 항목 재대조
+
+| 항목 | 현행 소스 대조 | 결과 |
+|---|---|---|
+| J-1(펜 문구 10키/11키) | `i18n/types.ts` 11키 실재 | 스펙 정합 · design 표기만 남음 → AA-1 |
+| V-1(CR-043 영향 TC 목록) | CR-044·CR-053으로 개정 TC 재편 | 기록 갱신 · R-41 추적 재편은 보류(제외) |
+| V-3(TC-201 it 이름) | 현행 이름이 CR-053 본문과 일치 | **해소** |
+| W-4(수동 확인표 미개정) | v16(CR-053)에서 M-29·M-30·M-32·M-33·M-43 개정 완료, v20에서 M-43을 S-22 v1.26과 재대조 — 일치 | **해소**(7장·뒷머리 복원 서술은 제외 항목이라 불변) |
+| W-5(뒷머리 비우기 뒤 포커스) | `ImagesTab.tsx` `focusAfter` = 같은 카드 「이미지 변경」(TC-196 · TC-206 · M-33 6)) | **해소**. 단 `kb_down_0` 「기본값」(비우기)은 `focusAfter` 없음 → 확정 뒤 누른 버튼이 비활성 — 원 G-1 그대로 열림(TC-236은 응답 직후까지, M-43 6) 관찰 기록) |
+| W-7 · M-4(기본 그림 기하) | 리셋 기본 partPos (411,464)·penPos (372,476) | 수동 M-07 · M-16 · M-40a는 v20 「읽는 법」으로 정정. `DragHit.test.tsx`·`mouseWizard.test.ts`의 「기본 그림」 주석은 이번 위임 스펙 목록 밖 — 명시 픽스처라 판정 영향 없음(기록 유지) |
+
+#### v28 추적
+
+| 요구ID | TC | TC-FLOW | 수동 |
+|---|---|---|---|
+| R-01 | 신규·이동 TC-306 · TC-308 · TC-309 · TC-310 + 기존 TC-033 · TC-034 · TC-155 · TC-102(CR-039 개정 스펙 그대로) | TC-FLOW-01(창 열기 — 재시도는 오류 분기, 새 흐름 없음) | M-01 · M-02 |
+| R-17 · R-18 | 개정 TC-089 · TC-025 | TC-FLOW-07 | M-07 · M-16(v20 읽는 법) |
+| R-40 · R-41 · R-25 | TC-233 · TC-235 · TC-236 · TC-143 · TC-139(기존) | TC-FLOW-23(서술 정정) | M-43(불변) |
+| R-27 · R-28 | 불변(색 단언 TC 없음 — TC-217 토큰 대조) | — | M-23(본문) · M-19 · M-26 · M-27(읽는 법) |
+| R-54 · R-46 | TC-283(카드 — 이름) · TC-249(주석) | — | — |
+
+| 설계 항목 | TC |
+|---|---|
+| design §6 P-1 첫 시도 + 200·500·1000ms 재시도(최대 4번) | TC-306, TC-308 |
+| §6 P-1 성공 시 `onOk` 1회·재시도 중단·오류 줄 건드리지 않음 | TC-306 |
+| §6 P-1 4번 모두 실패할 때만 `setError` 1회·재시도 중 오류 줄 없음·초기값 유지 | TC-308, TC-033, TC-034, TC-155 |
+| §6 P-1 설정·매니페스트 독립 판정 | TC-309, TC-034 |
+| §6 P-1 언마운트 취소 | TC-310 |
+| requirements §2 S-22(v1.26 현행 정정) | TC-FLOW-23 |
+| `DEFAULT_MOUSE_SETTINGS.penPos` 리셋(§5.2 `onReset`) | TC-089, TC-025, TC-FLOW-07 |
+| 색 토큰 D-4(CR-032) | TC-217(값) · M-23 · M-19 · M-26 · M-27 |
+| `DEFAULT_ALARM_VOLUME` 44 · `DEFAULT_TIMER_SETTINGS` (268,402)·7 | TC-283(탭) · TC-249 · TC-269(판정), TC-283(카드)·cr052 픽스처(이름·주석) |
+
+사용자행 ↔ TC-FLOW(v28): S-22 → TC-FLOW-23(서술 정정) · S-21 → TC-FLOW-22(점검, 불변). 새 사용자행·새 TC-FLOW 없음. CR ↔ TC: CR-039 → TC-306 · TC-308 · TC-309 · TC-310(대기열 Q-02 전환됨) / CR-032 → 색 서술 정정 / CR-044 · CR-059 → TC-089 · TC-025 · TC-FLOW-07 · TC-283 · TC-249 서술 정정.
+
+#### v28 설계 확인 필요 (관리자 인계 — 문서 수정은 소유자)
+
+- **AA-1. `design/i18n.md` §4.3 주 「위 10키」·「`Messages` 단순 키 수 +10」**(과 design 변경이력 CR-033 「문구 10키」)이 소스·표의 11키와 어긋난다(J-1 잔여). ui-designer 몫.
+- **AA-2. design RTM R-01 「예정 TC」**에 TC-306 · TC-308 ~ TC-310(CR-039 재시도)이 없다. ui-designer 몫.
+- **AA-3. CR 대장 번호 잔재.** CR-052 검증 칸 「TC-307」, 한 CR 검증 칸의 「TC-314 신규」는 이 문서·settings 스펙 어디에도 없는 번호다(다른 화면 번호 혼입 추정). TC-307은 이 문서에서 결번 처리했다. CR-039 행 「신규 TC 스펙 2건」에 TC-306 · TC-308 병기 권고. 대장 수정은 이 에이전트 범위 밖.
+- **AA-4. `kb_down_0` 비우기 뒤 포커스(G-1 재확인).** 「기본값」(비우기) 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. 뒷머리·뽀모도 인물처럼 `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-236 · TC-FLOW-23은 응답 직후 포커스만 단언한다.
+- **AA-5. TC-309 해석.** 매니페스트 실패 오류 줄 문구는 ja 사전 code 문구라 개수만 단언했다. 한 조회의 오류가 다른 조회의 성공으로 지워지지 않는다(「오류 줄 건드리지 않음」)는 설계 문장은 TC-309에서 「설정 성공이 먼저 와도 1.7초 뒤 오류 줄이 뜬다」로 확인된다.
+
 ## 추적표
 
 ### 요구 ↔ TC
@@ -3370,7 +3478,7 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 |---|---|---|---|
 | R-18 | TC-078, TC-079, TC-080, TC-081, TC-082, TC-083, TC-084, TC-085, TC-086, TC-087, TC-088, TC-089, TC-090, TC-091, TC-092, TC-009(30키) | TC-FLOW-07 | 선행: CR-026 화면 · bridge CR-026 · overlay CR-025 `resolvePenPos` |
 | R-11(추가 행) | TC-078, TC-084 ④, TC-085 | — | 펜 손이 생겨도 팔 파츠 끌기 결과가 같다 |
-| R-17(추가 행) | TC-025(`penPos` null·키 5개), TC-087, TC-089 | — | 리셋 기대값에 `penPos: null` |
+| R-17(추가 행) | TC-025(`penPos` null·키 5개 — v28: 현행 `penPos` (372,476)·키 6개), TC-087, TC-089 | — | 리셋 기대값에 `penPos: null`(CR-026 당시 기록 — **v28 정정: `DEFAULT_MOUSE_SETTINGS.penPos` = (372,476)**) |
 
 설계 항목 ↔ TC
 
@@ -3439,7 +3547,7 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 
 | 설계 항목 | TC |
 |---|---|
-| design §1 탭 3개·금지 조건 / §2 탭 바·오류 줄(머리글 없음) | TC-031, TC-099, TC-102 / 시각(알약·검정 채움·초록) M-23 |
+| design §1 탭 3개·금지 조건 / §2 탭 바·오류 줄(머리글 없음) | TC-031, TC-099, TC-102 / 시각(알약·검정 채움·초록 — v28: 셋 다 폐기 서술. 현행 = CR-031 세로 메뉴 + CR-032 포인트색 `--st-accent #BE72AD`·선택 배경 `--st-nav-active #F8EBF5`, `settings.module.css`) M-23 |
 | design §3 `SettingsApp`(Provider·`Shell`)·탭 버튼 `TABS` | TC-031, TC-032, TC-098, TC-100, TC-101 |
 | design §3 `MousePartsTab` 문구 출처(`useMessages`)·`labels.ts` 삭제 | TC-009, TC-030, TC-101 |
 | design §3 파일 분할 계획(400줄) | 해당 없음(구현 규칙 — U-11 실행 로그) |
@@ -3449,7 +3557,7 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 | design §7 v0.14 사용표 — `set_settings` / `set_autostart` / `reset_overlay_position` / `import_asset` / `remove_asset` / `pickPngFile(t.pickTitle)` / `setSettingsWindowTitle` / 상수(`isRequiredSlot`·`SCALE_MIN/MAX`·`CANVAS_MAX_*`) / `resolvePenPos` / 실패 표시 규칙 | TC-107, TC-109, TC-111, TC-120, TC-127, TC-148 / TC-113 ~ TC-116 / TC-117, TC-118 / TC-139 ~ TC-141 / TC-143, TC-146, TC-147 / TC-138, TC-150 / TC-031, TC-100, TC-103 / TC-133, TC-131, TC-136 / TC-148 / TC-097, TC-102 |
 | design §8(→ i18n.md 이관) | TC-009, TC-094 |
 | design §9 포커스 순서·언어 전환 시 포커스 유지·`<html lang>` | TC-031, TC-101, TC-130, TC-151, M-09, M-22 |
-| design §11 D-3(표준 원소 직접 — 수용)·D-4(초록 토큰) | 편차 기록(역할·키보드는 TC-104, TC-130) · M-23 |
+| design §11 D-3(표준 원소 직접 — 수용)·D-4(색 토큰 — v28: 옛 초록 → CR-032 포인트색 `--st-accent #BE72AD`·`--st-accent-hover #A85A97`·`--st-nav-active #F8EBF5`) | 편차 기록(역할·키보드는 TC-104, TC-130) · M-23 |
 | design §12 공용화 후보(`ToggleSwitch`·`SettingsCard`·`ConfirmDialog`) | 해당 없음(후작업 목록). 부품 계약은 TC-105, TC-106, TC-152 |
 | general §1 레이아웃 / §4 렌더 1 ~ 5 | TC-104, M-23 |
 | general §2 컴포넌트 표 / §2.1 `ToggleSwitch` / §2.2 `SettingsCard` | TC-104, TC-119, TC-131 / TC-105 / TC-106 |
@@ -3538,18 +3646,108 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | Q-nn | 일자 | CR-ID | 변경 요약 | 변경 파일 | 영향 TC 후보 | 신규 TC 필요 | 상태 |
 |---|---|---|---|---|---|---|---|
 | Q-01 | 2026-09-23 | — (bridge 구현 대기, contract v0.3 §3.6 · CR-007 계열) | hand-anchor 「호출 없음」 검사 재실행 고리. 조건: bridge 래퍼 `getHandAnchor`(commands)·`onHandAnchorChanged`(events) 생성 후, 설정 화면이 이를 호출·구독하지 않음을 재확인한다 | `src/bridge/commands.ts` · `src/bridge/events.ts`(bridge-implementer 소관) | TC-031, TC-040, TC-041, TC-042, TC-043, TC-FLOW-02, TC-FLOW-05 | 없음(기존 TC 재실행. 스펙은 실물 export 위에 mock을 덮어쓴다 — `bridge/events` mock의 `EVENTS`에 `handAnchorChanged` 추가) | 전환됨(TC-031, TC-040~TC-043, TC-FLOW-02) · 재실행 대기(**조건 충족 2026-09-23** — 두 래퍼 존재 확인, 다음 `/test ui`에서 재실행) |
-| Q-02 | 2026-09-25 | CR-039 | 초기 조회 실패 시 200·500·1000ms 간격 최대 3회 재시도, 끝내 실패할 때만 오류 줄 | `src/settings/index.tsx` · `src/components/utils/fetchWithRetry.ts`(신규) | TC-033·TC-034(조회 1회·즉시 오류 → 4회 뒤 오류)·TC-155·TC-102(오류 줄 대기 시간) | 예 — `SettingsApp.retry.test.tsx` 2건(ui-fixer 초안, TC-ID 부여 필요) | 대기 |
+| Q-02 | 2026-09-25 | CR-039 | 초기 조회 실패 시 200·500·1000ms 간격 최대 3회 재시도, 끝내 실패할 때만 오류 줄 | `src/settings/index.tsx` · `src/components/utils/fetchWithRetry.ts`(신규) | TC-033·TC-034(조회 1회·즉시 오류 → 4회 뒤 오류)·TC-155·TC-102(오류 줄 대기 시간) | 예 — `SettingsApp.retry.test.tsx` 2건(ui-fixer 초안, TC-ID 부여 필요). v28: 가번호 TC-208 → TC-306 · TC-209 → TC-308 이동(CR-040 TC-208·TC-209와 중복 해소) + 신규 TC-309(설정·매니페스트 따로 판정)·TC-310(언마운트 취소). 영향 TC TC-033·TC-034·TC-155·TC-102는 스펙이 이미 CR-039 개정(`mountUntilGaveUp`) — 추가 개정 없음 | 전환됨(TC-306, TC-308, TC-309, TC-310) · 검증 대기(v28 — 다음 `/test ui` 실행) |
 | Q-03 | 2026-09-26 | CR-049 | 자동 실행 취소(`autostart.cancelled`) 분기·안내·사전 키 삭제, 오류 code 23 → 22, `autostartDesc`·`autostartPending` 일반 권한 기준 문구로 | `src/settings/components/GeneralTab.tsx` · `src/settings/i18n/{types,ko,ja,en}.ts` | TC-093·TC-094·TC-246(code 수·사전), TC-104·TC-113(설명·대기 문구), TC-114(취소 → 폐기 또는 「모든 실패 = 오류 줄」로 대체), TC-FLOW-09(취소 단계 제거), SettingsApp·GeneralTab·i18n 스펙 | TC-114 대체 필요(모든 `setAutostart` 실패가 오류 줄로 가고 안내 줄은 비는지) | 검증됨(2026-09-26, 328 PASS) |
 | Q-04 | 2026-09-26 | CR-052 | 카드 1 설명문(timerCardDesc) 삭제·스톱워치 토글 설명 새 문장(3개 국어), alarmCardDesc 반복 재생 문구, 스톱워치 모드·둘 다 꺼짐일 때 시작 시간 입력 회색 비활성(disabled + aria-disabled, 안내 줄 비움, 잠김과 같은 `.durationOff`), 탭 UI 다듬기(구분선 `.group`·카드 간격 12px·시·분·초 한 상자·슬라이더 값 `.value`) | `src/settings/components/{TimerTab,CountdownTimeInput,AlarmSoundCard}.tsx` · `TimerTab.module.css` · `src/settings/i18n/{types,ko,ja,en}.ts` | TC-094·TC-246·TC-286(i18n 사전), TC-248·TC-268·TC-285·TC-287·TC-274·TC-275·TC-276(TimerTab), TC-277(AlarmSoundCard 문구), TC-FLOW-28, CountdownTimeInput 컴포넌트 스펙(TC-276 컴포넌트) | 예(inactive 비활성 TC — 스톱워치·둘 다 꺼짐·타이머 켜짐 stopped 3경우, aria-disabled·안내 줄 빈 값·입력 중 값 버림) | 검증됨(2026-09-27) |
 | Q-05 | 2026-09-27 | CR-053 | hair·pomo_char = 복원 칸(「기본값」 = restoreDefaultAsset 늘 활성) + 셋째 버튼 「비우기」(removeAsset, 등록 시만 활성, 비운 뒤 포커스 「이미지 변경」). kb_down_0 = 비우기 칸(「기본값」 = removeAsset, 마지막 장 규칙), 셋째 버튼 제거. 기본 그림 7장(다운로드 설명·덮어쓰기 개수 7). DEFAULT_TIMER_SETTINGS textPos (142,458)·rotation 9 | `src/settings/imageSlots.ts` · (bridge v0.24 `src/bridge/types.ts` 인용) | Hair.test.tsx TC-193·196·200·201·202·206·207·TC-FLOW-18 · imageSlots.test.ts TC-133·135·177·192·229·232 · ImagesTab.test.tsx TC-142·147·179·182·189·233·236·237·TC-FLOW-15·17·22·23 · PomoCards.test.tsx TC-241·242·TC-FLOW-25 · TimerTab.test.tsx TC-249 · timerValues.test.ts TC-239·269 | 예 — pomo_char 「비우기」·복원 TC | 검증됨(2026-09-27) |
 | Q-07 | 2026-09-27 | CR-054 | 「기본 설정」 탭 맨 아래 「초기화」 카드(`ResetAllCard` — 위험 버튼·확인창·`resetAppData()`·상태 줄 `role=status`), 화면 값은 기존 `settings://changed`·`assets://changed` 구독으로만(낙관적 갱신 없음), i18n 단순 키 +8(128 → 136)·errors +2(`ERROR_CODES` 25 → 27) | `src/settings/components/ResetAllCard.tsx`(신규) · `GeneralTab.tsx` · `GeneralTab.module.css` · `src/settings/i18n/{types,ko,ja,en}.ts` | 개정 TC-093 · TC-094 · TC-246 · TC-286(`i18n.test.ts`), TC-104 · TC-130(`GeneralTab.test.tsx`), TC-099 · TC-101(`SettingsApp.test.tsx`) — 스펙 개정 완료. mock 목록 정합 11개 스펙 — **불필요 확정(v25)**: 11개 모두 `...actual` 전개라 실물 `resetAppData` export 포함·「전체 초기화」 미조작으로 결과 불변(「CR-054 개정 TC」 표 사유) | 예 — 신규 TC-293 ~ TC-304, TC-FLOW-31 · TC-FLOW-32(TDD 선행 — 구현 전 Red) | 전환됨(TC-293 ~ TC-304, TC-FLOW-31, TC-FLOW-32) · 잔여 없음(v25 닫힘) |
 | Q-08 | 2026-09-27 | CR-057 | 이동 영역 문구 개선 — 새 키 `areaDesc`(idle에서 안내 줄 아래 `.guide` 줄로 표시, 다른 단계에서는 없음), `areaStart`·`areaPick1~4`·`areaReview` 문구 교체(ko 🔒·ja·en) | `src/settings/i18n/{types,ko,ja,en}.ts` · `src/settings/components/MousePartsTab.tsx` | TC-009(labels 이관 문구)·TC-094(ko 새 키 개수·문구)·i18n 키 수(simpleKeys)·TC-016·TC-024·TC-064~TC-074·TC-077·TC-049·TC-082·TC-086·TC-222·TC-225·TC-FLOW-02·04·06 및 ja·en 문구 단언 | 예 — areaDesc 표시(idle만·3개 국어) 1건 | 검증됨(2026-09-27) — 신규 TC-305, 개정 TC-009 · TC-094 · `IDLE_BUTTONS` 단언 전부 · TC-024 · TC-063 ~ TC-074 · TC-086 · TC-222 · TC-225 · TC-077 · TC-FLOW-02 · TC-FLOW-04 · TC-FLOW-06(「CR-057 개정」 절) |
 
+## v29 개정 — 뒷머리 내장 기본 없음 (🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29, 증분 모드 — 개정만)
+
+비유: 견본 상자에서 뒷머리 견본을 다시 뺐다(7개 → 6개). 견본이 없는 칸의 「기본값」 손잡이는 「치우기」가 되므로, 뒷머리 칸에 따로 달았던 지우개 단추도 뗀다. 지우개 단추는 이제 뽀모도 인물 칸에만 있다. CR-044 때의 뒷머리 기대로 돌아가되, CR-053에서 생긴 뽀모도 인물 · 「타자 입력 1」 규칙은 그대로다.
+
+- **v29 기준(이 절이 앞 모든 기준 줄·CR 절보다 우선 — 특히 「CR-053 개정」 절의 hair 행과 「doc-sync 개정(v28)」 절 「제외」 줄을 대체)**: 🔒 사용자 결정(2026-09-30) 뒷머리(hair) 기본 그림 없음 · contract **v0.29** · 현행 `src/bridge/types.ts` `DEFAULT_ASSET_SLOTS` **6개**(`kb_up` · `background` · `pomo_char` · `mouse_base` · `pen_up` · `pen_down_0`), `hasBuiltinDefault('hair')` = **false** · 위임 확정 화면 동작(아래 규칙 1 ~ 5). 화면 문서(requirements · design · images-tab · i18n)는 다른 에이전트가 동시에 개정 중 → AB-1
+- **CR-ID**: 미부여(CR 대장에 이 결정의 CR 행 없음 — 관리자가 기록할 때 이 절 이름 「v29」와 병기) → AB-4. 대기열 행도 만들지 않았다(소스 변경 `EMPTYABLE_SLOT_KEYS`는 다음 단계 ui-fixer 몫 — 적용 때 CR 기록)
+- **새 기대값 규칙(모든 개정 TC 공통)**
+  1. `hair` = **단일 비우기 칸**: `resetKind` `'clear'`, `canReset` = 등록 여부, `lastOnlyBlocked` false, `emptyable` · `canEmpty` **늘 false**. `EMPTYABLE_SLOT_KEYS` = **`['pomo_char']`**
+  2. 뒷머리 카드 버튼 = `[이미지 변경, 기본값]` 2개 · 한 줄(`cardEmptyable` · `actions2` 없음). 「기본값」 aria = `clearImageAria`(ko `뒷머리 그림 지우기`, ja · en `format(clearImageAria,{name})`) — `kb_down_0` 「기본값」(= 비우기)과 같은 키. `restoreImageAria` · `emptyImageAria` 이름 버튼 없음
+  3. 「기본값」: 미등록 비활성(`title` 없음) · 등록 활성 → 기존 비우기 확인창(`confirmClear*`, `{name}` = 뒷머리) → 「지우기」 → `removeAsset('hair')` 1회 · `restoreDefaultAsset` 0회. 경로는 `onRequestReset` → `onConfirmClear`라 `focusAfter`가 없다 → 응답 뒤 포커스 = 누른 「기본값」(수신 뒤 그 버튼이 비활성이 되므로 수신 뒤 포커스는 판정하지 않는다 — AB-3)
+  4. 뽀모도 인물 카드 불변(「기본값」 = 복원 · 셋째 「비우기」). 화면 전체 `/그림 비우기$/` 버튼 = `[slot-card-pomo_char]` 1개. 셋째 버튼 없는 슬롯 카드 19장
+  5. 기본 세트 6장: 다운로드 설명 · 완료 `{n}` = 6, 같은 이름 충돌 6개, 부분 실패 ok = 6 − 실패 수. 첫 실행 매니페스트 = 6장(hair · kb_down_0 없음) → 복원 활성 6칸, 빈 비우기 칸 **14**(kb_down_0 · hair · idle · rest · key_* 7 · mouse_left · mouse_right · pomo_bubble)
+- **번호 판정(TC-196 · TC-206 — 폐기 아님)**: 두 TC는 CR-037/CR-044 원 본문이 「「기본값」 → 비우기」 경로였고, CR-053에서만 「비우기」 버튼 경로로 옮겨졌다. 뒷머리를 비우는 기능(R-34 · R-35)은 v29에서도 「기본값」으로 남으므로 **정상(TC-196)·오류(TC-206) 분기를 같은 비중으로 유지**하려면 번호를 살려 「기본값」 경로로 개정하는 것이 맞다. 셋째 버튼 전용이던 TC-204 · TC-205(취소·확정)는 이미 폐기(CR-044)이고 되살리지 않는다 — 같은 확인창 · 취소 · Esc · 확정은 TC-196이 덮는다. TC-FLOW-19(S-18)도 폐기 유지
+- **수(v29)**: 새 TC · 새 폐기 없음. 자동 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32(유효 31 · 폐기 1) · 수동 54(`manual-checklist.md` v21 — 「v21 읽는 법」 블록, 행 수 불변)
+
+### v29 개정 TC (앞 본문을 대체 — 번호 유지)
+
+「지금」 열 = 이 패스 시점 소스(`EMPTYABLE_SLOT_KEYS` = `['hair','pomo_char']` 그대로, bridge는 v0.29 반영)에서의 예상. **Red(예정)** 는 ui-fixer가 `EMPTYABLE_SLOT_KEYS`를 `['pomo_char']`로 바꾸면 Green이 되어야 한다. 실행 증거는 ui-tester 몫(이 패스는 실행하지 않음).
+
+| TC | 스펙 | Given / When 변화 | Then ⓐ 화면 · ⓑ 상태/반환 · ⓒ bridge (새 기대) | 지금 |
+|---|---|---|---|---|
+| TC-193 | `Hair.test.tsx` | 불변(`NO_HAIR` → `HAIR`) | ⓐ 위치 · 제목 · 설명 · 선택 배지 · 빈 미리보기 불변, 버튼 `[이미지 변경, 기본값]`, 「기본값」(aria `뒷머리 그림 지우기`) 빈 칸 **비활성** · `title` 없음 → 등록 뒤 활성 · `title` 없음 · 버튼 2개, `뒷머리 기본 그림으로 되돌리기` · `뒷머리 그림 비우기` 없음, 카드 21 ⓑ `hasBuiltinDefault('hair')` false ⓒ `pickPngFile` · `importAsset` · `removeAsset` · `restoreDefaultAsset` · `setSettings` 0회 | Red(예정) |
+| TC-196 | 같음 | Given `HAIR`, `removeAsset` deferred(`NO_HAIR`) · When **「기본값」**(옛 CR-053 「비우기」) → 취소 / Esc / 「지우기」 → 응답 → props `NO_HAIR` | ⓐ `alertdialog`(`aria-modal`, 이름 `그림 지우기`, 설명 `‘뒷머리’ 그림을 지울까요? 되돌릴 수 없습니다.`, 버튼 `[지우기, 취소]`, 「지우기」 `danger`, 처음 포커스 「취소」), 취소 · Esc 뒤 닫힘 · 포커스 누른 「기본값」, 확정 뒤 카드 버튼 전부 비활성, 응답 뒤(수신 전) 포커스 누른 「기본값」 · `img` 그대로, 수신 뒤 `img` 없음 · 「등록된 그림 없음」 · 「기본값」 비활성 · 「이미지 변경」 활성 · 복원/비우기 이름 버튼 없음 · 카드 `alert` 없음 ⓑ `confirm`(clear, `focusAfter` 없음) → null, `slotBusy` hair → null ⓒ 취소 · Esc 동안 0회, 확정 뒤 `removeAsset('hair')` 정확히 1회, `restoreDefaultAsset` · `importAsset` · `pickPngFile` · `setSettings` · `onError` · `window.confirm` 0회 | Red(예정 — 셋째 버튼 부재 단언) |
+| TC-200 | 같음 | 불변 | ⓑ `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`, 예 1 hair 등록 = `{emptyable:false, canEmpty:false, resetKind:'clear', canReset:true, lastOnlyBlocked:false}`, 예 2 미등록 = `{false, false, 'clear', canReset:false}`, 예 3 다른 칸 false, `kb_down_0` false · false · clear · `canReset` true, `buildSlotGroups` `emptyable` 카드 = `[pomo_char]`(HAIR · NO_HAIR), `canEmpty` 카드 `[]`, add 카드 필드 없음 ⓐ · ⓒ 해당 없음(순수) | Red(예정) |
+| TC-201 | 같음 | 불변(`HAIR`) | ⓐ 뒷머리 버튼 `[이미지 변경, 기본값]` · aria `[뒷머리 이미지 변경, 뒷머리 그림 지우기]` · 활성 · `type=button`, 카드 `cardEmptyable` 없음 · 버튼 줄 `actions2` 아님 · `kb_up` 카드 클래스 전부 포함, 뽀모도 인물 버튼 3개(aria `… 이미지 변경` · `… 기본 그림으로 되돌리기` · `… 그림 비우기`) · 「비우기」 비활성 · `cardEmptyable`, 나머지 슬롯 카드 **19장** 버튼 2개 · 한 줄, `/그림 비우기$/` = `[slot-card-pomo_char]` ⓑ hair `emptyable` · `canEmpty` false ⓒ 0회 | Red(예정) |
+| TC-202 | 같음 | 대상 버튼 「비우기」 → **「기본값」** | ⓐ `NO_HAIR` 「기본값」 비활성 · 글자 `기본값` · `title` 없음 · 눌러도 `alertdialog` 없음 / `HAIR` 재렌더 뒤 활성 · 복원/비우기 이름 버튼 없음 / kb_up 가져오기 진행 중 비활성 · 눌러도 확인창 없음 / 응답 뒤 활성 ⓑ hair `canReset` false → true, `slotBusy` kb_up → null ⓒ `importAsset('kb_up', PATH)` 1회, `removeAsset` · `restoreDefaultAsset` · `setSettings` 0회 | Red(예정 — 부재 단언) |
+| TC-206 | 같음 | 대상 버튼 「비우기」 → **「기본값」**(ko `뒷머리 그림 지우기`, en `format(en.clearImageAria,{name})`) | ⓐ ko 카드 `alert` = `IO_FAIL.message`, `img` 그대로, 「기본값」 · 「이미지 변경」 다시 활성, 포커스 누른 「기본값」(trigger — 호출 전에 넣음; CR-053 「이미지 변경」 대체), kb_up `alert` 없음 / en 카드 `alert` = `en.errors['asset.not_found']` ⓑ `cardError` = hair, `slotBusy` null ⓒ `removeAsset` 2회 모두 `'hair'`, `restoreDefaultAsset` · `setSettings` · `onError` 0회 | Green 예상 |
+| TC-207 | 같음 | 불변(`HAIR`, ja · en) · 복원 확인창 단계 삭제 | ⓐ 버튼 글자 `[changeImage, clearImage]`, 둘째 이름 `format(clearImageAria,{name})`, `restoreImageAria` · `emptyImageAria` 이름 버튼 없음, 「기본값」 → 확인창 `confirmClearTitle` · `format(confirmClearMessage,{name})` · `[confirmClearOk, confirmCancel]` · 포커스 취소, 취소 뒤 포커스 「기본값」 ⓑ 불변 ⓒ `removeAsset` · `restoreDefaultAsset` · `setSettings` 0회 | Red(예정) |
+| TC-207 정정(v29 · 2026-09-30, 스펙 결함) | 같음 | 불변 | **셋째 버튼 부재 판정 방식만 바꿈 — 기대 불변.** ja 사전은 `clearImageAria` = `emptyImageAria`(`'{name}の画像を削除'`)라 「`emptyImageAria` 이름 버튼 없음」이 정상 「기본값」에 걸려 실패했다. ⓐ 셋째 버튼 부재 = 카드 버튼 **정확히 2개**(`toHaveLength(2)` + 글자 `[changeImage, clearImage]`), `emptyImageAria` 이름 버튼 = 「기본값」(btns[1]) 외 **0개**(en 0개 · ja 「기본값」 자신만 → 제외 후 0개). 제품 문구 · 소스 불변. 확인창 · 포커스 · en 반복 · ⓑ · ⓒ 기대 그대로 | (정정 반영 — 실행은 메인 세션) |
+| TC-203 | 같음 | 불변 | 사전 값 불변 — 주석만(`emptyImage*` 사용 카드 = 뽀모도 인물) | Green |
+| TC-133 | `imageSlots.test.ts` | hair 등록 예 추가 | ⓑ 미등록 `pomo_char` restore · `canReset` true(불변), 미등록 `hair` = `{required:false, resetKind:'clear', canReset:false, lastOnlyBlocked:false, n:null}`, 등록 hair `clear` · `canReset` true(CR-053 restore · true 대체) ⓐ · ⓒ 해당 없음 | Green 예상 |
+| TC-177 | 같음 | 예 4 대상 칸 교체 | ⓑ 복원 칸 `[pen_up, pen_down_0, mouse_base, kb_up, background, pomo_char]`, 비우기 칸 `[mouse_right, key_space, idle, kb_down_0, pomo_bubble, hair]` `canReset` false, 20장 모두 `resetKind` = `hasBuiltinDefault`, 복원 칸 파일명 = 6장 `DEFAULT_FILES` | Green 예상 |
+| TC-178 | 같음 | 픽스처 `DEFAULT_FILES` 6장(연동) | ⓑ `exportResult(done)` = `{kind:'done', count:6}`(CR-053 7) | Green 예상 |
+| TC-192 | 같음 | 불변 | ⓑ `hasBuiltinDefault('hair')` **false**, 빈 hair `toStrictEqual` = `resetKind:'clear'` · `canReset:false` · `emptyable:false` · `canEmpty:false`, 등록 hair = clear · `canReset:true` · `emptyable:false` · `canEmpty:false`, background · 그룹 · 필수 2장 · 1장 고정 불변 | Red(예정) |
+| TC-232 | 같음 | hair 행을 pomo_char 와 분리 | ⓑ `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`; 3 매니페스트(빈 · 두 칸 · hair 만)에서 pomo_char `emptyable` true · `canEmpty` = 등록 · restore · `canReset` true, hair `emptyable` · `canEmpty` false · clear · `canReset` = 등록; `emptyable` 카드 `[pomo_char]`, `canEmpty` 카드 두 칸 → `[pomo_char]` · hair 만 → `[]` · 빈 → `[]`; 첫 실행(`FIRST7` = 6장) pomo_char 외 전부 false · `canEmpty` `[pomo_char]`; `kb_down_0` 4행 · `kb_down_1+` · 추가 카드 불변 | Red(예정) |
+| TC-229 | 같음 | 픽스처 `FIRST7` 내용만 6장(hair 제거 — 이름은 옛 개수, W-8 관례) | 판정 불변(필수 2장 · kb_down_0 빈 비우기 칸) | Green |
+| TC-142 | `ImagesTab.test.tsx` | 빈 복원 칸 예 hair → **pomo_char** | ⓐ `뽀모도 인물 기본 그림으로 되돌리기` 활성 · `title` 없음, `뒷머리 그림 지우기` 비활성 · `title` 없음 · 눌러도 확인창 없음, `뒷머리 기본 그림으로 되돌리기` 없음, 나머지 불변 ⓒ `removeAsset` · `restoreDefaultAsset` 0회 | Green 예상 |
+| TC-179(둘째 `it`) | 같음 | 빈 복원 칸 둘째 대상 hair → **pomo_char** | ⓐ 복원 확인창 설명 `‘뽀모도 인물’ 칸을 내장 기본 그림으로 되돌릴까요? …`, 응답 뒤 포커스 누른 버튼, 뒷머리 · 타자 입력 1 복원 이름 버튼 없음 ⓒ `restoreDefaultAsset` `'background'` → `'pomo_char'`(2회), `removeAsset` · `setSettings` 0회 | Green 예상 |
+| TC-182 | 같음 | 픽스처 `BUILTIN_KEYS` 6칸(옛 `DEFAULT_KEYS7`) | ⓐ 설명 `내장 기본 그림 6장을 원본 크기 그대로 폴더에 저장합니다. 따라 그리거나 고쳐 쓸 때 쓰세요.` ⓑ `DEFAULT_ASSET_SLOTS` 길이 6 · `map(slotKey)` = 위 6칸 ⓒ `pickFolder` · `exportDefaultAssets` 0회 | Green 예상 |
+| TC-189 | 같음 | 부분 실패 픽스처 = 6장 중 `kb_up.png` 실패 | ⓐ ja · en 설명 `format(downloadDefaultsDesc,{n:6})`, 부분 실패 `format(exportPartial,{ok:5, fail:1, files:'kb_up.png'})`, 완료 `format(exportDone,{n:6})` ⓒ 호출 인자 불변 | Green 예상 |
+| TC-233 | 같음 | 불변(`KB1`) | ⓐ 버튼 2개 확인 목록에 `hair` 추가, 화면 `/그림 비우기$/` = `[slot-card-pomo_char]`(CR-053 `[hair, pomo_char]` 대체), 나머지 불변 ⓒ 0회 | Red(예정) |
+| TC-234 | 같음 | 불변(`KB1` · `BASIC` · `EMPTY` · `HP`) | ⓐ 두 줄 양식 = 뽀모도 인물 카드뿐; 뒷머리 카드(빈 칸 · 등록 모두) 버튼 2개 · `cardEmptyable` 없음 · `actions2` 아님; `BASIC`에서 `뽀모도 인물 그림 비우기` 비활성 · `뒷머리 그림 비우기` 없음 ⓒ 0회 | Red(예정) |
+| TC-FLOW-15 | 같음 | 매니페스트 = `DEFAULT_ASSET_SLOTS` 6장 | ⓐ `img` 있는 카드 = 6칸(hair 없음), 빈 칸 **14**, 뽀모도 인물 버튼 3개 · 「비우기」 활성, 뒷머리 버튼 `[이미지 변경, 기본값]` · `뒷머리 그림 지우기` 비활성, `/그림 비우기$/` = `[slot-card-pomo_char]`, 6칸 「기본값」 복원 aria · 활성 / 빈 칸 `… 그림 지우기` · 비활성, 추가 카드 0 ⓒ `importAsset` · `restoreDefaultAsset` · `removeAsset` · `setSettings` 0회 | Red(예정) |
+| TC-FLOW-17 | 같음 | 충돌 = 기본 파일 6개 | ⓐ 확인창 `이 폴더에 같은 이름의 파일이 6개 있습니다. …`, 완료 줄 `기본 이미지 6장을 저장했습니다.` ⓒ `exportDefaultAssets(DIR,false)` → `(DIR,true)` 2회 | Green 예상 |
+| TC-FLOW-22 | 같음 | 이름 · 주석만(기본 7장 → 6장) | 판정 불변 | Green |
+| TC-FLOW-18 | `Hair.test.tsx` | Step 3 「비우기」 → **「기본값」** | 아래 본문 | Red(예정) |
+| (주석) | `ResetAllCard.test.tsx` 151행 | 「기본 그림 7장(v0.24)」 → 6장(v0.29) | 판정 불변(실물 상수 사용) | Green |
+| TC-241(v29 · 2026-09-30 추가) | `PomoCards.test.tsx` | 불변(`EMPTY` · `CHAR` · `BOTH`) · 상수 단언 1줄만 교체 | ⓑ `EMPTYABLE_SLOT_KEYS` = **`['pomo_char']`**(CR-053 `['hair','pomo_char']` 대체), `hasBuiltinDefault` pomo_char true · pomo_bubble false, pomo_char 카드 `{restore, canReset:true, emptyable:true, canEmpty = 등록}` · pomo_bubble 카드 `{clear, canReset = 등록, emptyable:false, canEmpty:false}` · 배경 그룹 순서 `[background, hair, pomo_char, pomo_bubble]` · 슬롯 카드 20 · 필수 2장 · 다른 그룹 불변(hair 카드 필드는 이 TC에서 단언하지 않음 — TC-192 · TC-200 몫) ⓐ · ⓒ 해당 없음(순수) | Green 예상(소스 `imageSlots.ts` 이미 `['pomo_char']` — 옛 단언이 Red였음) |
+
+### TC-FLOW-18 · S-17: 뒷머리 PNG를 넣고 카드로 확인 → 미리보기 맨 아래 → 필요 없어져 「기본값」(= 비우기)으로 없애면 미리보기에서도 사라진다 · 종류: 자동 · 요구: R-34, R-35, R-32 · Steps: TC-194(이미지 변경 · 인자 부분) → TC-193(등록 뒤 표시 부분) → TC-198(`[hair, mouse_base, kb_up]`) → TC-196(「기본값」 → 비우기 확인 → `removeAsset('hair')` · 응답 직후 포커스 부분) → TC-198(헤어 없으면 미렌더 부분) → M-32 · 스펙: `test/Hair.test.tsx` · **v29 개정(CR-053 「비우기」 단계 대체 — CR-044 본문 복귀)**
+- 상태 전달: Step 1 응답 `HAIR`가 Step 2 · 3 Given, Step 3 응답 `NO_HAIR`가 Step 4 Given
+- Given `NO_HAIR`, `importAsset` → `HAIR`, `removeAsset` → `NO_HAIR`
+- When 「뒷머리 이미지 변경」 → 재렌더 → 어깨축 탭 렌더 → 「기본값」 → 「지우기」 → 재렌더 → 어깨축 탭 렌더
+- Then ⓐ Step 1 넣기 전 「기본값」 비활성, 넣은 뒤 `img` `asset://hair.png` · 「기본값」 활성 / Step 2 미리보기 `[hair, mouse_base, kb_up]` / Step 3 확인창 설명 `‘뒷머리’ 그림을 지울까요? 되돌릴 수 없습니다.`, 응답 뒤 포커스 누른 「기본값」, 재렌더 뒤 `img` 없음 · 「기본값」 비활성 · 복원/비우기 이름 버튼 없음 / Step 4 미리보기 `[mouse_base, kb_up]` ⓑ 매니페스트 `NO_HAIR` → `HAIR` → `NO_HAIR` ⓒ `importAsset('hair', PATH)` 1회 → `removeAsset('hair')` 1회, `restoreDefaultAsset` · `setSettings` 0회
+
+### v29 추적
+
+| 요구ID | 자동 TC | TC-FLOW | 수동 |
+|---|---|---|---|
+| R-34(헤어) | TC-192, TC-193, TC-196, TC-200, TC-201, TC-202, TC-206, TC-207 | TC-FLOW-18 | M-32 |
+| R-35(뒷머리 비우기 — 「기본값」이 수행, AB-2) | TC-196, TC-206(비우기 정상 · 오류), TC-200, TC-201, TC-234(셋째 버튼 없음) | TC-FLOW-18 | M-32 · M-33(v21 읽는 법) |
+| R-32(「기본값」 = 복원/비우기) | TC-133, TC-177, TC-192, TC-142, TC-179, TC-193, TC-196 | TC-FLOW-15, TC-FLOW-18 | M-29 |
+| R-36(기본 세트 — 6장) | TC-177, TC-178, TC-182 | TC-FLOW-15 | M-29 |
+| R-33(다운로드) | TC-178, TC-182, TC-189 | TC-FLOW-17 | M-30 |
+| R-41(타자 입력 1) · R-42(뽀모도 인물 셋째 버튼) | TC-232, TC-233, TC-234, TC-201 | TC-FLOW-15 | M-43 · M-45f |
+| R-40 · R-25 | TC-229(픽스처) | TC-FLOW-22(표기) | — |
+
+| 설계 항목(위임 확정 동작 · contract v0.29 — 화면 설계 문서 개정 뒤 절 번호로 바꿔 읽는다, AB-1) | TC |
+|---|---|
+| contract v0.29 `DEFAULT_ASSET_SLOTS` 6개(hair 없음) | TC-177, TC-178, TC-182, TC-189, TC-FLOW-15, TC-FLOW-17 |
+| `hasBuiltinDefault('hair')` false → `slotCard` hair = clear 단일 규칙(`canReset` = 등록) | TC-133, TC-177, TC-192, TC-193, TC-200, TC-202 |
+| `EMPTYABLE_SLOT_KEYS` = `['pomo_char']` · hair `emptyable` · `canEmpty` 늘 false | TC-192, TC-200, TC-201, TC-232, TC-233, TC-234, TC-241, TC-FLOW-15 |
+| 뒷머리 카드 버튼 2개 · 한 줄 양식 / 셋째 버튼은 뽀모도 인물뿐 | TC-193, TC-201, TC-233, TC-234, TC-FLOW-15 |
+| `onRequestReset` → `onConfirmClear`(`focusAfter ?? trigger` — hair는 trigger) 정상 · 오류 | TC-196, TC-206, TC-FLOW-18 |
+| 「기본값」 활성 규칙(미등록 비활성 · 등록 활성 · `slotBusy` 비활성) | TC-193, TC-202 |
+| i18n `clearImageAria` · `confirmClear*` 3개 국어(뒷머리) | TC-196, TC-206, TC-207 |
+| 빈 복원 칸 예(background · pomo_char) | TC-142, TC-179 |
+
+사용자행 ↔ TC-FLOW(v29): S-14 → TC-FLOW-15 · S-16 → TC-FLOW-17 · S-17 → TC-FLOW-18 · S-21 → TC-FLOW-22(표기) — 모두 개정, 새 사용자행 · 새 TC-FLOW 없음. S-18 → 없음(TC-FLOW-19 폐기 유지).
+
+### v29 설계 확인 필요 (관리자 인계 — 문서 수정은 소유자)
+
+- **AB-1. 화면 문서 동기화.** `requirements.md`(R-35 · R-36 「7장」 · S-14 · S-17), `design/images-tab.md` §15(hair = 복원 칸 + 「비우기」, `EMPTYABLE_SLOT_KEYS` `['hair','pomo_char']`, 첫 실행 7칸, 다운로드 n = 7), `design/i18n.md` §4.8(`emptyImageAria` 사용처 뒷머리)이 v29와 어긋날 수 있다. 이 패스는 위임 확정 동작 · contract v0.29 · 현행 `types.ts`를 기준으로 썼다 — ui-designer 개정 뒤 설계↔TC 표의 절 번호를 맞춘다.
+- **AB-2. R-35 처리(W-2 재발).** 「뒷머리 카드에만 비우기」 요구가 다시 「기본값」(비우기 칸)에 흡수됐다. 폐기할지 문구만 고칠지 requirements 결정 필요. 추적은 R-35 → TC-196 · TC-206(비우기 기능) · TC-200 · TC-201 · TC-234(셋째 버튼 없음).
+- **AB-3. 뒷머리 비우기 뒤 포커스(W-5 · AA-4 재발).** 「기본값」 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-196 · TC-206 · TC-FLOW-18은 응답 직후(수신 전) 포커스만 단언하고, M-32는 관찰 기록.
+- **AB-4. CR-ID 미부여.** 이 결정의 CR 행이 대장에 없다. 관리자가 기록하면 이 절 · 스펙 제목의 「v29」에 CR-ID를 병기한다.
+- **AB-5. 픽스처 이름 옛 개수.** `imageSlots.test.ts` `FIRST7`(내용 6장) · `DEFAULT7`(사용자 설치 예) · `ImagesTab.test.tsx` `d7()` · `D7`은 이름만 옛 개수(W-8 관례, 판정 무관). `ImagesTab.test.tsx` 194행 주석의 `DEFAULT_KEYS7` 언급은 이름 변경(→ `BUILTIN_KEYS`) 뒤 남은 주석 잔재 — 다음 위임에서 정리.
+
 ## 변경이력
 
 | 일자 | 내용 |
 |---|---|
-| 2026-09-29 | (최신 행) v27 — **CR-059(타이머 기본값 0.4.0 — (268,402)·7°·음량 44·기본 알림음 번들 mp3) 기대값 동기화 · CR-060(순수 리팩터) 설계↔TC 연결.** ① 본문 정정: TC-283(탭 Given·탭 실패 복귀 44%) · TC-FLOW-30(첫 미리 듣기 0.44) · 「CR-050 개정 TC」 표 TC-248·TC-249(44%)·TC-268(44%) · 「CR-053 개정」 절 제목·기준 줄·픽스처 줄·표 TC-239(7)·TC-269(`DEF` (268,402)·7·44)·TC-249(회전 '7'·268px/402px·음량 44·저장 인자)·설계↔TC 상수 행 ② 「CR-059 · CR-060 개정」 절 신설(판정 규칙·공용 픽스처 `TF` 44 / cr052 `TF` 80 예외·개정 표(TC-269·TC-287 원 본문 대체 포함)·유지 판정 표·CR-060 설계↔TC(`durationMsg` → TC-273·TC-275·TC-276·TC-288·TC-287, `statusTextByPhase` → TC-293 ~ TC-304)·추적 3종·설계 확인 필요 N-1·N-2) ③ 유지: TC-281·TC-282 ②·TC-283(카드)·TC-290 음량 80(명시 픽스처), 공용 `T` (268,403)·5°. 스펙 수정 없음. 수: 자동 305 · TC-FLOW 32 · 수동 54 그대로 |
+| 2026-09-30 | (최신 행) v29 — **뒷머리 내장 기본 없음(🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29 `DEFAULT_ASSET_SLOTS` 6개 · `hasBuiltinDefault('hair')` false, 증분 모드 — 개정만).** 「v29 개정」 절 신설(기준 · 새 기대값 규칙 1 ~ 5 · TC-196/TC-206 번호 판정 · 개정 표 · TC-FLOW-18 본문 · 추적 3종 · 설계 확인 AB-1 ~ AB-5). v28 「제외」(기본 세트 6/7장 · R-35 판정) 해소. 개정: `Hair.test.tsx` 전면(TC-193 · 196 · 200 · 201 · 202 · 206 · 207 · TC-FLOW-18 — 뒷머리 = 단일 비우기 칸 · 버튼 2개 · 한 줄 · 「기본값」 = 비우기, 도우미 `hairClear` · `expectNoRestoreOrEmpty`, TC-203 주석), `imageSlots.test.ts`(TC-133 · 177 · 178 · 192 · 232, `DEFAULT_FILES` 6장 · `FIRST7` 내용 6장), `ImagesTab.test.tsx`(TC-142 · 179 · 182 · 189 · 233 · 234 · TC-FLOW-15 · 17 · 22, 픽스처 `BUILTIN_KEYS` · `BUILTIN_FILES` · `DONE_BUILTIN` · `DESC_BUILTIN_KO` 6칸 — 옛 `DEFAULT_KEYS7` · `DONE7` · `DESC7_KO`), `ResetAllCard.test.tsx` 주석. 폐기 유지 TC-204 · TC-205 · TC-FLOW-19. `manual-checklist.md` v21(「v21 읽는 법」 — M-29 · M-30 · M-32 · M-33 · M-43). 소스 선행: `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`(ui-fixer) 전까지 셋째 버튼 부재 단언 TC는 Red(예정). 수: 자동 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 그대로 |
+| 2026-09-30 | v28 — **doc-sync 배치(requirements v1.26 · design 2026-09-30 행 · 현행 소스 대조, 증분 모드) + 대기열 Q-02(CR-039) 소진.** ① TC-208/TC-209 중복 해소: CR-039 재시도 스펙 가번호 TC-208 → TC-306 · TC-209 → TC-308 이동(CR-040 alphaMask 쪽이 정식 등록 선행), TC-307 결번, 옛 자리에 이동 한 줄 ② Q-02 전환: TC-306 · TC-308 BDD 본문 + 신규 TC-309(설정·매니페스트 따로 판정) · TC-310(언마운트 취소) — design §6 P-1, 스펙 `SettingsApp.retry.test.tsx` 초안 2건 추가·이름 변경 ③ 색: 추적표 2행·R-19 읽기 규칙의 「초록」 → CR-032 `#BE72AD`·`#F8EBF5` ④ R-18 리셋: TC-089 제목·TC-FLOW-07 상태 전달·추적표 R-17 행의 `penPos` null → `DEFAULT_MOUSE_SETTINGS.penPos` (372,476) ⑤ S-22 v1.26: TC-FLOW-23 현행 본문(셋째 버튼 없음·「기본값」 = 비우기·「이미지 변경」으로 다시) — 원 본문 끝 정정 표시, TC-FLOW-22 점검 불변 ⑥ J-1(11키 실재 — design 표기만 남음)·V-1(기록 갱신)·V-3(해소) ⑦ 스펙 이름·주석: `AlarmSoundCard.test.tsx` TC-283(카드)·`TimerTab.test.tsx` 334·344행·`TimerTab.cr052.test.tsx` 52행(단언 불변) ⑧ `manual-checklist.md` v20. 「doc-sync 개정(v28)」 절 신설(정식 TC·개정 표·색 표·재대조 표·추적 3종·설계 확인 AA-1 ~ AA-5). 제외: 기본 세트 6/7장·R-35·R-41 판정(사용자 결정 대기). 수: 자동 305 → 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32 · 수동 54 |
+| 2026-09-29 | v27 — **CR-059(타이머 기본값 0.4.0 — (268,402)·7°·음량 44·기본 알림음 번들 mp3) 기대값 동기화 · CR-060(순수 리팩터) 설계↔TC 연결.** ① 본문 정정: TC-283(탭 Given·탭 실패 복귀 44%) · TC-FLOW-30(첫 미리 듣기 0.44) · 「CR-050 개정 TC」 표 TC-248·TC-249(44%)·TC-268(44%) · 「CR-053 개정」 절 제목·기준 줄·픽스처 줄·표 TC-239(7)·TC-269(`DEF` (268,402)·7·44)·TC-249(회전 '7'·268px/402px·음량 44·저장 인자)·설계↔TC 상수 행 ② 「CR-059 · CR-060 개정」 절 신설(판정 규칙·공용 픽스처 `TF` 44 / cr052 `TF` 80 예외·개정 표(TC-269·TC-287 원 본문 대체 포함)·유지 판정 표·CR-060 설계↔TC(`durationMsg` → TC-273·TC-275·TC-276·TC-288·TC-287, `statusTextByPhase` → TC-293 ~ TC-304)·추적 3종·설계 확인 필요 N-1·N-2) ③ 유지: TC-281·TC-282 ②·TC-283(카드)·TC-290 음량 80(명시 픽스처), 공용 `T` (268,403)·5°. 스펙 수정 없음. 수: 자동 305 · TC-FLOW 32 · 수동 54 그대로 |
 | 2026-09-27 | v26 — **CR-057 대기열 Q-08 정식 TC 전환(이동 영역 설명 줄·🔒 문구 교체).** ① 신규 TC-305(`MousePartsTab.test.tsx` `it.each` ko·ja·en — `areaDesc` 설명 줄은 idle에서만, 안내 줄 바로 아래 형제·같은 `.guide`·role/aria-live 없음·버튼 위, pickArea·reviewArea·pickShoulder·review에서는 없음, 안내 줄 role=status 1개 불변, bridge 쓰기 0회) ② 개정(번호 유지, 판정 불변 — 문구·개수만): TC-009(`labels.test.ts` area* 6키 새 ko 문구) · TC-094(`i18n.test.ts` 단순 키 136 → 137·세 사전 `areaDesc` 존재, 「새 키 41개」 불변) · `MousePartsTab.test.tsx`(`AREA_START`·`IDLE_BUTTONS`·`G_AREA`·`G_AREA_REVIEW`·제목) · `DragHit.test.tsx`(TC-222·TC-225) · `SettingsApp.test.tsx`(TC-077·TC-FLOW-02·04·06) ③ 「CR-057 개정」 절(읽기 규칙·개정 표·추적 3종·설계 확인 필요 L-1 ~ L-4) 신설 ④ 대기열 Q-08 → 「TC 전환됨(검증 대기)」. 수: 자동 304 → 305 · TC-FLOW 32 · 수동 54 그대로 |
 | 2026-09-27 | v25 서술 정리 — **CR-054 서술만 정리(구현 완료·자동 PASS 뒤, 판정·TC 수 불변)**. ① 「설계 확인 필요」 K-2 TC 범위 TC-293 ~ TC-303 → TC-293 ~ TC-304(TC-304 반영) ② TC-FLOW-31·32 머리 Steps를 사례별로 분리(사례 C·사례 2 = 확인 → pending 중 이벤트(TC-303 ③) → 해결/reject 순서, 「순서는 사례 bullet이 정한다」 명시, FLOW-32 사례 1의 실패 뒤 이벤트 참조를 TC-303 ②로 특정) ③ 「CR-054 개정 TC」 표 아래 「`events` mock은 바뀌지 않는다」 → 새 이벤트 구독·events mock 목록 추가 없음(v25 `onTimerChanged` `vi.fn` 전환은 TC-296 단언용)으로 바로잡음 ④ `ResetAllCard.test.tsx` TC-301의 항상-참 단언 `expect(Object.keys(KO_NEW)).toHaveLength(8)`(로컬 기대값 표를 세는 것) 삭제 — 주석으로 기대값 표임을 표기, 사전 대조 단언은 그대로 |
 | 2026-09-27 | v25 — **CR-054 보정(ui-test-checker MAJOR 1·MINOR 4, ui-test-conflict-checker C2-1 반영, 지적 항목만)**. 기준 general-tab §7.2 언마운트 **규범**(매니저 결정)·§7.6 「응답과 이벤트 도착 순서에도 의존하지 않는다」·contract v0.25 §5.10 처리 순서(이벤트 2·3·6단계가 반환 전). ① 신규 TC-304(SettingsApp — pending 중 탭 이동으로 카드 언마운트 → reject는 창 공통 오류 줄·resolve는 오류 줄 없음, 복귀 시 카드 초기값, `resetAppData` 1회) — 추적표 §7.2 「언마운트 판정 안 함」 폐기 ② TC-FLOW-31 사례 C(settings → assets → 응답: pending 중 값 RESET_VALUES여도 disabled·pending 유지, 응답 뒤 done·포커스 복귀, 최종 화면 동일)·A·B 전제(응답이 이벤트를 앞지른 경우) 명시, TC-FLOW-32 사례 2·TC-303 ③(이벤트 → reject: 오류 줄 + RESET_VALUES·상태 줄 빈 문자열·버튼 활성·포커스 복귀), 추적표 §7.6 응답↔이벤트 행 신설 ③ TC-FLOW-31 스펙의 공허 단언 `expect(onError).not.toHaveBeenCalled()` 삭제(오류 줄 0개로 판정) ④ TC-296 ⓒ `onHandAnchorChanged`·`onTimerChanged` 0회(`onTimerChanged` mock `vi.fn` + beforeEach 구현 재설정) ⑤ TC-293 원소 `BUTTON` 단언 + M-54f ④ Enter·Space 관찰(user-event 미설치로 자동 키 TC 불가) ⑥ 「CR-054 개정 TC」 절 머리 「앞 본문을 대체」·원 본문 TC-093·094·099·101·104·130·246·286 머리 「개정(CR-054)」 ⑦ Q-07 닫힘(11개 스펙 `...actual` 전개 — 추가 불필요 확정) ⑧ manual-checklist v18(M-54c ⑥ 타이머 진행 상태 관찰, D-7 경로 `%APPDATA%\com.kuro.keyviewer\` 통일 — K-1 닫힘). 수: 자동 303 → 304(유효 296 · 폐기 8)·TC-FLOW 32·수동 54 |

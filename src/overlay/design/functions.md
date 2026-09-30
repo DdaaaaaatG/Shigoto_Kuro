@@ -46,7 +46,7 @@
 
 | 이름 | 정의 | 비고 |
 |---|---|---|
-| `SpecialKey` | `NonNullable<KeyboardInputEvent['special']>` = `'space' \| 'z' \| 'question' \| 'exclamation' \| 'enter' \| 'backspace' \| 'undo'`(`undo` = Ctrl+Z, 추가 결정 🔒 2026-09-24) | `import type { KeyboardInputEvent } from 'bridge/types'`(`mouseMapping.ts`와 같은 type-only import). 🔒 값 이름. 필드는 미확정 계약(bridge 인계) |
+| `SpecialKey` | `NonNullable<KeyboardInputEvent['special']>` = `'space' \| 'z' \| 'question' \| 'exclamation' \| 'enter' \| 'backspace' \| 'undo'`(`undo` = Ctrl+Z, 추가 결정 🔒 2026-09-24) | `import type { KeyboardInputEvent } from 'bridge/types'`(`mouseMapping.ts`와 같은 type-only import). 🔒 값 이름. 필드는 contract v0.11 확정·반영됨 |
 | `SPECIAL_KEYS` | `readonly SpecialKey[] = ['space', 'z', 'question', 'exclamation', 'enter', 'backspace', 'undo']` | `isSpecialKey` 판정용 |
 | `MachineState.specialHeld` | `readonly SpecialKey[]`, 초기값 `[]`(`createInitialState`) | 길이 ≤ 7(중복 없음). 분류값만 — 키 코드·문자·시각·횟수 없음 |
 | `MachineState.bounceSeq` | `number`, 초기값 `0` | 바운스 시작 횟수(렌더용 짝홀 신호). 어떤 키였는지 담지 않는다 — 기록 금지 위반 아님. `Number.MAX_SAFE_INTEGER`까지 증가만(짝홀만 쓰므로 넘침 무의미, 방어 없음) |
@@ -71,7 +71,7 @@
 | `BackgroundLayer` 렌더 (CR-014, `src/overlay/components/BackgroundLayer.tsx`) | `({ manifest }: { manifest: AssetManifest }) => JSX.Element \| null`, `export default memo(BackgroundLayer)` | `bg = findEntry(manifest, 'background')`(`LayerStack.tsx`의 기존 named export `findEntry` import). `bg`가 없으면 `null`. 있으면 `<img className={styles.layer} src={bg.url} alt="" draggable={false} />`(`styles` = `../overlay.module.css`, 기존 `.layer` = 캔버스 전체 `left:0 top:0 100%`). `.bounce`·인라인 `transform` 없음. `memo`라 `manifest` 참조가 바뀔 때(P-1, P-6 `assets://changed`)만 다시 그린다 — 입력·tick·`machine` 변화로는 재렌더되지 않는다. 슬롯 `'background'`는 contract v0.6 §3.1(캔버스 레이어·선택 슬롯). 선행: `src/bridge/types.ts` `AssetSlot`에 `'background'`(bridge-implementer, core `assets.md` §9.4 UI-B5) — 없으면 타입 오류 | R-17 |
 | `HairLayer` 렌더 (CR-037 신규, `src/overlay/components/HairLayer.tsx`) | `({ manifest }: { manifest: AssetManifest }) => JSX.Element \| null`, `export default memo(HairLayer)` | `hair = findEntry(manifest, 'hair')`(`LayerStack.tsx` named export `findEntry` import). `hair`가 없으면 `null`(투명·정상 — 안내·오류 없음). 있으면 `<img className={styles.layer} src={hair.url} alt="" draggable={false} />`(`styles` = `../overlay.module.css` 기존 `.layer` — 새 CSS 클래스 없음). 인라인 `style`·`transform`·애니메이션 클래스 없음. 호출 위치 = `OverlayApp` JSX `.jellyWrap`의 첫 자식(`MouseArm` 앞, `design/components.md` §3 규칙 7). `memo`라 `manifest` 참조가 바뀔 때(P-1 초기 로드, P-6 `assets://changed`)만 다시 그린다 — 입력·tick·`machine` 변화로는 재렌더되지 않는다(젤리·부르르는 부모 `.jellyWrap` 클래스 교체라 이 컴포넌트 재렌더와 무관). 1장 고정: 상태·키 입력·펜 모드·위치 잠금과 무관하게 같은 그림. 선행: `src/bridge/types.ts` `AssetSlot`에 `'hair'`(contract v0.17, bridge-implementer) — 없으면 타입 오류(구현 금지) | R-30 |
 | `HairLayer` 자리 (CR-051) | — | 컴포넌트 자체는 불변(`img` 또는 `null`). 부르는 자리만 `.jellyWrap` 첫 자식 → `.canvas` 첫 자식 `.hairWrap` 안으로(위 `jellyClass` CR-051 행). 겹침 아래→위 = 헤어 → 배경 → 뽀모도 → `.jellyWrap`(팔 → 본체 → 펜 손) | R-30 |
-| `SPECIAL_KEY_SLOT` (CR-021 신규, `LayerStack.tsx` named export 상수) | `Readonly<Record<SpecialKey, AssetSlot>>` = `{ space: 'key_space', z: 'key_z', question: 'key_question', exclamation: 'key_exclamation', enter: 'key_enter', backspace: 'key_backspace', undo: 'key_undo' }` | 분류값 → 선택 슬롯(🔒 슬롯 이름, `key_undo` = 「뒤로가기」 그림). `AssetSlot`에 7값이 추가돼야 타입이 맞는다(미확정 계약, bridge 인계) | R-22 |
+| `SPECIAL_KEY_SLOT` (CR-021 신규, `LayerStack.tsx` named export 상수) | `Readonly<Record<SpecialKey, AssetSlot>>` = `{ space: 'key_space', z: 'key_z', question: 'key_question', exclamation: 'key_exclamation', enter: 'key_enter', backspace: 'key_backspace', undo: 'key_undo' }` | 분류값 → 선택 슬롯(🔒 슬롯 이름, `key_undo` = 「뒤로가기」 그림). `AssetSlot` 7값은 contract v0.11 확정·`src/bridge/types.ts` 반영됨 | R-22 |
 | `pickKeyboardEntry` (CR-021 신규, `LayerStack.tsx` named export) | `(manifest: AssetManifest, machine: MachineState) => AssetEntry \| undefined` | ① `!machine.kbDown` → `findEntry(manifest, 'kb_up')` ② `s = currentSpecial(machine)`. `s !== null`이고 `e = findEntry(manifest, SPECIAL_KEY_SLOT[s])`가 있으면 `e` ③ 아니면 기존 누름 식 `kb_down[kbFrame] ?? kb_down[0]`(특수 키 그림이 없으면 일반 누름 프레임 순환 그대로). 예(`key_space`만 등록): 스페이스 누름 → `key_space` / 스페이스를 누른 채 `a` 누름 → `key_space` 유지 / 스페이스 뗌(`a` 눌림) → `kb_down[kbFrame]` / `a`도 뗌 → `kb_up` / `z` 누름 → `key_z` 없음 → `kb_down[kbFrame]` | R-07, R-22 |
 | `findByKey` (CR-025 신규, `LayerStack.tsx` named export) | `(manifest: AssetManifest, key: string) => AssetEntry \| undefined` | `manifest.entries.find(e => slotKey(e.slot) === key)`. 펜 슬롯은 TS 표현이 bridge 결정이라(`requirements.md` §3) **파일명 키 문자열**로 찾는다 — `slotKey`가 `pen_up`·`pen_down_{n}`·`pen_key_{special}`을 돌려주기만 하면 표현과 무관하게 동작 | R-25 |
 | `isPenMode` (CR-025 신규, `LayerStack.tsx` named export) | `(manifest: AssetManifest) => boolean` | `findByKey(manifest, 'pen_up') !== undefined`. **펜 모드 = `pen_up` 등록**(🔒). `pen_down_*`·`pen_key_*`만 있고 `pen_up`이 없으면 펜 모드가 아니다(그 그림들은 쓰지 않는다) | R-25 |
@@ -102,7 +102,7 @@
 
 | 이름 | 값/정의 | 비고 |
 |---|---|---|
-| `Quad` | `MouseSettings['area']` = `[Point, Point, Point, Point]`(`src/bridge/types.ts`, 미확정 계약) | 이동 영역 네 꼭짓점 |
+| `Quad` | `MouseSettings['area']` = `[Point, Point, Point, Point]`(`src/bridge/types.ts`, contract v0.9 확정) | 이동 영역 네 꼭짓점 |
 | `ArmTransform` | `interface { baseDeg: number; targetDeg: number; stretch: number }` | θh · θt · k |
 | `STRETCH_MIN` / `STRETCH_MAX` | `0.5` / `1.6` | 🔒 사용자 지정. 설정값 아님(settings에 필드 없음) |
 | `ARM_EPS` | `1e-6` | 길이 0 판정 |
@@ -112,7 +112,7 @@
 
 **`MouseArm` 렌더 — 한 모드**(CR-015, R-18. 모드 판별 없음)
 
-`entry` = 이미지 선택 결과(`AssetEntry`), `part = mouse.partPos`(캔버스 좌표, 미확정 계약 — bridge가 `MouseSettings.partPos`를 추가한 뒤 구현).
+`entry` = 이미지 선택 결과(`AssetEntry`), `part = mouse.partPos`(캔버스 좌표, contract v0.8 확정·반영됨).
 
 (CR-025) 아래 1~5단계는 순수 함수 **`armTransformFor`**(§5.5)로 옮긴다 — `MouseArm`은 `t = armTransformFor({ mouse, monitors, cursor, anchor, atRest })`를 한 번 부르고 6단계만 렌더한다(결과·동작 변경 없음). 펜 쥔 손(`PenHand`)이 같은 함수로 같은 `t`를 얻는다.
 
@@ -135,10 +135,10 @@
 | `isMouseLayerMode` | `src/overlay/components/MouseArm.tsx`(export) | 모드 판별 없음. `OverlayApp` 렌더 조건에서도 제거(`design/components.md` §3) |
 | 손바닥 모드 렌더 분기(`<svg>`·`<path>`·패드 매핑점 중심 손 `<img>`) | `MouseArm.tsx` | |
 | `mapToPad`, `armControlPoint`, `armPath`, `restPosition` | `src/state/mouseMapping.ts` | 손바닥 모드 전용. 해당 vitest도 삭제 대상(ui-test-designer 판단) |
-| `armWidth`·`armColor` 사용 | `MouseArm.tsx` | 계약에서 필드 삭제(미확정 계약, bridge 인계) |
+| `armWidth`·`armColor` 사용 | `MouseArm.tsx` | 계약에서 필드 삭제(contract v0.8 확정) |
 | `armRotationDeg` (CR-017) | `src/state/mouseMapping.ts` | `armTransform`·`armTransformCss`로 대체(회전만 → 회전 + 늘어나기). 해당 vitest는 개정·폐기 대상(ui-test-designer 판단) |
 | `mapAroundPivot` (CR-017) | `src/state/mouseMapping.ts` | 기준점 ± (가상 화면 전체 비율 − 0.5) × 패드 → `pickMonitor`·`cursorUv`·`bilerpQuad`로 대체 |
-| `mouse.pad` 사용·`Rect` import (CR-017) | `mouseMapping.ts`, `MouseArm.tsx` | 계약에서 `pad` 삭제(미확정 계약, bridge 인계). `Rect` 타입 자체의 존폐는 bridge 결정 |
+| `mouse.pad` 사용·`Rect` import (CR-017) | `mouseMapping.ts`, `MouseArm.tsx` | 계약에서 `pad` 삭제(contract v0.9 확정). `Rect` 타입 자체의 존폐는 bridge 결정 |
 | `MouseArm` prop `bounds: ScreenBounds` · `OverlayApp` 상태 `bounds` · `getScreenBounds()` 호출 (CR-017) | `MouseArm.tsx`, `src/overlay/index.tsx` | prop `monitors: ScreenBounds[]`·상태 `monitors`·`getMonitors()`로 교체(`design/components.md` §3, 주 문서 §4·P-1) |
 | `OverlayApp`의 두 번째 `MouseArm`(LayerStack 뒤, z4) | `src/overlay/index.tsx` | `MouseArm`은 `BackgroundLayer`와 `LayerStack` 사이 1개만 |
 
@@ -157,7 +157,7 @@ CR-022 이후 팔 바운스는 `MouseArm` 밖 `.jellyWrap`이 맡는다(몸과 �
 
 비유: 팔은 어깨 핀에 꽂힌 고무 막대이고, 손은 그 막대 끝에 **압정 하나로 꽂은 딱딱한 카드**다. 막대가 돌고 늘어나면 압정이 막대 끝을 따라 옮겨 가고 카드도 막대와 같은 각도로 기울지만, 카드 자체는 늘어나지 않는다. 키를 치면 카드 그림만 바뀐다.
 
-**붙는 점 P 결정 = 쉬는 자세에서 `pen_up` 그림의 중심**(`penPos + (pen_up 너비/2, 높이/2)`). 근거 ① 손은 크기가 변하지 않으므로 팔 늘어남(scaleX k)이 손에 주는 영향은 「붙는 점이 얼마나 옮겨 가는가」 하나뿐이며, 이를 손 전체의 대표점으로 재야 손 전체가 고르게 따라간다 — 좌상단으로 재면 손이 모서리를 축으로 돌아 회전할 때 손 본체가 팔 끝에서 크게 벗어난다 ② 중심은 사용자가 따로 지정할 값이 없어(설정 필드 추가 없음 — 요구 밖) `penPos`와 그림 크기만으로 정해진다 ③ 손 그림은 손만 딱 맞게 그린 작은 그림이라 중심 ≈ 손 본체다. 붙는 점·회전 기준은 **`pen_up`의 크기**로 정하고, `pen_down_*`·`pen_key_*`가 크기가 달라도 같은 기준(좌상단 = 같은 `penPos`, 회전 원점 = `pen_up` 중심)을 쓴다 — 그림 교체로 손이 튀지 않게. 펜 그림끼리 같은 크기로 그리는 것을 권장(검증은 core 몫, 미확정 계약).
+**붙는 점 P 결정 = 쉬는 자세에서 `pen_up` 그림의 중심**(`penPos + (pen_up 너비/2, 높이/2)`). 근거 ① 손은 크기가 변하지 않으므로 팔 늘어남(scaleX k)이 손에 주는 영향은 「붙는 점이 얼마나 옮겨 가는가」 하나뿐이며, 이를 손 전체의 대표점으로 재야 손 전체가 고르게 따라간다 — 좌상단으로 재면 손이 모서리를 축으로 돌아 회전할 때 손 본체가 팔 끝에서 크게 벗어난다 ② 중심은 사용자가 따로 지정할 값이 없어(설정 필드 추가 없음 — 요구 밖) `penPos`와 그림 크기만으로 정해진다 ③ 손 그림은 손만 딱 맞게 그린 작은 그림이라 중심 ≈ 손 본체다. 붙는 점·회전 기준은 **`pen_up`의 크기**로 정하고, `pen_down_0`이 크기가 달라도 같은 기준(좌상단 = 같은 `penPos`, 회전 원점 = `pen_up` 중심)을 쓴다 — 그림 교체로 손이 튀지 않게(CR-042 이후 누름 그림은 `pen_down_0` 한 장, `pen_key_*`는 손 그림으로 쓰지 않는다). 손 파츠끼리 같은 크기 규칙은 없다(CR-036 — 상한만 core가 검증).
 
 | function | 시그니처 | 동작 | 예외 | 요구ID |
 |---|---|---|---|---|
@@ -188,9 +188,22 @@ CR-022 이후 팔 바운스는 `MouseArm` 밖 `.jellyWrap`이 맡는다(몸과 �
 | `PenTransform` | `interface { dx: number; dy: number; deg: number }` | 붙는 점 이동량(캔버스 px)·손 회전(도). 스케일 필드 없음 |
 | `PEN_REST` | `{ dx: 0, dy: 0, deg: 0 }` | 쉬는 자세 = `penPos` 그대로·회전 0 |
 
-`PenHand` Props(`src/overlay/components/PenHand.tsx`): `manifest: AssetManifest`, `machine: MachineState`(`isPressing`(= `kbDown`·`clickHeld`, CR-027)·`kbFrame`·`specialHeld`만 읽음), `mouse: MouseSettings`(`penPos` 포함 — 미확정 계약), `monitors: ScreenBounds[]`, `cursor: { x: number; y: number }`, `anchor: Point \| null`, `atRest: boolean` — `OverlayApp`이 `MouseArm`에 넘기는 값과 **같은 값**(같은 렌더의 같은 상태)을 넘긴다. `button`은 받지 않는다 — CR-027(R-26) 이후 펜 모드 클릭은 손 그림을 바꾸지만, 그 판정은 상태기계가 `clickHeld`·`kbFrame`·`bounceSeq`로 이미 반영하므로 `PenHand`는 `machine`만 읽는다(`mouse.button`을 읽지 않는다 — 클릭 파츠 R-09 전용).
+`PenHand` Props(`src/overlay/components/PenHand.tsx` `interface Props`, as-built — CR-025·CR-033·CR-042 반영, doc-sync 2026-09-30): 8개.
 
-입력 비보관(R-22 유지): `PenHand`는 `currentSpecial`의 분류값으로 슬롯 이름만 만들고 저장·출력하지 않는다.
+| prop | 타입 | 읽는 것·의미 |
+|---|---|---|
+| `manifest` | `AssetManifest` | `findByKey`로 `pen_up`·`pen_down_0`만 찾는다 |
+| `machine` | `MachineState` | `isPressing(machine)`(= `kbDown \|\| clickHeld.length > 0`, CR-027)**만** 읽는다 — CR-042 이후 `kbFrame`·`specialHeld`(`currentSpecial`)는 읽지 않는다 |
+| `mouse` | `MouseSettings` | `shoulder`·`area`·`hand`·`penPos`(contract v0.13 이후 확정, 기본 `{x:372, y:476}` — v0.20)를 `resolvePenPos`·`armTransformFor`·`penTransform`에 넘긴다. `mouse.button`은 읽지 않는다(클릭 파츠 R-09 전용) |
+| `monitors` | `ScreenBounds[]` | 모니터마다 사각형 1개(`MouseArm`과 같은 값) |
+| `cursor` | `{ x: number; y: number }` | 커서 좌표(`MouseArm`과 같은 값) |
+| `anchor` | `Point \| null` | bridge 손 기준점(`MouseArm`과 같은 값) |
+| `atRest` | `boolean` | `true`면 쉬는 자세(`penPos` 그대로·회전 0) |
+| `penMode` | `boolean` | (CR-033) `false`면 그림 교체 없이 항상 `pen_up`(팔 끝 추종·기울기는 유지) |
+
+`OverlayApp`은 `manifest`~`atRest`에 `MouseArm`에 넘기는 값과 **같은 값**(같은 렌더의 같은 상태)을, `penMode`에 한 번 계산한 `isPenMode(manifest, settings.mouse)`를 넘긴다. `button`은 받지 않는다 — CR-027(R-26) 이후 펜 모드 클릭은 손 그림을 바꾸지만, 그 판정은 상태기계가 `clickHeld`·`bounceSeq`로 이미 반영하므로 `PenHand`는 `machine`만 읽는다.
+
+입력 비보관(R-22 유지): CR-042 이후 `PenHand`는 특수 키 분류값을 읽지 않는다(손 그림은 `pen_up`/`pen_down_0` 둘뿐). 특수 키 그림은 `LayerStack`의 `pickPenKeyboardEntry`가 분류값으로 슬롯 이름만 만들고 저장·출력하지 않는다.
 
 ### 5.6 뽀모도 타이머 (CR-045, R-33~R-36 — 주 문서 §10.14 14.4와 같은 내용)
 

@@ -3,7 +3,8 @@
 - 상위 문서: `src/settings/design.md`(RTM·전체 구조·공통 상태). 문구는 `design/i18n.md` §4.3·§4.4·§4.6(키 이름으로만 인용).
 - 요구: R-25(이미지 설정 — 그룹 4개, 필수 배지, 이미지 변경, 몸통 카드 없음. ~~「기본값」 = 슬롯 비우기~~ 문장은 CR-035로 R-32가 대체), R-19(카드 양식), R-20(문구·파일 대화상자 제목·에러 code 문구), **R-31**(첫 실행 기본 15장 — 화면 변경 없음, §10.1), **R-32**(「기본값」 = 기본 그림 있는 칸은 복원·없는 칸은 비우기 — §3·§4·§5·§6·§7 I-3·I-3R, §10), **R-33**(기본 이미지 다운로드 — §10.3~§10.8).
 - 계약(CR-035): contract **v0.16** — `restore_default_asset`(`restoreDefaultAsset`)·`export_default_assets`(`exportDefaultAssets`)·`pickFolder(title?)`·`ExportReport`·`ExportFailure`·`hasBuiltinDefault`·`DEFAULT_ASSET_SLOTS`·에러 `asset.no_default`·`asset.export_dir`. 이름은 `doc/200_설계/architecture/default-assets-03-packet-ui.md` 선행 조건 그대로(bridge-designer 작성 중 — 화면 구현은 bridge 완료 마커 뒤).
-- 계약: `doc/200_설계/bridge/contract.md` v0.14 — §3.1 `AssetSlot`·`REQUIRED_SLOTS`·`isRequiredSlot`, §3.2 `AssetEntry.url` 버전 규칙, §5 `import_asset`·`remove_asset`, §5.4 `pickPngFile(title?)`, §4 `assets://changed`, §3.3 `MouseSettings.penPos`(`null` = 아직 놓지 않음, `pen_up` 첫 등록 때 ui가 기본 위치를 정해 `set_settings`로 저장), §6 에러 코드.
+- 계약(현행, 2026-09-30 doc-sync): `doc/200_설계/bridge/contract.md` **v0.27** 인용 — 이 탭이 쓰는 이름은 아래 v0.14·v0.16 항목과 같고(래퍼 `pickPngFile(title?)`·`importAsset(slot, path)`·`removeAsset(slot)`·`restoreDefaultAsset(slot)`·`exportDefaultAssets(dir, overwrite)`·`pickFolder(title?)`, 모두 `src/bridge/commands.ts`), 이후 버전에서 바뀐 것은 상수 값뿐이다(`REQUIRED_SLOTS` 2개 v0.19 · 내장 기본 목록: v0.24 CR-053 7개(§15) → **0.4.0(CR-058·CR-059)에서 `hair` 다시 제외, 현행 6장** `kb_up`·`background`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` — 정본 Rust `src-tauri/src/assets/defaults.rs` `DEFAULT_ASSETS`). **(해소, 2026-09-30)** contract **v0.29**(§3.1·§8·§9, 🔒 사용자 결정 — 뒷머리 기본 없음 0.4.0 유지)로 TS `DEFAULT_ASSET_SLOTS`도 6개 — `hasBuiltinDefault('hair')` = false, 다운로드 `{n}` = 6. 뒷머리 카드 동작은 §16이 정본(§15의 `hair` 부분 대체). 아래 「v0.14」 줄은 도입 당시 기록.
+- 계약(도입 기록): `doc/200_설계/bridge/contract.md` v0.14 — §3.1 `AssetSlot`·`REQUIRED_SLOTS`·`isRequiredSlot`, §3.2 `AssetEntry.url` 버전 규칙, §5 `import_asset`·`remove_asset`, §5.4 `pickPngFile(title?)`, §4 `assets://changed`, §3.3 `MouseSettings.penPos`(`null` = 아직 놓지 않음, `pen_up` 첫 등록 때 ui가 기본 위치를 정해 `set_settings`로 저장), §6 에러 코드.
 - 검증은 core가 한다(PNG·크기·용량·캔버스 일치). 이 탭은 결과 메시지만 보인다(ui 재검증 금지 — ui-design-strategy §7).
 
 ## 1. 레이아웃 (확정)
@@ -107,7 +108,7 @@ export interface SlotGroup { id: SlotGroupId; cards: CardSpec[] }
 
 - **위치**: 배경 그룹(`groupBackground`)의 둘째 카드(배경 카드 바로 뒤). 캔버스 레이어(배경·키보드와 같은 크기)라 배경 그룹이 가장 가깝고, 새 그룹 제목을 만들지 않는다(새 문구 최소화).
 - **카드 양식**: 기존 `ImageSlotCard` 그대로 — 제목 `slots.hair.title`, 설명 `slots.hair.desc`(`design/i18n.md` §4.4), 필수 배지 없음, 미리보기, 「이미지 변경」·「기본값」.
-- **이미지 변경**: 기존 I-2 흐름 그대로(`pickPngFile(t.dialogPickImage)` → `importAsset({ slot: 'hair' }… )` — 슬롯 값은 문자열 `'hair'`). 크기가 캔버스와 다르면 core가 `asset.canvas_mismatch`를 돌려주고 카드 오류 띠에 보인다(CR-036 문구, 새 코드 없음). 캔버스가 아직 없으면(첫 캔버스 레이어) core 규칙대로 이 그림이 캔버스 기준이 될 수 있다 — ui 판정 없음.
+- **이미지 변경**: 기존 I-1 흐름 그대로(`pickPngFile(t.pickTitle)` → `importAsset('hair', path)` — 슬롯 값은 문자열 `'hair'`. 2026-09-30 doc-sync: 옛 표기 `t.dialogPickImage`·`importAsset({ slot: 'hair' }…)`는 소스에 없는 이름이라 실제 문구 키 `pickTitle`·래퍼 시그니처 `importAsset(slot, path)`로 정정). 크기가 캔버스와 다르면 core가 `asset.canvas_mismatch`를 돌려주고 카드 오류 띠에 보인다(CR-036 문구, 새 코드 없음). 캔버스가 아직 없으면(첫 캔버스 레이어) core 규칙대로 이 그림이 캔버스 기준이 될 수 있다 — ui 판정 없음.
 - ~~**「기본값」**: `resetKind = 'clear'` → 기존 비우기 확인창(`confirmClearTitle`·`confirmClearMessage`(`{name}` = `뒷머리`)) → `removeAsset('hair')`(I-3). 등록 안 됐으면 비활성. 새 function·새 분기 없음.~~ **(CR-038로 대체 — §11)** 「기본값」 = `resetKind` `'restore'`(기본 뒷머리로 복원, I-3R, 항상 활성). 비우기는 이 카드에만 있는 셋째 버튼 「비우기」(R-35, §11.2 — 기존 비우기 확인창 → `removeAsset('hair')`, 등록돼 있을 때만 활성). 아래 「새 컴포넌트·상태·function 없음」도 §11.2가 대체한다. **(CR-044로 원래대로 — §13)** 「기본값」 = 다시 `resetKind` `'clear'` → 기존 비우기 확인창(`{name}` = 뒷머리) → `removeAsset('hair')`(I-3), 등록 안 됐으면 비활성. 셋째 버튼 「비우기」 없음(R-35 폐기) — 한 줄 버튼·미리보기 140px, 다른 기본 없는 카드와 같다.
 - **펜·첫 등록 규칙과 무관**: `isFirstPenUp` 등 R-30 분기에 걸리지 않는다.
 - **새 컴포넌트·상태·function 없음** — `buildSlotGroups` 목록과 문구 2개(제목·설명, 3개 국어)만 늘어난다.
@@ -659,6 +660,7 @@ CSS(`ImagesTab.module.css`에 추가):
 
 비유: 견본 상자에 뒷머리·뽀모도 인물 견본이 새로 들어오고, 「타자 입력 1」 견본은 빠졌다. 견본이 생긴 두 칸은 「견본으로 되돌리기」와 「지우개」가 다른 일이 되므로 지우개를 단다. 견본이 없어진 「타자 입력 1」은 「되돌리기」가 곧 지우개라 따로 단 지우개를 뗀다.
 
+- (2026-09-30 doc-sync) **0.4.0(CR-058·CR-059)에서 Rust 내장 기본이 6장으로 바뀌어 `hair`가 다시 빠졌다**(`src-tauri/src/assets/defaults.rs` `DEFAULT_ASSETS: [DefaultAsset; 6]`). 이 절의 `hair` 「기본값」 = 복원 서술은 TS `DEFAULT_ASSET_SLOTS`(당시 7개, `hair` 잔존)와 일치했지만 core와 어긋났다. **(해소, 2026-09-30)** 🔒 사용자 결정 「뒷머리 기본 없음 0.4.0 유지」·contract v0.29(TS 6개)로 이 절의 **`hair` 부분은 §16이 대체**한다(`pomo_char`·`kb_down_0` 부분은 유효).
 - 계약: contract **v0.24** — `DEFAULT_ASSET_SLOTS` **7개**(`kb_up`·`background`·`hair`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` — `kb_down_0` 제외), `DEFAULT_TIMER_SETTINGS` `textPos` (142,458)·`rotation` 9(`design/timer-tab.md` §3 상수 행 — **CR-058·CR-059(2026-09-28, contract v0.27)로 (268,402)·7·음량 44로 다시 바뀜**, 현재값은 그 상수 행이 정본). 새 command·event·에러 코드·문구 키 없음.
 - 이 절이 대체하는 곳: §12(「타자 입력 1」 셋째 버튼) 전체, §13.1 `EMPTYABLE_SLOT_KEYS = ['kb_down_0']`·`hair` `clear`, §13.2 뒷머리 카드 버튼 2개·첫 실행 6칸·다운로드 n = 6, §14 「`pomo_char` `resetKind` `clear`·`emptyable` false」. `pomo_bubble`은 §14 그대로(기본 없음, 「기본값」 = 비우기).
 
@@ -692,3 +694,47 @@ CSS(`ImagesTab.module.css`에 추가):
 
 - `imageSlots.ts` 값 1곳 + 주석. TSX·CSS·문구·계약 호출 변경 없음.
 - TC: settings `test/scenarios.md` 「CR-053 개정」 절(변경 대기열 Q-05).
+
+## 16. 뒷머리 내장 기본 제외 유지 (0.4.0, 🔒 2026-09-30 — R-34 · R-35 폐기 · R-36 · R-41 · R-42 · R-32 · R-33)
+
+비유: 0.4.0 견본 상자에서 뒷머리 견본이 빠진 채로 확정됐다. 견본이 없으니 「견본으로 되돌리기」가 곧 지우개다 — 뒷머리 칸에 따로 달았던 지우개는 뗀다(「타자 입력 1」 칸과 같은 정리). 지우개는 견본이 있는 「뽀모도 인물」 칸에만 남는다.
+
+- 결정: 🔒 사용자 결정(2026-09-30) 「뒷머리 기본 그림은 없는 게 맞다(0.4.0 유지)」 — 확정사항 §6 「배포용 기본 세트 4차 — 0.4.0」.
+- 계약: contract **v0.29** §3.1·§8·§9 — TS `DEFAULT_ASSET_SLOTS` **6개** `kb_up`·`background`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0`(= Rust `DEFAULT_ASSETS`), `hasBuiltinDefault('hair') === false`. 새 command·event·에러 코드·문구 키 없음.
+- 요구: requirements v1.27 — R-34 원문 「내장 기본 없음 → 「기본값」=비우기」 현행, **R-35 다시 폐기**, R-36·R-56 「7장」 → 0.4.0~ 6장, R-41·R-42 비고.
+- 이 절이 대체하는 곳: §15 머리 대체 목록의 「§13.2 뒷머리 카드 버튼 2개」 철회 부분, §15.1 `EMPTYABLE_SLOT_KEYS = ['hair','pomo_char']`·`hair` `restore` 행·검증 예의 `hair` 열, §15.2 뒷머리 카드·첫 실행 7칸·다운로드 n = 7·`emptyImageAria` 사용처. §3 검증 예의 `hair` 서술(CR-038·CR-044·CR-053 줄)은 §16.1 표로 읽는다. `pomo_char`·`pomo_bubble`·`kb_down_0` 규칙은 §15 그대로.
+
+### 16.1 순수 모듈 (`imageSlots.ts`) — 값 1곳
+
+| 대상 | CR-053(§15) | 0.4.0 유지(§16) |
+|---|---|---|
+| `EMPTYABLE_SLOT_KEYS` | `['hair', 'pomo_char']` | **`['pomo_char']`** |
+| `resetKind`(`hair`) | `restore` | **`clear`** — `hasBuiltinDefault`(bridge v0.29)가 판정하므로 코드 변경 없음 |
+| `resetKind`(`pomo_char`) | `restore` | `restore`(불변) |
+| `resetKind`(`kb_down_0`) | `clear` | `clear`(불변) |
+| `canEmpty` 식·`SlotCardSpec` 필드·`buildSlotGroups` 순서 | §12.2 | 불변 |
+
+검증 예(단위 테스트로 고정 — §3·§15.1 검증 예의 `hair` 부분 대체):
+
+| 매니페스트 | `hair` `resetKind` / `canReset` / `emptyable` / `canEmpty` | `pomo_char` `resetKind` / `canReset` / `emptyable` / `canEmpty` |
+|---|---|---|
+| 빈 매니페스트 | `clear` / **false** / false / false | `restore` / true / true / false |
+| `hair`만 등록 | `clear` / **true** / false / false | (빈 칸과 같음) |
+| `hair`·`pomo_char` 등록 | `clear` / true / false / false | `restore` / true / true / **true** |
+
+- 빈 매니페스트의 복원 칸(`restore`·`canReset` true) = `kb_up`·`background`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` 6개. `DEFAULT_ASSET_SLOTS.length` = 6.
+- `emptyable` true인 카드는 `pomo_char` 하나뿐.
+
+### 16.2 렌더·파이프라인·접근성
+
+- **뒷머리 카드** = §3.1 CR-037 원래 양식(§13.2와 같음): 한 줄 버튼 「이미지 변경」·「기본값」 **2개**, 미리보기 140px, `.cardEmptyable`·`.actions2` 없음(`onEmpty`는 `spec.emptyable`일 때만 넘기므로 자동). 「기본값」 활성 = 비우기 칸 규칙(단일 칸: 등록돼 있으면 활성, 비어 있으면 비활성 — `canReset = entry !== undefined`). 「기본값」 → 비우기 확인창(`confirmClearTitle`·`confirmClearMessage` `{name}` = `slots.hair.title`(ko 「뒷머리」)·`confirmClearOk`·`confirmCancel`, 첫 포커스 「취소」) → `removeAsset('hair')` 1회·`restoreDefaultAsset` 0회(I-3). 응답 뒤 포커스 = 누른 「기본값」(`focusAfter` 없음 — 기존 clear 칸 규칙). 취소·Esc → 호출 0회. reject → 뒷머리 카드 오류 띠(기존 I-3 오류 분기).
+- **폐기 흐름**: 뒷머리 I-11(셋째 버튼 「비우기」)·I-3R(뒷머리 복원). 화면은 `restoreDefaultAsset('hair')`를 부르지 않는다.
+- **뽀모도 인물 카드**: §15.2 그대로(「기본값」 = 복원 I-3R, 「비우기」 = I-11, 버튼 3개).
+- **첫 실행**: 6칸(`background`·`pomo_char`·`kb_up`·`mouse_base`·`pen_up`·`pen_down_0`)에 그림. `hair`·`kb_down_0`·`pomo_bubble` 등 나머지는 빈 미리보기(`emptyOptional`). 필수 배지 2칸(`kb_up`·`mouse_base`)은 채워져 `emptyRequired` 없음.
+- **다운로드 설명**: `format(t.downloadDefaultsDesc, { n: DEFAULT_ASSET_SLOTS.length })` → n = **6**(코드·문구 불변 — ko/ja/en 사전은 `{n}` 치환, 장 수를 박아 둔 문구 없음). 결과 줄 `exportDone`의 수는 core `written` 수 그대로.
+- **접근성**: `emptyImage`·`emptyImageAria`(「{name} 그림 비우기」) 사용처 = 뽀모도 인물 카드만(ko 결과 「뽀모도 인물 그림 비우기」 — `{name}` = `slots.pomo_char.title`). 「뒷머리 그림 비우기」 aria-label 사용처 없음. 뒷머리 카드 버튼 aria-label은 기존 clear 칸 규칙(`clearImageAria`, `design/i18n.md` §4.3).
+
+### 16.3 파일 크기·TC
+
+- 소스 변경: `src/settings/imageSlots.ts` `EMPTYABLE_SLOT_KEYS` 값 1곳(`'hair', ` 삭제) + 관련 주석(38행 「hair·pomo_char … CR-053에서 내장 기본이 생겼다」, 121행 「현재 비우기 칸(hair·pomo_char)」, 219행 「hair·pomo_char는 내장 기본이 있다」). TSX·CSS·문구·계약 호출 변경 없음.
+- 예정 TC(ui-test-designer): ① `EMPTYABLE_SLOT_KEYS` = `['pomo_char']` ② `slotCard` — §16.1 검증 예 3행, `DEFAULT_ASSET_SLOTS.length` 6 ③ 뒷머리 카드 렌더 — 「비우기」 버튼 없음·버튼 2개·미리보기 140px, 빈 칸 「기본값」 비활성·등록 시 활성 ④ 뒷머리 「기본값」 → 비우기 확인창(`{name}` = 뒷머리) → `removeAsset('hair')` 1회·`restoreDefaultAsset` 0회, 취소 → 0회 ⑤ 회귀: 뽀모도 인물 3버튼(복원·비우기) 불변, `kb_down_0` 2버튼 불변 ⑥ 다운로드 설명 n = 6. 폐기 대상: CR-053 개정 절의 뒷머리 「비우기」·뒷머리 복원 TC.

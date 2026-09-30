@@ -238,7 +238,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 ## 9. 접근성
 
 - 포커스 순서(Tab): 선택된 메뉴 항목 → 「타이머 사용」 스위치 → 「시작」 → 「일시정지」 → 「멈춤」(끔이면 세 버튼 `disabled`라 건너뜀) → 회전 슬라이더 → 크기 슬라이더 → 글자 색. 미리보기 글자는 포커스 대상이 아니다.
-- 스위치 = 기존 `ToggleSwitch`(`role="switch"`·`aria-checked`·`aria-busy`). 버튼 묶음 = `role="group"` + `aria-label={t.timerControlsAria}`. 모든 버튼·슬라이더·색 입력은 네이티브라 Enter·Space·화살표로 조작된다. 슬라이더 값은 `aria-valuetext`(`5°`·`36px`)와 `<output>`으로 알린다.
+- 스위치 = 기존 `ToggleSwitch`(`role="switch"`·`aria-checked`·`aria-busy`). 버튼 묶음 = `role="group"` + `aria-label={t.timerControlsAria}`. 모든 버튼·슬라이더·색 입력은 네이티브라 Enter·Space·화살표로 조작된다. 슬라이더 값은 `aria-valuetext`(예: 기본값일 때 `7°`·`36px` — 2026-09-30 doc-sync, 옛 예시 `5°`는 CR-045 기본값)와 `<output>`으로 알린다.
 - 미리보기 상자 `role="group"` + `aria-label={t.timerPreviewAria}`, 글자 `role="img"` + `aria-label={t.timerTextDragAria}`, 그림 `<img>`는 모두 `alt=""`(장식). 흐르는 시간은 `aria-live`로 읽지 않는다(초마다 낭독 방지).
 - **글자 끌기는 포인터 전용**이다. 「어깨축·손 위치」 끌기와 같은 기존 결정(메인 세션 2026-09-23, `design.md` §9 — 키보드 대체 수단은 요구 없음)을 따른다. 키보드로 자리를 옮기는 수단(예: 화살표 1px 이동)은 요구 밖이라 넣지 않고 **추가 후보(확인 필요)**로 올린다(§12).
 - 상태 알림: 저장·조작 실패는 기존 오류 줄 `role="alert"`. 성공은 스위치 `aria-checked`와 보이는 시간으로 드러난다(별도 알림 없음).

@@ -82,8 +82,7 @@ pub struct MouseSettings {
     #[serde(default)]
     pub hand: Option<Point>,
     /// 펜 쥔 손 그림(pen_up·pen_down_N·pen_key_*)의 왼쪽 위 모서리 캔버스 좌표 — 쉬는 자세(회전 0°·배율 1)
-    /// 기준(CR-024). 기본값(default_mouse) (356, 504) = 배포용 기본 세트 pen_up(136×196, CR-038)을
-    /// 사용자가 끌어다 놓은 자리. None = 아직 놓지 않음 — 손 그림을 처음 등록하면 ui 가 정한다.
+    /// 기준(CR-024). 기본값(default_mouse) (372, 476) = 배포용 기본 세트 pen_up 의 기본 자리(CR-044). None = 아직 놓지 않음 — 손 그림을 처음 등록하면 ui 가 정한다.
     /// 키가 없는 옛 settings.json 과 `"penPos": null` 은 None(필드 default — default_mouse 값을 쓰지 않는다).
     #[serde(default)]
     pub pen_pos: Option<Point>,

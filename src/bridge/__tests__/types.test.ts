@@ -134,19 +134,18 @@ describe('DEFAULT_MOUSE_SETTINGS.shoulder · partPos', () => {
   })
 })
 
-// contract.md §3.1 「TS 내장 기본 슬롯 상수」 v0.23(CR-053) 고정 테스트. v0.20~v0.22: 6개(hair 제외).
+// contract.md §3.1 「TS 내장 기본 슬롯 상수」 v0.29 고정 테스트. hair는 v0.29(0.4.0~)부터 제외.
 describe('DEFAULT_ASSET_SLOTS · hasBuiltinDefault', () => {
-  it('길이 7, slotKey 중복 없음', () => {
-    expect(DEFAULT_ASSET_SLOTS).toHaveLength(7)
+  it('길이 6, slotKey 중복 없음', () => {
+    expect(DEFAULT_ASSET_SLOTS).toHaveLength(6)
     const keys = DEFAULT_ASSET_SLOTS.map(slotKey)
-    expect(new Set(keys).size).toBe(7)
+    expect(new Set(keys).size).toBe(6)
   })
 
-  it('7개 파일 키가 계약 목록과 정확히 같은 순서다(kb_down_0은 CR-053부터 제외)', () => {
+  it('6개 파일 키가 계약 목록과 정확히 같은 순서다(hair는 v0.29부터, kb_down_0은 CR-053부터 제외)', () => {
     expect(DEFAULT_ASSET_SLOTS.map(slotKey)).toEqual([
       'kb_up',
       'background',
-      'hair',
       'pomo_char',
       'mouse_base',
       'pen_up',
@@ -154,7 +153,7 @@ describe('DEFAULT_ASSET_SLOTS · hasBuiltinDefault', () => {
     ])
   })
 
-  it('7개 슬롯은 true', () => {
+  it('6개 슬롯은 true', () => {
     for (const slot of DEFAULT_ASSET_SLOTS) {
       expect(hasBuiltinDefault(slot)).toBe(true)
     }
@@ -180,8 +179,8 @@ describe('DEFAULT_ASSET_SLOTS · hasBuiltinDefault', () => {
   })
 })
 
-// contract.md §3.1 「AssetSlot」 v0.23(CR-053) 고정 테스트 — 'hair' 슬롯은 배포용 기본 세트 3차부터 다시 내장 기본 있음.
-describe('hair 슬롯 (v0.17 CR-037 도입 · v0.18 CR-038 내장 기본 추가 · v0.20 CR-044 내장 기본 제외 · v0.23 CR-053 내장 기본 재추가)', () => {
+// contract.md §3.1 「AssetSlot」 v0.29 고정 테스트 — 'hair' 슬롯은 v0.29(0.4.0~)부터 내장 기본 없음.
+describe('hair 슬롯 (v0.17 CR-037 도입 · v0.18 CR-038 내장 기본 추가 · v0.20 CR-044 제외 · v0.23 CR-053 재추가 · v0.29 내장 기본 재제외)', () => {
   it('slotKey는 자기 자신', () => {
     expect(slotKey('hair')).toBe('hair')
   })
@@ -190,8 +189,8 @@ describe('hair 슬롯 (v0.17 CR-037 도입 · v0.18 CR-038 내장 기본 추가 
     expect(isRequiredSlot('hair')).toBe(false)
   })
 
-  it('내장 기본 그림이 있다', () => {
-    expect(hasBuiltinDefault('hair')).toBe(true)
+  it('내장 기본 그림이 없다(v0.29)', () => {
+    expect(hasBuiltinDefault('hair')).toBe(false)
   })
 })
 
@@ -210,7 +209,7 @@ describe('pomo_char · pomo_bubble 슬롯 (v0.21, CR-045 / v0.23, CR-053)', () =
   it('pomo_char는 내장 기본이 있고 pomo_bubble은 없다(v0.23, CR-053)', () => {
     expect(hasBuiltinDefault('pomo_char')).toBe(true)
     expect(hasBuiltinDefault('pomo_bubble')).toBe(false)
-    expect(DEFAULT_ASSET_SLOTS).toHaveLength(7)
+    expect(DEFAULT_ASSET_SLOTS).toHaveLength(6)
   })
 
   it('마우스 파츠·kb_down·pen_down이 아니다', () => {

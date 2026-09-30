@@ -331,7 +331,7 @@ describe('TimerTab — 레이아웃·초기 표시 (R-43 ~ R-47 · R-49 ~ R-54, 
     const OLD = rest as unknown as Settings
     renderTab(OLD)
     await flush()
-    // ⓐ 기본값(리터럴 — CR-058 0.4.0 기본 세트: textPos (268,402)·rotation 7·alarmVolume 44. 공용 픽스처 T·TF 는 옛 값 그대로 둔다)
+    // ⓐ 기본값(리터럴 — 현행 DEFAULT_TIMER_SETTINGS: textPos (268,402)·rotation 7·alarmVolume 44, CR-058·CR-059). 공용 픽스처 T·TF 의 textPos (268,403)·rotation 5 는 기본값과 일부러 다른 명시값이다
     expect(checked()).toEqual(['false', 'false'])
     expect(rot()).toHaveValue('7')
     expect(size()).toHaveValue('36')
@@ -341,7 +341,7 @@ describe('TimerTab — 레이아웃·초기 표시 (R-43 ~ R-47 · R-49 ~ R-54, 
     expect(vol()).toHaveValue('44')
     fireEvent.click(swSw())
     await flush()
-    // ⓒ 전체 timer 객체 — DEFAULT 리터럴(TF 의 textPos·rotation·alarmVolume 을 CR-058 값으로 덮어씀)
+    // ⓒ 전체 timer 객체 — DEFAULT 리터럴(TF 위에 현행 기본 textPos (268,402)·rotation 7·alarmVolume 44 를 덮어씀)
     expect(setSettings).toHaveBeenCalledTimes(1)
     expect(saved(0)).toStrictEqual({
       ...OLD,

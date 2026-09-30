@@ -21,7 +21,7 @@
 ## 2. 남은 일
 
 ### 2-1. 우선
-1. **커밋 완료 `2be41ce`(2026-09-29, 미푸시)** — 1-3 오른쪽 클릭 메뉴와 함께 커밋. 내용: verify PASS(`doc/300_검증/verify-20260929-1928.md`, C0 H0) 후 1~3 수정 완료 — core 7건(CORE-201 hook 테스트 직렬화 `KEYS_TEST_LOCK`, CORE-207·208 주석, SEC-201 로그 경로, SEC-205 JSON 1MiB 상한 `settings::read_capped_string`), TS 3건(CR-060 settings·CR-061 overlay: 음량 단일 소스·중첩 삼항·calcNow), 문서 동기화(contract v0.27, core 4문서, 두 화면 design·requirements·scenarios·manual-checklist, `//!` 주석 5곳). settings R-46 🔒 문구도 사용자 지시로 (268,402)·7°(requirements v1.25). 사후 검증: fmt·clippy 0, cargo test 429/429, tsc·lint 0, vitest 801/801. 커밋 전 release exe 실행·캡처 확인(사용자 OK 후, 실행 시 이 PC 데이터 초기화). 커밋 메시지에 「원격 첫 커밋 99fe564 메시지는 0.3.0이지만 내용은 0.4.0」 정정 한 줄.
+1. **커밋 완료 `2be41ce`(2026-09-29, 푸시 완료 — main = origin/main 확인 2026-09-30)** — 1-3 오른쪽 클릭 메뉴와 함께 커밋. 내용: verify PASS(`doc/300_검증/verify-20260929-1928.md`, C0 H0) 후 1~3 수정 완료 — core 7건(CORE-201 hook 테스트 직렬화 `KEYS_TEST_LOCK`, CORE-207·208 주석, SEC-201 로그 경로, SEC-205 JSON 1MiB 상한 `settings::read_capped_string`), TS 3건(CR-060 settings·CR-061 overlay: 음량 단일 소스·중첩 삼항·calcNow), 문서 동기화(contract v0.27, core 4문서, 두 화면 design·requirements·scenarios·manual-checklist, `//!` 주석 5곳). settings R-46 🔒 문구도 사용자 지시로 (268,402)·7°(requirements v1.25). 사후 검증: fmt·clippy 0, cargo test 429/429, tsc·lint 0, vitest 801/801. 커밋 전 release exe 실행·캡처 확인(사용자 OK 후, 실행 시 이 PC 데이터 초기화). 커밋 메시지에 「원격 첫 커밋 99fe564 메시지는 0.3.0이지만 내용은 0.4.0」 정정 한 줄.
 1-1. **예정(사용자 2026-09-29)**: 기본 알림음을 나중에 옛 합성 기본음(삐 소리)으로 되돌릴 계획 — CSP `media-src`의 `blob:`은 **유지**(빼지 않는다).
 1-3. **오버레이 오른쪽 클릭 메뉴(overlay R-40, CR-062) 구현 완료·수동 미검증(커밋 2be41ce, 2026-09-29)** — 사용자 피드백 "키뷰어 오른쪽클릭하면 트레이 옵션 같이". 🔒 결정: 잠금 중에도 뜸(전역 훅, 클릭은 아래 창에도 전달), 누른 곳·뗀 곳 둘 다 창 사각형 안, 전체 화면(전경 창 클라이언트 영역이 모니터 전체)이면 안 뜸, 포커스 이탈·메뉴 경합 수용, 브라우저 기본 메뉴 제거. 설계 `doc/200_설계/architecture/overlay-context-menu.md`, core hook·window·tray.md, overlay requirements v3.2·design §10.16. 소스: hook/{right_click,foreground}.rs·tray/popup.rs 신규(unsafe는 foreground.rs U12~U19만), `PopupGate` Idle→Pending→Open(CORE-301), 사각형 판정을 전경 조회보다 먼저(SEC-301), lib.rs `start_input_pipeline`·`initial_hand_anchor` 추출, overlay `.root` onContextMenu preventDefault. 검증: fmt·clippy 0, cargo test 466/466, vitest 803/803, 리뷰 core·security C0 H0. **남은 것: 수동 MC-31~MC-45(dev·release) — 사용자가 게임 끝나고 "띄워" 할 때만 앱 실행.** 관찰·수용: T-f(메뉴 바깥 오버레이 재클릭 시 닫힘→재표시), T-j(늦은 메뉴 최대 1개), 앱 시작 직후 로딩 전 구간 브라우저 메뉴. 문서 잔여: overlay design.md:724·manual-checklist.md:65·scenarios.md:3804의 `POPUP_OPEN` 이름 → `PopupGate`.
 1-2. **다음 방향(사용자 합의 2026-09-29)**: 커밋 → 피드백 받아 새 기능(요구ID로 정리, 계층 1개면 해당 리프, 여러 계층이면 system-architect 절차). 남은 구조 이슈(CORE-202 훅 콜백 Mutex·CORE-203 종료 경로 Unhook·CORE-204 채널 상한·CORE-205 set_settings 59줄·리뷰 CR-203 긴 함수 9개·SEC-202·204·206·CORE-206)는 새 기능이 그 영역을 건드릴 때 묶어서, 아니면 정식 배포 전에.
@@ -35,7 +35,6 @@
 - 자동 실행: 재로그온 후 실행, 클릭 통과, 작업표시줄 토글, 옛 레지스트리 Run 값 잔존 여부, M-T1.
 
 ### 2-3. 조사·기술 부채
-- **Alt+Tab 때 오버레이 사라짐** — 미측정. 조건: 일반 창으로 전환할 때(게임 아님), 오버레이는 원래 Alt+Tab 목록에 없음. ui-error-analyst로 Alt+Tab 전후 IsWindowVisible·IsIconic·GWL_EXSTYLE(TOPMOST 0x8)·GetWindowRect 비교 → 값이 그대로면 WebView2 가림 판정(`additionalBrowserArgs`에 `CalculateNativeWinOcclusion` disable), TOPMOST가 빠지면 window 모듈에서 재적용. 수정 계층 core.
 - 모니터 재조회 미구현 — 모니터 구성이 바뀌면 재시작 필요.
 - 0.4.0 문서 잔여(2026-09-29 대부분 해소). 남은 것: core `settings.md` §3.7·§3.8·§3.10 코드 조각·S-T 표 옛 기본값, `data_reset.md` 본문 「=4·7장·376 708」(변경이력 행으로만 정리됨), `assets.md` §1 DA-01 「7장」, `timer.md` 「소스 미적용」 표기 확인. 테스트 스펙 주석: settings `AlarmSoundCard.test.tsx` TC-283 이름 「기본 80%」, `TimerTab.test.tsx:334·344`, `TimerTab.cr052.test.tsx:52` / overlay `TimerText.blink.test.tsx:98-111`·`OverlayApp.timerMode.test.tsx` 옛 `createObjectURL` stub 잔재, `timerClock.test.ts` 머리 R-34 옛 값 인용.
 - verify 잔여(2026-09-29 리포트 기준, 위 1-1 구조 이슈 외): 리뷰 CR-206(`src/bridge/commands.ts:124-129` resetAppData JSDoc 낡음), 이전 SEC-101·CORE-101·CORE-102, 이전 CR-003(`MousePartsTab.tsx:418` findUrl ↔ imageSlots.findEntry 중복).
@@ -48,6 +47,10 @@
 - **overlay**: design.md 「미확정 계약」·「소스 미적용」 표기, §10.12·`functions.md` §5.5 PenHand Props, RTM R-16의 TC-055 흔적·T-1·T-2 / scenarios TC-080·TC-143 옛 `.bounce`, R-09·R-23~25 추적표에 TC-204+ / manual-checklist 머리글 v1.4·변경 이력.
 - **settings**: requirements R-11·15·16·18 미작성, R-19·R-27 「초록 강조색」, S-14·S-17·S-22·S-24 / scenarios M-23(초록)·J-1(10키/11키)·V-1·V-3·Q-02·TC-208/209 번호 중복·TC-208/209 BDD / manual-checklist W-4·W-5·M-4 / design.md P-1 재시도 서술 / `i18n.md` 「24개」 / `images-tab.md` 머리 계약 v0.14·§3.1 `dialogPickImage`.
 - CR 「적용·미검증」 → 확인 끝난 것부터 「검증됨」.
+
+- 2026-09-30: Alt+Tab 때 오버레이 사라짐 — 사용자 확인으로 해결됨(조사 항목 삭제). git 로컬 설정: 커밋·푸시 계정 DdaaaaaatG(noreply 주소), 원격 URL `https://DdaaaaaatG@github.com/...`.
+
+- 2026-09-30: **첫 `/doc-sync` 완료(미커밋)** — 기준 99fe564..b5ff65b + §2-3·§2-4 잔여. 화면 2·core 문서 7·contract v0.28(표기 정정만)·코드 주석 5파일. vitest 805/805·tsc·lint 0. Rust 툴체인은 같은 날 사용자 승인으로 설치(rustup stable 1.98.1 msvc) → cargo fmt 0·clippy 0·cargo test 466/466 (첫 빌드 메모리 부족으로 백그라운드 실행이 중단된 적 있음 → `-j 4` 권장). 미해결은 `doc/doc-sync-state.json` openItems가 단일 소스. 결함 후보였던 뒷머리 기본 그림 불일치는 같은 날 **CR-063으로 해소(미커밋)** — 사용자 결정 A「뒷머리 기본 그림 없음」: contract v0.29, TS `DEFAULT_ASSET_SLOTS` 6개, settings `EMPTYABLE_SLOT_KEYS`=[pomo_char](뒷머리 카드 버튼 2개, 「기본값」=비우기), 확정사항 §6 「배포용 기본 세트 4차」 신설. vitest 805/805. CR-063 「적용·미검증」(설정 창 뒷머리 카드 수동 확인 대기). **나중에 뒷머리 기본 그림을 다시 넣으면 계약·TS 상수·Rust 기본 세트·EMPTYABLE을 함께 되돌린다.** 가드 `validate-bridge-implementer-write.py` 경로 버그(폴더명 `kuro_keyviewer/` 고정) 사용자 지시로 수정.
 
 ## 3. 사용자 결정 대기
 | # | 항목 | 비고 |

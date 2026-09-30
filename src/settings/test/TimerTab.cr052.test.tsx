@@ -49,7 +49,8 @@ vi.mock('components/hooks/useElapsedText', () => {
 })
 vi.mock('components/utils/alarmSound', () => ({ defaultAlarmUrl: vi.fn(), playSound: vi.fn(), alarmGain: vi.fn() }))
 
-// ─── 픽스처 (TimerTab.test.tsx 와 같은 값) ─────────────────────────────────
+// ─── 픽스처 (명시값 — textPos (268,403)·rotation 5 는 TimerTab.test.tsx T 와 같고, alarmVolume 80 은 이 파일 예외) ───
+// 현행 기본값은 DEFAULT_TIMER_SETTINGS textPos (268,402)·rotation 7·alarmVolume 44(CR-059) — 이 파일은 기본값을 단언하지 않는다.
 const TF: TimerSettings = {
   enabled: false,
   textPos: { x: 268, y: 403 },

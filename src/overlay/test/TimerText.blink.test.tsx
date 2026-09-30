@@ -89,14 +89,13 @@ const emitTimer = async (s: TimerSnapshot) => {
   await flush()
 }
 
-let origCreate: unknown
+// (CR-058, doc-sync 2026-09-30) 옛 URL.createObjectURL stub 삭제 — 기본음은 번들 mp3 자산 URL
+// (src/components/utils/alarmSound.ts `defaultAlarmUrl`)이라 어떤 코드도 부르지 않고, 이 스펙도 관찰하지 않았다(기대 불변).
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date', 'performance'] })
   vi.clearAllMocks()
   h.timerCb = undefined
   vi.stubGlobal('Audio', SilentAudio)
-  origCreate = (URL as unknown as { createObjectURL?: unknown }).createObjectURL
-  Object.defineProperty(URL, 'createObjectURL', { value: vi.fn(() => 'blob:default'), configurable: true, writable: true })
   vi.mocked(onTimerChanged).mockImplementation(((cb: (p: unknown) => void) => {
     h.timerCb = cb
     return Promise.resolve(vi.fn())
@@ -108,7 +107,6 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   vi.unstubAllGlobals()
-  Object.defineProperty(URL, 'createObjectURL', { value: origCreate, configurable: true, writable: true })
   vi.restoreAllMocks()
 })
 

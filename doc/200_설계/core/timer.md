@@ -1,7 +1,8 @@
 # timer 모듈 설계
 
-- 상태: 확정(사용자) — CR-048 증분(§2.3·§3.5~§3.9·§4)은 인계 패킷 기준 확정(사용자 결정 D-1~D-11 권고안) · 최종 갱신: 2026-09-26
+- 상태: 확정(사용자) — CR-048 증분(§2.3·§3.5~§3.9·§4)은 인계 패킷 기준 확정(사용자 결정 D-1~D-11 권고안) · 최종 갱신: 2026-09-30(doc-sync)
 - 변경이력:
+  - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 1·2차의 「소스 미적용」은 모두 소스에 반영됨을 확인했다: `timer/mod.rs`(`FINISHED_HOLD`:79·`with_config`:130·`disable`:224·`configure`:241·`tick`:259·`next_wake`:281·`status`:290), `timer/driver.rs`(`TimerWaker`:18·`spawn`:32), `lib.rs`(`AppState.timer_waker`, 깔때기 `publish_timer_change`:424), bridge 깔때기 경유(`bridge/commands/mod.rs:511-591`). §10 표의 TM-01·05·06·12 상태를 「소스 반영」으로, 「CR-048 과도 상태」 행을 해소로 바꿨다. 아래 1·2차 행의 「소스 미적용」은 당시 기록이라 그대로 둔다.
   - 2026-09-26 (2차, CR-048 타이머 모드 — 🔒 사용자 결정 D-1~D-11 권고안 확정(확정사항 CR-048 결정 줄), 정본 패킷 `doc/200_설계/architecture/timer-mode-03-packet-core.md`, 근거 `timer-mode-02-design.md` §3.1~§3.4·§10) **카운트다운 모드와 끝남(`Finished`) 상태 추가.** `TimerConfig`(모드·시작 시간)·`FINISHED_HOLD`(10초)·`with_config`·`configure`·`tick`·`next_wake`·`status` 신규, 스냅숏에 `mode`·`durationMs`. `apply`·`set_resting`·`disable`·`snapshot` 시그니처 불변(`bridge/commands.rs` 무수정 컴파일). 신규 `timer/driver.rs` — 마감 시각 스레드 `timer-deadline`(`TimerWaker`·`spawn`, 주기 깨움 없음, `std::sync::mpsc`만). `lib.rs` 조립: `AppState.timer_waker`, 깔때기 `publish_timer_change`, 시작 순서(§3.7). `TimerError::Disabled` 문구 변경(code 불변). 의존 추가 `timer → settings`(`TimerMode`·`TimerSettings`). **§2.3이 §2.1의 `TimerStatus`·`TimerSnapshot`·`TimerError` 문구·`Timer` 필드를, §3.5.2가 §3.3 `reset`·경과 규칙을, §4 머리말이 옛 「스레드 없음」을 대체한다**(옛 절은 스톱워치 기록으로 유지). 테스트는 §3.8(§8 증분), bridge 요구는 §3.9(§9 증분). **소스 미적용.**
   - 2026-09-26 (1차, CR-045 뽀모도 타이머, 🔒 사용자 결정 U-1~U-8 권고안 채택 — 확정사항 §6 CR-045 「결정」 줄, 패킷 `doc/200_설계/architecture/pomodoro-03-packet-core.md`, 근거 `pomodoro-02-design.md` §3.1) **신규 모듈 `src-tauri/src/timer/`** — 휘발 스톱워치 상태기계(`Timer`·`TimerStatus`·`TimerAction`·`TimerSnapshot`·`TimerError`), `AppState.timer: Mutex<Timer>`. 스레드·unsafe·새 의존성 없음. **소스 미적용.**
 - 요구ID 표기: `PT-xx` = 뽀모도 아키텍처 요구(02-design §6 RTM 전용). 화면 요구ID(overlay R-33~, settings R-42~)는 ui-designer가 확정한다 — 확정되면 §1·§10에 병기(§11 확인 필요 T-C1).
@@ -587,15 +588,15 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | PT-10 에러 문구 원문 ko | §6 | ✅ 설계 (3개 국어는 ui) |
 | 표시 형식·250ms 갱신·표시 조건(U-1) | — | 범위 밖(ui) |
 | command·event 계약 | §9 | 범위 밖(bridge) |
-| **TM-01 모드 전환 시 새 모드 대기(D-4)** | §2.3 `configure`, §3.5.3, §3.8 C13 | ✅ 설계 · 소스 미적용 |
+| **TM-01 모드 전환 시 새 모드 대기(D-4)** | §2.3 `configure`, §3.5.3, §3.8 C13 | ✅ 설계 · 소스 반영 |
 | **TM-03 스톱워치 동작 불변** | §3.2(불변), §3.8 C18 | ✅ 설계 |
 | **TM-04(안전망) 흐르는 중 시작 시간 변경은 다음 대기부터** | §3.5.3-3, §3.8 C9·C14 | ✅ 설계 (입력 잠금 D-5는 ui, 범위는 settings) |
-| **TM-05 카운트다운 전이·멈춤 = 지정 시간·쉬는중에도 계속** | §3.5.1·§3.5.2, §3.8 C1~C4 | ✅ 설계 · 소스 미적용 |
-| **TM-06 0 도달 → 끝남 10초(감지 시각부터) → 대기, 마감 스레드·깔때기** | §3.5.1 `tick`, §3.6, §3.7, §4, §3.8 C5~C8·C15·D1~D4 | ✅ 설계 · 소스 미적용 |
+| **TM-05 카운트다운 전이·멈춤 = 지정 시간·쉬는중에도 계속** | §3.5.1·§3.5.2, §3.8 C1~C4 | ✅ 설계 · 소스 반영 |
+| **TM-06 0 도달 → 끝남 10초(감지 시각부터) → 대기, 마감 스레드·깔때기** | §3.5.1 `tick`, §3.6, §3.7, §4, §3.8 C5~C8·C15·D1~D4 | ✅ 설계 · 소스 반영 |
 | **TM-11 트레이 보기용 `status`** | §2.3, [tray.md](tray.md) §3.6 | ✅ 설계 |
-| **TM-12 끝남 중 끔 → 대기, 흐르는 중 끔 → 일시정지, 재시작 = 지정 시간 대기** | §2.3 `disable`·`with_config`, §3.7 1-b, §3.8 C11·C12·C16 | ✅ 설계 · 소스 미적용 |
+| **TM-12 끝남 중 끔 → 대기, 흐르는 중 끔 → 일시정지, 재시작 = 지정 시간 대기** | §2.3 `disable`·`with_config`, §3.7 1-b, §3.8 C11·C12·C16 | ✅ 설계 · 소스 반영 |
 | **TM-13 `timer.disabled` 새 문구(원문 ko)** | §6 | ✅ 설계 (3개 국어는 ui) |
-| CR-048 과도 상태 — bridge 패킷 전 설정 창·오버레이 경로는 깔때기 미경유 | §3.7 | 부분(bridge 패킷 대기) |
+| CR-048 과도 상태 — bridge 패킷 전 설정 창·오버레이 경로는 깔때기 미경유 | §3.7 | ✅ 해소 — bridge가 깔때기 `crate::publish_timer_change`를 경유한다(`bridge/commands/mod.rs:511-591`, 안 바뀌면 `tray::sync_timer_menu`만) |
 
 ## 11. 설계 결정 노트
 

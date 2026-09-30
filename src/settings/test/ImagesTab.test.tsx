@@ -197,14 +197,16 @@ const DEFAULT_KEYS = ['kb_up', 'kb_down_0', 'background', 'mouse_base', 'pen_up'
 const DEFAULT_FILES = DEFAULT_KEYS.map(k => `${k}.png`)
 const DONE6: ExportReport = { written: DEFAULT_FILES, conflicts: [], failed: [] }
 /**
- * 내장 기본 7칸(CR-053 🔒, 확정사항 CR-053 줄 「배포용 기본 세트 3차」·contract v0.24 — CR-044 6칸·CR-038 7칸·CR-035 15칸 대체).
- * hair·pomo_char = 복원 칸 + 셋째 버튼 「비우기」, kb_down_0 = 기본 없음(「기본값」 = 비우기, 셋째 버튼 없음).
- * DEFAULT_ASSET_SLOTS 를 베끼지 않고 리터럴로 둔다(bridge 상수와 독립 대조 — 순서는 contract v0.24 표).
+ * 내장 기본 6칸(v29 — 사용자 결정 2026-09-30 🔒 「뒷머리 기본 그림 없음(0.4.0 유지)」·contract v0.29 — CR-053 7칸에서 hair 제외.
+ * CR-044 6칸(kb_down_0 포함)·CR-038 7칸·CR-035 15칸과는 다른 목록).
+ * pomo_char = 복원 칸 + 셋째 버튼 「비우기」(셋째 버튼은 이 카드뿐), hair·kb_down_0 = 기본 없음(「기본값」 = 비우기, 셋째 버튼 없음).
+ * DEFAULT_ASSET_SLOTS 를 베끼지 않고 리터럴로 둔다(bridge 상수와 독립 대조 — 순서는 contract v0.29 표).
+ * (옛 이름 DEFAULT_KEYS7·DONE7·DESC7_KO → BUILTIN_KEYS·DONE_BUILTIN·DESC_BUILTIN_KO — 개수가 바뀌어도 이름이 틀리지 않게)
  */
-const DEFAULT_KEYS7 = ['kb_up', 'background', 'hair', 'pomo_char', 'mouse_base', 'pen_up', 'pen_down_0']
-const DEFAULT_FILES7 = DEFAULT_KEYS7.map(k => `${k}.png`)
-const DONE7: ExportReport = { written: DEFAULT_FILES7, conflicts: [], failed: [] }
-const DESC7_KO = '내장 기본 그림 7장을 원본 크기 그대로 폴더에 저장합니다. 따라 그리거나 고쳐 쓸 때 쓰세요.'
+const BUILTIN_KEYS = ['kb_up', 'background', 'pomo_char', 'mouse_base', 'pen_up', 'pen_down_0']
+const BUILTIN_FILES = BUILTIN_KEYS.map(k => `${k}.png`)
+const DONE_BUILTIN: ExportReport = { written: BUILTIN_FILES, conflicts: [], failed: [] }
+const DESC_BUILTIN_KO = '내장 기본 그림 6장을 원본 크기 그대로 폴더에 저장합니다. 따라 그리거나 고쳐 쓸 때 쓰세요.'
 
 const deferred = <T,>() => {
   let resolve!: (v: T) => void
@@ -487,7 +489,7 @@ describe('ImagesTab — 손(펜) 그룹 두 칸 (R-39, CR-042)', () => {
 
 // ─── 기본값 = 비우기(내장 기본이 없는 칸, I-3) (U-8) ─────────────────────────
 describe('ImagesTab — 기본값 = 비우기(내장 기본 없는 칸) (R-25·R-32, I-3, U-8)', () => {
-  it('TC-142 (CR-035·CR-038·CR-042·CR-053 개정): 비우기 칸만 옛 규칙 — 빈 칸(idle 포함)·여러 장의 가운데 장(kb_down_0·kb_down_1, 툴팁) 비활성, 마지막 장 활성 / 복원 칸은 빈 칸(background·hair)도 활성·툴팁 없음', () => {
+  it('TC-142 (CR-035·CR-038·CR-042·CR-053·v29 개정): 비우기 칸만 옛 규칙 — 빈 칸(idle·hair 포함)·여러 장의 가운데 장(kb_down_0·kb_down_1, 툴팁) 비활성, 마지막 장 활성 / 복원 칸은 빈 칸(background·pomo_char)도 활성·툴팁 없음', () => {
     const KB3P: AssetManifest = { ...BASIC, entries: [...BASIC.entries, entry(kbDown(2))] }
     renderImages(KB3P)
     expect(clearBtn('kb_down_1', '타자 입력 2')).toBeDisabled()
@@ -505,8 +507,14 @@ describe('ImagesTab — 기본값 = 비우기(내장 기본 없는 칸) (R-25·R
     expect(within(card('kb_down_0')).queryByRole('button', { name: '타자 입력 1 기본 그림으로 되돌리기' })).toBeNull()
     expect(restoreBtn('background', '배경')).toBeEnabled() // CR-038: 빈 복원 칸 예(옛 idle)
     expect(restoreBtn('background', '배경')).not.toHaveAttribute('title')
-    expect(restoreBtn('hair', '뒷머리')).toBeEnabled() // CR-053: 빈 복원 칸 예(내장 뒷머리)
-    expect(restoreBtn('hair', '뒷머리')).not.toHaveAttribute('title')
+    // v29(사용자 결정 2026-09-30 🔒 — 뒷머리 내장 기본 없음, contract v0.29): 빈 복원 칸 예 = pomo_char(CR-053 hair 대체)
+    expect(restoreBtn('pomo_char', '뽀모도 인물')).toBeEnabled()
+    expect(restoreBtn('pomo_char', '뽀모도 인물')).not.toHaveAttribute('title')
+    // v29: 빈 hair = 단일 비우기 칸 — 「기본값」(aria 「뒷머리 그림 지우기」) 비활성·툴팁 없음, 복원 이름 버튼 없음
+    expect(clearBtn('hair', '뒷머리')).toBeDisabled()
+    expect(clearBtn('hair', '뒷머리')).not.toHaveAttribute('title')
+    expect(within(card('hair')).queryByRole('button', { name: '뒷머리 기본 그림으로 되돌리기' })).toBeNull()
+    fireEvent.click(clearBtn('hair', '뒷머리'))
     fireEvent.click(clearBtn('kb_down_0', '타자 입력 1'))
     expect(clearBtn('idle', '대기')).toBeDisabled() // CR-038: idle 은 빈 비우기 칸
     expect(clearBtn('idle', '대기')).not.toHaveAttribute('title')
@@ -678,7 +686,7 @@ describe('ImagesTab — 기본값 = 내장 기본 그림으로 복원 (R-32·R-3
     expect(onError).not.toHaveBeenCalled()
   })
 
-  it('TC-179 (CR-038·CR-053 개정 — 대상 칸만): 빈 복원 칸(background, 옛 idle)·빈 뒷머리(hair — CR-053 내장 기본, 옛 「가운데 장 kb_down_0」 대체)도 복원 — 각각 restoreDefaultAsset 1회, removeAsset 0회', async () => {
+  it('TC-179 (CR-038·CR-053·v29 개정 — 대상 칸만): 빈 복원 칸(background, 옛 idle)·빈 뽀모도 인물(pomo_char — v29: 옛 CR-053 hair 대체)도 복원 — 각각 restoreDefaultAsset 1회, removeAsset 0회, 뒷머리·타자 입력 1 에는 복원 버튼 없음', async () => {
     vi.mocked(restoreDefaultAsset).mockResolvedValue(BASIC)
     renderImages(BASIC)
     openRestore('background', '배경')
@@ -687,17 +695,18 @@ describe('ImagesTab — 기본값 = 내장 기본 그림으로 복원 (R-32·R-3
     )
     confirmRestore()
     await waitFor(() => expect(restoreDefaultAsset).toHaveBeenCalledWith('background'))
-    await waitFor(() => expect(restoreBtn('hair', '뒷머리')).toBeEnabled())
-    const trigger = openRestore('hair', '뒷머리')
+    await waitFor(() => expect(restoreBtn('pomo_char', '뽀모도 인물')).toBeEnabled())
+    const trigger = openRestore('pomo_char', '뽀모도 인물')
     expect(dialog()).toHaveAccessibleDescription(
-      '‘뒷머리’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
+      '‘뽀모도 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
     )
     confirmRestore()
     await waitFor(() => expect(restoreDefaultAsset).toHaveBeenCalledTimes(2))
-    expect(restoreDefaultAsset).toHaveBeenLastCalledWith('hair')
+    expect(restoreDefaultAsset).toHaveBeenLastCalledWith('pomo_char')
     await waitFor(() => expect(trigger).toHaveFocus())
-    // CR-053: kb_down_0 에는 복원 버튼이 없다(내장 기본 없음) — 복원 경로 대상 아님
+    // CR-053: kb_down_0 · v29: hair 에는 복원 버튼이 없다(내장 기본 없음) — 복원 경로 대상 아님
     expect(within(card('kb_down_0')).queryByRole('button', { name: '타자 입력 1 기본 그림으로 되돌리기' })).toBeNull()
+    expect(within(card('hair')).queryByRole('button', { name: '뒷머리 기본 그림으로 되돌리기' })).toBeNull()
     expect(removeAsset).not.toHaveBeenCalled()
     expect(setSettings).not.toHaveBeenCalled()
   })
@@ -774,7 +783,7 @@ describe('ImagesTab — 기본값 = 내장 기본 그림으로 복원 (R-32·R-3
 
 // ─── 기본 이미지 다운로드 (R-33, I-8 ~ I-10) ─────────────────────────────────
 describe('ImagesTab — 기본 이미지 다운로드 (R-33, DefaultsDownloadPanel)', () => {
-  it('TC-182 (CR-038·CR-044·CR-053 개정): 패널 위치(p.note 바로 뒤·첫 그룹 앞)·단추(type=button·outline·활성·aria-busy 아님)·설명 7장(aria-describedby)·결과 줄 없음·탭의 첫 버튼, 호출 없음', () => {
+  it('TC-182 (CR-038·CR-044·CR-053·v29 개정): 패널 위치(p.note 바로 뒤·첫 그룹 앞)·단추(type=button·outline·활성·aria-busy 아님)·설명 6장(aria-describedby)·결과 줄 없음·탭의 첫 버튼, 호출 없음', () => {
     renderImages(EMPTY)
     const btn = downloadBtn()
     expect(btn).toHaveTextContent('기본 이미지 다운로드')
@@ -783,9 +792,9 @@ describe('ImagesTab — 기본 이미지 다운로드 (R-33, DefaultsDownloadPan
     expect(btn.getAttribute('aria-busy')).not.toBe('true')
     expect(btn).toHaveAttribute('aria-describedby', 'download-defaults-desc')
     expect(document.getElementById('download-defaults-desc')?.tagName).toBe('P')
-    expect(DEFAULT_ASSET_SLOTS).toHaveLength(7) // CR-053(CR-044 6 · CR-038 7 · 옛 15)
-    expect(DEFAULT_ASSET_SLOTS.map(slotKey)).toEqual(DEFAULT_KEYS7)
-    expect(btn).toHaveAccessibleDescription(DESC7_KO) // {n} = DEFAULT_ASSET_SLOTS.length(문구 사전 불변)
+    expect(DEFAULT_ASSET_SLOTS).toHaveLength(6) // v29 contract v0.29(CR-053 7 · CR-044 6 · CR-038 7 · 옛 15)
+    expect(DEFAULT_ASSET_SLOTS.map(slotKey)).toEqual(BUILTIN_KEYS)
+    expect(btn).toHaveAccessibleDescription(DESC_BUILTIN_KO) // {n} = DEFAULT_ASSET_SLOTS.length(문구 사전 불변)
     expect(btn.className).toBe(clearBtn('mouse_left', '왼클릭').className) // .outline 재사용
     const note = within(region()).getByText(/^PNG\(32비트 RGBA\)만/)
     const firstH2 = within(region()).getAllByRole('heading', { level: 2 })[0]
@@ -1210,7 +1219,7 @@ describe('ImagesTab — 3개 국어 (R-20)·접근성 (§8)·ConfirmDialog (§6)
     for (const b of within(dlg).getAllByRole('button')) expect(b).toHaveAttribute('type', 'button')
   })
 
-  it('TC-189 (CR-053 개정 — 개수): CR-035 문구 ja·en — 다운로드 단추·설명(7장)·폴더 대화상자 제목·복원 aria-label·복원 확인창·덮어쓰기 확인창·결과 줄(부분 실패·완료)·오류 code 문구(asset.no_default·asset.export_dir)', async () => {
+  it('TC-189 (CR-053·v29 개정 — 개수): CR-035 문구 ja·en — 다운로드 단추·설명(6장)·폴더 대화상자 제목·복원 aria-label·복원 확인창·덮어쓰기 확인창·결과 줄(부분 실패·완료)·오류 code 문구(asset.no_default·asset.export_dir)', async () => {
     for (const [lang, dict] of [
       ['ja', ja],
       ['en', en],
@@ -1219,15 +1228,15 @@ describe('ImagesTab — 3개 국어 (R-20)·접근성 (§8)·ConfirmDialog (§6)
       vi.mocked(exportDefaultAssets)
         .mockResolvedValueOnce({ written: [], conflicts: ['kb_up.png'], failed: [] })
         .mockResolvedValueOnce({
-          written: DEFAULT_FILES7.filter(f => f !== 'kb_up.png'),
+          written: BUILTIN_FILES.filter(f => f !== 'kb_up.png'),
           conflicts: [],
           failed: [{ fileName: 'kb_up.png', code: 'asset.io' }],
         })
-        .mockResolvedValueOnce(DONE7)
+        .mockResolvedValueOnce(DONE_BUILTIN)
         .mockRejectedValueOnce(EXPORT_DIR)
       const { unmount } = renderImages(BASIC, { ...SETTINGS, language: lang }, lang)
       const btn = screen.getByRole('button', { name: dict.downloadDefaults })
-      expect(btn).toHaveAccessibleDescription(format(dict.downloadDefaultsDesc, { n: 7 })) // CR-053(CR-044 6 · CR-038 7 · 옛 15)
+      expect(btn).toHaveAccessibleDescription(format(dict.downloadDefaultsDesc, { n: 6 })) // v29(CR-053 7 · CR-044 6 · CR-038 7 · 옛 15)
       const upName = dict.slots.kb_up.title
       const reset = within(card('kb_up')).getByRole('button', { name: format(dict.restoreImageAria, { name: upName }) })
       expect(reset).toHaveTextContent(dict.clearImage)
@@ -1248,12 +1257,12 @@ describe('ImagesTab — 3개 국어 (R-20)·접근성 (§8)·ConfirmDialog (§6)
       fireEvent.click(within(c).getByRole('button', { name: dict.exportConflictOk }))
       await waitFor(() =>
         expect(resultLine()?.textContent, lang).toBe(
-          format(dict.exportPartial, { ok: 6, fail: 1, files: 'kb_up.png' }), // CR-053: 7 − 1(CR-044 ok 5)
+          format(dict.exportPartial, { ok: 5, fail: 1, files: 'kb_up.png' }), // v29: 6 − 1(CR-053 ok 6)
         ),
       )
       await waitFor(() => expect(btn).toBeEnabled())
       fireEvent.click(btn)
-      await waitFor(() => expect(resultLine()?.textContent, lang).toBe(format(dict.exportDone, { n: 7 }))) // CR-053
+      await waitFor(() => expect(resultLine()?.textContent, lang).toBe(format(dict.exportDone, { n: 6 }))) // v29(CR-053 7)
       await waitFor(() => expect(btn).toBeEnabled())
       fireEvent.click(btn)
       await waitFor(() => expect(resultLine()?.textContent, lang).toBe(dict.errors['asset.export_dir']))
@@ -1306,7 +1315,7 @@ describe('ImagesTab — 3개 국어 (R-20)·접근성 (§8)·ConfirmDialog (§6)
 
 // ─── 사용자 흐름 (CR-035) ───────────────────────────────────────────────────
 describe('ImagesTab — TC-FLOW (S-14 · S-15 · S-16, CR-035)', () => {
-  it('TC-FLOW-15 (CR-038·CR-042·CR-044·CR-053 개정): S-14 — 첫 실행에 core 가 채운 기본 7장(hair·pomo_char 포함, kb_down_0 없음)이 카드에 그대로 보이고, 7칸 「기본값」은 복원(활성)·나머지 빈 칸 13개(kb_down_0·idle·rest·key_* 7·mouse_left·mouse_right·pomo_bubble)는 비우기(비활성), 뒷머리·뽀모도 인물 「비우기」 활성, 추가 카드 없음', () => {
+  it('TC-FLOW-15 (CR-038·CR-042·CR-044·CR-053·v29 개정): S-14 — 첫 실행에 core 가 채운 기본 6장(pomo_char 포함, hair·kb_down_0 없음)이 카드에 그대로 보이고, 6칸 「기본값」은 복원(활성)·나머지 빈 칸 14개(kb_down_0·hair·idle·rest·key_* 7·mouse_left·mouse_right·pomo_bubble)는 비우기(비활성), 뽀모도 인물 「비우기」 활성, 뒷머리는 빈 비우기 칸(버튼 2개), 추가 카드 없음', () => {
     const { update } = renderImages(EMPTY) // TC-136 부분(아직 받기 전)
     expect(region().querySelectorAll('article img')).toHaveLength(0)
     const DEFAULT15: AssetManifest = { canvas: CANVAS, entries: DEFAULT_ASSET_SLOTS.map(s => entry(s)) }
@@ -1314,17 +1323,21 @@ describe('ImagesTab — TC-FLOW (S-14 · S-15 · S-16, CR-035)', () => {
     const arts = Array.from(region().querySelectorAll<HTMLElement>('article'))
     expect(arts).toHaveLength(20) // CR-045: 슬롯 카드 20장(뽀모도 2 — CR-042 18, 옛 25)
     const withImg = arts.filter(a => a.querySelector('img')).map(a => a.dataset.testid)
-    expect([...withImg].sort()).toEqual(DEFAULT_KEYS7.map(k => `slot-card-${k}`).sort())
-    // CR-053: 13 = 20 − 기본 7(CR-044·CR-045 14)
-    expect(arts.filter(a => a.querySelector('img') === null)).toHaveLength(13)
-    // CR-053: 뒷머리·뽀모도 인물 = 버튼 3개, 「기본값」 복원 활성·「비우기」 활성(등록됨)
-    for (const [key, name] of [
-      ['hair', '뒷머리'],
-      ['pomo_char', '뽀모도 인물'],
-    ] as const) {
-      expect(within(card(key)).getAllByRole('button').map(b => b.textContent), key).toEqual(['이미지 변경', '기본값', '비우기'])
-      expect(within(card(key)).getByRole('button', { name: `${name} 그림 비우기` }), key).toBeEnabled()
-    }
+    expect([...withImg].sort()).toEqual(BUILTIN_KEYS.map(k => `slot-card-${k}`).sort())
+    // v29: 14 = 20 − 기본 6(CR-053 13)
+    expect(arts.filter(a => a.querySelector('img') === null)).toHaveLength(14)
+    // CR-053: 뽀모도 인물 = 버튼 3개, 「기본값」 복원 활성·「비우기」 활성(등록됨)
+    expect(within(card('pomo_char')).getAllByRole('button').map(b => b.textContent)).toEqual(['이미지 변경', '기본값', '비우기'])
+    expect(within(card('pomo_char')).getByRole('button', { name: '뽀모도 인물 그림 비우기' })).toBeEnabled()
+    // v29: 뒷머리 = 빈 비우기 칸 — 버튼 2개(셋째 「비우기」 없음), 「기본값」(뒷머리 그림 지우기) 비활성
+    expect(within(card('hair')).getAllByRole('button').map(b => b.textContent)).toEqual(['이미지 변경', '기본값'])
+    expect(clearBtn('hair', '뒷머리')).toBeDisabled()
+    // v29: 화면의 「… 그림 비우기」 버튼 = 뽀모도 인물 하나(CR-053 뒷머리·뽀모도 인물 2개)
+    expect(
+      within(region())
+        .getAllByRole('button', { name: /그림 비우기$/ })
+        .map(b => b.closest('article')?.dataset.testid),
+    ).toEqual(['slot-card-pomo_char'])
     // CR-053: 「타자 입력 1」 빈 칸 = 선택 칸·버튼 2개(「기본값」 = 비우기 비활성, 셋째 버튼 없음)
     expect(within(card('kb_down_0')).getAllByRole('button').map(b => b.textContent)).toEqual(['이미지 변경', '기본값'])
     expect(clearBtn('kb_down_0', '타자 입력 1')).toBeDisabled()
@@ -1397,20 +1410,20 @@ describe('ImagesTab — TC-FLOW (S-14 · S-15 · S-16, CR-035)', () => {
     expect(restoreDefaultAsset).toHaveBeenLastCalledWith('pen_up')
   })
 
-  it('TC-FLOW-17 (CR-038·CR-044·CR-053 개정): S-16 — 기본 이미지를 폴더에 받는다(같은 이름 파일 7개 → 덮어쓰기 확인 → 저장 완료)', async () => {
+  it('TC-FLOW-17 (CR-038·CR-044·CR-053·v29 개정): S-16 — 기본 이미지를 폴더에 받는다(같은 이름 파일 6개 → 덮어쓰기 확인 → 저장 완료)', async () => {
     vi.mocked(exportDefaultAssets)
-      .mockResolvedValueOnce({ written: [], conflicts: DEFAULT_FILES7, failed: [] })
-      .mockResolvedValueOnce(DONE7)
+      .mockResolvedValueOnce({ written: [], conflicts: BUILTIN_FILES, failed: [] })
+      .mockResolvedValueOnce(DONE_BUILTIN)
     renderImages(BASIC)
-    expect(downloadBtn()).toHaveAccessibleDescription(DESC7_KO) // TC-182 부분
+    expect(downloadBtn()).toHaveAccessibleDescription(DESC_BUILTIN_KO) // TC-182 부분
     fireEvent.click(downloadBtn()) // TC-185 부분
     expect(pickFolder).toHaveBeenCalledWith('기본 이미지를 저장할 폴더 선택')
     const dlg = await screen.findByRole('alertdialog')
     expect(dlg).toHaveAccessibleDescription(
-      '이 폴더에 같은 이름의 파일이 7개 있습니다. 모두 덮어쓸까요? 덮어쓴 파일은 되돌릴 수 없습니다.', // CR-053(CR-044 6개)
+      '이 폴더에 같은 이름의 파일이 6개 있습니다. 모두 덮어쓸까요? 덮어쓴 파일은 되돌릴 수 없습니다.', // v29(CR-053 7개)
     )
     fireEvent.click(within(dlg).getByRole('button', { name: '덮어쓰기' }))
-    await waitFor(() => expect(resultLine()?.textContent).toBe('기본 이미지 7장을 저장했습니다.'))
+    await waitFor(() => expect(resultLine()?.textContent).toBe('기본 이미지 6장을 저장했습니다.'))
     expect(resultLine()).toHaveAttribute('role', 'status')
     expect(exportDefaultAssets).toHaveBeenNthCalledWith(1, DIR, false)
     expect(exportDefaultAssets).toHaveBeenNthCalledWith(2, DIR, true)
@@ -1480,7 +1493,7 @@ describe('ImagesTab — 타자 입력 1 선택 강등 (R-40, CR-043)', () => {
 describe('ImagesTab — 「타자 입력 1」 「기본값」 = 비우기 (R-41, CR-043 → CR-053)', () => {
   // CR-053: kb_down_0 내장 기본이 빠져 「기본값」 자체가 비우기(resetKind clear)가 됐고 셋째 버튼 「비우기」는 없앴다(images-tab §15.2).
   // R-41(「타자 입력 1」을 비울 수 있다)은 「기본값」 경로로 계속 덮는다 — TC 번호 유지, 셋째 버튼 단언은 뒷머리·뽀모도 인물로 옮김(TC-234).
-  it('TC-233 (CR-053 개정): 「타자 입력 1」 카드 버튼 2개(셋째 「비우기」 없음), 「기본값」 = 비우기 칸(aria 「타자 입력 1 그림 지우기」) — 뒤 장 없으면 활성, kb_down_1 등록이면 비활성·툴팁, 빈 칸이면 비활성(눌러도 확인창 없음), 화면 전체 「그림 비우기」 = 뒷머리·뽀모도 인물, ja·en 이름', () => {
+  it('TC-233 (CR-053·v29 개정): 「타자 입력 1」 카드 버튼 2개(셋째 「비우기」 없음), 「기본값」 = 비우기 칸(aria 「타자 입력 1 그림 지우기」) — 뒤 장 없으면 활성, kb_down_1 등록이면 비활성·툴팁, 빈 칸이면 비활성(눌러도 확인창 없음), 화면 전체 「그림 비우기」 = 뽀모도 인물 하나, ja·en 이름', () => {
     const { update, unmount } = renderImages(KB1)
     const btns = within(card('kb_down_0')).getAllByRole('button')
     expect(btns.map(b => b.textContent)).toEqual(['이미지 변경', '기본값'])
@@ -1494,16 +1507,17 @@ describe('ImagesTab — 「타자 입력 1」 「기본값」 = 비우기 (R-41,
     expect(
       within(card('kb_down_0')).queryByRole('button', { name: /그림 비우기$|기본 그림으로 되돌리기$/ }),
     ).toBeNull()
-    for (const key of ['kb_up', 'idle', 'rest', 'key_space', 'key_undo']) {
+    // v29: hair 도 셋째 버튼 없는 카드(뒷머리 내장 기본 없음 — 「기본값」 = 비우기)
+    for (const key of ['kb_up', 'idle', 'rest', 'key_space', 'key_undo', 'hair']) {
       expect(within(card(key)).getAllByRole('button').map(b => b.textContent), key).toEqual(['이미지 변경', '기본값'])
     }
     expect(within(addCard('kb_down_1')).queryByRole('button', { name: /그림 비우기$/ })).toBeNull()
-    // 화면 전체 「… 그림 비우기」 = 뒷머리·뽀모도 인물(CR-053 — CR-044 기대 [kb_down_0] 대체)
+    // 화면 전체 「… 그림 비우기」 = 뽀모도 인물 하나(v29 — CR-053 기대 [hair, pomo_char] · CR-044 [kb_down_0] 대체)
     expect(
       within(region())
         .getAllByRole('button', { name: /그림 비우기$/ })
         .map(b => b.closest('article')?.dataset.testid),
-    ).toEqual(['slot-card-hair', 'slot-card-pomo_char'])
+    ).toEqual(['slot-card-pomo_char'])
     // kb_down_1 등록(BASIC) → 비활성·툴팁(마지막 장부터), 「이미지 변경」은 활성, 뒤 장 「기본값」 활성
     update(BASIC)
     expect(clearBtn('kb_down_0', DOWN1)).toBeDisabled()
@@ -1542,12 +1556,18 @@ describe('ImagesTab — 「타자 입력 1」 「기본값」 = 비우기 (R-41,
     expect(setSettings).not.toHaveBeenCalled()
   })
 
-  it('TC-234 (CR-053 개정): 두 줄 양식(cardEmptyable·actions2·outline 재사용) = 뒷머리·뽀모도 인물 카드(등록·빈 칸 모두), 「타자 입력 1」·kb_down_1·다른 키보드 카드는 한 줄', () => {
+  it('TC-234 (CR-053·v29 개정): 두 줄 양식(cardEmptyable·actions2·outline 재사용) = 뽀모도 인물 카드뿐(등록·빈 칸 모두), 뒷머리(등록·빈 칸 모두)·「타자 입력 1」·kb_down_1·다른 키보드 카드는 한 줄', () => {
     const HP: AssetManifest = { ...KB1, entries: [...KB1.entries, entry('hair'), entry('pomo_char')] }
     const { update } = renderImages(KB1)
     for (const m of [KB1, BASIC, EMPTY, HP]) {
       update(m)
-      for (const key of ['hair', 'pomo_char']) {
+      // v29: 뒷머리 = 버튼 2개·한 줄(CR-053 두 줄 대체) — 빈 칸(KB1·BASIC·EMPTY)·등록(HP) 모두
+      const hair = card('hair')
+      const hBtns = within(hair).getAllByRole('button')
+      expect(hBtns).toHaveLength(2)
+      expect(hair.className).not.toMatch(/cardEmptyable/)
+      expect(hBtns[0].parentElement?.className ?? '').not.toMatch(/actions2/)
+      for (const key of ['pomo_char']) {
         const c = card(key)
         const btns = within(c).getAllByRole('button')
         expect(btns, key).toHaveLength(3)
@@ -1573,7 +1593,8 @@ describe('ImagesTab — 「타자 입력 1」 「기본값」 = 비우기 (R-41,
     update(BASIC)
     expect(card('kb_down_1').className).not.toMatch(/cardEmptyable/)
     expect(within(card('kb_down_1')).getAllByRole('button')[0].parentElement?.className ?? '').not.toMatch(/actions2/)
-    expect(emptyBtn('hair', '뒷머리')).toBeDisabled() // BASIC 에는 hair 가 없다
+    expect(emptyBtn('pomo_char', '뽀모도 인물')).toBeDisabled() // BASIC 에는 pomo_char 가 없다(v29: 옛 hair 대상)
+    expect(within(card('hair')).queryByRole('button', { name: '뒷머리 그림 비우기' })).toBeNull() // v29: 셋째 버튼 없음
     expect(pickPngFile).not.toHaveBeenCalled()
     expect(removeAsset).not.toHaveBeenCalled()
     expect(restoreDefaultAsset).not.toHaveBeenCalled()
@@ -1670,8 +1691,8 @@ describe('ImagesTab — 「타자 입력 1」 「기본값」 = 비우기 (R-41,
 })
 
 describe('ImagesTab — TC-FLOW (S-21 · S-22, CR-043)', () => {
-  it('TC-FLOW-22 (CR-053 개정): S-21 — 첫 실행(기본 7장 — 타자 그림 없음) 이미지 탭에서 필수 배지 2장(기본·팔 기본)과 「타자 입력 1」의 「선택」 배지·설명·빈 칸(경고 없음)을 보고, 타자 그림을 넣어도 선택 칸임을 확인', () => {
-    const D7 = d7() // DEFAULT_ASSET_SLOTS 실물 — CR-053 7장, kb_down_0 없음
+  it('TC-FLOW-22 (CR-053·v29 개정 — 개수 표기만): S-21 — 첫 실행(기본 6장 — 타자 그림 없음) 이미지 탭에서 필수 배지 2장(기본·팔 기본)과 「타자 입력 1」의 「선택」 배지·설명·빈 칸(경고 없음)을 보고, 타자 그림을 넣어도 선택 칸임을 확인', () => {
+    const D7 = d7() // DEFAULT_ASSET_SLOTS 실물 — v29 6장(hair·kb_down_0 없음, CR-053 7장). 이름 d7·D7 은 옛 개수(W-8 관례)
     const { update } = renderImages(D7)
     // Step 1 (TC-230 배지·빈 칸 부분) — CR-053: 첫 실행부터 kb_down_0 빈 칸(옛 Step 3 이 Step 1 로 합쳐짐)
     expect(badgeCardIds('필수')).toEqual(['slot-card-kb_up', 'slot-card-mouse_base'])
