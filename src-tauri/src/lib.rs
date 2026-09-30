@@ -1,7 +1,7 @@
 //! kuro_keyviewer Rust 계층 진입점.
 //!
 //! [목적] Tauri 앱 조립 — 플러그인·상태·트레이·전역 훅 스레드·command 등록.
-//! [계층] core 모듈(hook/window/tray/assets/settings/timer/data_reset) ← bridge(commands/events) ← ui(React).
+//! [계층] core 모듈(hook/window/tray/assets/settings/timer/data_reset/presets) ← bridge(commands/events) ← ui(React).
 //!        core 는 ui 를 모른다. 밖으로 나가는 것은 bridge::events 의 emit 뿐이다.
 //! [스레드] 훅 스레드(hook::start) → mpsc 채널 → 전달 스레드(여기서 spawn) → Tauri emit.
 //!        시작 시 단발 스레드 `autostart-sync`(spawn_autostart_sync, SV2-05)가 자동 실행
@@ -24,6 +24,7 @@ pub mod bridge;
 pub mod data_reset;
 pub mod error;
 pub mod hook;
+pub mod presets;
 pub mod settings;
 pub mod timer;
 pub mod tray;
@@ -51,6 +52,11 @@ impl AppPaths {
             settings_file: data_dir.join("settings.json"),
             data_dir,
         })
+    }
+
+    /// 프리셋 폴더(`{data_dir}/presets`). 필드가 아니라 메서드 — 테스트의 구조체 리터럴을 깨지 않는다.
+    pub fn presets_dir(&self) -> std::path::PathBuf {
+        self.data_dir.join(presets::PRESETS_DIR)
     }
 }
 

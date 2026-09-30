@@ -4,7 +4,7 @@
 //!        `?v=`로 붙여, 같은 슬롯을 다른 그림으로 바꾸면 url이 달라지게 한다(WebView가 옛
 //!        그림을 캐시로 보여주던 결함 방지).
 //! [공개 API] `asset_url(path) -> String`(불변). `versioned_asset_url`은 `assets` 모듈
-//!        내부(`pub(super)`)에서만 쓴다.
+//!        내부와 `presets`(`pub(crate)`)에서 쓴다.
 //! [unsafe] 없음.
 //! [테스트] `with_version` 단위(V1·V2), `import`가 만든 url 형태(V3·V4, tempdir),
 //!        `encode_uri_component` 왕복(V5).
@@ -21,7 +21,7 @@ pub fn asset_url(path: &Path) -> String {
 
 /// `asset_url` 뒤에 `?v={파일 수정 시각 ms}`를 붙인다(SV2-07). `import`가 파일을 쓴 직후
 /// 호출해 그 순간의 수정 시각을 반영한다.
-pub(super) fn versioned_asset_url(path: &Path) -> String {
+pub(crate) fn versioned_asset_url(path: &Path) -> String {
     let modified = std::fs::metadata(path).and_then(|m| m.modified()).ok();
     with_version(asset_url(path), modified)
 }

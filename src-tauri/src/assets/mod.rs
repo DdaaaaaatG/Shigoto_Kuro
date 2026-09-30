@@ -77,6 +77,7 @@ mod url;
 pub use anchor::compute_hand_anchor;
 pub use slot::{AssetSlot, KbDownKind, PenDownKind, SimpleSlot};
 pub use url::asset_url;
+pub(crate) use url::versioned_asset_url;
 
 pub const CANVAS_MAX_WIDTH: u32 = 900;
 pub const CANVAS_MAX_HEIGHT: u32 = 700;
@@ -118,7 +119,7 @@ impl AssetManifest {
         self.entries.iter().find(|e| e.slot.file_key() == key)
     }
 
-    fn recompute_canvas(&mut self) {
+    pub(crate) fn recompute_canvas(&mut self) {
         self.canvas = self
             .entries
             .iter()
@@ -272,7 +273,7 @@ fn group_size(manifest: &AssetManifest, slot: &AssetSlot) -> Option<CanvasSize> 
 
 /// 슬롯의 저장 파일 이름 — 경로는 항상 이것으로 만든다. manifest.json의 `fileName`은 신뢰하지
 /// 않는다(SEC-002) — 위조·오염된 경로로 앱 데이터 밖 파일을 읽거나 지우는 것을 막는다.
-fn stored_file_name(slot: &AssetSlot) -> String {
+pub(crate) fn stored_file_name(slot: &AssetSlot) -> String {
     format!("{}.png", slot.file_key())
 }
 
@@ -342,7 +343,7 @@ pub fn import(assets_dir: &Path, slot: AssetSlot, src: &Path) -> Result<AssetMan
 }
 
 /// 최대 `max + 1`바이트만 읽는다. 넘으면 `TooManyBytes`(검사 뒤 파일이 커진 드문 경쟁 조건).
-fn read_capped(src: &Path, max: u64) -> Result<Vec<u8>, AssetError> {
+pub(crate) fn read_capped(src: &Path, max: u64) -> Result<Vec<u8>, AssetError> {
     let file = fs::File::open(src)?;
     let mut buf = Vec::new();
     file.take(max + 1).read_to_end(&mut buf)?;
