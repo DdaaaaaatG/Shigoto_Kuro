@@ -189,6 +189,7 @@ export const ko: Messages = {
   presetImageCount: '그림 {count}장',
   presetHasAlarm: '알림음 있음',
   presetNoAlarm: '알림음 없음',
+  presetPreviewUnavailable: '미리보기를 표시할 수 없습니다.',
   presetApply: '적용',
   presetExport: '내보내기',
   presetRename: '이름 바꾸기',

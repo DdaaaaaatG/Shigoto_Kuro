@@ -74,23 +74,64 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--st-gap-sm);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--st-gap-md);
 }
 
 .item {
+  box-sizing: border-box;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-gap-sm);
   padding: var(--st-gap-md);
   border: 1px solid var(--st-border);
   border-radius: 8px;
+  background: var(--st-card);
+}
+
+.preview {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: repeating-conic-gradient(#e5e7eb 0 25%, #ffffff 0 50%) 0 0 / 16px 16px;
+}
+
+.previewLayer {
+  position: absolute;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.previewNote {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: var(--st-gap-sm);
+  background: var(--st-card);
+  color: var(--st-muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .itemName {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
+  line-height: 20px;
   color: var(--st-ink);
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .visuallyHidden {
@@ -106,14 +147,31 @@
 }
 
 .itemMeta {
-  margin: 4px 0 0;
+  margin: 0;
   color: var(--st-muted);
   font-size: 12px;
+  line-height: 16px;
 }
 
-.itemActions {
-  display: flex;
-  flex-wrap: wrap;
+.cardNameRow {
+  padding: 0;
+}
+
+.cardNameRow .nameInput {
+  flex-basis: 100%;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--st-gap-sm);
-  margin-top: var(--st-gap-sm);
+  margin-top: auto;
+}
+
+.actionGrid > button {
+  min-width: 0;
+  padding: 6px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

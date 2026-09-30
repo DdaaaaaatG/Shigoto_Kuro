@@ -298,6 +298,7 @@ export interface Messages {
   presetImageCount: string
   presetHasAlarm: string
   presetNoAlarm: string
+  presetPreviewUnavailable: string
   presetApply: string
   presetExport: string
   presetRename: string

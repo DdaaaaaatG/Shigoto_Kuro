@@ -190,6 +190,7 @@ export const en: Messages = {
   presetImageCount: '{count} images',
   presetHasAlarm: 'Alarm sound',
   presetNoAlarm: 'No alarm sound',
+  presetPreviewUnavailable: 'Preview unavailable.', // 검수 필요
   presetApply: 'Apply',
   presetExport: 'Export',
   presetRename: 'Rename',

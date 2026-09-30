@@ -1,6 +1,6 @@
 /**
- * 프리셋 카드 한 장 — design/presets-tab.md §2.2·§5.3(CR-064, R-59·R-61·R-62·R-64·R-66·R-67).
- * 순수 표시 컴포넌트: 이름·요약 줄·버튼 4개·인라인 이름 편집. bridge 는 부르지 않고 콜백만 올린다.
+ * 프리셋 카드 한 장 — design/presets-tab.md §2.2·§5.3·§11(CR-064·CR-065, R-59·R-61·R-62·R-64·R-66·R-67·R-68).
+ * 순수 표시 컴포넌트: 합성 미리보기·이름·요약 줄·버튼 4개·인라인 이름 편집. bridge 는 부르지 않고 콜백만 올린다.
  * 편집 중에도 이름 h3 는 DOM 에 남겨(시각적으로만 숨김) li 의 접근 이름 참조가 끊기지 않게 한다.
  */
 import { useEffect, useId, useRef, type KeyboardEvent } from 'react'
@@ -8,6 +8,7 @@ import { PRESET_NAME_MAX, type PresetSummary } from 'bridge/types'
 import { format } from '../i18n/index'
 import { useLanguage, useMessages } from '../i18n/MessagesContext'
 import { formatSavedAt, isPresetNameFilled } from '../presetValues'
+import PresetPreviewBox from './PresetPreviewBox'
 import gen from './GeneralTab.module.css'
 import styles from './PresetsTab.module.css'
 
@@ -67,8 +68,8 @@ export const PresetCard = ({
     onFocused()
   }, [focusTarget, pending, renaming, onFocused])
 
-  const meta = [
-    format(t.presetSavedAt, { date: formatSavedAt(preset.savedAt, language) }),
+  const metaDate = format(t.presetSavedAt, { date: formatSavedAt(preset.savedAt, language) })
+  const metaInfo = [
     format(t.presetImageCount, { count: preset.imageCount }),
     preset.hasAlarm ? t.presetHasAlarm : t.presetNoAlarm,
   ].join(' · ')
@@ -89,11 +90,12 @@ export const PresetCard = ({
 
   return (
     <li className={styles.item} aria-labelledby={nameId}>
-      <h3 id={nameId} className={renaming ? styles.visuallyHidden : styles.itemName}>
+      <PresetPreviewBox preview={preset.preview} />
+      <h3 id={nameId} title={preset.name} className={renaming ? styles.visuallyHidden : styles.itemName}>
         {preset.name}
       </h3>
       {renaming && (
-        <div className={styles.nameRow}>
+        <div className={`${styles.nameRow} ${styles.cardNameRow}`}>
           <input
             ref={inputRef}
             type="text"
@@ -127,13 +129,15 @@ export const PresetCard = ({
           </button>
         </div>
       )}
-      <p className={styles.itemMeta}>{meta}</p>
-      <div className={styles.itemActions}>
+      <p className={styles.itemMeta}>{metaDate}</p>
+      <p className={styles.itemMeta}>{metaInfo}</p>
+      <div className={styles.actionGrid}>
         <button
           ref={applyRef}
           type="button"
           className={gen.outlineButton}
           disabled={pending}
+          title={t.presetApply}
           aria-label={aria(t.presetApply)}
           onClick={() => onApply()}
         >
@@ -144,6 +148,7 @@ export const PresetCard = ({
           type="button"
           className={gen.outlineButton}
           disabled={pending}
+          title={t.presetExport}
           aria-label={aria(t.presetExport)}
           onClick={() => onExport()}
         >
@@ -154,6 +159,7 @@ export const PresetCard = ({
           type="button"
           className={gen.outlineButton}
           disabled={pending || renaming}
+          title={t.presetRename}
           aria-label={aria(t.presetRename)}
           onClick={() => onStartRename()}
         >
@@ -164,6 +170,7 @@ export const PresetCard = ({
           type="button"
           className={gen.dangerButton}
           disabled={pending}
+          title={t.presetDelete}
           aria-label={aria(t.presetDelete)}
           onClick={() => onDelete()}
         >

@@ -189,6 +189,7 @@ export const ja: Messages = {
   presetImageCount: '画像 {count}枚',
   presetHasAlarm: '通知音あり',
   presetNoAlarm: '通知音なし',
+  presetPreviewUnavailable: 'プレビューを表示できません。', // 검수 필요
   presetApply: '適用',
   presetExport: '書き出し',
   presetRename: '名前を変更',
