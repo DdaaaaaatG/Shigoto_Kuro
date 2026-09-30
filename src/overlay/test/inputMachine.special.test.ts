@@ -124,7 +124,7 @@ describe('design.md §10.6 규칙표 1~13 — reduce key', () => {
     expect(s.bounceSeq).toBe(3)
   })
 
-  // CR-066: repeat 플래그 없는 같은 특수 키 누름은 새 누름이다 — bounceSeq +1(진짜 자동 반복 repeat:true는 TC-161·TC-FIX66-3)
+  // CR-066: repeat 플래그 없는 같은 특수 키 누름은 새 누름이다 — bounceSeq +1(진짜 자동 반복 repeat:true는 TC-161·TC-333)
   it('TC-133: 규칙 9 — 같은 특수 키 재누름(repeat 없음)은 빼고 맨 뒤에 추가(중복 없음)·bounceSeq +1(CR-066), 프레임은 누름마다 순환', () => {
     let s = run(init(), key(true, 1, 'space'))
     const frames: number[] = [s.kbFrame]

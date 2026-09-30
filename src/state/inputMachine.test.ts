@@ -91,7 +91,7 @@ describe('inputMachine', () => {
 
 // CR-066: 새 누름(자동 반복 아님)은 무엇을 누른 채여도 매번 바운스를 다시 시작한다 — CR-027 조건 대체
 describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
-  it('TC-FIX66-1: Shift 누른 채(held 1→2) 새 키 → bounceSeq +1', () => {
+  it('TC-331:Shift 누른 채(held 1→2) 새 키 → bounceSeq +1', () => {
     let s = reduce(createInitialState(0), key(true, 1, 10), config)
     expect(s.bounceSeq).toBe(1)
     s = reduce(s, key(true, 2, 20), config)
@@ -99,7 +99,7 @@ describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
     expect(s.heldCount).toBe(2)
   })
 
-  it('TC-FIX66-2: 펜 모드 클릭 누른 채 새 키 → bounceSeq +1', () => {
+  it('TC-332:펜 모드 클릭 누른 채 새 키 → bounceSeq +1', () => {
     const pen: MachineConfig = { ...config, clickPress: true }
     let s = reduce(
       createInitialState(0),
@@ -113,7 +113,7 @@ describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
     expect(s.clickHeld).toEqual(['left'])
   })
 
-  it('TC-FIX66-3: 자동 반복(repeat && pressed) → bounceSeq 불변, shiverSeq = bounceSeq', () => {
+  it('TC-333:자동 반복(repeat && pressed) → bounceSeq 불변, shiverSeq = bounceSeq', () => {
     let s = reduce(createInitialState(0), key(true, 1, 10), config)
     s = reduce(s, { ...key(true, 1, 510), repeat: true }, config)
     expect(s.bounceSeq).toBe(1)
@@ -121,7 +121,7 @@ describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
     expect(s.repeating).toBe(true)
   })
 
-  it('TC-FIX66-4: 키 누른 채 펜 모드 클릭 → bounceSeq +1', () => {
+  it('TC-334:키 누른 채 펜 모드 클릭 → bounceSeq +1', () => {
     const pen: MachineConfig = { ...config, clickPress: true }
     let s = reduce(createInitialState(0), key(true, 1, 10), pen)
     expect(s.bounceSeq).toBe(1)
@@ -130,7 +130,7 @@ describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
     expect(s.clickHeld).toEqual(['left'])
   })
 
-  it('TC-FIX66-5: 펜 모드 아님 클릭 → bounceSeq 불변(clickHeld에 안 들어감)', () => {
+  it('TC-335:펜 모드 아님 클릭 → bounceSeq 불변(clickHeld에 안 들어감)', () => {
     let s = reduce(createInitialState(0), key(true, 1, 10), config)
     s = reduce(s, { type: 'mouseButton', button: 'left', pressed: true, ts: 20 }, config)
     expect(s.bounceSeq).toBe(1)

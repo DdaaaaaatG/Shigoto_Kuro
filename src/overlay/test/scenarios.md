@@ -2627,7 +2627,7 @@ v0.6 변경 요약(2026-09-24, 근거: CR-017 사용자 🔒 · requirements.md 
 | Q-05 | 2026-09-26 | CR-052 | 끝남 알림음 반복 재생: `playSound` 4번째 인자 `loop`(기본 false), `useAlarmOnFinish`는 등록 파일·기본음·실패 대체 기본음 모두 loop true. 정지 경로 불변(finished 이탈·언마운트 halt) | `src/components/utils/alarmSound.ts` · `src/overlay/hooks/useAlarmOnFinish.ts` | TC-300 ①(`loop false` → true), TC-299 ①(기본 loop false 유지), TC-302·TC-303(대체음도 loop true), manual-checklist MC-29·MC-30(한 번 → 10초 동안 반복·정지) | 예(playSound loop true 설정 단언 1건, 대체 기본음 loop 단언) | 검증됨(2026-09-27) |
 | Q-06 | 2026-09-27 | CR-053 | DEFAULT_TIMER_SETTINGS textPos (142,458)·rotation 9 (bridge v0.24) — 오버레이 소스 변경 없음 | (없음 — `src/bridge/types.ts` 인용) | OverlayApp.pomodoro.test.tsx TC-286 ② | 아니오 | 검증됨(2026-09-27) |
 | Q-07 | 2026-09-27 | CR-055 | 끝남 알림음 1회 재생 복원(CR-052 반복 재생 폐기): `useAlarmOnFinish` `start`가 등록 파일·기본음·실패 대체 기본음 모두 `loop` false로 재생. `finished` 이탈·언마운트 시 정지·깜빡임 10초·미리 듣기는 불변 | `src/overlay/hooks/useAlarmOnFinish.ts` · `src/components/utils/alarmSound.ts`(주석만) | TC-300 ①·TC-302 ①·TC-303 ①②③④·TC-304(`loop` true → false 개정), TC-299 ①(공용 `loop` 인자 — 불변 확인), TC-307 등 타이머 통합 TC의 반복 문구 | 아니오(기존 TC 개정으로 커버) | 검증됨(2026-09-27 — 전환됨(개정 TC-300 ①·TC-302 ①·TC-303 ①②③④·TC-304 ①②·TC-307·TC-311(MC-29)·TC-312(MC-30), 재확인 TC-299 ①·TC-301·TC-302 ②③·TC-305·TC-308·TC-309·TC-313 — v2.3 「CR-055」 절)) |
-| Q-08 | 2026-09-30 | CR-066 | 바운스 시작 규칙: 새 키 누름(자동 반복 아님)은 다른 키·펜 모드 클릭을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체). **클릭 포함**: 펜 모드 새 클릭 누름도 키·다른 버튼을 누른 채여도 매번 +1(뗌 불변, 펜 모드 아닌 클릭은 바운스 없음 불변). 자동 반복·부르르 규칙 불변 | `src/state/inputMachine.ts`(`startsBounce` 삭제, `onKey` 단순화, `onMouseButton` 바운스 조건 제거) | 개정(ui-fixer 초안): TC-100·TC-129·TC-130·TC-131·TC-132·TC-133·TC-136·TC-145·TC-146·TC-147·TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208·TC-209·TC-210·TC-211·TC-215·TC-216·TC-217·TC-218·TC-257 / 회귀: TC-161·TC-166·TC-169~TC-173·TC-205·TC-207·TC-219 | 예 — `src/state/inputMachine.test.ts` 5건(TC-FIX66-1~5 임시 ID, TC-ID 부여 필요) | 대기 |
+| Q-08 | 2026-09-30 | CR-066 | 바운스 시작 규칙: 새 키 누름(자동 반복 아님)은 다른 키·펜 모드 클릭을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체). **클릭 포함**: 펜 모드 새 클릭 누름도 키·다른 버튼을 누른 채여도 매번 +1(뗌 불변, 펜 모드 아닌 클릭은 바운스 없음 불변). 자동 반복·부르르 규칙 불변 | `src/state/inputMachine.ts`(`startsBounce` 삭제, `onKey` 단순화, `onMouseButton` 바운스 조건 제거) | 개정(ui-fixer 초안): TC-100·TC-129·TC-130·TC-131·TC-132·TC-133·TC-136·TC-145·TC-146·TC-147·TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208·TC-209·TC-210·TC-211·TC-215·TC-216·TC-217·TC-218·TC-257 / 회귀: TC-161·TC-166·TC-169~TC-173·TC-205·TC-207·TC-219 | 예 — `src/state/inputMachine.test.ts` 5건(TC-FIX66-1~5 임시 ID, TC-ID 부여 필요) | 전환됨(2026-09-30 — 신규 TC-331~TC-335(TC-FIX66-1~5)·TC-336(MC-46), 개정 자동 25건(영향 TC 후보 전부)·수동 TC-151·TC-159·TC-222·TC-258·TC-FLOW-01·07·08·10, 회귀 지정 불변 — v2.7 「CR-066」 절) |
 
 ## CR-039 초기 조회 재시도 — 추가·개정 TC (2026-09-25)
 
@@ -3973,10 +3973,147 @@ CR ↔ TC(추가): CR-062 → 신규 TC-315(자동, `OverlayApp.contextMenu.test
 
 사용자행 ↔ TC-FLOW: 변동 없음(새 사용자행·새 TC 없음). CR ↔ TC: 새 CR 없음(doc-sync).
 
+## CR-066 바운스 시작 규칙 — 새 누름마다 재시작 · 신규·개정 TC (v2.7, 2026-09-30, 증분 · 보강 · 대기열 소진 Q-08)
+
+- **기준(v2.7)**: `doc/000_프로젝트_확정사항.md` §5 「바운스 시작 규칙 (🔒 2026-09-30 사용자 지정, CR-066 — CR-027 「이미 누르고 있으면 재생 안 함」 대체)」 줄(클릭 포함 문장까지) · CR 대장 CR-066 · `src/overlay/design/functions.md` §5.2 바운스 재생 카운터 행·`mouseButton` 펜 모드 클릭 누름 행 ④(현행 규칙·「대체됨」 표기) · `src/overlay/design.md` 변경이력 CR-066 행 · 현행 소스 `src/state/inputMachine.ts`(`onKey` — `pressed`면 `bounceSeq + 1`, 반복 누름은 앞에서 `onKeyRepeat`로 분기 / `onMouseButton` — 펜 모드 새 클릭 누름 `bounceSeq + 1`, `startsBounce` 삭제). 새 command·event 없음.
+- **규칙(이 절의 모든 기대의 근거)**: ① 새 키 누름(`key` 입력 `pressed && !repeat`)은 무엇을 누른 채여도(다른 키·Shift·Ctrl·펜 모드 클릭) 매번 `bounceSeq + 1` — `repeat` 플래그 없는 같은 키 재누름도 새 누름 ② 펜 모드(`config.clickPress`) 새 클릭 누름(`clickHeld`에 없던 버튼)은 키·다른 버튼을 누른 채여도 매번 `bounceSeq + 1` ③ 불변: 자동 반복(`repeat && pressed`)은 `bounceSeq` 불변·부르르(CR-023 `shiverSeq = bounceSeq`), 뗌은 불변, 같은 버튼 중복 누름(뗌 누락 방어)은 불변, 펜 모드 아닌 클릭은 `clickHeld`에 들어가지 않아 바운스 없음, `kbFrame` 순환 규칙 불변 ④ 부르르 중 새 누름은 `bounceSeq ≠ shiverSeq`가 되어 부르르가 끝나면(키 뗌·반복 끊김) 새 번호 젤리가 산다(의도).
+- **v2.7 상태·수**: 신규 자동 TC-331~TC-335(임시 ID `TC-FIX66-1`~`TC-FIX66-5` → 정식 번호, `src/state/inputMachine.test.ts`), 신규 수동 TC-336(MC-46). 개정 자동 25건(CR 대장 CR-066 목록 그대로 — 스펙은 ui-fixer가 개정·통과 완료, 이 절은 문서 기대를 스펙에 맞춤), 개정 수동 4건(TC-151·TC-159·TC-222·TC-258 — 옛 「누른 채 새 출렁임 없음」 기대), TC-FLOW-01·07·08·10 문구·종료 상태 개정. 336번까지 = 유효 316건(자동 271 + 수동 45) + 폐기 20건. TC-FLOW 유효 20건 + 폐기 1건(변동 없음).
+- **읽기 규칙**: 아래 개정표는 해당 TC 본문과 앞 개정표(v0.8·v0.9·v1.0·v1.2·v1.6·v2.6 등)의 같은 항목을 대체한다. 본문·앞 개정표에 남은 「누름 유지 중 추가 누름 → 재생 없음/안 됨」, 「키 누른 채 클릭 → 프레임만(재생 없음)」, 「클릭 누른 채 키 → 재생 없음」, 「(같은 특수 키) 재누름 → 재생 없음」, 「바운스 조건 ⓐ `!isPressing(state)`」 문구는 이 절이 무효로 한다. v1.0 개정표의 「TC-133·TC-147·TC-155 = `repeat` 필드 없는 재누름은 옛 규칙(재생 없음) 호환」 행도 대체한다 — `repeat` 필드 없는 재누름은 **새 누름**(재생)이고 진짜 자동 반복(`repeat: true`)은 TC-161·TC-170·TC-333이 본다.
+- 실행(보강 모드 — 변경에 걸리는 TC): `yarn test --run src/state/inputMachine.test.ts src/overlay/test/inputMachine.special.test.ts src/overlay/test/inputMachine.repeat.test.ts src/overlay/test/inputMachine.click.test.ts src/overlay/test/OverlayApp.jelly.test.tsx src/overlay/test/OverlayApp.special.test.tsx src/overlay/test/OverlayApp.test.tsx src/overlay/test/OverlayApp.penClick.test.tsx src/overlay/test/OverlayApp.pen.test.tsx`. 회귀(기대 불변): TC-161·TC-166·TC-169~TC-173·TC-205·TC-207·TC-219. 수동: MC-46, 개정된 MC-17 ④⑤·MC-18 ③·MC-21 ③④⑤·MC-25 ④⑥.
+
+### 정식 번호 매핑
+
+| 임시 ID(스펙 it 이름 — 이 패스에서 교체) | 정식 TC |
+|---|---|
+| TC-FIX66-1 | TC-331 |
+| TC-FIX66-2 | TC-332 |
+| TC-FIX66-3 | TC-333 |
+| TC-FIX66-4 | TC-334 |
+| TC-FIX66-5 | TC-335 |
+
+공통 전제(TC-331~TC-335): `src/state/inputMachine.test.ts`의 `config = { idleMs: 5000, kbFrames: 3 }`(펜 모드 = `{ ...config, clickPress: true }`), `key(pressed, heldCount, ts)` = `{ type: 'key', pressed, heldCount, special: null, ts }`. 순수 상태기계라 화면·bridge는 이 TC의 관찰 대상이 아니다 — 화면 반영(`.jellyWrap` 짝 교대)은 개정 TC-100·TC-154·TC-155·TC-215~TC-218이 본다. `reduce`는 bridge를 import하지 않으므로 mock 없이 실행한다.
+
+### TC-331 · Shift를 누른 채(heldCount 1→2) 새 키 → `bounceSeq` +1 · 종류: 자동 · 요구: R-23, R-07 · 설계: 확정사항 §5 바운스 시작 규칙(「Shift·Ctrl 같은 다른 키를 누른 채여도」), design/functions.md §5.2 바운스 재생 카운터 행(CR-066) · **신규(CR-066)**
+- Given `createInitialState(0)`에 `key(true, 1, 10)`(Shift 누름) → `bounceSeq 1`
+- When `key(true, 2, 20)`(Shift 누른 채 다른 키 새 누름, `repeat` 없음)
+- Then ⓐ 화면: 해당 없음(순수 함수 — 화면 짝 교대는 TC-100·TC-154) ⓑ 상태: `bounceSeq` 1 → **2**, `heldCount 2`(옛 CR-027 규칙이면 1 유지) ⓒ bridge: 호출 없음(`reduce`는 bridge 비참조)
+- 스펙: `src/state/inputMachine.test.ts`
+
+### TC-332 · 펜 모드 클릭을 누른 채 새 키 → `bounceSeq` +1, `clickHeld` 유지 · 종류: 자동 · 요구: R-23, R-26 · 설계: 확정사항 §5 바운스 시작 규칙(「마우스 버튼(펜 모드 클릭 포함)을 꾹 누른 채여도」), design/functions.md §5.2 바운스 재생 카운터 행·`mouseButton` 펜 모드 클릭 누름 행 ④ · **신규(CR-066)**
+- Given 펜 모드(`clickPress: true`), `createInitialState(0)`에 `{ type: 'mouseButton', button: 'left', pressed: true, ts: 10 }` → `bounceSeq 1`·`clickHeld ['left']`
+- When `key(true, 1, 20)`(왼 버튼 누른 채 키 새 누름)
+- Then ⓐ 화면: 해당 없음 ⓑ 상태: `bounceSeq` 1 → **2**, `clickHeld ['left']` 그대로 ⓒ bridge: 호출 없음
+- 스펙: `src/state/inputMachine.test.ts`
+
+### TC-333 · 자동 반복(`repeat && pressed`)은 `bounceSeq` 불변 — 부르르 규칙 그대로 · 종류: 자동 · 요구: R-24, R-23 · 설계: 확정사항 §5 바운스 시작 규칙(「자동 반복은 여전히 바운스를 다시 시작하지 않고 부르르(CR-023) 규칙은 그대로」), design/functions.md §5.2 자동 반복 행 · **신규(CR-066)**
+- Given `createInitialState(0)`에 `key(true, 1, 10)` → `bounceSeq 1`
+- When 같은 키 반복 `{ ...key(true, 1, 510), repeat: true }`
+- Then ⓐ 화면: 해당 없음 ⓑ 상태: `bounceSeq 1`(불변), `shiverSeq 1`(= `bounceSeq`), `repeating true` ⓒ bridge: 호출 없음
+- 스펙: `src/state/inputMachine.test.ts`
+
+### TC-334 · 키를 누른 채 펜 모드 클릭 → `bounceSeq` +1 · 종류: 자동 · 요구: R-26, R-23 · 설계: 확정사항 §5 바운스 시작 규칙 「마우스 클릭도 같은 규칙」 문장, design/functions.md §5.2 `mouseButton` 펜 모드 클릭 누름 행 ④(옛 「누른 게 없을 때만」 대체) · **신규(CR-066)**
+- Given 펜 모드, `createInitialState(0)`에 `key(true, 1, 10)` → `bounceSeq 1`
+- When `{ type: 'mouseButton', button: 'left', pressed: true, ts: 20 }`
+- Then ⓐ 화면: 해당 없음 ⓑ 상태: `bounceSeq` 1 → **2**, `clickHeld ['left']` ⓒ bridge: 호출 없음
+- 스펙: `src/state/inputMachine.test.ts`
+
+### TC-335 · 펜 모드가 아니면 클릭은 `bounceSeq` 불변(`clickHeld`에 안 들어감) · 종류: 자동 · 요구: R-26, R-09 · 설계: design/functions.md §5.2 `mouseButton` 행 ②(비펜 모드 — 클릭은 목록·프레임·젤리에 영향 없음, CR-066 불변), design.md §10.8 적용 조건 · **신규(CR-066)**
+- Given 펜 모드 아님(`clickPress` 없음) ① `createInitialState(0)`에 `key(true, 1, 10)` → `bounceSeq 1` ② 새 `createInitialState(0)`
+- When ① `left` 누름(ts 20) ② `right` 누름(ts 10)
+- Then ⓐ 화면: 해당 없음 ⓑ 상태: ① `bounceSeq 1`(불변)·`clickHeld []` ② `bounceSeq 0`(불변) ⓒ bridge: 호출 없음
+- 스펙: `src/state/inputMachine.test.ts`
+
+### TC-336 · 게임 상황 실측 — 마우스 버튼·Shift·키를 누른 채 새로 누를 때마다 젤리, 자동 반복은 부르르 · 종류: 수동(MC-46) · 요구: R-23, R-24, R-26, R-07, R-09 · 설계: 확정사항 §5 바운스 시작 규칙(사용자 피드백 — 게임 중 마우스 버튼을 누른 채 키보드를 치면 탱글거리지 않았다), design/functions.md §5.2 바운스 재생 카운터 행·`mouseButton` ④ · **신규(CR-066)**
+- Given 실제 앱(CR-066 적용 빌드), 몸통·대기·`kb_up`·`kb_down` 2장 이상·`key_space`·마우스 파츠 3장 등록, 메모장(또는 게임) 포커스. ②의 펜 모드 확인은 `pen_up`·`pen_down_0` 등록 + 「펜 손 사용」 켬
+- When MC-46 절차 ①~⑦
+- Then ⓐ 화면: 마우스 버튼을 누른 채 키를 천천히 연타하면 누를 때마다 배경 뺀 전체가 처음부터 젤리로 출렁인다. Shift를 누른 채 다른 키·키를 누른 채 다른 키를 누를 때도 매번. 펜 모드에서 키를 누른 채 클릭하면 클릭마다 출렁이고, 비펜 모드 클릭은 팔(클릭 파츠) 그림만 바뀌고 출렁이지 않는다. 키를 꾹 누르면 처음 1회 젤리 뒤 부르르(떼면 즉시 정지), 부르르 중 다른 키를 새로 누르면 다시 젤리. 떼는 동작으로는 출렁이지 않는다 ⓑ 상태: `settings.json` 변화 없음 ⓒ core: 전역 훅 → `input://keyboard`·`input://mouse-button`(새 command·event 없음)
+
+### v2.7 개정표 — 자동 TC 25건(CR-066, 스펙은 개정·통과 완료, 번호 보존)
+
+Given은 각 TC 본문과 같다(바뀐 것은 When 순서가 아니라 Then 값). ⓒ는 전부 「상태기계 스펙 = 호출 없음 / 화면 스펙 = `setSettings` 0회(조회 각 1회)」로 불변.
+
+| TC | 스펙 | 개정된 Then(현행 동작 — 굵게 = 옛 기대에서 바뀐 값) |
+|---|---|---|
+| TC-100 | `OverlayApp.test.tsx` | 제목 「누름 유지 중 추가 누름 — 같은 키보드 img·`.jellyWrap` 노드, 키보드 img class 변경 없음, 젤리는 짝 교대로 재시작」. 설계 칸: 확정사항 §5 바운스 시작 규칙·design/functions.md §5.2 바운스 재생 카운터 행(CR-066)·§5.4 `.armWrap` 컨테이너 6(옛 「§10.3 누름 유지 중 추가 누름은 재생 안 됨」 인용 삭제). Then ⓐ 키보드 img 같은 노드·src `u:kb_down_2`·class `layer`·class 변경 기록 0건, `.jellyWrap` 같은 노드·class `jellyWrap jellyAlt` → **`jellyWrap jelly`**(재시작) ⓑ `kbDown true`, `kbFrame` 1 → 2, **`bounceSeq` 1 → 2** ⓒ `setSettings` 0회 |
+| TC-129 | `inputMachine.special.test.ts` | 스페이스 누름 → `[space]`·seq 1·phase 1·`kbFrame 1` → 스페이스 누른 채 a → `[space]`·**seq 2·phase 0**·`kbFrame 2`, `currentSpecial` `space` |
+| TC-130 | 같음 | Given 스페이스·a(**seq 2**). Enter(heldCount 3) → `[space, enter]`·**seq 3·phase 1**·`kbFrame 0`·current `enter` → Enter 뗌 → `[space]`·seq 3·phase 1·current `space` |
+| TC-131 | 같음 | Given 스페이스·a·Enter·Enter 뗌(**seq 3**). 스페이스 뗌(heldCount 1) → `[]`·seq 3·**phase 1**·`kbDown true` → a 뗌 → seq 3·phase `null`·`kbDown false` |
+| TC-132 | 같음 | Z → seq 1 → Z 뗌 → 일반 키 첫 누름 seq 2·phase 0 → 누름 유지 중 일반 키 → **seq 3** → 모두 뗌 → seq 3 |
+| TC-133 | 같음 | 스페이스 누른 뒤 같은 스페이스 재누름 3회(`repeat` 없음 = 새 누름) → 매번 `[space]`·**seq 2·3·4, phase 0·1·0**, 프레임 `[1, 2, 0, 1]` → Enter → `[space, enter]`·**seq 5**·phase 1 → 스페이스 재누름 → `[enter, space]`·**seq 6**·phase 0·current `space` |
+| TC-136 | 같음 | 일반 키 seq 1 → Ctrl 누른 채 Z(`undo`) → `[undo]`·seq 2·phase 0 → 이어서 `null`(Ctrl+C) → `[undo]`·**seq 3·phase 1**. 별도: Ctrl → C(`null`, `null`) → `[]`·**seq 2·phase 0** |
+| TC-162 | `inputMachine.repeat.test.ts` | 반복 중(`bounceSeq 1`·`shiverSeq 1`)에 반복 아닌 입력 6종 — 모두 `repeating false`·`lastRepeatAt T0+510`·`shiverSeq 1`·`lastInputAt T0+600`. ① 뗌·③ `pressed false + repeat true` → `bounceSeq 1`·wrapMotion `null` ② 새 일반 키 → **`bounceSeq 2`·`kbFrame 2`·wrapMotion 0** ④ 새 특수 키 → `[z, space]`·`bounceSeq 2`·wrapMotion 0 ⑤ 같은 z(`repeat` 없음)·⑥ `repeat false` → `[z]`·**`bounceSeq 2`·`kbFrame 2`·wrapMotion 0** |
+| TC-167 | 같음 | ① 500ms 방어로 꺼짐 → `bouncePhase 1`·wrapMotion `null` ② 반복 키 누른 채 일반 키 새 누름 → **`bounceSeq 2`·phase 0·wrapMotion 0**, 그 키 뗌 → wrapMotion 0 유지 ③ 모두 뗌 → `null`, 새 첫 누름 → **`bounceSeq 3`**·`shiverSeq 1`·wrapMotion 1 |
+| TC-206 | `inputMachine.click.test.ts` | 펜 모드 좌 → 우 누름 → `['left','right']`·`kbFrame 0`·**`bounceSeq 2`·phase 0·motion 0** → 좌 뗌 → `['right']`·`bounceSeq 2`·button `none`·누름 유지 → 우 뗌 → phase `null` → 좌 → `kbFrame 1`·**`bounceSeq 3`**·phase 1. 규칙표 13(좌·우 누름 뒤 우 뗌) → `['left']`·**`bounceSeq 2`·phase 0**. ③ 같은 버튼 중복 누름·② 안 눌린 버튼 뗌 → 목록·`kbFrame 1`·`bounceSeq 1` 불변(중복 누름은 새 누름 아님) |
+| TC-208 | 같음 | 키 → `kbFrame 1`·`bounceSeq 1` → 키 누른 채 클릭 → `['left']`·`kbFrame 0`·**`bounceSeq 2`·phase 0·motion 0**(키 필드 불변) → 키 뗌 → `bounceSeq 2`·누름 유지 → 버튼 뗌 → phase `null` → 클릭 → `kbFrame 1`·`bounceSeq 3` → 클릭 누른 채 키 → `kbFrame 0`·**`bounceSeq 4`·phase 0**. 대조(비펜 모드 같은 순서) → `clickHeld []`·`kbFrame 1`·`bounceSeq 3` |
+| TC-209 | 같음 | 클릭 → 클릭 누른 채 스페이스 → current `space`·`bounceSeq 2`·phase 0 → 스페이스 뗌 → `bounceSeq 2`·누름 유지 → 버튼 뗌. 스페이스 → `bounceSeq 1` → 스페이스 누른 채 클릭 → `[space]` 유지·current `space`·`kbFrame 0`·**`bounceSeq 2`·phase 0·motion 0** → 스페이스 뗌 → current `null`·`bounceSeq 2` → 버튼 뗌 → 누름 아님 |
+| TC-210 | 같음 | 키 → 반복(T0+510) → `shiver` → 부르르 중 클릭(T0+600) → `repeating true`·`lastRepeatAt T0+510`·`shiverSeq 1`·`['left']`·**`bounceSeq 2`**·motion `'shiver'`(부르르 우선) → 키 뗌 → `repeating false`·**phase 0·motion 0(새 번호 젤리)** → 버튼 뗌 → motion `null`. 클릭만(같은 버튼 누름 3회) → `repeating false`·`lastRepeatAt 0`·`shiverSeq -1`·motion 1 |
+| TC-211 | 같음 | 이동·키·tick은 `clickHeld` 불변, 변화 없는 tick은 같은 참조, 유휴 rest 뒤 오른 클릭 → `layer idle`·`lastInputAt T0+400000`·`['left','right']`·`kbFrame 0`·**`bounceSeq 2`**, 뗌은 새 배열(이전 상태 불변) |
+| TC-154 | `OverlayApp.jelly.test.tsx` | 첫 누름 `jellyWrap jellyAlt`·`u:kb_down_1` → 뗌 `jellyWrap`·`u:kb_up` → 첫 누름 `jellyWrap jelly`·`u:kb_down_2` → 누름 유지 중 추가 누름 **`jellyWrap jellyAlt`**·`u:kb_down_0` → 하나 뗌 → class 변경 기록 0건(`jellyWrap jellyAlt`·`u:kb_down_0`) → 모두 뗌 `jellyWrap`·`u:kb_up`. 같은 노드, 키보드 img class `layer` |
+| TC-155 | 같음 | 일반 키 `jellyAlt`·`u:kb_down_1` → 스페이스 `jelly`·`u:key_space` → Enter `jellyAlt`·`u:key_enter` → 같은 Enter 재누름(`repeat` 없음) **`jelly`**·`u:key_enter` → Enter 뗌 → class 변경 0건(`jelly`·`u:key_space`) → 모두 뗌 `jellyWrap`·`u:kb_up`. `.armWrap` `armWrap` |
+| TC-145 | `OverlayApp.special.test.tsx` | (그림 / `.jellyWrap` 짝) 스페이스 `u:key_space`/`jellyAlt` → a **`u:key_space`/`jelly`** → Enter `u:key_enter`/**`jellyAlt`** → Enter 뗌 `u:key_space`/`jellyAlt` → 스페이스 뗌 `u:kb_down_0`/`jellyAlt` → a 뗌 `u:kb_up`/`jellyWrap`. 같은 img·래퍼, `.armWrap` `armWrap` |
+| TC-146 | 같음 | Z `u:kb_down_1`/`jellyAlt` → 뗌 → 일반 키 `u:kb_down_2`/`jelly` → Ctrl+Z `u:key_undo`/`jellyAlt` → Ctrl+C(`null`) 키보드 img class·src 변경 0건·`u:key_undo`, **`.jellyWrap` `jelly`(재생)** → 뗌 `u:kb_up`/`jellyWrap` |
+| TC-147 | 같음 | 스페이스 → 같은 스페이스 재누름 3회 → 키보드 img class 변경 0건·`u:key_space`·**`jellyWrap jelly`**(교대 3회) → Enter `u:key_enter`/`jellyAlt` → 스페이스 재누름 → img class 변경 0건·`u:key_space`/**`jelly`** |
+| TC-148 | 같음 | 필드 없음 누름 `u:kb_down_1`/`jellyAlt` → `bogus`·`'Space'`·`undefined` 누름 3회(heldCount 2~4) → 키보드 img class 변경 0건·`u:kb_down_1`·`u:key_` img 없음·**`.jellyWrap` `jellyWrap jelly`**(교대 3회) → 뗌 `u:kb_up`/`jellyWrap` |
+| TC-215 | `OverlayApp.penClick.test.tsx` | (손 / `.jellyWrap` / 클릭 파츠) 키 `pen_down_0`/`jellyAlt`/`mouse_base` → 키 누른 채 클릭 **`jelly`**/`mouse_left` → 키 뗌 `jelly` 유지 → 버튼 뗌 `pen_up`/`jellyWrap`/`mouse_base` → 클릭 `jellyAlt`/`mouse_left` → 클릭 누른 채 키 **`jelly`** → 키 뗌 `jelly` 유지 → 버튼 뗌 `pen_up`/`jellyWrap` |
+| TC-216 | 같음 | 클릭 `jellyAlt`/`mouse_left` → 클릭 누른 채 스페이스 `jelly`·키보드 `u:key_space` → 스페이스 뗌 `jelly`·`u:kb_up` → 버튼 뗌 `pen_up`/`jellyWrap` → 스페이스 `jellyAlt`/`mouse_base`/`u:key_space` → 스페이스 누른 채 클릭 **`jelly`**/`mouse_left`/`u:key_space` → 스페이스 뗌 `jelly`/`u:kb_up` → 버튼 뗌 `pen_up`/`jellyWrap` |
+| TC-217 | 같음 | 키 `jellyAlt` → 반복 `shiver` → 부르르 중 클릭 `shiver`/`mouse_left`(부르르 우선) → 키 뗌 **`jelly`(새 클릭의 젤리)** → 버튼 뗌 `pen_up`/`jellyWrap` → 클릭 `jellyAlt` → 같은 버튼 누름 재수신 `jellyAlt`(불변) → 1000ms 뒤 `jellyAlt`(부르르 없음) → 뗌 `pen_up`/`jellyWrap` |
+| TC-218 | 같음 | 좌 `jellyAlt`/`mouse_left` → 우 **`jelly`**/`mouse_right` → 우 뗌 `jelly`/`mouse_base`·손 `pen_down_0` → 좌 뗌 `pen_up`/`jellyWrap` → 우 `jellyAlt`/`mouse_right` → 좌 **`jelly`**/`mouse_left` → 좌 뗌 `jelly`/`mouse_base` → 우 뗌 `pen_up` |
+| TC-257 | `OverlayApp.pen.test.tsx` | 행 1~9 불변. 행 10 스페이스 `u:key_space`/`jellyAlt` → 스페이스 누른 채 클릭 **`jelly`** → 스페이스 뗌 `u:kb_up`/`jelly` → 버튼 뗌 `pen_up`/`jellyWrap` → 행 11 클릭 **`jellyAlt`** → 클릭 누른 채 스페이스 `u:key_space`/**`jelly`** → 행 12 스페이스 뗌 `jelly` → 버튼 뗌 → 행 13 스페이스 **`jellyAlt`** → 반복 2회 `shiver`·`u:key_space` → 뗌 `jellyWrap` → 행 14 키 **`jelly`** → 뗌 → 키 **`jellyAlt`** → 뗌(이후 짝이 한 칸씩 밀림). 키보드 img·손 img 같은 노드·자세 불변·`u:kb_down*` 0개 불변 |
+
+### v2.7 개정표 — 수동 TC 4건·TC-FLOW(옛 「누른 채 새 출렁임 없음」 기대)
+
+| 대상 | 개정 내용(CR-066) |
+|---|---|
+| TC-151(MC-17) | Then ⓐ ④ 「Ctrl을 누르는 순간 1회 튀고 Ctrl+C로는 더 튀지 않는다」 → 「Ctrl을 누르는 순간 1회, Ctrl+C·Ctrl+Z·Ctrl+Enter의 두 번째 키에서도 다시 튄다」 ⑤ 「스페이스 누른 채 a → 스페이스 그림 유지(튐 없음)」 → 「스페이스 그림 유지 + 다시 튐」(Enter 뗌·스페이스 뗌·a 뗌은 튐 없음 — 불변). 요구·설계 칸에 확정사항 §5 바운스 시작 규칙 추가 |
+| TC-159(MC-18) | Then ⓐ 「누른 채 일반 키 추가는 새 출렁임 없음」 → 「누른 채 일반 키 추가·스페이스 새 누름 모두 처음부터 다시 출렁임」. v1.0 개정표의 ③ 판정 문구도 같이 대체. ⑤ 「모든 키가 떼진 뒤의 첫 누름마다」 → 「새로 누를 때마다」 |
+| TC-222(MC-21) | Then ⓐ ③ 「클릭에 손 그림만 바뀌고 새 출렁임 없음」·「왼쪽을 누른 채 a를 누르면 … 새 출렁임 없음」 → 두 경우 모두 **다시 출렁임** ④ 「스페이스를 누른 채 클릭하면 … 새 출렁임 없음」 → 다시 출렁임 ⑤ 「a를 떼면 떨림이 멈추고 다시 출렁이지 않으며」 → 「a를 떼면 떨림이 멈추고 떨리는 중 누른 클릭의 젤리가 한 번 출렁인다」 |
+| TC-258(MC-25) | Then ⓐ ④ 「스페이스만 떼면 … 새 출렁임 없음」은 불변(뗌), ⑥ 「스페이스 중 클릭 = … 새 출렁임 없음」 → 「스페이스 중 클릭 = 몸 `key_space`·손 `pen_down_0` 유지 + 다시 출렁」 |
+| TC-FLOW-01 | Step 9 종료 상태 「누른 채 추가 키 무반응」 → 「누른 채 추가 키에도 새로 출렁임」. Step 1~6 값 불변(TC-056·TC-054·TC-067은 겹쳐 누르기 없음) |
+| TC-FLOW-07 | 머리 문단에 「CR-066: 누른 채 새 누름도 `bounceSeq` +1」 추가. 종료 상태 개정: Step 2(TC-145) `bounceSeq 8` → **9**(`kbFrame 0`) · **연결 2a 신설**(TC 아님): 일반 키 누름·뗌 3쌍 → `bounceSeq 12`·`kbFrame 0`·들림 ⇒ TC-146 Given · Step 3(TC-146) → **`bounceSeq 16`**·`kbFrame 1` · 연결 3a: 5쌍 → **2쌍** → `bounceSeq 18`·`kbFrame 0` ⇒ TC-147 Given · Step 4(TC-147) → `['enter','space']` 눌린 채·**`bounceSeq 24`**·`kbFrame 0` · 4a → `bounceSeq 24` · Step 5(TC-148) → **`bounceSeq 28`**·`kbFrame 1`. Steps 줄: TC-144 → [1a] → TC-145 → **[2a]** → TC-146 → [3a] → TC-147 → [4a] → TC-148 → TC-149 → (환경 전환) TC-151 |
+| TC-FLOW-08 | 머리 문단 「짝 규칙 = 모든 키가 떼진 상태의 첫 누름·특수 키 새 누름마다 +1」 → 「새 누름(자동 반복 아님)마다 +1(CR-066)」. 종료 상태 값 불변(TC-169·TC-170·TC-172·TC-173은 일반 키 겹쳐 누르기 없음 — 특수 키 새 누름은 옛 규칙에서도 +1) |
+| TC-FLOW-10 | 머리 문단의 「일반 키 겹쳐 누르기 = `bounceSeq` +1」 → **+2**(CR-066). 종료 상태 개정: Step 2(TC-215) `bounceSeq 6` → **8** · Step 3(TC-216) `9` → **12**(`kbFrame 0`) · 연결 3a → **입력 없음**(Step 3 종료가 이미 짝수·`kbFrame 0`) ⇒ TC-217 Given · Step 4(TC-217) `12` → **15**(`kbFrame 1`) · 연결 4a → **왼 누름·뗌 1쌍만** → `kbFrame 0`·**`bounceSeq 16`** ⇒ TC-218 Given · Step 5(TC-218) `16` → **20**(`kbFrame 0`). Step 1·1a·6·7 불변 |
+
+### 설계 확인 필요
+
+1. **design.md 본문 규칙표 미개정**: §10.3 젤리 트리거·재생 조건, §10.6 규칙표(특수 키 1~13행의 「재생 없음」), §10.8 규칙표 4·5·9·11·13(「프레임만」·「재생 없음」)은 ui-designer가 개정 중이다(관리자 위임문). 이 절의 TC는 확정사항 §5·design/functions.md §5.2(현행 규칙)를 정본으로 인용했다. 본문 개정이 끝나면 위 TC들의 설계 칸 §10.3·§10.6·§10.8 인용을 새 행 번호로 맞춰야 한다(행 번호가 바뀌면 알려 달라).
+2. **requirements.md 미대조**: R-22·R-23·R-26 원문과 S-7·S-10 설명에 「첫 누름에만」·「이미 누르고 있으면 재생 안 함」 서술이 남았는지 이 패스에서 확인하지 않았다(CR 대장은 「CR-021 ⓐ 「첫 누름」 서술도 대체」라고만 적음). 남아 있으면 요구 문서 개정이 필요하다.
+3. **개정 TC 수**: 위임문은 27건, CR 대장 CR-066·Q-08 목록은 25건(TC-100·129·130·131·132·133·136·145·146·147·148·154·155·162·167·206·208·209·210·211·215·216·217·218·257)이다. 스펙의 CR-066 표기와 대조해 25건으로 처리했다. 빠진 2건이 따로 있으면 알려 달라.
+4. **TC-FLOW-09 Step 3 값 미검증**: TC-197은 `.jellyWrap` class를 단언하지 않아 FLOW 표의 「단독 값 5」는 판정 대상이 아니지만, TC-197에 일반 키 겹쳐 누르기가 있으면 Step 4(TC-199)의 `jellyWrap jelly` 짝이 바뀐다. TC-197이 순차 누름·특수 키 새 누름만 쓰면 영향 없음 — FLOW 실행 시 확인.
+
+### 추적표 v2.7 추가분 — 「## 추적표」와 각 절 추가분 표에 더한다
+
+요구 ↔ TC(추가·대체)
+
+| 요구ID | 자동 TC | 수동 TC |
+|---|---|---|
+| R-23(바운스 시작 규칙 — **CR-066이 CR-027 「이미 누르고 있으면 재생 안 함」(`!isPressing`)을 대체**, v2.6 통합 행에 더한다) | TC-331, TC-332, TC-333, TC-334 / 개정 TC-100, TC-129~TC-133, TC-136, TC-145~TC-148, TC-154, TC-155, TC-162, TC-167, TC-206, TC-208~TC-211, TC-215~TC-218, TC-257 | TC-336, 개정 TC-151, TC-159, TC-222, TC-258 |
+| R-24(더함 — 자동 반복은 재시작 없음·부르르 불변, 부르르 중 새 누름 → 끝나면 새 젤리) | TC-333, 개정 TC-162, TC-167, TC-210, TC-217 / 회귀 TC-161, TC-166, TC-169~TC-173 | TC-336 |
+| R-26(더함 — 펜 모드 클릭도 누른 채 새 누름마다 재시작, 비펜 모드 클릭은 바운스 없음) | TC-332, TC-334, TC-335, 개정 TC-206, TC-208~TC-211, TC-215~TC-218, TC-257 / 회귀 TC-205, TC-207, TC-219 | TC-336, 개정 TC-222, TC-258 |
+| R-22(더함 — 특수 키 겹침·같은 특수 키 재누름) | 개정 TC-129~TC-133, TC-136, TC-145~TC-148, TC-155 | 개정 TC-151 |
+| R-07(더함 — 프레임 순환 불변) | TC-331, 개정 TC-100, TC-154 | TC-336 |
+| R-09(더함 — 비펜 모드 클릭 = 클릭 파츠만) | TC-335 | TC-336 |
+
+설계 항목 ↔ TC(CR-066)
+
+| 설계 항목 | TC |
+|---|---|
+| 확정사항 §5 「바운스 시작 규칙(🔒 CR-066)」 줄 — 다른 키를 누른 채 / 마우스 버튼(펜 모드 클릭 포함)을 누른 채 / 자동 반복 불변·부르르 그대로 / 클릭도 같은 규칙 | TC-331 / TC-332 / TC-333 / TC-334·TC-335, 실측 TC-336 |
+| design/functions.md §5.2 바운스 재생 카운터 행(CR-066 — `pressed`면 +1, CR-027 조건 「대체됨」) | TC-331, TC-332, TC-333, 개정 TC-129~TC-133·TC-136·TC-162·TC-167 |
+| design/functions.md §5.2 `mouseButton` 펜 모드 클릭 누름 행 ④(새 클릭 누름 +1 — 옛 「누른 게 없을 때만」 대체)·같은 버튼 중복 누름·뗌 불변·비펜 모드 ② | TC-334, TC-335, 개정 TC-206·TC-208~TC-211 / 회귀 TC-205·TC-207 |
+| design.md §10.3 젤리 트리거·§10.6·§10.8 규칙표(CR-066 개정 — ui-designer 진행 중, 「설계 확인 필요」 1) | 개정 TC-100·TC-145~TC-148·TC-154·TC-155·TC-215~TC-218·TC-257 |
+| design.md 변경 이력 CR-066 행 | 이 절 전체 |
+
+상태 전이표(확정사항 §5) ↔ TC(CR-066): 전이표 행 자체는 불변(상태 레이어 대기·쉬는중 규칙 그대로). 같은 절의 「바운스 시작 규칙」 줄 → TC-331~TC-335(자동)·TC-336(수동).
+
+사용자행 ↔ TC-FLOW: 새 사용자행 없음. S-1 → TC-FLOW-01(Step 9 문구 개정), S-7 → TC-FLOW-07(종료 값·연결 2a), S-8 → TC-FLOW-08(머리 문단), S-10 → TC-FLOW-10(종료 값·연결 3a·4a). TC-331~TC-335는 단위 검증이라 FLOW Step이 아니며, 실측은 TC-336이 S-1·S-8·S-10 환경 전환 Step과 같은 준비로 수행한다.
+
+CR ↔ TC(추가): CR-066 → 신규 TC-331~TC-335(자동)·TC-336(수동 MC-46) / 개정 자동 25건(위 표)·수동 TC-151·TC-159·TC-222·TC-258 / TC-FLOW-01·07·08·10 / 회귀 TC-161·TC-166·TC-169~TC-173·TC-205·TC-207·TC-219(기대 불변). CR-027 행의 「바운스 조건 `!isPressing`」 추적은 CR-066으로 대체.
+
 ## 변경이력
 
 | 일자 | 버전 | 내용 | 근거 |
 |---|---|---|---|
+| 2026-09-30 | v2.7 | (최신 행) **CR-066 증분(대기열 소진 Q-08 · 보강)** — 바운스 시작 규칙: 새 키 누름·펜 모드 새 클릭 누름은 무엇을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체), 자동 반복·부르르·뗌·중복 누름·비펜 모드 클릭은 불변. 「CR-066 바운스 시작 규칙」 절 신설(기준·규칙·정식 번호 매핑·신규 TC·개정표 2종·설계 확인 필요·추적 추가분). 신규 자동 TC-331~TC-335(임시 `TC-FIX66-1`~`5` → 정식, `src/state/inputMachine.test.ts` it 이름 교체 — 로직 불변), 신규 수동 TC-336(MC-46 게임 상황 실측). 개정 자동 25건(TC-100·TC-129~TC-133·TC-136·TC-145~TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208~TC-211·TC-215~TC-218·TC-257 — Then 값을 개정·통과된 스펙에 맞춤), 개정 수동 TC-151·TC-159·TC-222·TC-258, TC-FLOW-01·07(연결 2a 신설)·08·10(연결 3a·4a 변경) 종료 값. `inputMachine.special.test.ts` TC-133 주석의 `TC-FIX66-3` → `TC-333`(주석만). `manual-checklist.md` 같은 패스(MC-46·CR-066 개정 주). 대기열 Q-08 → 전환됨. 자동 266 → 271, 수동 44 → 45, 폐기 20·TC-FLOW 20 불변 | 확정사항 §5 바운스 시작 규칙 🔒 · CR 대장 CR-066 · Q-08 · design/functions.md §5.2 · design.md 변경이력 CR-066 · `src/state/inputMachine.ts` |
 | 2026-09-30 | v2.6 | (최신 행) **doc-sync 배치(보강) — design.md 2026-09-30 doc-sync 행·현행 소스 대조.** 「doc-sync 2026-09-30」 절 신설(기준·개정표·픽스처 표현 정정·설계 확인 필요 해소·스펙 변경·추적 추가분). 개정표: TC-043·TC-044·TC-046·TC-054·TC-080·TC-105·TC-143(옛 `bounce` prop·`armWrap bounce`·`.bounce` 기대 → CR-022 현재 동작), TC-045·TC-142 **폐기(CR-022)** 재표기, 설계 참조 「§5.4 바운스 래퍼」·「§3 `bounce` prop」 → 「§5.4 `.armWrap` 컨테이너」(TC-081·TC-100·TC-144·TC-145·TC-147 포함), TC-198·TC-213 설계 칸 `PenHand` Props 8개·`machine` = `isPressing`만, TC-322 `POPUP_OPEN` → `PopupGate`. v1.6 절 「설계 확인 필요」 2건 → 해소 표기. 픽스처 「기본」 표현 = 스펙 픽스처(제품 기본은 CR-044 값). 추적: R-09·R-23~R-25 통합 행(TC-204 이후 포함), `.armWrap` 컨테이너·`PenHand` Props·`PopupGate` 설계 행 대체. 스펙: `OverlayApp.timerMode.test.tsx`·`TimerText.blink.test.tsx` 옛 `URL.createObjectURL` stub 삭제(기대 불변), `timerClock.test.ts` 머리 주석 R-34 현행값. `manual-checklist.md` 같은 패스(머리글 현행 버전·MC-37 선행 조건 `PopupGate`·변경이력). 신규 TC 없음, 수 불변(자동 266 · 수동 44 · 폐기 20 · TC-FLOW 20). CR 「적용·미검증」·대기열 상태 불변 | design.md 변경이력 2026-09-30 doc-sync · design/functions.md §5.4·§5.5 · design.md §10.12·§10.16·RTM · CR-022·CR-042·CR-044·CR-058·CR-062 · `src/components/utils/alarmSound.ts` |
 | 2026-09-29 | v2.5 | **CR-062 증분(R-40 오버레이 오른쪽 클릭 메뉴의 ui 몫 = WebView2 기본 메뉴 억제, 증분 모드·보강)**. 「CR-062 오버레이 오른쪽 클릭 메뉴」 절 신설(기준·범위 규칙·§0.3 red 보충·잔여 위험·회귀 지정 표·추적 3종·CR). 신규 자동 TC-315(`OverlayApp.contextMenu.test.tsx` — ① `.root`·키보드 img·팔 img의 `contextmenu` 반환 `false`, `document` 도달 `defaultPrevented` true(전파 유지), DOM·상태·포커스·모든 bridge 래퍼 호출 수 불변, `[role="menu"]` 없음, `preventContextMenu` export 없음 ② 오른쪽 누름·뗌 → contextmenu → 오른쪽 누름·뗌에서 클릭 파츠 `mouse_right` ↔ `mouse_base` 그대로). 신규 수동 TC-316~TC-330(MC-31~MC-45 — 횡단 설계 §7 원문, MC-36 「한쪽만 창 안」의 ui 핸들러·기본 메뉴는 관찰 항목, 시작 직후 로딩 전 기본 메뉴는 수용된 잔여 위험이라 판정 제외). TC-FLOW-21(S-21: TC-319 → TC-318 → TC-325). 회귀는 기존 TC 번호 참조만(R-09 TC-013·TC-039·TC-062, R-26 TC-214·TC-218·TC-219, R-04 TC-071·TC-073·TC-077·TC-088, R-12·R-28 TC-077·TC-227). 기존 TC 개정 없음. `manual-checklist.md` 같은 패스(CR-062 절·RV-02). 자동 265 → 266, 수동 29 → 44, TC-FLOW 19 → 20 | CR-062(사용자 결정 🔒 2026-09-29 U-1·U-3·U-5, U-2·U-4 수용) · requirements.md v3.2 R-40·R-28 용어 주·S-21 · design.md §2·§6 P-10·§7·§9·§10.9.1 L-7·L-8·§10.16·RTM · design/functions.md §5.1 · design/components.md §3 · design/a11y.md · 횡단 설계 overlay-context-menu.md v2 §7 |
 | 2026-09-29 | v2.4 | **CR-058·CR-061 동기화(증분 모드)** — 설계(요구 v3.1·design.md §10.15 15.3·15.4·15.7·design/functions.md §5.7 ④)에 맞춰 문서만 개정, 스펙 로직 불변(이미 개정·통과). 「CR-058·CR-061 … 개정 TC」 절 신설(개정표·유지 판정표·추적 3종·CR). 본문 개정: TC-297 제목·요구·설계·Given/When/Then(`synthBeepWav` 바이트 검증 → `DEFAULT_ALARM_VOLUME` === 44·`Audio` 0개), TC-298 제목·요구·설계·Given/When/Then(Blob URL 캐시 → 번들 mp3 자산 import URL과 같음·반복 호출 동일·`Audio` 0개), TC-299 머리·When ⑤·Then ⑤(없음·NaN → 0.44, `Audio` 0개), TC-286 머리·Then ⓐ②·ⓑ②(44·(268,402)·7 — 본문에 남아 있던 v1.9 값까지 정리), TC-310·TC-311·TC-312(기본음 = 번들 mp3, TC-312 ⑥ 근거를 기본음 길이와 무관하게), TC-266 Given·설계 칸(`DEF` = 픽스처), v1.8 공통 전제 `TIMER_OFF` 설명, v1.9 공통 전제(`URL.createObjectURL` stub 삭제·import 목록·`'blob:default'`·0.8 픽스처 명시), 추적표 v1.9 설계 행 15.2·15.3·15.4·§5.7 ④. `manual-checklist.md` MC-27 ②·MC-28·MC-29·MC-30 같은 패스 개정. `alarmSound.test.ts` 머리 주석(동기화 대기·정리 필요 문구)만 정정. 신규 TC 없음, 수 불변(자동 265 · 수동 29) | requirements.md v3.1 R-34·R-39 · design.md §4·§7·§10.15 15.3·15.4·15.7 · design/functions.md §5.7 ②④ · CR 대장 CR-058·CR-061 · contract v0.27 §3.3 |
