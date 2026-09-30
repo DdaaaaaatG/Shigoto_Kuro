@@ -18,6 +18,10 @@ deploy/
 # 안단테 원본 참조본 (커밋하지 않는다)
 _reference/
 
+# 그림 원본 보관 폴더 (공개 저장소라 그림은 올리지 않는다. 안내 파일만 커밋)
+originals/*
+!originals/README.md
+
 # Claude 에이전트 개인 메모리 (세션별, 공유 안 함)
 .claude/agent-memory/
 # 에이전트가 하위 폴더(src-tauri 등) 기준 상대 경로로 잘못 쓴 메모리도 제외

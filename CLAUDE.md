@@ -29,6 +29,7 @@ src/            React — main.tsx, overlay/, settings/, components/, bridge/, s
 src-tauri/      Rust  — src/{hook,window,tray,assets,settings,bridge}/, tests/, Cargo.toml, tauri.conf.json, capabilities/
 doc/            000_프로젝트_확정사항.md · 100_요구조건/ · 200_설계/{core,bridge}/ · 300_검증/
 .claude/        agents/ skills/ commands/ hooks/ scripts/ rules/ reports/
+originals/      사용자 그림 원본 보관(그림은 git 제외, README만 커밋). `dist/`에 원본을 두지 않는다
 _reference/     안단테 원본 자산(참조 전용, Claude가 로드하지 않음, 삭제 가능, git 제외)
 ```
 

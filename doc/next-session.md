@@ -57,10 +57,9 @@
 ## 3. 사용자 결정 대기
 | # | 항목 | 비고 |
 |---|---|---|
-| 2 | `Cargo.toml` rust-version 1.77 → 1.90(single-instance 플러그인 요구) | |
-| 3 | 그림 원본 보관 폴더(dist 밖) | 지금은 `doc/assets/samples/`에 복사본 |
 | 4 | 흰 글자 on 포인트색 #BE72AD 대비 3.38:1(AA 미달) | 판단 대기 |
-| 5 | settings S-18/TC-FLOW-19 부활 여부 | |
+
+결정 완료(2026-09-30): `Cargo.toml` rust-version 1.90으로 상향(tauri 2.12·single-instance 2.5 요구와 일치) / 그림 원본 보관 폴더 = 루트 `originals/`(그림은 git 제외, README만 커밋) / settings S-18·TC-FLOW-19는 폐기 유지(뒷머리 기본 그림 없음 확정, CR-063).
 
 
 ## 4. 꼭 지킬 것
