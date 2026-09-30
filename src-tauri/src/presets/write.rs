@@ -85,7 +85,7 @@ fn commit_staging(
         }
         return Err(e);
     }
-    Ok(summary(&id, file))
+    Ok(summary(&presets_dir.join(&id), &id, file))
 }
 
 /// 현재 그림·알림음·설정을 새 프리셋으로 저장한다(PS-01·PS-02·PS-08). 현재 파일은 다시 검증하지 않는다.

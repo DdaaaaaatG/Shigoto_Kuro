@@ -97,7 +97,7 @@ pub fn list(presets_dir: &Path) -> Result<Vec<PresetSummary>, PresetError> {
             continue;
         }
         match read_preset_file(&entry.path()) {
-            Ok(file) => out.push(summary(&id, &file)),
+            Ok(file) => out.push(summary(&entry.path(), &id, &file)),
             Err(e) => log::warn!("preset: 건너뜀 id={id} code={}", e.code()),
         }
     }
@@ -112,7 +112,7 @@ pub fn rename(presets_dir: &Path, id: &str, name: &str) -> Result<PresetSummary,
     let mut file = read_preset_file(&dir)?;
     file.name = name;
     write_preset_file(&dir, &file)?;
-    Ok(summary(id, &file))
+    Ok(summary(&dir, id, &file))
 }
 
 /// 삭제(PS-07). `.trash-{id}`로 옮겨 목록에서 즉시 없애고, 지우기 실패는 경고만(다음에 정리).

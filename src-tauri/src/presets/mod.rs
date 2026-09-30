@@ -5,7 +5,7 @@
 //!        내보내기·가져오기·이름 바꾸기·삭제를 하는 단일 소유자. 적용은 「검증 → 백업 → 교체 → 설정 병합 →
 //!        실패 시 되돌림」이며 설정 쓰기는 `settings::update` 하나만 쓴다. PC별 설정 5개는 건드리지 않는다.
 //! [공개 API] `list`·`save`·`apply`·`export_to`·`import_from`·`rename`·`delete`, `PresetSummary`·
-//!        `PresetProblem`·`PresetImportReport`·`PresetExportResult`·`AppliedPreset`, `PresetError`
+//!        `PresetPreview`·`PresetPreviewLayer`·`PresetProblem`·`PresetImportReport`·`PresetExportResult`·`AppliedPreset`, `PresetError`
 //!        (`code()`·`may_have_changed()`), 상수 5개.
 //! [형식] `preset.json`(formatVersion 1) + `{file_key}.png` + `alarm.{wav|mp3|ogg}`. 파일 이름은 슬롯·형식에서만
 //!        만든다(JSON에 파일 이름 문자열 없음).
@@ -29,10 +29,12 @@ use crate::settings::SettingsError;
 mod apply;
 mod format;
 mod load;
+mod preview;
 mod scan;
 mod write;
 
 pub use apply::apply;
+pub use preview::{PresetPreview, PresetPreviewLayer};
 pub use scan::{delete, list, rename};
 pub use write::{export_to, import_from, save};
 
@@ -49,8 +51,8 @@ pub const NAME_MAX_CHARS: usize = 50;
 /// 프리셋 하나의 그림 수 상한(A-9).
 pub const MAX_IMAGES: usize = 64;
 
-/// 목록 카드 한 장. JSON {id, name, savedAt, imageCount, hasAlarm}.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+/// 목록 카드 한 장. JSON {id, name, savedAt, imageCount, hasAlarm, preview}. `Point`(f64) 때문에 `Eq` 없음.
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PresetSummary {
     pub id: String,
@@ -58,6 +60,8 @@ pub struct PresetSummary {
     pub saved_at: u64,
     pub image_count: u32,
     pub has_alarm: bool,
+    /// 카드 미리보기 재료(PS-09 개정) — 목록 조회 순간 디스크에서 만든다(저장하지 않는다).
+    pub preview: PresetPreview,
 }
 
 /// 가져오기 파일별 문제. code = 기존 asset.*·sound.* 또는 preset.file_missing·preset.file_link·
@@ -70,7 +74,7 @@ pub struct PresetProblem {
 }
 
 /// 불변식: preset.is_some() ⇔ problems.is_empty().
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PresetImportReport {
     pub preset: Option<PresetSummary>,
@@ -165,14 +169,15 @@ impl PresetError {
     }
 }
 
-/// 목록 카드. `image_count`는 `images.len()`, `has_alarm`은 `alarm.is_some()`.
-fn summary(id: &str, file: &PresetFile) -> PresetSummary {
+/// 목록 카드. `image_count`는 `images.len()`, `has_alarm`은 `alarm.is_some()`. `preset_dir`은 정규 id 폴더.
+fn summary(preset_dir: &Path, id: &str, file: &PresetFile) -> PresetSummary {
     PresetSummary {
         id: id.to_string(),
         name: file.name.clone(),
         saved_at: file.saved_at,
         image_count: file.images.len() as u32,
         has_alarm: file.alarm.is_some(),
+        preview: preview::preview(preset_dir, id, file),
     }
 }
 
