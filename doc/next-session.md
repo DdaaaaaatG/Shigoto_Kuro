@@ -7,8 +7,9 @@
 - 세션은 **프로젝트 루트**에서 연다(`.claude` 폴더에서 열면 가드 경로가 어긋나 에이전트 Bash·Write가 막힌다).
 - 진행 방식: 메인 세션은 소스·산출 문서를 직접 고치지 않고 리프 에이전트에 위임한다(CLAUDE.md §5-0).
 
-## 1. 현재 상태 (2026-09-28)
-- **버전 0.4.0** (2026-09-28) — `deploy/0.4.0/`에 포터블 exe(5.4MB)·NSIS setup(2.0MB)·README. 기본 세트 = 사용자가 쓰던 그림 6장(뒷머리 제외, 옛 세트 `doc/assets/defaults-v4/`)·기본 알림음 = 사용자 mp3(`src/assets/sounds/default-alarm.mp3`)·타이머 기본 textPos(268,402)·rotation 7·음량 44. `DATA_GENERATION` 5(기존 사용자 초기화). CR-058(overlay)·CR-059(settings) 「적용·미검증」. verify-manager 미실행.
+## 1. 현재 상태 (2026-09-30)
+- **버전 0.5.0** (2026-09-30) — `deploy/0.5.0/`에 포터블 exe(5.9MB)·NSIS setup(2.5MB)·README·0.5.0.zip. 내용: 프리셋 탭(CR-064·065, 세로형 카드·미리보기), **내장 프리셋 2개**(PS-11 — 「세바시에-기본」=기본 세트 4차와 동일, 「게님드림」 7장; `presets/` 폴더가 없을 때만 `builtin-1`·`builtin-2` 시딩, 원본 `doc/assets/presets/{1,2}`), 바운스 규칙 CR-066. 기본 세트·`DATA_GENERATION` 5 **불변**(업데이트 시 데이터 초기화 없음). 검증: cargo 550 통과·clippy 0, vitest 881/881, 리뷰 C0 H0. **release exe 실행·캡처 확인함**(2026-09-30 20:33, `doc/300_검증/screenshots/20260930-2033-release-0.5.0/` — 오버레이·설정 창·프리셋 탭 카드 2장). 이 PC는 `presets/`가 있어 내장 시딩은 통합 테스트로만 확인(새 PC 첫 실행 수동 확인 M 대기). 남은 부채: 시딩 실패 경로 테스트(CORE-001, `seed_from` 주입 리팩터), `PresetsTab`·`PresetCard` 분리(CR-001), CORE-002·003·005(LOW), Cargo.lock 형식 v4(cargo ≥1.78).
+- (이전) **버전 0.4.0** (2026-09-28) — `deploy/0.4.0/`에 포터블 exe(5.4MB)·NSIS setup(2.0MB)·README. 기본 세트 = 사용자가 쓰던 그림 6장(뒷머리 제외, 옛 세트 `doc/assets/defaults-v4/`)·기본 알림음 = 사용자 mp3(`src/assets/sounds/default-alarm.mp3`)·타이머 기본 textPos(268,402)·rotation 7·음량 44. `DATA_GENERATION` 5(기존 사용자 초기화). CR-058(overlay)·CR-059(settings) 「적용·미검증」. verify-manager 미실행.
 - 마지막 검증(2026-09-28): cargo fmt·clippy 0, cargo test lib 375·통합 49 전부 통과 / vitest 801 / tsc·lint 0 / `yarn tauri build` exit 0.
 - 사용자 앱 데이터 백업: `%USERPROFILE%\kuro-appdata-backup-20260928`(0.4.0 세대 5로 이 PC 데이터가 초기화되기 전 상태).
 - **0.4.0 release exe 실행 확인 안 함** — 실행하면 이 PC 앱 데이터가 초기화된다. 실행 직전 사용자 재확인.
