@@ -1,4 +1,4 @@
-# 다음 세션 인계 (2026-09-29 갱신)
+# 다음 세션 인계 (2026-09-30 갱신)
 
 - 날짜별 경과 기록(2026-09-23~27)은 `doc/archive/next-session-20260923-0927.md`로 옮겼다. 결정은 `doc/000_프로젝트_확정사항.md`, 화면별 이력은 각 `test/change-requests.md`가 단일 소스다.
 - 이 문서는 **지금 상태 · 남은 일 · 결정 대기 · 꼭 지킬 것**만 담는다. 항목을 끝내면 지우고, 새 일은 해당 절에 짧게 추가한다.
@@ -21,6 +21,7 @@
 ## 2. 남은 일
 
 ### 2-1. 우선
+0. **프리셋 기능 구현 완료·푸시 (2026-09-30, CR-064·CR-065, 🔒 PS-01~PS-10 + PS-09 개정, 커밋 13be83d~2270652)** — 설정 창 다섯째 「프리셋」 탭: 저장·목록·적용·내보내기(폴더)·가져오기(폴더)·이름 바꾸기·삭제, 세로형 카드 격자 + 오버레이 합성 미리보기(`PREVIEW_ORDER` 9키, asset scope `$APPDATA/presets/*/*.png`). core `src-tauri/src/presets/`(unsafe 없음) · 계약 v0.31(command 30·code 40) · 설계 `doc/200_설계/architecture/presets-*.md`·`core/presets.md`·`src/settings/design/presets-tab.md`. 검증: cargo 543 통과·clippy 0, vitest 876/876, 리뷰 SEC C0 H0(H1은 SEC-001로 수정) · CR APPROVE · CORE C0 H0. **dev 앱 실물 확인(2026-09-30 18:04~18:31, `doc/300_검증/screenshots/20260930-1803-presets/`)**: 저장(사용자 직접 「세바시에-기본」)·탭 렌더·세로형 카드·미리보기 합성 OK. **수동 미확인**: 내보내기·가져오기·적용(오버레이 즉시 반영)·삭제·이름 바꾸기·ja/en 문구 검수(M-64a~f·M-65a~c) → 확인 후 CR-064·065 「검증됨」. **남은 부채**: 리뷰 CR-001(`PresetsTab` 본문 255줄·`PresetCard` 150줄 → 훅/서브컴포넌트 분리, ui-postprocessor), CORE-003·005·006(LOW), 되돌림 실패(`changed:true`) 경로 테스트 미작성(재현 곤란). 프리셋 폴더 실물: `%APPDATA%\com.kuro.keyviewer\presets\1790759046103\`.
 1. **커밋 완료 `2be41ce`(2026-09-29, 푸시 완료 — main = origin/main 확인 2026-09-30)** — 1-3 오른쪽 클릭 메뉴와 함께 커밋. 내용: verify PASS(`doc/300_검증/verify-20260929-1928.md`, C0 H0) 후 1~3 수정 완료 — core 7건(CORE-201 hook 테스트 직렬화 `KEYS_TEST_LOCK`, CORE-207·208 주석, SEC-201 로그 경로, SEC-205 JSON 1MiB 상한 `settings::read_capped_string`), TS 3건(CR-060 settings·CR-061 overlay: 음량 단일 소스·중첩 삼항·calcNow), 문서 동기화(contract v0.27, core 4문서, 두 화면 design·requirements·scenarios·manual-checklist, `//!` 주석 5곳). settings R-46 🔒 문구도 사용자 지시로 (268,402)·7°(requirements v1.25). 사후 검증: fmt·clippy 0, cargo test 429/429, tsc·lint 0, vitest 801/801. 커밋 전 release exe 실행·캡처 확인(사용자 OK 후, 실행 시 이 PC 데이터 초기화). 커밋 메시지에 「원격 첫 커밋 99fe564 메시지는 0.3.0이지만 내용은 0.4.0」 정정 한 줄.
 1-1. **예정(사용자 2026-09-29)**: 기본 알림음을 나중에 옛 합성 기본음(삐 소리)으로 되돌릴 계획 — CSP `media-src`의 `blob:`은 **유지**(빼지 않는다).
 1-3. **오버레이 오른쪽 클릭 메뉴(overlay R-40, CR-062) 구현 완료·수동 미검증(커밋 2be41ce, 2026-09-29)** — 사용자 피드백 "키뷰어 오른쪽클릭하면 트레이 옵션 같이". 🔒 결정: 잠금 중에도 뜸(전역 훅, 클릭은 아래 창에도 전달), 누른 곳·뗀 곳 둘 다 창 사각형 안, 전체 화면(전경 창 클라이언트 영역이 모니터 전체)이면 안 뜸, 포커스 이탈·메뉴 경합 수용, 브라우저 기본 메뉴 제거. 설계 `doc/200_설계/architecture/overlay-context-menu.md`, core hook·window·tray.md, overlay requirements v3.2·design §10.16. 소스: hook/{right_click,foreground}.rs·tray/popup.rs 신규(unsafe는 foreground.rs U12~U19만), `PopupGate` Idle→Pending→Open(CORE-301), 사각형 판정을 전경 조회보다 먼저(SEC-301), lib.rs `start_input_pipeline`·`initial_hand_anchor` 추출, overlay `.root` onContextMenu preventDefault. 검증: fmt·clippy 0, cargo test 466/466, vitest 803/803, 리뷰 core·security C0 H0. **남은 것: 수동 MC-31~MC-45(dev·release) — 사용자가 게임 끝나고 "띄워" 할 때만 앱 실행.** 관찰·수용: T-f(메뉴 바깥 오버레이 재클릭 시 닫힘→재표시), T-j(늦은 메뉴 최대 1개), 앱 시작 직후 로딩 전 구간 브라우저 메뉴. 문서 잔여: overlay design.md:724·manual-checklist.md:65·scenarios.md:3804의 `POPUP_OPEN` 이름 → `PopupGate`.
@@ -31,7 +32,7 @@
 
 ### 2-2. 수동 확인 대기 (기록상 미확인 — 이미 봤으면 CR 「검증됨」 처리)
 - 오버레이: MC-24(뒷머리), MC-27~30(뽀모도·알림음 자동 재생·타이머), M-40a(알파 기준 끌기, dev·release), 펜 모드 특수 키, 트레이 「새로고침」·타이머 메뉴.
-- 설정 창: M-27(확인창 후 포커스), M-28·M-31(ja·en), M-29(새 PC 첫 실행 시딩), M-30(기본 이미지 다운로드), M-32, M-45a~f, M-50a~g, 창 닫았다 다시 열기(CR-041).
+- 설정 창: **프리셋 탭 M-64a~f·M-65a~c(내보내기·가져오기·적용·삭제·이름·열 수·ja/en)**, M-27(확인창 후 포커스), M-28·M-31(ja·en), M-29(새 PC 첫 실행 시딩), M-30(기본 이미지 다운로드), M-32, M-45a~f, M-50a~g, 창 닫았다 다시 열기(CR-041).
 - 자동 실행: 재로그온 후 실행, 클릭 통과, 작업표시줄 토글, 옛 레지스트리 Run 값 잔존 여부, M-T1.
 
 ### 2-3. 조사·기술 부채
