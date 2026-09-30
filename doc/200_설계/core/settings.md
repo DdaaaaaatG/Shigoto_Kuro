@@ -1,7 +1,8 @@
 # settings 모듈 설계
 
-- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · 최종 갱신 2026-09-30(doc-sync)
+- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · §3.12(presets 사용처)는 인계 패킷 기준 초안 · 최종 갱신 2026-09-30(presets)
 - 변경이력:
+  - 2026-09-30 (presets — 🔒 확정사항 §6 「프리셋」 PS-01~PS-10, 새 모듈 문서 [presets.md](presets.md), 패킷 `doc/200_설계/architecture/presets-03-packet-core.md` §6) **settings 변경 없음 — 호출자만 늘어난다.** 새 모듈 `presets`가 `update`(프리셋 적용의 설정 병합 — 쓰기 유일 창구 CR-047 그대로)·`write_atomic`·`read_capped_string`·`MAX_TEXT_FILE_BYTES`(`preset.json` 쓰기·읽기)·`IDLE_SECONDS_MIN/MAX`·`timer::normalize`·`Settings::validate`(프리셋 설정 보정·검사)를 부른다. `Settings` 필드는 PS-02(`scale`·`idle_seconds`·`mouse`·`timer` — 프리셋에 담김)와 PS-03(`overlay`·`autostart`·`language`·`position_lock`·`show_in_taskbar` — PC별 유지)으로 나뉘고, 분류 가드는 `presets::format::PresetSettings::from_settings`의 구조 분해다(**`Settings`에 필드를 더하면 presets가 컴파일되지 않는다** — 분류를 정하라는 신호). 스키마·공개 API·검증 규칙·`version` 부재(D19) 불변. 증분 **§3.12**. **소스 미적용.**
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 2026-09-29 행 ②에서 「옛 기록」으로 남긴 코드 조각·테스트 기대값을 현재 소스 값으로 고쳤다. §3.7: `default_mouse().pen_pos` 조각 (380, 496) → **(372, 476)**(CR-044, `mod.rs:196-198`), 동작 표 첫 두 행, 현재 값 안내(N1′ 현재 이름 `default_pen_pos_is_372_476`). §3.8.1 `impl Default`: `text_pos` (142, 458) → **(268, 402)**, `rotation` 9 → **7**(주석 = `timer.rs:87-90`). §3.8.4 S-T1·S-T10·S-T12 기대값. §3.10.1 `DEFAULT_ALARM_VOLUME` 80 → **44**. §3.10.2·§3.10.4·§3.10.5(S-T13·S-T14·S-T18·S-T12 갱신) 음량 기본 80 → **44**, 좌표·회전 (268, 402)·7. 공개 API·스키마·검증 규칙 불변. **코드 주석 불일치 발견(수정 안 함)**: `settings/mod.rs:84-87` `MouseSettings.pen_pos` 문서주석이 「기본값 (356, 504) = pen_up(136×196, CR-038)」로 남아 있다 — 실제 기본은 (372, 476)(CR-044, `:198`). **추가(같은 날 2차):** §3.7 동작 표 「기본값으로 리셋」 행과 N1′ 행(`default_pen_pos_is_372_476`, (372, 476))·안내 줄, §8 N1 대체 표기, §10 TM-10(기본 44)을 고쳤다. §10·§3.7 요구 추적의 「✅ 설계 · 소스 미적용」 전부와 §3.9 추적 줄을 「소스 반영」으로 바꿨다. 근거는 2026-09-29 행 ③의 확인과 이번 대조다: `SlamSettings`·`slam` 필드 없음, `pen_pos_tests.rs`·`pen_mode_tests.rs`, `Language`·`position_lock`·`show_in_taskbar` 필드, `window/placement.rs:256` `keep_core_owned`, `timer.rs` CR-048 필드, `store.rs:28` `update`, `atomic.rs:39` `write_atomic`. DA-07 첫 행에는 값 대체 이력을 붙였다.
   - 2026-09-29 (소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **SEC-205 텍스트 크기 상한**: `settings/atomic.rs`에 `pub fn read_capped_string(path: &Path, max_bytes: u64) -> std::io::Result<String>`·`pub const MAX_TEXT_FILE_BYTES: u64 = 1024 * 1024`(1MiB), `mod.rs`가 `pub use atomic::{read_capped_string, write_atomic, MAX_TEXT_FILE_BYTES};`로 재노출. `load`는 이 함수로 읽는다 — `fs::metadata` 길이가 상한을 넘으면 읽지 않고 `ErrorKind::InvalidData` → `SettingsError::Io` → `load_or_default`가 기존 손상 파일 경로(기본값 대체 + 경고, 로그에는 파일 이름만)를 그대로 탄다. 같은 상한을 assets `load_manifest`·data_reset `read_marker`·`read_attempts`가 공유한다. 테스트: atomic.rs AW7(`aw7_read_capped_string_rejects_oversized_file`), `mod.rs` 1MiB 초과 settings.json → 기본값. §2 표 반영. ② **0.4.0 기본값**(`settings/timer.rs:80-96`, 계약 v0.27 §3.3과 일치): `timer.textPos` (142, 458) → **(268, 402)**, `timer.rotation` 9 → **7**, `timer.alarmVolume` 80 → **44**(`DEFAULT_ALARM_VOLUME`), `fontSize` 36·`countdownSecs` 1500(`DEFAULT_COUNTDOWN_SECS`)·`color` `"#333333"`·`enabled` false·`mode` Stopwatch 불변. `default_mouse()` 좌표(CR-044, §11 확인 필요 14): `shoulder` (582, 484)·`partPos` (411, 464)(키 없음 serde 기본은 여전히 (389, 492))·`penPos` (372, 476)·`penMode` **true**. §2·§3.1 표 반영. §3.7·§3.8·§3.10의 코드 조각과 테스트 기대값(S-T1·S-T10·S-T12·S-T13·S-T14·S-T17·S-T18의 (142, 458)·9·80, N1′의 (380, 496))은 **옛 기록** — 현재 값은 §3.1·소스. ③ **표기 정리**: 아래 변경이력·§3.x·§10의 「소스 미적용」(CR-017·019·024·033·035·045·047·048, SV2, data-reset, CR-053)은 모두 소스에 반영됨(`settings/{mod,timer,atomic,store,pen_mode_tests,pen_pos_tests}.rs`). CR-053 값은 0.4.0에서 다시 바뀌었다(②). `save`는 CR-047 ③단계대로 **비공개**(§2 행 정정). `idleSeconds` 검증은 60~3600(`IDLE_SECONDS_MIN/MAX`, 읽기는 보정 — §3.1 행 정정).
   - 2026-09-27 (data-reset, 🔒 사용자 결정 R-A·R-B·D-2(언어 유지)·D-3, 새 모듈 문서 [data_reset.md](data_reset.md)) **앱 시작 순서 변경**: settings `load_or_default`가 시딩보다 **앞으로** 오고, 그 값을 담은 `Mutex<Settings>`로 `data_reset::run_startup`이 돈다. 세대가 다르거나 없으면 `settings::update` 한 번으로 설정 전체를 `Settings::default()`로 바꾸되 `autostart`·`language`만 유지한다. 세대 표식은 settings 스키마 밖의 별도 파일 `data-generation.json`(`version` 필드 추가 없음 — D19 유지). **settings 공개 API·스키마·검증 불변**(호출자만 늘어남). 증분 **§3.11**. **소스 미적용.**
@@ -1097,6 +1098,26 @@ pub struct TimerSettings {
 - **settings 쪽 변경 없음.** 공개 API·스키마·검증·`version` 부재(D19)·`keep_core_owned` 불변. 세대 표식은 settings 스키마 밖의 `data-generation.json`이다(02-design §4).
 - 잠금: `update`가 설정 잠금을 잡으므로 `reset_data` 호출자는 잠금을 쥔 채 부르면 안 된다(bridge 요구 — [data_reset.md](data_reset.md) §9).
 - 테스트: [data_reset.md](data_reset.md) §8(`reset_settings_keeps_autostart_and_language`·`language_defaults_when_settings_unreadable`·`reset_twice_keeps_language_on_disk` 등). store.rs SU1~SU7 영향 없음.
+
+### 3.12 presets — 사용처와 PS-02/PS-03 분류 (🔒 2026-09-30 확정사항 §6 「프리셋」, 정본 [presets.md](presets.md) §3.2·§7)
+
+비유: 장부(settings)는 그대로이고, 장부의 네 칸만 베껴 두었다가 다시 옮겨 적는 옷장 관리인(`presets`)이 생긴다. 옮겨 적을 때도 기존 「장부 고치기 창구」(`update`)만 쓴다.
+
+| settings 항목 | presets 사용처 |
+|---|---|
+| `update(state, path, f)` | `presets::apply` 5단계 — `\|cur\| preset.settings.merge_into(cur)`(PS-02 4필드 대입만). **새 저장 경로 없음**(CR-047) |
+| `write_atomic`·`read_capped_string`·`MAX_TEXT_FILE_BYTES` | `preset.json` 쓰기·읽기(1MiB 상한), 적용 백업의 되돌림 쓰기 |
+| `IDLE_SECONDS_MIN/MAX`·`timer::normalize`·`Settings::validate` | `preset.json`의 설정 읽기 보정·검사(`load`와 같은 규칙) |
+| `Settings`·`MouseSettings`·`TimerSettings`·`SettingsError` | 타입 재사용. `SettingsError`는 `PresetError::Settings`로 감싸 code 그대로 전달 |
+
+| 분류 | 필드 | 프리셋 적용 때 |
+|---|---|---|
+| PS-02 (프리셋에 담김) | `scale`·`idle_seconds`·`mouse`·`timer` | 프리셋 값으로 바뀜 |
+| PS-03 (PC별) | `overlay`·`autostart`·`language`·`position_lock`·`show_in_taskbar` | 그대로 |
+
+- **분류 가드**: `presets::format::PresetSettings::from_settings`가 `Settings`를 `..` 없이 구조 분해한다. 이 문서에서 `Settings`에 필드를 더하는 설계를 하면 [presets.md](presets.md) §7 표에 그 필드의 분류(PS-02/PS-03)를 함께 적는다.
+- **settings 쪽 변경 없음.** 공개 API·스키마·검증·기본값 불변. 잠금 규칙(§3.9)도 그대로 — `presets::save`는 잠금을 한 문장으로만 잡고, `apply`는 `update` 안에서만 잡는다.
+- 테스트: [presets.md](presets.md) §8(`merge_into_keeps_pc_local_fields`·`apply_keeps_pc_local_fields`·`apply_rolls_back_on_settings_failure`). store.rs SU1~SU7 영향 없음.
 
 ## 4. 스레드·채널
 

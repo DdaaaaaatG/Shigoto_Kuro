@@ -1,7 +1,8 @@
 # assets 모듈 설계
 
-- 상태: 확정(사용자) — §3.14(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.15(CR-048)는 인계 패킷 기준 확정 · §3.16(CR-053)은 사용자 지정 확정 · 최종 갱신 2026-09-30(doc-sync)
+- 상태: 확정(사용자) — §3.14(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.15(CR-048)는 인계 패킷 기준 확정 · §3.16(CR-053)은 사용자 지정 확정 · §3.18(presets 가시성)은 인계 패킷 기준 초안 · 최종 갱신 2026-09-30(presets)
 - 변경이력:
+  - 2026-09-30 (16차, presets — 🔒 확정사항 §6 「프리셋」 PS-01~PS-10, 새 모듈 문서 [presets.md](presets.md), 패킷 `doc/200_설계/architecture/presets-03-packet-core.md` §6) **가시성만 4곳 확대, 동작 불변**: `stored_file_name`·`read_capped` → `pub(crate)`, `AssetManifest::recompute_canvas` → `pub(crate)`, `versioned_asset_url` 재노출(`mod.rs` `pub(crate) use url::versioned_asset_url;` + `url.rs:24` `pub(super)` → `pub(crate)`). 사용처는 새 모듈 `presets`(검증기·적용). 공개 API·시그니처·에러 변형·code·규격 규칙 불변. 증분 **§3.18**. **소스 미적용.**
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) ① §1 DA-01·DA-02와 §10 DA-01 행의 「현재 7장(CR-053)」을 **현재 6장**(0.4.0, 데이터 세대 5, hair 제외 — `defaults.rs:3·56-57`, 시딩 순서 kb_up → background → pomo_char → mouse_base → pen_up → pen_down_0)으로 고쳤다. §3.16.1~§3.16.3의 7장 표는 §3.16.0 머리말대로 CR-053 당시 기록으로 둔다. ② §3.12 `SimpleSlot::Hair` 조각의 겹침 순서를 현재 ui 순서(CR-051: 헤어 → 배경 → 뽀모도(인물 → 말풍선 → 시간 글자) → 팔 → 본체 → 펜 손, overlay `design/functions.md` HairLayer 행·`OverlayApp.hair.test.tsx` TC-241)로 고쳤다. 겹침 순서는 여전히 ui 몫이다(D36·D39 불변). ③ §10 표의 「✅ 설계 · 소스 미적용」을 「소스 반영」으로 바꿨다. 근거는 2026-09-29 행 ③의 확인과 `assets/{sound,manifest_load,defaults,anchor,slot}.rs`가 있다는 점이다. §3.14 추적 줄도 같이 바꿨다(SEC-002·SEC-003·CORE-002 확인). **코드 주석 정정 필요(수정 안 함)**: `slot.rs:30`의 겹침 순서가 CR-037 옛 순서다. `slot.rs:16-17`·`:33`은 `pomo_char`를 「내장 기본 없음(DEFAULT_ASSETS 비포함)」이라고 적었지만 실제로는 `DEFAULT_ASSETS`에 들어 있다(`defaults.rs:8`).
   - 2026-09-29 (15차, 소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **0.4.0 내장 기본 6장**(🔒 사용자 확정 배포 세트, hair 제외): `DEFAULT_ASSETS: [DefaultAsset; 6]` = kb_up → background → pomo_char → mouse_base → pen_up → pen_down_0(`defaults.rs:55-70`). 크기 캔버스 3장 900×700, `mouse_base` 168×151, `pen_up`·`pen_down_0` 119×196(`tests/default_assets.rs` D2 단언). `has_default(hair)`는 다시 거짓, `pomo_char` 참, `kb_down_0` 거짓. 현재 표는 **§3.16.0**, §3.16.1~§3.16.3의 7장·143×189·168×150·hair 뒤집기 테스트와 §1 DA-01 「현재 7장」은 옛 기록. 데이터 세대 5([data_reset.md](data_reset.md)). ② **SEC-205**: `load_manifest`가 `crate::settings::read_capped_string(&path, crate::settings::MAX_TEXT_FILE_BYTES)`(1MiB)로 읽는다 — 길이를 먼저 보고 상한을 넘으면 파싱 전에 `AssetError::Io`(`asset.io`)로 실패, 호출자는 기존 오류 경로 그대로. 공개 시그니처·에러 변형·code 불변. 테스트 `assets/mod.rs` `#[cfg(test)]`(1MiB 초과 manifest.json 거부). ③ **SEC-201 로그 최소화**: 로그에 절대 경로·원본 값을 남기지 않는다 — `sound.rs remove_other_formats` 삭제 실패 경고는 `file={파일 이름}, kind={ErrorKind}`만, `manifest_load.rs parse_entry` 형식 오류 경고는 serde 오류 메시지를 빼고 `slot=` 문자열만(SEC-002의 `fileName` 미기록과 같은 원칙). 동작·API 불변. ④ **표기 정리**: 1~14차 항목과 §10의 「소스 미적용」은 모두 소스에 반영됨(`assets/{mod,slot,url,anchor,defaults,export,manifest_load,sound,security_tests,mouse_part_tests,pen_part_tests}.rs`). 단 CR-053의 7장 표는 0.4.0에서 6장으로 다시 바뀌었다(①).
   - 2026-09-27 (14차, data-reset, 🔒 사용자 결정 R-A·R-B, 새 모듈 문서 [data_reset.md](data_reset.md)) **앱 시작 순서 변경**: AppPaths → `create_dir_all` → settings `load_or_default` → **`data_reset::run_startup`** → `seed_if_empty`(유지) → manifest 로드 …. 세대가 다르거나 없으면 `data_reset`이 assets 폴더의 화이트리스트 파일(`*.png`·`*.tmp`·`*.wav`·`*.mp3`·`*.ogg`·`manifest.json`)을 지우고 `seed_if_empty`로 7장을 다시 채운다. **assets 공개 API·시그니처·시딩 규칙 불변**(호출자만 늘어남). 증분 **§3.17**, §3.10.2 `lib.rs` 조각에 대체 표시, §4 갱신. **소스 미적용.**
@@ -1305,6 +1306,7 @@ fn stored_file_name(slot: &AssetSlot) -> String {
 - `AssetEntry.file_name` 필드·계약 `fileName`은 **그대로 둔다**(쓰기는 여전히 정규 이름, 읽기는 대조용).
 - 호환: `import`/`import_bytes`는 처음부터 `{file_key}.png`로만 썼다 → 정상 매니페스트 항목은 건너뛰지 않는다(확인 필요 Q47-1).
 - 건너뛴 항목의 파일은 지우지 않는다(§3.6 D21과 같은 원칙 — 읽기 경로에 부수 효과 없음). 다음 `import`/`remove`가 매니페스트를 다시 쓸 때 그 줄이 사라진다.
+- (2026-09-30 presets) `stored_file_name`은 `pub(crate)`로 넓어진다 — 프리셋 폴더의 파일 경로도 같은 규칙 하나로 만든다(§3.18, 동작 불변).
 
 #### 3.14.3 SEC-003 — 크기 선검사 + 상한 읽기
 
@@ -1336,6 +1338,7 @@ fn read_capped(src: &Path, max: u64) -> Result<Vec<u8>, AssetError> {
 - **검사 순서 변화(수용, D47-2):** 1MB를 넘는 파일은 PNG가 아니어도 `TooManyBytes`가 먼저 나온다(이전: `NotPng`). 1MB 이하는 순서 불변(시그니처 → IHDR → RGBA → 용량 → 크기 → 캔버스). 스킬 §7 순서는 「읽은 바이트」의 검증 순서이고, 크기 선검사는 읽기 전 안전장치라 앞에 둔다.
 - `metadata`가 거짓이거나 검사 뒤 파일이 커져도 `take`가 메모리를 `max + 1`로 묶는다. 이때 메시지 바이트 수는 `1048577`(실제보다 작을 수 있음) — 드문 경쟁 조건이라 수용.
 - `import_bytes`(내장 기본 시딩·복원)는 입력이 exe 안 상수라 변경 없음.
+- (2026-09-30 presets) `read_capped`는 `pub(crate)`로 넓어진다 — 프리셋 저장·검증기가 같은 상한 읽기를 쓴다(§3.18, 동작 불변). `recompute_canvas`·`versioned_asset_url`도 같은 절.
 
 #### 3.14.4 CORE-002 — 매니페스트 원자적 쓰기
 
@@ -1659,6 +1662,22 @@ pub static DEFAULT_ASSETS: [DefaultAsset; 7] = [
 - **assets 쪽 변경 없음.** 공개 API·시그니처·시딩 규칙·에러 코드가 그대로다. `seed_all`(비공개)은 공개하지 않는다 — `seed_if_empty`로 충분하다.
 - 비원자 PNG 쓰기(CORE-001, mod.rs:310)는 고치지 않는다. 초기화 도중 끊기면 세대 표식이 없으므로 다음 시작 때 처음부터 다시 한다([data_reset.md](data_reset.md) §3.3).
 - 테스트: [data_reset.md](data_reset.md) §8.2(`tests/data_reset.rs`). `tests/default_assets.rs`는 영향이 없다.
+
+### 3.18 presets — 가시성 확대 4곳 (🔒 2026-09-30 확정사항 §6 「프리셋」 PS-01~PS-10, 정본 [presets.md](presets.md) §3.8)
+
+비유: 앨범(assets)의 규칙은 그대로이고, 옷장 관리인(`presets`)이 앨범의 도구 네 개(이름표 만들기·크기 제한 읽기·캔버스 다시 재기·주소 붙이기)를 빌려 쓴다.
+
+| 항목 | 위치 | 변경 | 사용처(presets) |
+|---|---|---|---|
+| `stored_file_name(slot) -> String` | `mod.rs:275` | `fn` → `pub(crate) fn` | 검증기·저장·적용·내보내기의 파일 경로(SEC-002 — 경로는 슬롯에서만) |
+| `read_capped(src, max) -> Result<Vec<u8>, AssetError>` | `mod.rs:345` | `fn` → `pub(crate) fn` | 검증기·저장의 상한 읽기(SEC-003) |
+| `AssetManifest::recompute_canvas(&mut self)` | `mod.rs:121` | `fn` → `pub(crate) fn` | 적용 때 새 매니페스트의 캔버스 |
+| `versioned_asset_url(path) -> String` | `url.rs:24`, `mod.rs` 재노출 | `url.rs`: `pub(super) fn` → `pub(crate) fn`, `mod.rs`: `pub(crate) use url::versioned_asset_url;` 추가 | 적용 때 새 `AssetEntry.url` |
+
+- **동작 불변.** 함수 본문·시그니처·에러 변형·code·검증 규칙(§3.5·§3.11)·캔버스 규칙은 그대로다. `pub(crate)`라 계약·bridge 공개면도 바뀌지 않는다.
+- `url.rs`도 한 단어 바꾸는 이유: `pub(super)` 항목은 그보다 넓게 재노출할 수 없다(rustc E0364). 패킷은 재노출만 적었다([presets.md](presets.md) §11.1 Δ2).
+- 규격 규칙을 presets에 다시 쓰지 않는다 — presets는 `parse_png_header`·`validate`(공개)·`is_canvas_layer`를 그대로 부른다. `group_size`(비공개)는 넓히지 않는다(프리셋 검증기는 목록 순서의 첫 캔버스 레이어를 기준으로 자기가 정한다).
+- 테스트: assets 기존 테스트 영향 없음. 사용 쪽 테스트는 [presets.md](presets.md) §8.
 
 ## 4. 스레드·채널
 
