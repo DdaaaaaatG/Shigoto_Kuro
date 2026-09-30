@@ -50,9 +50,9 @@
 
 - 2026-09-30: Alt+Tab 때 오버레이 사라짐 — 사용자 확인으로 해결됨(조사 항목 삭제). git 로컬 설정: 커밋·푸시 계정 DdaaaaaatG(noreply 주소), 원격 URL `https://DdaaaaaatG@github.com/...`.
 
-- 2026-09-30: **첫 `/doc-sync` 완료(미커밋)** — 기준 99fe564..b5ff65b + §2-3·§2-4 잔여. 화면 2·core 문서 7·contract v0.28(표기 정정만)·코드 주석 5파일. vitest 805/805·tsc·lint 0. Rust 툴체인은 같은 날 사용자 승인으로 설치(rustup stable 1.98.1 msvc) → cargo fmt 0·clippy 0·cargo test 466/466 (첫 빌드 메모리 부족으로 백그라운드 실행이 중단된 적 있음 → `-j 4` 권장). 미해결은 `doc/doc-sync-state.json` openItems가 단일 소스. 결함 후보였던 뒷머리 기본 그림 불일치는 같은 날 **CR-063으로 해소(미커밋)** — 사용자 결정 A「뒷머리 기본 그림 없음」: contract v0.29, TS `DEFAULT_ASSET_SLOTS` 6개, settings `EMPTYABLE_SLOT_KEYS`=[pomo_char](뒷머리 카드 버튼 2개, 「기본값」=비우기), 확정사항 §6 「배포용 기본 세트 4차」 신설. vitest 805/805. CR-063 「적용·미검증」(설정 창 뒷머리 카드 수동 확인 대기). **나중에 뒷머리 기본 그림을 다시 넣으면 계약·TS 상수·Rust 기본 세트·EMPTYABLE을 함께 되돌린다.** 가드 `validate-bridge-implementer-write.py` 경로 버그(폴더명 `kuro_keyviewer/` 고정) 사용자 지시로 수정.
+- 2026-09-30: **첫 `/doc-sync` 완료(커밋 `ca50864`)** — 기준 99fe564..b5ff65b + §2-3·§2-4 잔여. 화면 2·core 문서 7·contract v0.28(표기 정정만)·코드 주석 5파일. vitest 805/805·tsc·lint 0. Rust 툴체인은 같은 날 사용자 승인으로 설치(rustup stable 1.98.1 msvc) → cargo fmt 0·clippy 0·cargo test 466/466 (첫 빌드 메모리 부족으로 백그라운드 실행이 중단된 적 있음 → `-j 4` 권장). 미해결은 `doc/doc-sync-state.json` openItems가 단일 소스. 결함 후보였던 뒷머리 기본 그림 불일치는 같은 날 **CR-063으로 해소(커밋 `ca50864`)** — 사용자 결정 A「뒷머리 기본 그림 없음」: contract v0.29, TS `DEFAULT_ASSET_SLOTS` 6개, settings `EMPTYABLE_SLOT_KEYS`=[pomo_char](뒷머리 카드 버튼 2개, 「기본값」=비우기), 확정사항 §6 「배포용 기본 세트 4차」 신설. vitest 805/805. CR-063 「적용·미검증」(설정 창 뒷머리 카드 수동 확인 대기). **나중에 뒷머리 기본 그림을 다시 넣으면 계약·TS 상수·Rust 기본 세트·EMPTYABLE을 함께 되돌린다.** 가드 `validate-bridge-implementer-write.py` 경로 버그(폴더명 `kuro_keyviewer/` 고정) 사용자 지시로 수정.
 
-- 2026-09-30: 커밋 `d5e7b9c`(가드 수정)·`d97102c`(CR-063 + doc-sync) **로컬만, 미푸시** — 원격 작업 중이라 DdaaaaaatG 자격 증명 로그인 창을 못 눌러 푸시 중단. PC에서 `git push origin main` → DdaaaaaatG로 로그인(이후 자격 증명 저장됨).
+- 2026-09-30: **푸시 완료** — 다른 PC의 미푸시 커밋 3개를 패치(`git format-patch`)로 옮겨 이 PC에서 `git am`으로 적용: `39f3aaf`(가드 수정)·`ca50864`(CR-063 + doc-sync)·`ce65570`(인계 기록). 옛 해시 `d5e7b9c`·`d97102c`는 그 PC 로컬에만 있으니 거기서는 푸시하지 말고 `git fetch` 후 origin/main에 맞춘다. 적용 후 재검증: tsc·lint 0, vitest 805/805, cargo fmt·clippy(`-D warnings`) 0, cargo test 통과(`-j 4`). main = origin/main.
 
 ## 3. 사용자 결정 대기
 | # | 항목 | 비고 |
