@@ -106,20 +106,21 @@ describe('onMouseButton ④ 새 클릭 누름 (design.md §10.8 규칙표 1·2·
 })
 
 describe('두 버튼·중복 누름·설계 예 (design/functions.md §5.2 onMouseButton 예, design.md §10.8 규칙표 13)', () => {
-  it('TC-206: 설계 예 연쇄, 좌·우 동시 누름에서 한쪽 뗌은 누름 유지, 같은 버튼 중복 누름·안 눌린 버튼 뗌은 목록·카운터 불변', () => {
+  // CR-066: 다른 버튼을 누른 채여도 새 클릭 누름마다 bounceSeq +1(같은 버튼 중복 누름은 새 누름 아님 — 불변)
+  it('TC-206: 설계 예 연쇄, 좌·우 동시 누름(두 번째 클릭도 재생 CR-066)에서 한쪽 뗌은 누름 유지, 같은 버튼 중복 누름·안 눌린 버튼 뗌은 목록·카운터 불변', () => {
     const a = run(PEN, s0(), btn('left', true, T0 + 10))
     const b = run(PEN, a, btn('right', true, T0 + 20))
-    expect(view(b)).toEqual({ clickHeld: ['left', 'right'], kbFrame: 0, bounceSeq: 1, button: 'right', pressing: true, phase: 1, motion: 1 })
+    expect(view(b)).toEqual({ clickHeld: ['left', 'right'], kbFrame: 0, bounceSeq: 2, button: 'right', pressing: true, phase: 0, motion: 0 })
     const c = run(PEN, b, btn('left', false, T0 + 30))
-    expect(view(c)).toEqual({ clickHeld: ['right'], kbFrame: 0, bounceSeq: 1, button: 'none', pressing: true, phase: 1, motion: 1 })
+    expect(view(c)).toEqual({ clickHeld: ['right'], kbFrame: 0, bounceSeq: 2, button: 'none', pressing: true, phase: 0, motion: 0 })
     const d = run(PEN, c, btn('right', false, T0 + 40))
-    expect(view(d)).toEqual({ clickHeld: [], kbFrame: 0, bounceSeq: 1, button: 'none', pressing: false, phase: null, motion: null })
+    expect(view(d)).toEqual({ clickHeld: [], kbFrame: 0, bounceSeq: 2, button: 'none', pressing: false, phase: null, motion: null })
     const e = run(PEN, d, btn('left', true, T0 + 50))
-    expect(view(e)).toEqual({ clickHeld: ['left'], kbFrame: 1, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
+    expect(view(e)).toEqual({ clickHeld: ['left'], kbFrame: 1, bounceSeq: 3, button: 'left', pressing: true, phase: 1, motion: 1 })
 
     // 규칙표 13: 왼·오른 동시에 누른 뒤 오른만 뗌 → 누름 유지, mouse.button은 as-built대로 'none'
     const f = run(PEN, s0(), btn('left', true, T0 + 10), btn('right', true, T0 + 11), btn('right', false, T0 + 20))
-    expect(view(f)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'none', pressing: true, phase: 1, motion: 1 })
+    expect(view(f)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'none', pressing: true, phase: 0, motion: 0 })
 
     // ③ 같은 버튼 중복 누름(뗌 누락 방어) — 목록·kbFrame·bounceSeq 불변, mouse.button·lastInputAt만 갱신
     const g = run(PEN, a, btn('left', true, T0 + 15))
@@ -161,32 +162,32 @@ describe('비펜 모드·모드 전환 (design.md §10.8 적용 조건·규칙�
 })
 
 describe('일반 키와 교차 (design.md §10.8 규칙표 4~7, design/functions.md §5.2 ⓐ isPressing·wrapMotion ②)', () => {
-  // CR-066: 클릭 누른 채 새 키 누름은 바운스를 다시 시작한다(CR-027 「프레임만」 대체). 키 누른 채 클릭은 그대로 재생 없음
-  it('TC-208: 키 누른 채 클릭 → 프레임만(재생 없음), 키만 뗌 → 누름 유지, 버튼 뗌 → 해제, 클릭 누른 채 키 → 프레임+재생(CR-066)', () => {
+  // CR-066: 키 누른 채 클릭·클릭 누른 채 키 모두 새 누름마다 바운스를 다시 시작한다(CR-027 「프레임만」 대체)
+  it('TC-208: 키 누른 채 클릭 → 프레임+재생(CR-066), 키만 뗌 → 누름 유지, 버튼 뗌 → 해제, 클릭 누른 채 키 → 프레임+재생(CR-066)', () => {
     const r4a = run(PEN, s0(), key(true, 1, null, T0 + 10))
     expect(view(r4a)).toMatchObject({ kbFrame: 1, bounceSeq: 1, phase: 1 })
     const r4 = run(PEN, r4a, btn('left', true, T0 + 20))
-    expect(view(r4)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'left', pressing: true, phase: 1, motion: 1 })
+    expect(view(r4)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
     expect(keyFields(r4)).toEqual(keyFields(r4a))
     const r5 = run(PEN, r4, key(false, 0, null, T0 + 30))
     expect(r5.kbDown).toBe(false)
-    expect(view(r5)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'left', pressing: true, phase: 1, motion: 1 })
+    expect(view(r5)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
     const r6 = run(PEN, r5, btn('left', false, T0 + 40))
-    expect(view(r6)).toEqual({ clickHeld: [], kbFrame: 0, bounceSeq: 1, button: 'none', pressing: false, phase: null, motion: null })
+    expect(view(r6)).toEqual({ clickHeld: [], kbFrame: 0, bounceSeq: 2, button: 'none', pressing: false, phase: null, motion: null })
     const r7a = run(PEN, r6, btn('left', true, T0 + 50))
-    expect(view(r7a)).toMatchObject({ kbFrame: 1, bounceSeq: 2, phase: 0 })
+    expect(view(r7a)).toMatchObject({ kbFrame: 1, bounceSeq: 3, phase: 1 })
     const r7 = run(PEN, r7a, key(true, 1, null, T0 + 60))
     expect(r7.kbDown).toBe(true)
     expect(r7.heldCount).toBe(1)
-    expect(view(r7)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 3, button: 'left', pressing: true, phase: 1, motion: 1 })
+    expect(view(r7)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 4, button: 'left', pressing: true, phase: 0, motion: 0 })
     // 대조: 비펜 모드에서 같은 순서면 클릭은 세지 않고 키 누름만 재생된다
     const c7 = run(PLAIN, r6, btn('left', true, T0 + 50), key(true, 1, null, T0 + 60))
-    expect(view(c7)).toMatchObject({ clickHeld: [], kbFrame: 1, bounceSeq: 2 })
+    expect(view(c7)).toMatchObject({ clickHeld: [], kbFrame: 1, bounceSeq: 3 })
   })
 })
 
 describe('특수 키와 교차 (design.md §10.8 규칙표 8·9·10, design/functions.md §5.2 ⓑ)', () => {
-  it('TC-209: 클릭 누른 채 스페이스 → ⓑ 재생·특수 키 우선, 스페이스 누른 채 클릭 → 특수 키 유지·재생 없음·프레임 +1, 스페이스만 뗌 → 일반 누름', () => {
+  it('TC-209: 클릭 누른 채 스페이스 → ⓑ 재생·특수 키 우선, 스페이스 누른 채 클릭 → 특수 키 유지·재생(CR-066)·프레임 +1, 스페이스만 뗌 → 일반 누름', () => {
     const r8a = run(PEN, s0(), btn('left', true, T0 + 10))
     const r8 = run(PEN, r8a, key(true, 1, 'space', T0 + 20))
     expect(currentSpecial(r8)).toBe('space')
@@ -201,16 +202,17 @@ describe('특수 키와 교차 (design.md §10.8 규칙표 8·9·10, design/func
     const r9 = run(PEN, r9a, btn('left', true, T0 + 20))
     expect(r9.specialHeld).toEqual(['space'])
     expect(currentSpecial(r9)).toBe('space')
-    expect(view(r9)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'left', pressing: true, phase: 1, motion: 1 })
+    expect(view(r9)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
     const r10 = run(PEN, r9, key(false, 0, 'space', T0 + 30))
     expect(currentSpecial(r10)).toBeNull()
-    expect(view(r10)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'left', pressing: true, phase: 1, motion: 1 })
+    expect(view(r10)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
     expect(view(run(PEN, r10, btn('left', false, T0 + 40)))).toMatchObject({ clickHeld: [], pressing: false, phase: null })
   })
 })
 
 describe('부르르와 교차 (design.md §10.8 규칙표 11·12, design/functions.md §5.2 isRepeating 불변·wrapMotion ③)', () => {
-  it('TC-210: 부르르 중 클릭 → 부르르 유지·repeating 계열 불변, 키 뗌 → 젤리 되살리지 않음, 클릭만으로는 부르르 없음', () => {
+  // CR-066: 부르르 중 새 클릭은 bounceSeq +1 — 부르르가 우선이지만 키를 떼면 새 번호 젤리가 산다
+  it('TC-210: 부르르 중 클릭 → 부르르 유지·repeating 계열 불변·bounceSeq +1(CR-066), 키 뗌 → 새 번호 젤리(CR-066), 클릭만으로는 부르르 없음', () => {
     const a = run(PEN, s0(), key(true, 1, null, T0 + 10))
     const b = run(PEN, a, key(true, 1, null, T0 + 510, true))
     expect(wrapMotion(b)).toBe('shiver')
@@ -219,11 +221,11 @@ describe('부르르와 교차 (design.md §10.8 규칙표 11·12, design/functio
     expect(c.lastRepeatAt).toBe(T0 + 510)
     expect(c.shiverSeq).toBe(1)
     expect(isRepeating(c)).toBe(true)
-    expect(view(c)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'left', pressing: true, phase: 1, motion: 'shiver' })
+    expect(view(c)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 'shiver' })
     const d = run(PEN, c, key(false, 0, null, T0 + 700))
     expect(d.repeating).toBe(false)
     expect(isRepeating(d)).toBe(false)
-    expect(view(d)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 1, button: 'left', pressing: true, phase: 1, motion: null })
+    expect(view(d)).toEqual({ clickHeld: ['left'], kbFrame: 0, bounceSeq: 2, button: 'left', pressing: true, phase: 0, motion: 0 })
     expect(view(run(PEN, d, btn('left', false, T0 + 800)))).toMatchObject({ clickHeld: [], motion: null })
 
     // 클릭만: 같은 버튼 누름이 반복돼도 부르르 없음
@@ -253,7 +255,7 @@ describe('다른 입력·불변성·입력 비보관 (design/functions.md §5.2 
     const woke = reduce(rest, btn('right', true, T0 + 400_000), PEN)
     expect(woke.layer).toBe('idle')
     expect(woke.lastInputAt).toBe(T0 + 400_000)
-    expect(view(woke)).toMatchObject({ clickHeld: ['left', 'right'], kbFrame: 0, bounceSeq: 1 })
+    expect(view(woke)).toMatchObject({ clickHeld: ['left', 'right'], kbFrame: 0, bounceSeq: 2 }) // CR-066: 새 클릭 +1
 
     const rel = reduce(held, btn('left', false, T0 + 40), PEN)
     expect(rel).not.toBe(held)

@@ -120,4 +120,26 @@ describe('inputMachine — 바운스 시작 규칙 (CR-066)', () => {
     expect(s.shiverSeq).toBe(1)
     expect(s.repeating).toBe(true)
   })
+
+  it('TC-FIX66-4: 키 누른 채 펜 모드 클릭 → bounceSeq +1', () => {
+    const pen: MachineConfig = { ...config, clickPress: true }
+    let s = reduce(createInitialState(0), key(true, 1, 10), pen)
+    expect(s.bounceSeq).toBe(1)
+    s = reduce(s, { type: 'mouseButton', button: 'left', pressed: true, ts: 20 }, pen)
+    expect(s.bounceSeq).toBe(2)
+    expect(s.clickHeld).toEqual(['left'])
+  })
+
+  it('TC-FIX66-5: 펜 모드 아님 클릭 → bounceSeq 불변(clickHeld에 안 들어감)', () => {
+    let s = reduce(createInitialState(0), key(true, 1, 10), config)
+    s = reduce(s, { type: 'mouseButton', button: 'left', pressed: true, ts: 20 }, config)
+    expect(s.bounceSeq).toBe(1)
+    expect(s.clickHeld).toEqual([])
+    s = reduce(
+      createInitialState(0),
+      { type: 'mouseButton', button: 'right', pressed: true, ts: 10 },
+      config,
+    )
+    expect(s.bounceSeq).toBe(0)
+  })
 })

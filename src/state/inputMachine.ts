@@ -13,14 +13,14 @@
  * - 특수 키(CR-021, R-22): `specialHeld`가 지금 눌린 특수 키 분류값을 누른 순서로 담는다(길이 ≤ 7).
  *   키 정보는 이 분류값뿐이며 이력·횟수·시각은 남기지 않는다(design.md §10.6 기록 금지).
  * - 바운스(CR-021 추가 결정 · CR-066): `bounceSeq`는 새 키 누름(자동 반복 아님)마다 +1되는 신호일 뿐 어떤
- *   키였는지는 담지 않는다 — 다른 키나 마우스 버튼을 누른 채여도 매번 다시 시작한다(CR-066이 CR-027의
+ *   키였는지는 담지 않는다 — 다른 키나 마우스 버튼을 누른 채여도 매번 다시 시작한다(펜 모드 클릭 누름도 같다)(CR-066이 CR-027의
  *   「이미 누르고 있으면 재생 안 함」을 대체). 렌더는 `bouncePhase`(짝홀)로 두 keyframe을 번갈아 재생한다.
  * - 자동 반복(CR-023, R-24): `repeat && pressed`인 `key` 입력은 프레임·특수 키 목록·바운스 신호를 바꾸지 않고
  *   `repeating`만 켠다. `tick`은 마지막 반복 뒤 REPEAT_TIMEOUT_MS(500ms)가 지나면 `repeating`을 끈다(뗌 누락
  *   방어). 렌더는 `wrapMotion`(부르르 우선, 그 다음 `bouncePhase`)으로 젤리와 부르르 중 하나만 고른다.
  * - 펜 모드 클릭(CR-027, R-26): `config.clickPress`가 `true`(펜 모드)면 클릭 누름도 키 누름처럼 센다
- *   (`clickHeld`에 추가, `kbFrame` 순환, 클릭 누름은 아무것도 안 눌린 상태의 첫 누름만 바운스 재생 — `isPressing`
- *   기준. 클릭을 누른 채 새로 누른 키는 CR-066에 따라 바운스를 다시 시작한다).
+ *   (`clickHeld`에 추가, `kbFrame` 순환, 새 클릭 누름마다 바운스 재시작 — CR-066, 키를 누른 채여도).
+ *   펜 모드가 아니면 클릭은 `clickHeld`에 들어가지 않고 바운스도 없다.
  *   뗌은 모드와 무관하게 항상 `clickHeld`에서 제거한다. 이 파일은 「펜」을 모른다 — 스위치 하나만 받는다.
  */
 import type { KeyboardInputEvent } from 'bridge/types'
@@ -234,8 +234,8 @@ const onKey = (
 /**
  * 마우스 버튼 입력(design/functions.md §5.2 `onMouseButton` ①~④, CR-027). 클릭 파츠 교체용 `mouse.button`은
  * 항상 갱신한다(R-09, 기존 규칙). 뗌은 모드와 무관하게 `clickHeld`에서 항상 제거한다(모드 전환 중에 눌린
- * 버튼이 남지 않게). 새 클릭 누름(펜 모드에서만)은 키 누름과 같은 카운터(kbFrame)를 돌리고, 누르기 전 아무
- * 것도 누르고 있지 않았을 때만 바운스를 재생한다(isPressing, 갱신 전 state 기준). `specialHeld`·`heldCount`·
+ * 버튼이 남지 않게). 새 클릭 누름(펜 모드에서만)은 키 누름과 같은 카운터(kbFrame)를 돌리고, 키 누름과 같이
+ * 무엇을 누르고 있든 매번 바운스를 다시 시작한다(CR-066 — 옛 「아무것도 안 눌렸을 때만」 대체). `specialHeld`·`heldCount`·
  * `kbDown`·`repeating`·`lastRepeatAt`·`shiverSeq`는 바꾸지 않는다 — 클릭은 특수 키가 아닌 일반 누름이고
  * 부르르 대상이 아니다.
  */
@@ -261,7 +261,8 @@ const onMouseButton = (
     ...woke,
     mouse,
     kbFrame: (state.kbFrame + 1) % frames,
-    bounceSeq: isPressing(state) ? state.bounceSeq : state.bounceSeq + 1,
+    // CR-066: 키·다른 버튼을 누른 채여도 새 클릭 누름마다 바운스를 다시 시작한다(CR-027 `!isPressing` 조건 대체)
+    bounceSeq: state.bounceSeq + 1,
     clickHeld: [...state.clickHeld, button],
   }
 }

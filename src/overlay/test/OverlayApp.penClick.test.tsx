@@ -250,24 +250,24 @@ describe('펜 모드 클릭 = 누름 (design.md §10.8 규칙표 1·2·3·§10.1
 })
 
 describe('일반 키와 겹침 (design.md §10.8 규칙표 4~7)', () => {
-  // CR-066: 클릭 누른 채 새 키 누름은 젤리를 다시 시작한다(CR-027 「재생 없음」 대체). 키 누른 채 클릭은 그대로 재생 없음
-  it('TC-215: 키 누른 채 클릭 → 재생 없음, 키만 뗌 → 유지, 버튼 뗌 → pen_up, 클릭 누른 채 키 → 재생(CR-066) — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
+  // CR-066: 키 누른 채 클릭·클릭 누른 채 키 모두 새 누름마다 젤리를 다시 시작한다(CR-027 「재생 없음」 대체)
+  it('TC-215: 키 누른 채 클릭 → 재생(CR-066), 키만 뗌 → 유지, 버튼 뗌 → pen_up, 클릭 누른 채 키 → 재생(CR-066) — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
     const { container } = await mount()
     const check = penChecker(container)
     await key(true, 1)
     check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_base')
     await click('left', true) // 4
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await key(false, 0) // 5
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await click('left', false) // 6
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     await click('left', true) // 7
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await key(true, 1)
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await key(false, 0)
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await click('left', false)
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     expect(setSettings).not.toHaveBeenCalled()
@@ -275,7 +275,8 @@ describe('일반 키와 겹침 (design.md §10.8 규칙표 4~7)', () => {
 })
 
 describe('특수 키와 겹침 양방향 (design.md §10.8 규칙표 8·9·10, §10.12 동작 표 10·11·12)', () => {
-  it('TC-216: 클릭 누른 채 스페이스 → 키보드 key_space + 재생, 스페이스 누른 채 클릭 → key_space 유지·재생 없음, 스페이스만 뗌 → 키보드 kb_up — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
+  // CR-066: 스페이스 누른 채 클릭도 새 누름 — 재생
+  it('TC-216: 클릭 누른 채 스페이스 → 키보드 key_space + 재생, 스페이스 누른 채 클릭 → key_space 유지·재생(CR-066), 스페이스만 뗌 → 키보드 kb_up — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
     const { container } = await mount()
     const check = penChecker(container)
     await click('left', true)
@@ -289,9 +290,9 @@ describe('특수 키와 겹침 양방향 (design.md §10.8 규칙표 8·9·10, �
     await key(true, 1, 'space')
     check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_base', 'u:key_space')
     await click('left', true) // 9
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left', 'u:key_space')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left', 'u:key_space')
     await key(false, 0, 'space') // 10
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await click('left', false)
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     expect(setSettings).not.toHaveBeenCalled()
@@ -299,7 +300,8 @@ describe('특수 키와 겹침 양방향 (design.md §10.8 규칙표 8·9·10, �
 })
 
 describe('부르르 비생성·유지 (design.md §10.8 규칙표 11·12)', () => {
-  it('TC-217: 부르르 중 클릭 → shiver 유지, 키 뗌 → 젤리 되살리지 않음, 클릭만 오래 눌러도 부르르 없음 — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
+  // CR-066: 부르르 중 새 클릭은 bounceSeq +1 — 부르르가 우선이고, 키를 떼면 새 번호 젤리가 산다
+  it('TC-217: 부르르 중 클릭 → shiver 유지, 키 뗌 → 새 클릭의 젤리(CR-066), 클릭만 오래 눌러도 부르르 없음 — 손은 누름 중 pen_down_0 (v1.6 개정, CR-042)', async () => {
     const { container } = await mount()
     const check = penChecker(container)
     await key(true, 1)
@@ -309,17 +311,17 @@ describe('부르르 비생성·유지 (design.md §10.8 규칙표 11·12)', () =
     await click('left', true) // 11
     check('u:pen_down_0', 'jellyWrap shiver', 'u:mouse_left')
     await key(false, 0) // 12
-    check('u:pen_down_0', 'jellyWrap', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await click('left', false)
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     await click('left', true)
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await click('left', true) // 같은 버튼 누름이 다시 와도(뗌 누락 방어) 변화 없음
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await act(async () => {
       vi.advanceTimersByTime(1_000)
     })
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await click('left', false)
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     expect(setSettings).not.toHaveBeenCalled()
@@ -327,19 +329,20 @@ describe('부르르 비생성·유지 (design.md §10.8 규칙표 11·12)', () =
 })
 
 describe('좌·우 동시 누름에서 한쪽 뗌 (design.md §10.8 규칙표 13)', () => {
-  it('TC-218: 두 버튼 중 하나만 떼면 누름 그림 pen_down_0·젤리 클래스 유지(클릭 파츠는 as-built대로 mouse_base), 둘 다 떼면 pen_up (v1.6 개정, CR-042)', async () => {
+  // CR-066: 두 번째 버튼 누름도 새 누름 — 재생(짝 교대)
+  it('TC-218: 두 번째 버튼 누름은 재생(CR-066), 두 버튼 중 하나만 떼면 누름 그림 pen_down_0·젤리 클래스 유지(클릭 파츠는 as-built대로 mouse_base), 둘 다 떼면 pen_up (v1.6 개정, CR-042)', async () => {
     const { container } = await mount()
     const check = penChecker(container)
     await click('left', true)
     check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_left')
     await click('right', true)
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_right')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_right')
     await click('right', false)
-    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_base')
+    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_base')
     await click('left', false)
     check('u:pen_up', 'jellyWrap', 'u:mouse_base')
     await click('right', true)
-    check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_right')
+    check('u:pen_down_0', 'jellyWrap jellyAlt', 'u:mouse_right')
     await click('left', true)
     check('u:pen_down_0', 'jellyWrap jelly', 'u:mouse_left')
     await click('left', false)

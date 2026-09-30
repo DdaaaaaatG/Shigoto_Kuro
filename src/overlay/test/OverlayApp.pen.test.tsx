@@ -576,7 +576,8 @@ describe('CR-042 회귀 ⑤ 남은 옛 파일 (design.md §10.12 남은 옛 파�
 })
 
 describe('CR-042 동작 표 1~14행 화면 통합 (design.md §10.12 동작 표·바운스·부르르·입력 비보관)', () => {
-  it('TC-257: pen_up·pen_down_0·key_space(key_enter 없음) — 키보드는 특수 키 누름 중에만 key_space, 손은 누름 중 pen_down_0(순환 없음), 젤리·부르르 규칙 그대로', async () => {
+  // CR-066: 스페이스 누른 채 펜 모드 클릭도 새 누름 — 젤리 재시작(이후 짝이 한 칸씩 밀린다)
+  it('TC-257: pen_up·pen_down_0·key_space(key_enter 없음) — 키보드는 특수 키 누름 중에만 key_space, 손은 누름 중 pen_down_0(순환 없음), 젤리·부르르 규칙(CR-066 개정)', async () => {
     vi.mocked(getAssetManifest).mockResolvedValue(SIMPLE_MANIFEST)
     const { container } = await mount()
     const logs = (['log', 'info', 'debug'] as const).map(m => vi.spyOn(console, m).mockImplementation(() => undefined))
@@ -615,22 +616,22 @@ describe('CR-042 동작 표 1~14행 화면 통합 (design.md §10.12 동작 표�
       [() => click('left', true), 'u:kb_up', 'u:pen_down_0', B], // 9
       [() => click('left', false), 'u:kb_up', 'u:pen_up', J],
       [() => key(true, 1, 'space'), 'u:key_space', 'u:pen_down_0', A], // 10
-      [() => click('left', true), 'u:key_space', 'u:pen_down_0', A],
-      [() => key(false, 0, 'space'), 'u:kb_up', 'u:pen_down_0', A],
+      [() => click('left', true), 'u:key_space', 'u:pen_down_0', B], // CR-066: 스페이스 누른 채 클릭도 재생
+      [() => key(false, 0, 'space'), 'u:kb_up', 'u:pen_down_0', B],
       [() => click('left', false), 'u:kb_up', 'u:pen_up', J],
-      [() => click('left', true), 'u:kb_up', 'u:pen_down_0', B], // 11
-      [() => key(true, 1, 'space'), 'u:key_space', 'u:pen_down_0', A],
-      [() => key(false, 0, 'space'), 'u:kb_up', 'u:pen_down_0', A], // 12
+      [() => click('left', true), 'u:kb_up', 'u:pen_down_0', A], // 11
+      [() => key(true, 1, 'space'), 'u:key_space', 'u:pen_down_0', B],
+      [() => key(false, 0, 'space'), 'u:kb_up', 'u:pen_down_0', B], // 12
       [() => click('left', false), 'u:kb_up', 'u:pen_up', J],
-      [() => key(true, 1, 'space'), 'u:key_space', 'u:pen_down_0', B], // 13
+      [() => key(true, 1, 'space'), 'u:key_space', 'u:pen_down_0', A], // 13
       [() => keyRepeat(1, 'space'), 'u:key_space', 'u:pen_down_0', S],
       [() => keyRepeat(1, 'space'), 'u:key_space', 'u:pen_down_0', S],
       [() => key(false, 0, 'space'), 'u:kb_up', 'u:pen_up', J],
-      [() => key(true, 1), 'u:kb_up', 'u:pen_down_0', A], // 14
-      [() => key(false, 0), 'u:kb_up', 'u:pen_up', J],
-      [() => key(true, 1), 'u:kb_up', 'u:pen_down_0', B],
+      [() => key(true, 1), 'u:kb_up', 'u:pen_down_0', B], // 14
       [() => key(false, 0), 'u:kb_up', 'u:pen_up', J],
       [() => key(true, 1), 'u:kb_up', 'u:pen_down_0', A],
+      [() => key(false, 0), 'u:kb_up', 'u:pen_up', J],
+      [() => key(true, 1), 'u:kb_up', 'u:pen_down_0', B],
       [() => key(false, 0), 'u:kb_up', 'u:pen_up', J],
     ]
     for (const [run, kbSrc, penSrc, cls] of rows) {
