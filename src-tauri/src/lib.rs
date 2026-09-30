@@ -178,6 +178,13 @@ pub fn run() {
             bridge::commands::import_alarm_sound,
             bridge::commands::remove_alarm_sound,
             bridge::commands::reset_app_data,
+            bridge::commands::presets::list_presets,
+            bridge::commands::presets::save_preset,
+            bridge::commands::presets::apply_preset,
+            bridge::commands::presets::export_preset,
+            bridge::commands::presets::import_preset,
+            bridge::commands::presets::rename_preset,
+            bridge::commands::presets::delete_preset,
         ])
         .run(tauri::generate_context!());
 
