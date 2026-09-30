@@ -186,9 +186,12 @@ pub fn apply(
     let old = load_manifest(&paths.assets_dir).map_err(|e| PresetError::io(asset_to_io(e)))?;
     let backup = FileBackup::capture(&paths.assets_dir, &backup_names(&old, &v))?;
 
-    let manifest = commit_files(&paths.assets_dir, &old, &v).map_err(|source| PresetError::Io {
-        source,
-        changed: !backup.restore(),
+    let manifest = commit_files(&paths.assets_dir, &old, &v).map_err(|source| {
+        log::warn!("preset: 교체 실패 kind={:?}", source.kind());
+        PresetError::Io {
+            source,
+            changed: !backup.restore(),
+        }
     })?;
     update(settings, &paths.settings_file, |cur| {
         v.file.settings.merge_into(cur)

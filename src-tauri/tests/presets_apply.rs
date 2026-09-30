@@ -338,3 +338,47 @@ fn apply_latency_report_15_images() {
     assert_eq!(applied.manifest.entries.len(), 15);
     println!("apply 15 images (~3MB): {ms} ms (목표 <= 300 ms, 실패 조건 아님)");
 }
+
+#[test]
+fn apply_rolls_back_on_file_replace_failure() {
+    let tmp = tempfile::tempdir().expect("tmp");
+    let paths = make_paths(tmp.path());
+    seed_basic(&paths, 450, 350, 1);
+    put(&paths, AssetSlot::kb_down(0), 450, 350, 1);
+    let id = save_preset(&paths, &scaled(1.75, 900));
+    // 현재 자산을 프리셋과 다르게 만들고, 새 kb_down_0.png 자리를 폴더로 막아 rename을 실패시킨다.
+    put(&paths, simple(SimpleSlot::KbUp), 450, 350, 9);
+    put(&paths, simple(SimpleSlot::Hair), 450, 350, 9);
+    std::fs::remove_file(paths.assets_dir.join("kb_down_0.png")).expect("rm");
+    std::fs::create_dir(paths.assets_dir.join("kb_down_0.png")).expect("dir in place of png");
+    let current = scaled(1.0, 300);
+    settings::update(&current, &paths.settings_file, |s| s.scale = 1.0).expect("write");
+    settings::update(&current, &paths.settings_file, |s| s.scale = 1.1).expect("write");
+
+    let files = |p: &AppPaths| {
+        let mut names: Vec<String> = std::fs::read_dir(&p.assets_dir)
+            .expect("read_dir")
+            .map(|e| e.expect("e").file_name().to_string_lossy().to_string())
+            .collect();
+        names.sort();
+        names
+    };
+    let (names, bytes, settings_bytes) = (
+        files(&paths),
+        snapshot(&paths.assets_dir),
+        std::fs::read(&paths.settings_file).expect("settings"),
+    );
+    let err = presets::apply(&paths, &id, &current).expect_err("replace failure");
+    assert!(
+        matches!(err, PresetError::Io { changed: false, .. }),
+        "{err:?}"
+    );
+    assert!(!err.may_have_changed());
+    assert_eq!(files(&paths), names);
+    assert_eq!(snapshot(&paths.assets_dir), bytes);
+    assert_eq!(
+        std::fs::read(&paths.settings_file).expect("settings"),
+        settings_bytes
+    );
+    assert_eq!(current.lock().expect("lock").scale, 1.1);
+}

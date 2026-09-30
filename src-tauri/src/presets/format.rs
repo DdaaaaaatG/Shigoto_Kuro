@@ -38,6 +38,7 @@ const FORMAT_TOO_BIG: &str = "파일이 너무 큽니다";
 const FORMAT_VERSION_BAD: &str = "지원하지 않는 형식 버전입니다";
 const FORMAT_DUPLICATE: &str = "같은 그림이 두 번 들어 있습니다";
 const FORMAT_TOO_MANY: &str = "그림이 너무 많습니다";
+const FORMAT_INDEX: &str = "슬롯 순번이 범위를 벗어났습니다";
 
 /// `preset.json` 전체. id는 넣지 않는다(폴더 이름이 id).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -137,15 +138,31 @@ fn parse_preset(text: &str) -> Result<PresetFile, PresetError> {
     if file.images.len() > MAX_IMAGES {
         return Err(format_err(FORMAT_TOO_MANY));
     }
+    // SEC-001: 가져온 JSON의 index가 수십억이면 설정 창이 카드를 그리다 멈춘다 — 순번은 MAX_IMAGES 미만만.
+    if file
+        .images
+        .iter()
+        .any(|s| slot_index(s) >= MAX_IMAGES as u32)
+    {
+        return Err(format_err(FORMAT_INDEX));
+    }
     let mut keys: Vec<String> = file.images.iter().map(AssetSlot::file_key).collect();
     keys.sort();
-    if keys.windows(2).any(|w| w[0] == w[1]) {
+    if keys.windows(2).any(|w| matches!(w, [a, b] if a == b)) {
         return Err(format_err(FORMAT_DUPLICATE));
     }
     file.name = normalize_name(&file.name)?;
     file.settings = file.settings.normalized();
     file.settings.validate()?;
     Ok(file)
+}
+
+/// 번호가 붙는 슬롯(`kb_down`·`pen_down`)의 순번. 나머지는 0.
+fn slot_index(slot: &AssetSlot) -> u32 {
+    match slot {
+        AssetSlot::KbDown { index, .. } | AssetSlot::PenDown { index, .. } => *index,
+        AssetSlot::Simple(_) => 0,
+    }
 }
 
 /// `dir/preset.json` 읽기·검사. 파일 검사(PNG·알림음)는 하지 않는다.
@@ -181,7 +198,9 @@ pub(super) fn write_preset_file(dir: &Path, file: &PresetFile) -> Result<(), Pre
 pub(super) fn normalize_name(raw: &str) -> Result<String, PresetError> {
     let name = raw.trim();
     let len = name.chars().count();
-    if len == 0 || len > NAME_MAX_CHARS || name.chars().any(char::is_control) {
+    // SEC-003: 글자 순서를 뒤집는 양방향 서식 문자와 U+200B~U+200F(안 보이는 글자)도 거부한다.
+    let hidden = |c: char| matches!(c, '\u{200B}'..='\u{200F}' | '\u{202A}'..='\u{202E}' | '\u{2066}'..='\u{2069}');
+    if len == 0 || len > NAME_MAX_CHARS || name.chars().any(|c| c.is_control() || hidden(c)) {
         return Err(PresetError::InvalidName);
     }
     Ok(name.to_string())
@@ -190,11 +209,14 @@ pub(super) fn normalize_name(raw: &str) -> Result<String, PresetError> {
 /// `^[0-9a-z][0-9a-z-]{0,39}$` — 정규식 크레이트 없이 바이트 검사.
 pub(super) fn is_valid_id(id: &str) -> bool {
     let b = id.as_bytes();
-    if b.is_empty() || b.len() > ID_MAX_LEN {
+    if b.len() > ID_MAX_LEN {
         return false;
     }
     let alnum = |c: u8| c.is_ascii_digit() || c.is_ascii_lowercase();
-    alnum(b[0]) && b[1..].iter().all(|&c| alnum(c) || c == b'-')
+    match b.split_first() {
+        Some((&first, rest)) => alnum(first) && rest.iter().all(|&c| alnum(c) || c == b'-'),
+        None => false,
+    }
 }
 
 /// `"{now_ms}"` 또는 `"{now_ms}-{n}"`(n=1..=999). 후보마다 `presets_dir/{후보}`가 없고
@@ -224,16 +246,25 @@ pub(super) fn claim_staging(
 
 /// Windows 예약 장치 이름(대소문자 무시). 첫 '.' 앞부분으로 판정한다.
 fn is_reserved_name(name: &str) -> bool {
+    // SEC-002: "CON .x"처럼 stem 끝 공백이 있어도 Windows는 장치 이름으로 본다.
     let stem = name
         .split('.')
         .next()
         .unwrap_or_default()
+        .trim_end_matches(' ')
         .to_ascii_uppercase();
-    matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL")
-        || ["COM", "LPT"].iter().any(|p| {
-            stem.strip_prefix(p)
-                .is_some_and(|d| matches!(d.as_bytes(), [b'1'..=b'9']))
+    matches!(
+        stem.as_str(),
+        "CON" | "PRN" | "AUX" | "NUL" | "CONIN$" | "CONOUT$"
+    ) || ["COM", "LPT"].iter().any(|p| {
+        stem.strip_prefix(p).is_some_and(|d| {
+            let mut chars = d.chars();
+            matches!(
+                (chars.next(), chars.next()),
+                (Some('1'..='9' | '\u{00B9}' | '\u{00B2}' | '\u{00B3}'), None)
+            )
         })
+    })
 }
 
 /// `< > : " / \ | ? *`와 제어 문자 → '_', 끝의 '.'·' ' 제거, 예약 이름이면 뒤에 '_', 비면 "preset".
@@ -376,6 +407,12 @@ mod tests {
             normalize_name("a\nb"),
             Err(PresetError::InvalidName)
         ));
+        for bad in ["a\u{202E}b", "a\u{2066}b", "a\u{200B}b", "a\u{200F}b"] {
+            assert!(
+                matches!(normalize_name(bad), Err(PresetError::InvalidName)),
+                "{bad:?}"
+            );
+        }
         assert_eq!(normalize_name("  이름 ").expect("ok"), "이름");
         assert_eq!(
             normalize_name(&"한".repeat(50))
@@ -416,5 +453,8 @@ mod tests {
         assert_eq!(export_folder_name("a/b\\c"), "a_b_c");
         assert_eq!(export_folder_name("com1"), "com1_");
         assert_eq!(export_folder_name("com10"), "com10");
+        assert_eq!(export_folder_name("CON .x"), "CON .x_");
+        assert_eq!(export_folder_name("conin$"), "conin$_");
+        assert_eq!(export_folder_name("COM\u{00B9}"), "COM\u{00B9}_");
     }
 }

@@ -70,10 +70,10 @@
 
 | 컴포넌트/모듈 | 파일 | 분류 | props / export | 책임 | 요구ID |
 |---|---|---|---|---|---|
-| `PresetsTab` (default·named) | `src/settings/components/PresetsTab.tsx` (**신규**, ~260줄) | 화면 로컬 | `{ manifest: AssetManifest; onError: (e: BridgeError \| null) => void }` | §4 상태 전부, 래퍼 호출(§5.1), 확인창 1개, 포커스 요청(§8.2). `settings`는 받지 않는다(적용 결과는 다른 탭이 이벤트로 받는다) | R-58, R-61~R-67 |
-| `PresetSaveCard` (default·named) | `src/settings/components/PresetSaveCard.tsx` (**신규**, ~140줄) | 화면 로컬 | §2.1 | 이름 입력(로컬 `name`), 저장 버튼 활성·이유 줄, 가져오기 버튼, 문제 목록, 상태 줄 | R-58~R-60, R-63, R-65, R-66 |
-| `PresetCard` (default·named) | `src/settings/components/PresetCard.tsx` (**신규**, ~130줄) | 화면 로컬 | §2.2 | 프리셋 한 장 표시·버튼 4·인라인 이름 편집(A-11) | R-59, R-61, R-62, R-64, R-66, R-67 |
-| `presetValues` | `src/settings/presetValues.ts` (**신규**, ~60줄, 순수) | 화면 로컬 순수 모듈 | §3 | 판정·날짜 표시·표시용 에러 변환 | R-58, R-65, R-66, R-62 |
+| `PresetsTab` (default·named) | `src/settings/components/PresetsTab.tsx` (**신규**, 304줄 실측 — 커밋 125871d) | 화면 로컬 | `{ manifest: AssetManifest; onError: (e: BridgeError \| null) => void }` | §4 상태 전부, 래퍼 호출(§5.1), 확인창 1개, 포커스 요청(§8.2). `settings`는 받지 않는다(적용 결과는 다른 탭이 이벤트로 받는다) | R-58, R-61~R-67 |
+| `PresetSaveCard` (default·named) | `src/settings/components/PresetSaveCard.tsx` (**신규**, 130줄 실측) | 화면 로컬 | §2.1 | 이름 입력(로컬 `name`), 저장 버튼 활성·이유 줄, 가져오기 버튼, 문제 목록, 상태 줄 | R-58~R-60, R-63, R-65, R-66 |
+| `PresetCard` (default·named) | `src/settings/components/PresetCard.tsx` (**신규**, 177줄 실측) | 화면 로컬 | §2.2 | 프리셋 한 장 표시·버튼 4·인라인 이름 편집(A-11) | R-59, R-61, R-62, R-64, R-66, R-67 |
+| `presetValues` | `src/settings/presetValues.ts` (**신규**, 45줄 실측, 순수) | 화면 로컬 순수 모듈 | §3 | 판정·날짜 표시·표시용 에러 변환 | R-58, R-65, R-66, R-62 |
 | `SettingsCard` | `components/SettingsCard.tsx` (기존) | 화면 로컬(재사용) | `{ title; action?; children }` | 카드 2장의 틀 | R-66 |
 | `ConfirmDialog` | `components/ConfirmDialog.tsx` (기존) | 화면 로컬(재사용, 입력칸 없음) | `{ open; title; message; confirmLabel; cancelLabel; tone?; onConfirm; onCancel }` | 적용·삭제 확인창(`tone` 기본 `'danger'` — 둘 다 되돌릴 수 없는 조작). 첫 포커스 = 취소, Esc = 취소 | R-61, R-64 |
 | `TabIcon` | `components/TabIcon.tsx` (기존, 개정) | 화면 로컬 | `name`에 `'presets'` 추가 | §2.4 | R-66 |
@@ -112,7 +112,7 @@
 - 카드 안 id: `useId()`로 이름 요소 id를 만들어 `<li aria-labelledby={nameId}>`로 건다.
 - 편집 중에도 `<h3 id={nameId}>`(현재 저장된 이름)는 **DOM에 남기고 시각적으로만 숨긴다**(`className={renaming ? styles.visuallyHidden : styles.itemName}`) — `li`의 접근 이름 참조가 끊기지 않는다. 입력칸은 h3 바로 뒤에 렌더한다.
 
-### 2.3 스타일 (`src/settings/components/PresetsTab.module.css` 신규 — 세 컴포넌트가 공유, 새 CSS 모듈은 이것 하나)
+### 2.3 스타일 (`src/settings/components/PresetsTab.module.css` 신규, 119줄 실측 — 세 컴포넌트가 공유, 새 CSS 모듈은 이것 하나)
 
 기존 재사용: 버튼 = `GeneralTab.module.css` `.outlineButton`(적용·내보내기·이름 바꾸기·가져오기·편집 취소)·`.dangerButton`(삭제), 설명 = `.fieldDesc`, 상태 줄 = `.notice`, 이유 줄 = `.hint`, 카드 사이 간격 = `.stack`(`ResetAllCard`의 `GeneralTab.module.css` 공유 선례). 색은 기존 `--st-*` 토큰만 쓴다(새 색 없음).
 

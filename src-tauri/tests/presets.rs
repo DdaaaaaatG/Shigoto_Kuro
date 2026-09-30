@@ -629,3 +629,35 @@ fn export_bad_dir() {
     let r = presets::export_to(&paths.presets_dir(), "../x", tmp.path());
     assert!(matches!(r, Err(PresetError::NotFound)));
 }
+
+#[test]
+fn import_rejects_out_of_range_index() {
+    let tmp = tempfile::tempdir().expect("tmp");
+    let dir = presets_dir_of(tmp.path());
+    let cases = [
+        (
+            r#"{"kind":"kb_down","index":4000000000}"#,
+            "kb_down_4000000000.png",
+            false,
+        ),
+        (
+            r#"{"kind":"pen_down","index":64}"#,
+            "pen_down_64.png",
+            false,
+        ),
+        (r#"{"kind":"kb_down","index":63}"#, "kb_down_63.png", true),
+        (r#"{"kind":"pen_down","index":63}"#, "pen_down_63.png", true),
+    ];
+    for (n, (slot_json, file, ok)) in cases.into_iter().enumerate() {
+        let src = tmp.path().join(format!("src{n}"));
+        let mut images = basic_images();
+        images.push((slot_json, file, png(450, 350)));
+        write_src(&src, 1, &images, None);
+        let r = import(&dir, &src);
+        if ok {
+            assert!(r.expect("report").preset.is_some(), "{slot_json}");
+        } else {
+            assert!(matches!(r, Err(PresetError::Format(_))), "{slot_json}");
+        }
+    }
+}
