@@ -1,7 +1,8 @@
 # assets 모듈 설계
 
-- 상태: 확정(사용자) — §3.14(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.15(CR-048)는 인계 패킷 기준 확정 · §3.16(CR-053)은 사용자 지정 확정 · §3.18(presets 가시성)은 인계 패킷 기준 초안 · 최종 갱신 2026-09-30(presets)
+- 상태: 확정(사용자) — §3.14(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.15(CR-048)는 인계 패킷 기준 확정 · §3.16(CR-053)은 사용자 지정 확정 · §3.18(presets 가시성)은 인계 패킷 기준 초안 · **소스 반영**(커밋 8ffb3a9) · 최종 갱신 2026-10-15(doc-sync)
 - 변경이력:
+  - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**, 마커 b5ff65b 이후 커밋 8ffb3a9·ca50864 대조) ① §3.18 가시성 4곳이 소스에 들어갔다(16차 「소스 미적용」 해소, 커밋 8ffb3a9). §3.18 표의 위치를 현재 줄로 고쳤다(`stored_file_name` `mod.rs:276`, `read_capped` `:346`, `recompute_canvas` `:122`, 재노출 `:80`). §3 `recompute_canvas` 가시성 줄에도 넓어진 사실을 붙였다. ② §2 `DEFAULT_ASSETS` 행 `[DefaultAsset; 7]` → **`[DefaultAsset; 6]`**(`defaults.rs:57`, 현재 표 §3.16.0). §1 DA-01·DA-02는 이미 6장이다. §10 CR-053 행에 0.4.0 6장 표기를 붙였다. ③ 2026-09-30 doc-sync 행이 적은 코드 주석 불일치(`slot.rs` 헤어 겹침 순서, `pomo_char` 「내장 기본 없음」)는 ca50864에서 소스 주석이 고쳐져 해소됐다. ④ §4에 내장 프리셋 시딩(PS-11) 위치 한 줄, §10에 presets 가시성 행 1개를 더했다. 공개 API·시그니처·에러·규격 불변.
   - 2026-09-30 (17차, PS-11 내장 프리셋 — [presets.md](presets.md) §3.10) **assets 변경 없음.** `DEFAULT_ASSETS` 바이트를 builtin 프리셋 ①「세바시에-기본」(6장 전부)과 ②「게님드림」(`background.png`)이 재사용한다(`presets::builtin`이 `&'static [u8]`을 빌림 — exe 중복 내장 없음). 기본 세트 4차(6장)·`DATA_GENERATION` 5 불변. 기본 세트를 바꾸면 presets 단위 테스트 `builtin_bytes_match_source_folder`가 깨진다(presets.md §11.4 C-8).
   - 2026-09-30 (16차, presets — 🔒 확정사항 §6 「프리셋」 PS-01~PS-10, 새 모듈 문서 [presets.md](presets.md), 패킷 `doc/200_설계/architecture/presets-03-packet-core.md` §6) **가시성만 4곳 확대, 동작 불변**: `stored_file_name`·`read_capped` → `pub(crate)`, `AssetManifest::recompute_canvas` → `pub(crate)`, `versioned_asset_url` 재노출(`mod.rs` `pub(crate) use url::versioned_asset_url;` + `url.rs:24` `pub(super)` → `pub(crate)`). 사용처는 새 모듈 `presets`(검증기·적용). 공개 API·시그니처·에러 변형·code·규격 규칙 불변. 증분 **§3.18**. **소스 미적용.**
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) ① §1 DA-01·DA-02와 §10 DA-01 행의 「현재 7장(CR-053)」을 **현재 6장**(0.4.0, 데이터 세대 5, hair 제외 — `defaults.rs:3·56-57`, 시딩 순서 kb_up → background → pomo_char → mouse_base → pen_up → pen_down_0)으로 고쳤다. §3.16.1~§3.16.3의 7장 표는 §3.16.0 머리말대로 CR-053 당시 기록으로 둔다. ② §3.12 `SimpleSlot::Hair` 조각의 겹침 순서를 현재 ui 순서(CR-051: 헤어 → 배경 → 뽀모도(인물 → 말풍선 → 시간 글자) → 팔 → 본체 → 펜 손, overlay `design/functions.md` HairLayer 행·`OverlayApp.hair.test.tsx` TC-241)로 고쳤다. 겹침 순서는 여전히 ui 몫이다(D36·D39 불변). ③ §10 표의 「✅ 설계 · 소스 미적용」을 「소스 반영」으로 바꿨다. 근거는 2026-09-29 행 ③의 확인과 `assets/{sound,manifest_load,defaults,anchor,slot}.rs`가 있다는 점이다. §3.14 추적 줄도 같이 바꿨다(SEC-002·SEC-003·CORE-002 확인). **코드 주석 정정 필요(수정 안 함)**: `slot.rs:30`의 겹침 순서가 CR-037 옛 순서다. `slot.rs:16-17`·`:33`은 `pomo_char`를 「내장 기본 없음(DEFAULT_ASSETS 비포함)」이라고 적었지만 실제로는 `DEFAULT_ASSETS`에 들어 있다(`defaults.rs:8`).
@@ -92,7 +93,7 @@
 | **`pub fn import_bytes(assets_dir: &Path, slot: AssetSlot, bytes: &[u8]) -> Result<AssetManifest, AssetError>`** (CR-035 추출) | 폴더·슬롯·PNG 바이트 | 갱신된 매니페스트 | `import`와 같음: 검증 실패 전부(`NotPng`·`BadHeader`·`NotRgba`·`TooManyBytes`·`TooLarge`·`CanvasMismatch`·`MousePartMismatch`·`PenPartMismatch`), `Io`, `Manifest` | ST-R-02, DA-02, DA-03 |
 | (`import` — 시그니처 불변) | — | 본문 = `fs::read(src)?` → `import_bytes(assets_dir, slot, &bytes)` | 불변 | ST-R-02 |
 | **`pub struct DefaultAsset { pub slot: AssetSlot, pub bytes: &'static [u8] }`** (`assets::defaults`, `#[derive(Debug, Clone, Copy)]`) | — | 내장 1장(바이트 = exe 정적 영역) | — | DA-01 |
-| **`pub static DEFAULT_ASSETS: [DefaultAsset; 7]`** (`assets::defaults`) | — | 순서 고정 표(**§3.16.1**, CR-053 — 길이 이력 15 → 6 → 7) | — | DA-01, **CR-053** |
+| **`pub static DEFAULT_ASSETS: [DefaultAsset; 6]`** (`assets::defaults`) | — | 순서 고정 표(**현재 §3.16.0**, `defaults.rs:57` — 길이 이력 15 → 6 → 7(CR-053, §3.16.1) → 6(0.4.0, hair 제외)) | — | DA-01, **CR-053** |
 | **`pub fn default_bytes(slot: &AssetSlot) -> Option<&'static [u8]>`** (`assets::defaults`) | 슬롯 | 내장 바이트 / `None`. `file_key` 기준 비교(순번 슬롯은 **`pen_down_0`만** 있음 — CR-053에서 `kb_down_0` 제외) | 없음 | DA-01, DA-03, **CR-053** |
 | **`pub fn has_default(slot: &AssetSlot) -> bool`** (`assets::defaults`) | 슬롯 | `default_bytes(slot).is_some()` | 없음 | DA-01 |
 | **`pub enum SeedSkip { NotEmpty, ManifestUnreadable, FilesPresent }`** (`assets::defaults`, `#[derive(Debug, Clone, Copy, PartialEq, Eq)]`) | — | 시딩 건너뜀 사유 | — | DA-02 |
@@ -291,7 +292,7 @@ pub fn load_manifest(assets_dir: &Path) -> Result<AssetManifest, AssetError> {
 }
 ```
 
-- `recompute_canvas`는 `impl AssetManifest`의 비공개 메서드지만 자식 모듈(`manifest_load`)에서 호출할 수 있다(Rust 가시성: 비공개 항목은 정의 모듈과 그 하위 모듈에 보인다). 공개 범위 변경 없음.
+- `recompute_canvas`는 `impl AssetManifest`의 비공개 메서드지만 자식 모듈(`manifest_load`)에서 호출할 수 있다(Rust 가시성: 비공개 항목은 정의 모듈과 그 하위 모듈에 보인다). 공개 범위 변경 없음. (2026-09-30 presets 이후 `pub(crate)` — §3.18. 크레이트 밖 공개 범위는 여전히 불변.)
 - `RawManifest`의 필드 이름(`canvas`, `entries`)은 camelCase 변환과 같은 철자라 `rename_all`이 필요 없다. `entries`는 지금처럼 **필수**(누락 시 `Manifest` — 기존 동작 유지), `canvas`는 `Option`이라 누락 허용(기존과 같음).
 - `log` 크레이트는 이미 의존성(settings `log::warn!` 사용). 새 의존성 없음.
 - `mod.rs` `//!` 갱신: [공개 API] 불변, [슬롯]에 "`slam`은 CR-019로 폐기 — 옛 매니페스트의 `slam` 항목은 로드 시 건너뛴다(manifest_load.rs)" 추가, [테스트]에 "관대한 매니페스트 로드(manifest_load.rs L1~L8)" 추가.
@@ -1670,19 +1671,20 @@ pub static DEFAULT_ASSETS: [DefaultAsset; 7] = [
 
 | 항목 | 위치 | 변경 | 사용처(presets) |
 |---|---|---|---|
-| `stored_file_name(slot) -> String` | `mod.rs:275` | `fn` → `pub(crate) fn` | 검증기·저장·적용·내보내기의 파일 경로(SEC-002 — 경로는 슬롯에서만) |
-| `read_capped(src, max) -> Result<Vec<u8>, AssetError>` | `mod.rs:345` | `fn` → `pub(crate) fn` | 검증기·저장의 상한 읽기(SEC-003) |
-| `AssetManifest::recompute_canvas(&mut self)` | `mod.rs:121` | `fn` → `pub(crate) fn` | 적용 때 새 매니페스트의 캔버스 |
-| `versioned_asset_url(path) -> String` | `url.rs:24`, `mod.rs` 재노출 | `url.rs`: `pub(super) fn` → `pub(crate) fn`, `mod.rs`: `pub(crate) use url::versioned_asset_url;` 추가 | 적용 때 새 `AssetEntry.url` |
+| `stored_file_name(slot) -> String` | `mod.rs:276` | `fn` → `pub(crate) fn` | 검증기·저장·적용·내보내기의 파일 경로(SEC-002 — 경로는 슬롯에서만) |
+| `read_capped(src, max) -> Result<Vec<u8>, AssetError>` | `mod.rs:346` | `fn` → `pub(crate) fn` | 검증기·저장의 상한 읽기(SEC-003) |
+| `AssetManifest::recompute_canvas(&mut self)` | `mod.rs:122` | `fn` → `pub(crate) fn` | 적용 때 새 매니페스트의 캔버스 |
+| `versioned_asset_url(path) -> String` | `url.rs:24`, `mod.rs:80` 재노출 | `url.rs`: `pub(super) fn` → `pub(crate) fn`, `mod.rs`: `pub(crate) use url::versioned_asset_url;` 추가 | 적용 때 새 `AssetEntry.url` |
 
 - **동작 불변.** 함수 본문·시그니처·에러 변형·code·검증 규칙(§3.5·§3.11)·캔버스 규칙은 그대로다. `pub(crate)`라 계약·bridge 공개면도 바뀌지 않는다.
 - `url.rs`도 한 단어 바꾸는 이유: `pub(super)` 항목은 그보다 넓게 재노출할 수 없다(rustc E0364). 패킷은 재노출만 적었다([presets.md](presets.md) §11.1 Δ2).
 - 규격 규칙을 presets에 다시 쓰지 않는다 — presets는 `parse_png_header`·`validate`(공개)·`is_canvas_layer`를 그대로 부른다. `group_size`(비공개)는 넓히지 않는다(프리셋 검증기는 목록 순서의 첫 캔버스 레이어를 기준으로 자기가 정한다).
 - 테스트: assets 기존 테스트 영향 없음. 사용 쪽 테스트는 [presets.md](presets.md) §8.
+- **소스 반영(2026-10-15 doc-sync 확인, 커밋 8ffb3a9)**: 4곳 모두 위 표대로다. `url.rs` `//!` [공개 API]도 「`assets` 모듈 내부와 `presets`(`pub(crate)`)에서 쓴다」로 바뀌었다. 사용처 예: `presets/builtin.rs:22-24`(`DEFAULT_ASSETS`·`stored_file_name`).
 
 ## 4. 스레드·채널
 
-- 없음. 모든 함수는 동기이며 호출자 스레드(Tauri command 스레드·setup)에서 돈다. CR-035 시딩은 setup 스레드에서 1회 돈다(창 표시 전, 목표 ≤150 ms). **data-reset 뒤 순서: settings 로드 → `data_reset::run_startup` → 시딩(§3.17).** 전체 초기화 때는 `data_reset::reset_data`가 같은 스레드에서 `seed_if_empty`를 한 번 더 부른다. 내보내기는 command 스레드에서 돈다.
+- 없음. 모든 함수는 동기이며 호출자 스레드(Tauri command 스레드·setup)에서 돈다. CR-035 시딩은 setup 스레드에서 1회 돈다(창 표시 전, 목표 ≤150 ms). **data-reset 뒤 순서: settings 로드 → `data_reset::run_startup` → 시딩(§3.17).** 전체 초기화 때는 `data_reset::reset_data`가 같은 스레드에서 `seed_if_empty`를 한 번 더 부른다. 내보내기는 command 스레드에서 돈다. **내장 프리셋 시딩(PS-11)**: `lib.rs`가 `seed_default_assets` 바로 뒤, `load_manifest` 앞에서 `seed_builtin_presets`를 부른다(`lib.rs:117-119`). presets가 `DEFAULT_ASSETS` 바이트와 `stored_file_name`을 빌려 쓴다(`presets/builtin.rs:22-24`, [presets.md](presets.md) §3.10).
 - `compute_hand_anchor` 비용: 해독 + 2회 순회(최대 900×700). 이벤트 시점 1회라 허용. 호출자는 설정 `Mutex` 잠금을 쥔 채 부르지 않는다.
 - `parse_manifest` 비용: 항목 최대 수십 개의 JSON 값 변환 — 무시할 수준.
 
@@ -1970,7 +1972,8 @@ CR-035 증분:
 | 요구ID | 반영 절 | 상태 |
 |---|---|---|
 | DA-01 — 기본 세트 15장 내장(include_bytes!, 원본 `doc/assets/defaults/`) — **현재 6장(0.4.0, hair 제외, §3.16.0)** | §2, §3.10.1, §3.16.1, D1·D2·D3 | ✅ 설계 · 소스 반영 |
-| **CR-053 (🔒 2026-09-27, CR-044 대체)** — 배포용 기본 세트 3차: `DEFAULT_ASSETS` 7장(hair·pomo_char 추가, kb_down_0 제거), 시딩·복원·내보내기 규칙 불변 | §1, §2, §3.16 | ✅ 설계 · 소스 반영 |
+| **CR-053 (🔒 2026-09-27, CR-044 대체)** — 배포용 기본 세트 3차: `DEFAULT_ASSETS` 7장(hair·pomo_char 추가, kb_down_0 제거 — 0.4.0에서 hair를 빼 6장, §3.16.0), 시딩·복원·내보내기 규칙 불변 | §1, §2, §3.16 | ✅ 설계 · 소스 반영 |
+| **PS-01~PS-10 (presets, 🔒 2026-09-30)** — assets 가시성 4곳 `pub(crate)` 확대(동작 불변), 사용처 `presets` | §3.18 | ✅ 설계 · 소스 반영(8ffb3a9) |
 | DA-02 — 첫 실행 시딩, 기존 데이터 덮어쓰기 금지, 앱 시작 막지 않음 | §2, §3.10.2(lib.rs 포함), D4~D8 | ✅ 설계 · 소스 반영 |
 | DA-03 — 기본값 복원(검증 먼저, 실패 시 사용자 그림 보존) | §2, §3.10.3, D9~D11 | ✅ 설계 · 소스 반영 |
 | DA-03 — 복원 후처리(리사이즈·`assets://changed`·기준점) | §3.10.6-1 | 부분(bridge 몫) |

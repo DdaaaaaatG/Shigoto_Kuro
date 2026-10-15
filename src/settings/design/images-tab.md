@@ -4,6 +4,7 @@
 - 요구: R-25(이미지 설정 — 그룹 4개, 필수 배지, 이미지 변경, 몸통 카드 없음. ~~「기본값」 = 슬롯 비우기~~ 문장은 CR-035로 R-32가 대체), R-19(카드 양식), R-20(문구·파일 대화상자 제목·에러 code 문구), **R-31**(첫 실행 기본 15장 — 화면 변경 없음, §10.1), **R-32**(「기본값」 = 기본 그림 있는 칸은 복원·없는 칸은 비우기 — §3·§4·§5·§6·§7 I-3·I-3R, §10), **R-33**(기본 이미지 다운로드 — §10.3~§10.8).
 - 계약(CR-035): contract **v0.16** — `restore_default_asset`(`restoreDefaultAsset`)·`export_default_assets`(`exportDefaultAssets`)·`pickFolder(title?)`·`ExportReport`·`ExportFailure`·`hasBuiltinDefault`·`DEFAULT_ASSET_SLOTS`·에러 `asset.no_default`·`asset.export_dir`. 이름은 `doc/200_설계/architecture/default-assets-03-packet-ui.md` 선행 조건 그대로(bridge-designer 작성 중 — 화면 구현은 bridge 완료 마커 뒤).
 - 계약(현행, 2026-09-30 doc-sync): `doc/200_설계/bridge/contract.md` **v0.27** 인용 — 이 탭이 쓰는 이름은 아래 v0.14·v0.16 항목과 같고(래퍼 `pickPngFile(title?)`·`importAsset(slot, path)`·`removeAsset(slot)`·`restoreDefaultAsset(slot)`·`exportDefaultAssets(dir, overwrite)`·`pickFolder(title?)`, 모두 `src/bridge/commands.ts`), 이후 버전에서 바뀐 것은 상수 값뿐이다(`REQUIRED_SLOTS` 2개 v0.19 · 내장 기본 목록: v0.24 CR-053 7개(§15) → **0.4.0(CR-058·CR-059)에서 `hair` 다시 제외, 현행 6장** `kb_up`·`background`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` — 정본 Rust `src-tauri/src/assets/defaults.rs` `DEFAULT_ASSETS`). **(해소, 2026-09-30)** contract **v0.29**(§3.1·§8·§9, 🔒 사용자 결정 — 뒷머리 기본 없음 0.4.0 유지)로 TS `DEFAULT_ASSET_SLOTS`도 6개 — `hasBuiltinDefault('hair')` = false, 다운로드 `{n}` = 6. 뒷머리 카드 동작은 §16이 정본(§15의 `hair` 부분 대체). 아래 「v0.14」 줄은 도입 당시 기록.
+- 계약(현행, 2026-10-15 doc-sync): contract **v0.31**. v0.30(프리셋 command 7·code 13)·v0.31(`PresetSummary.preview`)은 프리셋 탭 몫이고 이 탭이 쓰는 이름·시그니처는 바뀌지 않았다 — `src/bridge/commands.ts` 실물 대조: `pickPngFile(title?)`·`importAsset(slot, path)`·`removeAsset(slot)` 등 위 줄 그대로. 파일 대화상자 제목 키는 `t.pickTitle`(§3.1·§5 I-1, 옛 `dialogPickImage` 표기는 2026-09-30에 정정됨 — 문서 안 잔존 없음).
 - 계약(도입 기록): `doc/200_설계/bridge/contract.md` v0.14 — §3.1 `AssetSlot`·`REQUIRED_SLOTS`·`isRequiredSlot`, §3.2 `AssetEntry.url` 버전 규칙, §5 `import_asset`·`remove_asset`, §5.4 `pickPngFile(title?)`, §4 `assets://changed`, §3.3 `MouseSettings.penPos`(`null` = 아직 놓지 않음, `pen_up` 첫 등록 때 ui가 기본 위치를 정해 `set_settings`로 저장), §6 에러 코드.
 - 검증은 core가 한다(PNG·크기·용량·캔버스 일치). 이 탭은 결과 메시지만 보인다(ui 재검증 금지 — ui-design-strategy §7).
 
@@ -556,6 +557,8 @@ CSS(`ImagesTab.module.css`에 추가):
 
 ## 12. 「타자 입력 1」 비우기 (CR-043, R-41)
 
+> **대체 표기 (R-41 현행화, requirements v1.30 · 🔒 2026-10-15):** 이 절 전체는 옛 설계다. **CR-053(§15) → CR-063(§16)으로 대체**됐다. 현행 `EMPTYABLE_SLOT_KEYS = ['pomo_char']` — `kb_down_0`은 내장 기본 그림이 없어 「기본값」(`resetKind` clear)이 곧 비우기(`removeAsset`)이고, 셋째 「비우기」 버튼·두 줄 버튼·미리보기 106px는 이 카드에 없다(한 줄 버튼·140px). 현행 규칙은 §15.1·§15.2(`kb_down_0`)와 §16(뒷머리 같은 방식)을 본다. 아래 본문은 기록으로 남긴다.
+
 비유: 뒷머리 칸에 달린 「비우기」 손잡이를 「타자 입력 1」 칸에도 똑같이 단다. 다만 뒤 칸(타자 입력 2 이상)이 차 있으면 앞 칸 손잡이는 잠가 둔다 — 여러 장 칸은 늘 뒤에서부터 비우는 규칙과 같다.
 
 **대체 범위**: §3.3의 「비우기 버튼 없음 … `kb_down_0`을 비우는 길은 여전히 없다」 문장, §3 CR-038 줄(102행)의 「`emptyable` = `hair`인 카드만 true」, §11.3 `EMPTYABLE_SLOT_KEYS = ['hair']`·「뒷머리 전용」, §11.6 「같은 문구 버튼이 다른 카드에 없으므로」를 이 절이 대체한다. 그 밖의 §11 규칙(레이아웃·props·렌더·CSS·`onRequestEmpty`·`onConfirmClear` `focusAfter`·confirm)은 **그대로 재사용**한다.
@@ -607,10 +610,12 @@ CSS(`ImagesTab.module.css`에 추가):
 
 ## 13. 배포용 기본 세트 2차 교체 (CR-044, R-36 · R-34 · R-35 폐기)
 
+> **대체 표기 (R-41 현행화, requirements v1.30 · 🔒 2026-10-15):** 이 절의 `EMPTYABLE_SLOT_KEYS = ['kb_down_0']`·「지우개(「비우기」)는 「타자 입력 1」 칸에만」 서술은 **CR-053(§15) → CR-063(§16)으로 대체**됐다. 현행 `['pomo_char']` — 「타자 입력 1」·뒷머리 카드 모두 「기본값」이 비우기, 셋째 「비우기」 버튼은 뽀모도 인물 카드에만. 기본 세트 목록도 §16(0.4.0, 6장 — `kb_down_0` 제외·`pomo_char` 포함)이 현행이다.
+
 비유: 견본 상자에서 뒷머리 견본을 다시 뺐다. 견본이 없는 칸은 「견본으로 되돌리기」가 곧 「비우기」이므로, 뒷머리 칸에 따로 달았던 지우개 단추도 뗀다. 지우개는 「타자 입력 1」 칸에만 남는다.
 
 - 계약: contract **v0.20**(`src/bridge/types.ts` 반영됨, core 반영 대기) — `DEFAULT_ASSET_SLOTS` **6개**(`kb_up`·`kb_down_0`·`background`·`mouse_base`·`pen_up`·`pen_down_0`), `hasBuiltinDefault('hair') === false`, `DEFAULT_MOUSE_SETTINGS` shoulder (582,484)·partPos (411,464)·penPos (372,476)·penMode true·area 불변. 새 command·event·에러 코드·문구 키 없음.
-- 요구: R-36(CR-044 부분 대체 — 6장), R-34(원문 「내장 기본 없음 → 기본값=비우기」 다시 유효), R-35 **폐기**, R-41(버튼은 `kb_down_0`만), R-32(기본 없는 칸에 `hair` 포함).
+- 요구: R-36(CR-044 부분 대체 — 6장), R-34(원문 「내장 기본 없음 → 기본값=비우기」 다시 유효), R-35 **폐기**, R-41(버튼은 `kb_down_0`만 — **CR-053 → CR-063으로 대체, 현행 `['pomo_char']`: 「타자 입력 1」은 「기본값」 = 비우기, 별도 버튼 없음(requirements v1.30)**), R-32(기본 없는 칸에 `hair` 포함).
 
 ### 13.1 순수 모듈 (`imageSlots.ts`) — 코드 변경 1곳
 

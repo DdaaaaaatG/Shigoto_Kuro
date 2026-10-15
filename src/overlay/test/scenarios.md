@@ -57,7 +57,7 @@
 | 두 모니터 중앙 | (520,530) | B 중앙 (1280,1980) · A 중앙 (1280,720) → (0.5,0.5) | (520,530) | `CENTER`(가상 화면 전체 비율이었다면 B 중앙 v = 0.786 → 다른 값) |
 | 두 모니터 밖 | (520,530) | (100,1980) → 가장 가까운 B, (0,0.5) | (420,530) | `rotate(180deg) scaleX(1.6) rotate(-180deg)` |
 | B 왼쪽 위 | (520,530) | (320,1440) → B (0,0) | q0 (420,430) | `rotate(-153.43deg) scaleX(1.6) rotate(-180deg)` |
-| 기본 영역 | (520,530) | (960,540) / (0,0), 영역 `DEF_AREA`, **어깨 = 기본 (558,500)**(CR-038) | (435,575) / (375,525) | `rotate(148.63deg) scaleX(1.6) rotate(-141.71deg)` / `rotate(172.22deg) scaleX(1.6) rotate(-141.71deg)`(θh = atan2(30,−38) = 141.71, 배율 2.976 / 3.815 → 1.6) |
+| 기본 영역 | (520,530) | (960,540) / (0,0), 영역 `DEF_AREA`, **어깨 = 기본 (582,484)**(CR-044 🔒, contract v0.20 — v2.8 정정, 옛 CR-038 (558,500)) | (435,575) / (375,525) | `rotate(148.24deg) scaleX(1.6) rotate(-143.43deg)` / `rotate(168.8deg) scaleX(1.6) rotate(-143.43deg)`(θh = atan2(46,−62) = 143.43, θt = atan2(91,−147) = 148.24 / atan2(41,−207) = 168.80 → 문자열 `168.8`, 배율 2.239 / 2.733 → 1.6. TC-123 스펙 주석과 같은 값) |
 | 설계 예 | (520,530) | (960,0), 영역 (420,410)(620,410)(620,610)(420,610) | (520,410) | `rotate(-129.81deg) scaleX(1.562) rotate(-180deg)`(design/functions.md §5.4 6단계 예) |
 
 v0.5까지의 「회전각」 표(`armRotationDeg`·`mapAroundPivot`)는 CR-017로 폐기. 대응: v0.5 `rotate(-45deg)` → `DOWN`, `rotate(45deg)` → `UP`(기준점 520,530) 또는 `UP_ALT`(기준점 620,430 — 커서 (1920,540)은 새 식에서 목표 = 어깨가 되어 구분력이 약하므로 (960,0)으로 바꿈), `rotate(0deg)` → `REST`.
@@ -2621,7 +2621,7 @@ v0.6 변경 요약(2026-09-24, 근거: CR-017 사용자 🔒 · requirements.md 
 | Q-nn | 일자 | CR-ID | 변경 요약 | 변경 파일 | 영향 TC 후보 | 신규 TC 필요 | 상태 |
 |---|---|---|---|---|---|---|---|
 | Q-01 | 2026-09-23 | —(자동화 추적, CR 없음) | TC-097(창 라벨 분기) 자동화: 창 라벨 조회(`@tauri-apps/api/window`)를 mock하고 `src/main.tsx`를 불러와 `document.body.dataset.window = 'overlay'`와 지연 로딩 대상(`./overlay`)을 단언하는 스펙 | `src/main.tsx`(공용 진입점 — 이번 overlay 범위에서는 수정 없음) | TC-097 | 예(자동 TC 1건, 추가 뒤 TC-097 수동은 유지 또는 대체를 그때 정함) | 대기(공용 진입점을 다루는 작업에서 전환) |
-| Q-02 | 2026-09-24 | CR-017 | 이동 영역·팔 늘어나기 소스 적용: `mouseMapping.ts`에 `pickMonitor`·`cursorUv`·`bilerpQuad`·`armTransform`·`armTransformCss`·상수·타입 신규, `armRotationDeg`·`mapAroundPivot` 삭제, `MouseArm`·`OverlayApp`의 `bounds` → `monitors`·`getScreenBounds()` → `getMonitors()` 전환(실행 중 재조회 없음, design.md §5.1 그대로) | `src/state/mouseMapping.ts` · `src/state/mouseMapping.test.ts` · `src/overlay/components/MouseArm.tsx` · `src/overlay/index.tsx` | TC-015~TC-017, TC-024, TC-025, TC-037~TC-046, TC-098, TC-103~TC-108, TC-113~TC-125 | 아니오(기존 Red TC로 커버 — `yarn test --run src/overlay src/state` 129 passed) | 대기(ui-tester 검증 전) |
+| Q-02 | 2026-09-24 | CR-017 | 이동 영역·팔 늘어나기 소스 적용: `mouseMapping.ts`에 `pickMonitor`·`cursorUv`·`bilerpQuad`·`armTransform`·`armTransformCss`·상수·타입 신규, `armRotationDeg`·`mapAroundPivot` 삭제, `MouseArm`·`OverlayApp`의 `bounds` → `monitors`·`getScreenBounds()` → `getMonitors()` 전환(실행 중 재조회 없음, design.md §5.1 그대로) | `src/state/mouseMapping.ts` · `src/state/mouseMapping.test.ts` · `src/overlay/components/MouseArm.tsx` · `src/overlay/index.tsx` | TC-015~TC-017, TC-024, TC-025, TC-037~TC-046, TC-098, TC-103~TC-108, TC-113~TC-125 | 아니오(기존 Red TC로 커버 — `yarn test --run src/overlay src/state` 129 passed) | 검증됨(2026-10-15 — ui-tester vitest overlay·state·components 331/331 PASS, `test/result.md` 2026-10-15; TC-042·TC-045는 폐기 TC라 제외) |
 | Q-03 | 2026-09-25 | CR-039 | 초기 조회 실패 시 200·500·1000ms 간격 최대 3회 재시도(성공 시 중단·언마운트 시 취소·끝내 실패하면 빈 투명 창) | `src/overlay/index.tsx` · `src/components/utils/fetchWithRetry.ts`(신규) | TC-048(「조회 1회」 단언 3건 → 1+3회로 개정)·TC-063(모니터 실패 시 호출 횟수) | 예 — `OverlayApp.retry.test.tsx` 4건(ui-fixer 초안, TC-ID 부여 필요) | 전환됨(신규 TC-248 ~ TC-251, 개정 TC-048 ①②③·TC-063 ①) |
 | Q-04 | 2026-09-26 | CR-051 | 헤어를 `.jellyWrap` 밖 `.canvas` 첫 자식 `.hairWrap`(hair 있을 때만)으로 이동 — 겹침 헤어 → 배경 → 뽀모도 → .jellyWrap(팔 → 본체 → 펜 손). `.hairWrap`은 본체 래퍼와 같은 motion 클래스(.jelly/.jellyAlt/.shiver)를 같은 커밋에 받는다. 검증할 것: 순서·헤어 없을 때 래퍼 없음·젤리/부르르 클래스 두 래퍼 동일·배경/뽀모도에는 애니메이션 없음·`.hairWrap` CSS 기하 = .jellyWrap | `src/overlay/index.tsx` · `src/overlay/overlay.module.css` · `src/overlay/components/HairLayer.tsx`(주석) | TC-241·243·244·245·246(개정 — 옛 「.jellyWrap 첫 자식」 단언), TC-238~240·242·158·288(회귀), MC-24(TC-247) | 예 — `.hairWrap` CSS 기하 TC(TC-158 짝) | 검증됨(2026-09-26 — 전환됨(개정 TC-241·TC-243·TC-244·TC-245·TC-246·TC-247(MC-24), 신규 TC-314, 재확인 TC-238~TC-240·TC-242·TC-158·TC-282·TC-283·TC-288 — v2.0 절); `yarn test --run` 766 PASS) |
 | Q-05 | 2026-09-26 | CR-052 | 끝남 알림음 반복 재생: `playSound` 4번째 인자 `loop`(기본 false), `useAlarmOnFinish`는 등록 파일·기본음·실패 대체 기본음 모두 loop true. 정지 경로 불변(finished 이탈·언마운트 halt) | `src/components/utils/alarmSound.ts` · `src/overlay/hooks/useAlarmOnFinish.ts` | TC-300 ①(`loop false` → true), TC-299 ①(기본 loop false 유지), TC-302·TC-303(대체음도 loop true), manual-checklist MC-29·MC-30(한 번 → 10초 동안 반복·정지) | 예(playSound loop true 설정 단언 1건, 대체 기본음 loop 단언) | 검증됨(2026-09-27) |
@@ -4075,8 +4075,8 @@ Given은 각 TC 본문과 같다(바뀐 것은 When 순서가 아니라 Then 값
 
 ### 설계 확인 필요
 
-1. **design.md 본문 규칙표 미개정**: §10.3 젤리 트리거·재생 조건, §10.6 규칙표(특수 키 1~13행의 「재생 없음」), §10.8 규칙표 4·5·9·11·13(「프레임만」·「재생 없음」)은 ui-designer가 개정 중이다(관리자 위임문). 이 절의 TC는 확정사항 §5·design/functions.md §5.2(현행 규칙)를 정본으로 인용했다. 본문 개정이 끝나면 위 TC들의 설계 칸 §10.3·§10.6·§10.8 인용을 새 행 번호로 맞춰야 한다(행 번호가 바뀌면 알려 달라).
-2. **requirements.md 미대조**: R-22·R-23·R-26 원문과 S-7·S-10 설명에 「첫 누름에만」·「이미 누르고 있으면 재생 안 함」 서술이 남았는지 이 패스에서 확인하지 않았다(CR 대장은 「CR-021 ⓐ 「첫 누름」 서술도 대체」라고만 적음). 남아 있으면 요구 문서 개정이 필요하다.
+1. **design.md 본문 규칙표 미개정**: §10.3 젤리 트리거·재생 조건, §10.6 규칙표(특수 키 1~13행의 「재생 없음」), §10.8 규칙표 4·5·9·11·13(「프레임만」·「재생 없음」)은 ui-designer가 개정 중이다(관리자 위임문). 이 절의 TC는 확정사항 §5·design/functions.md §5.2(현행 규칙)를 정본으로 인용했다. 본문 개정이 끝나면 위 TC들의 설계 칸 §10.3·§10.6·§10.8 인용을 새 행 번호로 맞춰야 한다(행 번호가 바뀌면 알려 달라). → **해소(doc-sync 2026-10-15, v2.8)**: 본문 개정 완료·행 번호 불변(§10.6 3·13행, §10.8 4·7·9·11·12·13행, §10.12 바운스 줄·10행 — design.md RTM R-23·R-26 비고). 설계 칸 대체 행은 v2.8 절 「설계 참조 정정」.
+2. **requirements.md 미대조**: R-22·R-23·R-26 원문과 S-7·S-10 설명에 「첫 누름에만」·「이미 누르고 있으면 재생 안 함」 서술이 남았는지 이 패스에서 확인하지 않았다(CR 대장은 「CR-021 ⓐ 「첫 누름」 서술도 대체」라고만 적음). 남아 있으면 요구 문서 개정이 필요하다. → **해소(doc-sync 2026-10-15, v2.8)**: requirements v3.3이 §1 아래 용어 주(CR-066)를 신설하고 용어 주(CR-022)의 「첫 누름」 문장·§2 S-10 「아무것도 안 눌린 상태의 첫 누름」을 취소선 + CR-066 대체로 표기했다(v3.4 머리 이전 판 설명).
 3. **개정 TC 수**: 위임문은 27건, CR 대장 CR-066·Q-08 목록은 25건(TC-100·129·130·131·132·133·136·145·146·147·148·154·155·162·167·206·208·209·210·211·215·216·217·218·257)이다. 스펙의 CR-066 표기와 대조해 25건으로 처리했다. 빠진 2건이 따로 있으면 알려 달라.
 4. **TC-FLOW-09 Step 3 값 미검증**: TC-197은 `.jellyWrap` class를 단언하지 않아 FLOW 표의 「단독 값 5」는 판정 대상이 아니지만, TC-197에 일반 키 겹쳐 누르기가 있으면 Step 4(TC-199)의 `jellyWrap jelly` 짝이 바뀐다. TC-197이 순차 누름·특수 키 새 누름만 쓰면 영향 없음 — FLOW 실행 시 확인.
 
@@ -4109,11 +4109,116 @@ Given은 각 TC 본문과 같다(바뀐 것은 When 순서가 아니라 Then 값
 
 CR ↔ TC(추가): CR-066 → 신규 TC-331~TC-335(자동)·TC-336(수동 MC-46) / 개정 자동 25건(위 표)·수동 TC-151·TC-159·TC-222·TC-258 / TC-FLOW-01·07·08·10 / 회귀 TC-161·TC-166·TC-169~TC-173·TC-205·TC-207·TC-219(기대 불변). CR-027 행의 「바운스 조건 `!isPressing`」 추적은 CR-066으로 대체.
 
+## doc-sync 2026-10-15 — 요구 v3.4·design.md doc-sync 행 대조 (v2.8, 증분 · 보강)
+
+- **기준(v2.8)**: `src/overlay/requirements.md` **v3.4**(R-01 비고 「항상 위 재적용」 🔒 2026-10-05 — core 담당·ui 변경 없음, §3 「미확정 계약」 표기를 contract v0.31 기준 확정으로 정정, 요구ID·원문 증감 없음) · v3.3(CR-066 바운스 시작 규칙 용어 주 — v2.7 절의 근거) / `src/overlay/design.md` 변경이력 2026-10-15 doc-sync 행 ①~⑥(§7 「창 기능 — 항상 위 재적용(R-01, 🔒 2026-10-05)」 행 신설, RTM R-01·R-13 비고, RTM R-23·R-24·R-25 예정 TC 칸 = 이 문서 v2.6 통합 표 + v2.7 CR-066 절, 헤더 요구 v3.4·계약 v0.31, `design/functions.md` §5.1 모니터 목록 로드 행 표기 정정) / `doc/200_설계/bridge/contract.md` 현행 **v0.31**(v0.28~v0.31 = 표기 정정·`DEFAULT_ASSET_SLOTS` `hair` 제외·설정 창 프리셋. 이 화면이 쓰는 command·event·타입 모양은 v0.27과 같다 — design.md 헤더) / `doc/200_설계/core/window.md` §3.2 WT-01~WT-09·§3.2.4 수동 MC-51~MC-62(core 문서 번호 — 이 문서·`manual-checklist.md`의 MC 번호와 별개) / `doc/000_프로젝트_확정사항.md` §4 마우스 파츠 설정값 표(기본 어깨 (582, 484) — CR-044 🔒) / 현행 소스 `src/state/mouseMapping.ts` `armTransform`(각도 `toFixed(2)`·배율 `toFixed(3)` 뒤 `Number()`). **오버레이 소스 변경 없음.**
+- **v2.8 상태·수**: 문서 정리 + 수동 TC 1건. 신규 수동 TC-337(MC-47 — 항상 위 복구 관찰, R-01). 자동 TC 신규·개정 없음, 기대값 변경 없음(§0.2 「기본 영역」 행은 v1.7a에서 이미 개정된 TC-123 기대·스펙 주석에 표를 맞춘 것). 337번까지 = 유효 317건(자동 271 + 수동 46) + 폐기 20건. TC-FLOW 유효 20건 + 폐기 1건(변동 없음).
+- **읽기 규칙**: 아래 표는 앞 절의 같은 항목을 대체한다. v2.6 통합 표의 R-23·R-24 행과 v2.7 추가분의 R-23·R-24 행은 아래 「2」가 대체한다. v2.7 「설계 항목 ↔ TC」의 「design.md §10.3 젤리 트리거·§10.6·§10.8 규칙표(CR-066 개정 — ui-designer 진행 중…)」 행은 아래 「5」의 대체 행이 대신한다.
+- 실행(보강 모드 — 이 절에 걸리는 자동 TC): `yarn test --run src/overlay/test/OverlayApp.test.tsx src/overlay/test/mouseMapping.test.ts`(TC-123·TC-025 — §0.2 「기본 영역」 행 대조, 기대 불변 회귀). 수동: MC-47(TC-337).
+
+### 1. §0.2 변형 참조표 「기본 영역」 행 재계산 (어깨 (558,500) → (582,484))
+
+§0.2 60행을 현행 기본 어깨로 고쳤다. 식은 §0.2 머리 문단 그대로(A = (520,530), 영역 `DEF_AREA`, 모니터 1920×1080).
+
+| 항목 | 옛 값(CR-038 — 어깨 558,500) | 현행 값(CR-044 🔒 — 어깨 582,484) |
+|---|---|---|
+| h = A − S | (−38, 30) | (−62, 46), \|h\| = √5960 ≈ 77.201 |
+| θh = atan2(h) | 141.71 | 143.43(= 180 − atan(23/31) = 143.426969, 반올림 경계 143.425와 0.002 차) |
+| 커서 (960,540) → T = (435,575), t = T − S | (−123, 75) | (−147, 91) |
+| θt | 148.63 | 148.24(= 180 − atan(13/21) = 148.240520, 경계와 0.004 차) |
+| 배율 \|t\|/\|h\| | 2.976 → 1.6 | 2.239 → 1.6(상한) |
+| 변형 문자열 | `rotate(148.63deg) scaleX(1.6) rotate(-141.71deg)` | `rotate(148.24deg) scaleX(1.6) rotate(-143.43deg)` |
+| 커서 (0,0) → T = q0 (375,525), t | (−183, 25) | (−207, 41) |
+| θt | 172.22 | 168.80(= 180 − atan(41/207) = 168.796565, 경계와 0.0016 차) — 문자열은 `Number(toFixed(2))`라 `168.8` |
+| 배율 | 3.815 → 1.6 | 2.733 → 1.6(상한) |
+| 변형 문자열 | `rotate(172.22deg) scaleX(1.6) rotate(-141.71deg)` | `rotate(168.8deg) scaleX(1.6) rotate(-143.43deg)` |
+| (참고, 표 밖) 변형 원점 | `169px 8px` | `171px 20px`(= 어깨 (582,484) − 기본 partPos (411,464)) |
+
+이 행을 기대값으로 쓰는 TC는 TC-123(`OverlayApp.test.tsx`, v1.7a 개정 — 스펙 기대 문자열이 위 현행 값과 같다)뿐이다. 기본값 자체는 TC-025(`mouseMapping.test.ts`)가 단언한다. 스펙 변경 없음.
+
+### 2. 통합 추적표 R-23·R-24 (design.md §13 RTM 예정 TC 칸과 같은 목록)
+
+자동·수동 칸은 design.md RTM R-23·R-24 칸(doc-sync 2026-10-15)과 글자 그대로 같다(v2.6 통합 행 + CR-066 TC-331~TC-334 · TC-333 · 수동 TC-336). 「겸 추적」 칸은 v2.7 추가분 R-23 행에 있었지만 RTM R-23 칸에 없는 개정 TC다 — 주 추적은 괄호 안 요구 행이며 삭제가 아니다(RTM도 그 행에서 추적한다). 폐기 TC-045·TC-142·TC-188 제외.
+
+| 요구ID | 자동 TC | 수동 TC | 겸 추적(주 추적 요구 행) |
+|---|---|---|---|
+| R-23 | TC-031, TC-044, TC-054, TC-064, TC-067, TC-080, TC-100, TC-141, TC-143~TC-148, TC-150, TC-152~TC-158, TC-165~TC-167, TC-169, TC-170, TC-172, TC-173, TC-199, TC-205, TC-208, TC-209, TC-214~TC-217, TC-219, TC-225, TC-232, TC-233, TC-235, TC-236, TC-243, TC-244, TC-246, TC-253, TC-257, TC-262, TC-282, TC-283, TC-309, TC-314, TC-331~TC-334 | TC-090, TC-159, TC-175, TC-203, TC-222, TC-237, TC-247, TC-258, TC-263, TC-290, TC-336 | 자동 TC-129~TC-133, TC-136(R-22) · TC-162(R-24) · TC-206, TC-211, TC-218(R-26) · TC-210(R-24·R-26) / 수동 TC-151(R-22·R-24) |
+| R-24 | TC-001, TC-160~TC-174, TC-189, TC-199, TC-210, TC-217, TC-244, TC-253, TC-257, TC-262, TC-282, TC-283, TC-314, TC-333 | TC-151, TC-175, TC-203, TC-222, TC-247, TC-258, TC-263, TC-290, TC-336 | 없음(v2.7 추가분 R-24 행의 TC-162·TC-167·TC-210·TC-217·회귀 TC-161·TC-166·TC-169~TC-173은 모두 왼쪽 목록 안) |
+
+R-25 행은 v2.6 통합 행 그대로다(RTM R-25 칸과 같고 CR-066으로 늘어난 TC 없음).
+
+### 3. 신규 수동 TC — R-01 항상 위 복구
+
+### TC-337 · 항상 위 복구 — 다른 창 아래로 밀린 뒤 창 전환 시 다시 맨 위 · 종류: 수동(MC-47) · 요구: R-01 · 설계: design.md §7 「창 기능 — 항상 위 재적용(R-01, 🔒 2026-10-05)」 행·RTM R-01 비고, `doc/200_설계/core/window.md` §3.2 WT-01·WT-02·WT-05·WT-07 · **신규(v2.8)**
+- Given 실제 앱(항상 위 재적용 WT-01~WT-09가 들어간 빌드 — core 2026-10-15 소스 적용), 오버레이 표시 중(그림 등록), 메모장 실행. core window.md §3.2.4 「결함 상태 만들기」 PowerShell 스크립트로 오버레이를 항상 위에서 내리고(`HWND_NOTOPMOST`) 메모장을 오버레이 위로 끌어 겹친다
+- When MC-47 절차 ①~④(다른 앱 창 클릭·Alt+Tab, 트레이로 숨긴 뒤 같은 조작)
+- Then ⓐ 화면: 창 전환 직후 오버레이가 메모장 위에 다시 보인다(그림·위치·배율 불변, 오버레이에 오류·안내 문구 없음). 트레이로 숨긴 동안에는 창을 전환해도 보이지 않는다 ⓑ 상태: 포커스·키 입력은 사용자가 고른 창에 남는다, `settings.json` 변화 없음 ⓒ bridge/core: 오버레이 ui의 command 호출·event 구독 추가 없음(새 계약 없음 — design.md §7). 재적용은 core(전경 창 변화 → `SetWindowPos(HWND_TOPMOST, …NOACTIVATE)`). 트리거 ⓑⓒ·최소화·전체 화면·다른 항상 위 앱·로그 판정은 core window.md §3.2.4 MC-51~MC-62가 맡는다(이 TC는 오버레이 쪽 관찰 요약)
+- 자동화 불가: 실제 Win32 창 z-순서·전역 전경 변화가 필요하다(jsdom 불가). ui 소스 변경이 없어 자동 TC 대상이 없다(관리자 지시)
+
+### 4. 변경 대기열 점검 (행 상태 변경 없음 — 보고만)
+
+| Q | 현재 상태 | 처리 |
+|---|---|---|
+| Q-01 | 대기 | 유지 — 공용 진입점 `src/main.tsx`, 이번 범위 밖(관리자 지시) |
+| Q-02 | 대기(ui-tester 검증 전) | **보고만** — CR-017 소스 적용 행. 영향 TC는 기존 TC로 커버(행 기록: 129 passed). 「검증됨」 마킹은 이 문서 소유자가 하지 않는다 |
+| Q-03, Q-08 | 전환됨 | 대기 아님 — 변경 없음(「검증됨」은 ui-tester 결과로) |
+| Q-04~Q-07 | 검증됨 | 변경 없음 |
+
+새 대기열 행 없음(R-01 보강은 ui 소스 변경 없음).
+
+### 5. 설계 참조·계약 판 정정
+
+- **계약 판**: 각 절이 인용한 contract 판(v0.8~v0.27)은 그 절이 쓰인 시점의 판이다. 현행은 v0.31이고 오버레이가 쓰는 command·event·타입 모양은 v0.27 이후 같다(design.md 헤더) — 기대값 영향 없음. v0.29 `DEFAULT_ASSET_SLOTS`(`hair` 제외)를 단언하는 오버레이 TC는 없다.
+- **요구 판·미확정 표기**: 각 절의 「requirements vN」은 그 절의 기준 판이다(현행 v3.4). 이 문서 머리 줄과 §0.3의 「미확정 계약(bridge 인계 필요)」 문구는 당시 기록이며, 현행은 requirements v3.4 §3·design.md 헤더 「미확정 계약 없음」이다.
+- **절 번호**: design.md doc-sync는 절·행 번호를 바꾸지 않았다(§7은 번호 없는 표에 행 추가). 이 문서가 인용한 core window.md §2.1·§2.1.1·§2.2·§9.1·§9.2는 §3.2 추가 뒤에도 같은 번호다. `design/functions.md` §5.1 모니터 목록 로드 행의 정정(「미확정」 → core window.md D8)은 이 문서가 인용하지 않는 문구라 영향이 없다.
+- **설계 항목 ↔ TC 대체 행(CR-066 본문 규칙표 — v2.7 「설계 확인 필요」 1 해소)**:
+
+| 설계 항목 | TC |
+|---|---|
+| design.md §10.3 젤리 트리거 칸·재생 조건 문단(새 누름마다 — 무엇을 누른 채여도, 같은 키 재누름 포함)·부르르 규칙 2·3 | TC-331, TC-333, 개정 TC-100·TC-132·TC-133·TC-147·TC-148·TC-154·TC-155·TC-162·TC-167 |
+| design.md §10.6 3행(스페이스 누른 채 일반 키 → 재생)·13행(Ctrl 누른 채 C → 재생) | 3행: 개정 TC-129·TC-130·TC-131·TC-145 / 13행: 개정 TC-136·TC-146 |
+| design.md §10.8 4행(키 누른 채 클릭)·7행(클릭 누른 채 키) | TC-332, TC-334, 개정 TC-208·TC-215 |
+| design.md §10.8 9행(스페이스 누른 채 클릭)·§10.12 10행(같은 경우 — 손 `pen_down_0`·키보드 `key_space`) | 개정 TC-209·TC-216·TC-257 |
+| design.md §10.8 11·12행(부르르 중 클릭 → 키 뗌 때 새 번호 젤리) | 개정 TC-210·TC-217 |
+| design.md §10.8 13행(좌·우 겹쳐 누름 — 둘째 누름도 재생) | 개정 TC-206·TC-211·TC-218 |
+| design.md §10.12 바운스 줄(CR-066) | 개정 TC-215~TC-218·TC-257 |
+
+### 설계 확인 필요 (v2.8 — 관리자 전달, TC로 우회하지 않음)
+
+1. **design.md RTM R-26·R-09 칸에 CR-066 TC 없음**: TC-332·TC-334·TC-335(자동)·TC-336(수동)은 이 문서 v2.7 추가분 R-26 행에 있으나 RTM R-26 칸은 「TC-001(개정), TC-198(개정), TC-204~TC-221 / 수동 TC-222, TC-203(개정) / TC-FLOW-10」 그대로다. 특히 **TC-335는 RTM 어느 행에도 없다**(이 문서 추적 = R-26·R-09). scenarios 쪽 추적은 v2.7 표에 있다. RTM 보충 여부는 ui-designer 판단.
+2. **RTM R-01 칸에 TC-337 없음**: RTM R-01 비고는 「수동 MC-51~MC-62는 core 쪽 확인 대상」만 적는다. TC-337(MC-47)을 예정 TC 칸에 넣을지 ui-designer 판단.
+3. (정보) RTM R-23 칸은 위 「2」 겸 추적 12건을 담지 않는다. 각 TC는 RTM R-22·R-24·R-26 칸에서 추적되므로 누락이 아니다.
+
+### 추적표 v2.8 추가분 — 「## 추적표」와 각 절 추가분 표에 더한다
+
+요구 ↔ TC(추가)
+
+| 요구ID | 자동 TC | 수동 TC |
+|---|---|---|
+| R-01(더함 — v3.4 비고 항상 위 재적용, core 담당) | 없음(ui 변경 없음 — 관리자 지시) | TC-337 |
+| R-23, R-24 | 위 「2」 통합 행 | 위 「2」 통합 행 |
+
+설계 항목 ↔ TC(추가)
+
+| 설계 항목 | TC |
+|---|---|
+| design.md §7 「창 기능 — 항상 위 재적용(R-01, 🔒 2026-10-05)」 행(ui 호출·구독 없음, core 담당) | TC-337(MC-47) |
+| design.md RTM R-01 비고(항상 위 재적용) | TC-337 |
+| design.md RTM R-13 비고 정정(위치 저장·복원은 core 구현됨) | 기존 TC-075·TC-076 / 수동 TC-085·TC-086(기대 불변) |
+| design.md RTM R-23·R-24·R-25 예정 TC 칸 교체 | 위 「2」 통합 행(R-25는 v2.6 통합 행 그대로) |
+| design.md 헤더 요구 v3.4·계약 v0.31 | 위 「5」 계약 판 문단(기대 영향 없음) |
+| design/functions.md §5.1 모니터 목록 로드 행 표기 정정 | 기존 TC-047·TC-048·TC-063(기대 불변) |
+| 확정사항 §4 기본 어깨 (582, 484)(CR-044) | §0.2 「기본 영역」 행 → TC-123, 기본값 TC-025 |
+| design.md 변경이력 2026-10-15 doc-sync 행 | 이 절 전체 |
+
+사용자행 ↔ TC-FLOW: 새 사용자행 없음(requirements v3.4 §2 변경 없음). TC-337은 환경 확인 수동 TC라 FLOW Step이 아니다. CR ↔ TC: 새 overlay CR 없음(R-01 보강은 core 몫 — window.md §3.2, ui 소스 변경 없음).
+
 ## 변경이력
 
 | 일자 | 버전 | 내용 | 근거 |
 |---|---|---|---|
-| 2026-09-30 | v2.7 | (최신 행) **CR-066 증분(대기열 소진 Q-08 · 보강)** — 바운스 시작 규칙: 새 키 누름·펜 모드 새 클릭 누름은 무엇을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체), 자동 반복·부르르·뗌·중복 누름·비펜 모드 클릭은 불변. 「CR-066 바운스 시작 규칙」 절 신설(기준·규칙·정식 번호 매핑·신규 TC·개정표 2종·설계 확인 필요·추적 추가분). 신규 자동 TC-331~TC-335(임시 `TC-FIX66-1`~`5` → 정식, `src/state/inputMachine.test.ts` it 이름 교체 — 로직 불변), 신규 수동 TC-336(MC-46 게임 상황 실측). 개정 자동 25건(TC-100·TC-129~TC-133·TC-136·TC-145~TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208~TC-211·TC-215~TC-218·TC-257 — Then 값을 개정·통과된 스펙에 맞춤), 개정 수동 TC-151·TC-159·TC-222·TC-258, TC-FLOW-01·07(연결 2a 신설)·08·10(연결 3a·4a 변경) 종료 값. `inputMachine.special.test.ts` TC-133 주석의 `TC-FIX66-3` → `TC-333`(주석만). `manual-checklist.md` 같은 패스(MC-46·CR-066 개정 주). 대기열 Q-08 → 전환됨. 자동 266 → 271, 수동 44 → 45, 폐기 20·TC-FLOW 20 불변 | 확정사항 §5 바운스 시작 규칙 🔒 · CR 대장 CR-066 · Q-08 · design/functions.md §5.2 · design.md 변경이력 CR-066 · `src/state/inputMachine.ts` |
+| 2026-10-15 | v2.8 | (최신 행) **doc-sync(v2.8) — 요구 v3.4·design.md 2026-10-15 doc-sync 행 대조 · 보강.** ① §0.2 변형 참조표 「기본 영역」 행: 기본 어깨 (558,500) → **(582,484)**(CR-044 🔒, 확정사항 §4), θh 141.71 → 143.43, θt 148.63 / 172.22 → 148.24 / 168.8, 배율 2.976 / 3.815 → 2.239 / 2.733(상한 1.6 유지) — TC-123 스펙 기대와 같은 값(스펙 변경 없음) ② 통합 추적표 R-23·R-24 행을 design.md RTM 칸과 같은 목록으로(CR-066 TC-331~TC-334·TC-333·수동 TC-336 합침, v2.7 R-23 개정 TC 중 RTM R-23 칸에 없는 12건은 「겸 추적」 칸) ③ 신규 수동 **TC-337**(MC-47 — 항상 위 복구, R-01 v3.4 비고, core window.md §3.2 WT·MC-51~MC-62 참조), 자동 TC 없음 ④ 변경 대기열 점검 — Q-01 대기 유지, Q-02 「대기(ui-tester 검증 전)」 보고만, 행 상태 변경 없음 ⑤ 계약 v0.31·요구 v3.4 판 표기 확인(기대 영향 없음), v2.7 「설계 확인 필요」 1·2 해소 표기, CR-066 본문 규칙표 행 번호(§10.6 3·13, §10.8 4·7·9·11·12·13, §10.12 바운스 줄·10)로 설계↔TC 대체 행. 「설계 확인 필요」 v2.8 1~3(RTM R-26·R-09 칸에 TC-332·334·335·336 없음 — TC-335는 RTM 전체에 없음, RTM R-01에 TC-337 없음). `manual-checklist.md` 같은 패스(MC-47 · 공통 준비 기본 `partPos` (389,492) → (411,464) 문구 정정). 자동 271 불변, 수동 45 → 46, 폐기 20·TC-FLOW 20 불변 | requirements v3.4 R-01 비고 · design.md 변경이력 2026-10-15 doc-sync 행·§7·§13 RTM · 확정사항 §4 · core window.md §3.2 · `src/state/mouseMapping.ts` `armTransform` · `OverlayApp.test.tsx` TC-123 |
+| 2026-09-30 | v2.7 | **CR-066 증분(대기열 소진 Q-08 · 보강)** — 바운스 시작 규칙: 새 키 누름·펜 모드 새 클릭 누름은 무엇을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체), 자동 반복·부르르·뗌·중복 누름·비펜 모드 클릭은 불변. 「CR-066 바운스 시작 규칙」 절 신설(기준·규칙·정식 번호 매핑·신규 TC·개정표 2종·설계 확인 필요·추적 추가분). 신규 자동 TC-331~TC-335(임시 `TC-FIX66-1`~`5` → 정식, `src/state/inputMachine.test.ts` it 이름 교체 — 로직 불변), 신규 수동 TC-336(MC-46 게임 상황 실측). 개정 자동 25건(TC-100·TC-129~TC-133·TC-136·TC-145~TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208~TC-211·TC-215~TC-218·TC-257 — Then 값을 개정·통과된 스펙에 맞춤), 개정 수동 TC-151·TC-159·TC-222·TC-258, TC-FLOW-01·07(연결 2a 신설)·08·10(연결 3a·4a 변경) 종료 값. `inputMachine.special.test.ts` TC-133 주석의 `TC-FIX66-3` → `TC-333`(주석만). `manual-checklist.md` 같은 패스(MC-46·CR-066 개정 주). 대기열 Q-08 → 전환됨. 자동 266 → 271, 수동 44 → 45, 폐기 20·TC-FLOW 20 불변 | 확정사항 §5 바운스 시작 규칙 🔒 · CR 대장 CR-066 · Q-08 · design/functions.md §5.2 · design.md 변경이력 CR-066 · `src/state/inputMachine.ts` |
 | 2026-09-30 | v2.6 | (최신 행) **doc-sync 배치(보강) — design.md 2026-09-30 doc-sync 행·현행 소스 대조.** 「doc-sync 2026-09-30」 절 신설(기준·개정표·픽스처 표현 정정·설계 확인 필요 해소·스펙 변경·추적 추가분). 개정표: TC-043·TC-044·TC-046·TC-054·TC-080·TC-105·TC-143(옛 `bounce` prop·`armWrap bounce`·`.bounce` 기대 → CR-022 현재 동작), TC-045·TC-142 **폐기(CR-022)** 재표기, 설계 참조 「§5.4 바운스 래퍼」·「§3 `bounce` prop」 → 「§5.4 `.armWrap` 컨테이너」(TC-081·TC-100·TC-144·TC-145·TC-147 포함), TC-198·TC-213 설계 칸 `PenHand` Props 8개·`machine` = `isPressing`만, TC-322 `POPUP_OPEN` → `PopupGate`. v1.6 절 「설계 확인 필요」 2건 → 해소 표기. 픽스처 「기본」 표현 = 스펙 픽스처(제품 기본은 CR-044 값). 추적: R-09·R-23~R-25 통합 행(TC-204 이후 포함), `.armWrap` 컨테이너·`PenHand` Props·`PopupGate` 설계 행 대체. 스펙: `OverlayApp.timerMode.test.tsx`·`TimerText.blink.test.tsx` 옛 `URL.createObjectURL` stub 삭제(기대 불변), `timerClock.test.ts` 머리 주석 R-34 현행값. `manual-checklist.md` 같은 패스(머리글 현행 버전·MC-37 선행 조건 `PopupGate`·변경이력). 신규 TC 없음, 수 불변(자동 266 · 수동 44 · 폐기 20 · TC-FLOW 20). CR 「적용·미검증」·대기열 상태 불변 | design.md 변경이력 2026-09-30 doc-sync · design/functions.md §5.4·§5.5 · design.md §10.12·§10.16·RTM · CR-022·CR-042·CR-044·CR-058·CR-062 · `src/components/utils/alarmSound.ts` |
 | 2026-09-29 | v2.5 | **CR-062 증분(R-40 오버레이 오른쪽 클릭 메뉴의 ui 몫 = WebView2 기본 메뉴 억제, 증분 모드·보강)**. 「CR-062 오버레이 오른쪽 클릭 메뉴」 절 신설(기준·범위 규칙·§0.3 red 보충·잔여 위험·회귀 지정 표·추적 3종·CR). 신규 자동 TC-315(`OverlayApp.contextMenu.test.tsx` — ① `.root`·키보드 img·팔 img의 `contextmenu` 반환 `false`, `document` 도달 `defaultPrevented` true(전파 유지), DOM·상태·포커스·모든 bridge 래퍼 호출 수 불변, `[role="menu"]` 없음, `preventContextMenu` export 없음 ② 오른쪽 누름·뗌 → contextmenu → 오른쪽 누름·뗌에서 클릭 파츠 `mouse_right` ↔ `mouse_base` 그대로). 신규 수동 TC-316~TC-330(MC-31~MC-45 — 횡단 설계 §7 원문, MC-36 「한쪽만 창 안」의 ui 핸들러·기본 메뉴는 관찰 항목, 시작 직후 로딩 전 기본 메뉴는 수용된 잔여 위험이라 판정 제외). TC-FLOW-21(S-21: TC-319 → TC-318 → TC-325). 회귀는 기존 TC 번호 참조만(R-09 TC-013·TC-039·TC-062, R-26 TC-214·TC-218·TC-219, R-04 TC-071·TC-073·TC-077·TC-088, R-12·R-28 TC-077·TC-227). 기존 TC 개정 없음. `manual-checklist.md` 같은 패스(CR-062 절·RV-02). 자동 265 → 266, 수동 29 → 44, TC-FLOW 19 → 20 | CR-062(사용자 결정 🔒 2026-09-29 U-1·U-3·U-5, U-2·U-4 수용) · requirements.md v3.2 R-40·R-28 용어 주·S-21 · design.md §2·§6 P-10·§7·§9·§10.9.1 L-7·L-8·§10.16·RTM · design/functions.md §5.1 · design/components.md §3 · design/a11y.md · 횡단 설계 overlay-context-menu.md v2 §7 |
 | 2026-09-29 | v2.4 | **CR-058·CR-061 동기화(증분 모드)** — 설계(요구 v3.1·design.md §10.15 15.3·15.4·15.7·design/functions.md §5.7 ④)에 맞춰 문서만 개정, 스펙 로직 불변(이미 개정·통과). 「CR-058·CR-061 … 개정 TC」 절 신설(개정표·유지 판정표·추적 3종·CR). 본문 개정: TC-297 제목·요구·설계·Given/When/Then(`synthBeepWav` 바이트 검증 → `DEFAULT_ALARM_VOLUME` === 44·`Audio` 0개), TC-298 제목·요구·설계·Given/When/Then(Blob URL 캐시 → 번들 mp3 자산 import URL과 같음·반복 호출 동일·`Audio` 0개), TC-299 머리·When ⑤·Then ⑤(없음·NaN → 0.44, `Audio` 0개), TC-286 머리·Then ⓐ②·ⓑ②(44·(268,402)·7 — 본문에 남아 있던 v1.9 값까지 정리), TC-310·TC-311·TC-312(기본음 = 번들 mp3, TC-312 ⑥ 근거를 기본음 길이와 무관하게), TC-266 Given·설계 칸(`DEF` = 픽스처), v1.8 공통 전제 `TIMER_OFF` 설명, v1.9 공통 전제(`URL.createObjectURL` stub 삭제·import 목록·`'blob:default'`·0.8 픽스처 명시), 추적표 v1.9 설계 행 15.2·15.3·15.4·§5.7 ④. `manual-checklist.md` MC-27 ②·MC-28·MC-29·MC-30 같은 패스 개정. `alarmSound.test.ts` 머리 주석(동기화 대기·정리 필요 문구)만 정정. 신규 TC 없음, 수 불변(자동 265 · 수동 29) | requirements.md v3.1 R-34·R-39 · design.md §4·§7·§10.15 15.3·15.4·15.7 · design/functions.md §5.7 ②④ · CR 대장 CR-058·CR-061 · contract v0.27 §3.3 |

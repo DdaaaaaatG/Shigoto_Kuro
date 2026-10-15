@@ -1,22 +1,24 @@
 {
-  "lastSyncedSha": "b5ff65b",
-  "syncedAt": "2026-09-30",
-  "note": "첫 /doc-sync. 기준 99fe564..b5ff65b + next-session §2-3·§2-4 잔여 목록. 산출물은 미커밋(/sync 대상). vitest 805/805·tsc·lint 0. Rust 툴체인 설치 후 cargo fmt 0·clippy 0·cargo test 466/466.",
+  "lastSyncedSha": "da6a785",
+  "syncedAt": "2026-10-15",
+  "note": "둘째 /doc-sync. 기준 b5ff65b..da6a785 + 미커밋 작업 트리(항상 위 재적용 WT-01~09 core 소스·설계 3문서). 산출물은 미커밋(/sync 대상). 검증: cargo test 558/558(11 바이너리)·vitest 881/881 전체 + ui-tester overlay 331/331·settings 552/552, 스크린샷 doc/300_검증/screenshots/20261015-{overlay,settings}/. manual.md 두 화면 신규 작성(이미지 4·11장). bridge 감사 .claude/reports/bridge-docsync-20261015.md(불일치 0, 표기 8건 정정 완료). 후속(같은 날): contract v1.0 승격+§5.4 예외, R-41 현행화, CR-067 알림음 문구, settings scenarios v33(Q-09 전환·검증됨). 최종 vitest 883/883·tsc 0.",
   "syncedTargets": [
-    "src/overlay (requirements·design·design/*·scenarios v2.6·manual-checklist·스펙 주석 3파일)",
-    "src/settings (requirements v1.26·design·design/*·scenarios v28·manual-checklist v20·스펙 4파일, TC-309·310 신규)",
-    "doc/200_설계/core (settings·data_reset·timer·assets·hook·tray·window)",
-    "doc/200_설계/bridge/contract.md v0.28 (표기 정정, 계약 변경 없음)",
-    "주석 정정: src/bridge/{types,commands}.ts, src-tauri/src/bridge/types.rs, src-tauri/src/settings/mod.rs, src-tauri/src/assets/slot.rs"
+    "src/overlay (requirements v3.4·design+functions.md·scenarios v2.8·manual-checklist·manual.md 신규)",
+    "src/settings (requirements v1.29 유지·design+presets-tab·i18n·images-tab·scenarios v32(TC-363)·manual-checklist v24·manual.md 신규·CR 대장 상태 비고)",
+    "doc/200_설계/core (assets·settings·tray·hook·window·data_reset — WT 절은 같은 날 core-designer 별도 동기화)",
+    "doc/200_설계/bridge/contract.md v0.31 (표기 정정 D-1~D-8, 계약 변경 없음)",
+    "doc/000_프로젝트_확정사항.md §6 항상 위 재적용 결정, CLAUDE.md §9 정정"
   ],
   "openItems": {
-    "settings-R35-R41-R56": "R-35는 CR-063으로 다시 폐기, R-36·R-56 「7장」은 비고로 6장 명시(v1.27). 남은 것: R-41 「기본값=비우기」 해석 사용자 확인, scenarios v29 AB-3(뒷머리 「기본값」으로 비운 뒤 포커스 — kb_down_0과 같은 현 동작 유지), AB-5 픽스처 이름(FIRST7·d7·DEFAULT_KEYS7 주석)",
-    "window-bridge-error": "window::apply_overlay_settings가 BridgeError 반환 — core→bridge 역참조 여부 core-analyst 판단",
-    "core-CR047": "hook.md §3.8·527·528·1292행, tray.md §3.5·340행 — CR-047 실측 게이트 절 정리",
-    "contract-open": "§6.2 묶음 행 분리 여부, L1508 테스트 실패 34건 기록 재판정, L185·187 CR-053 v0.23/v0.24 엇갈림, 머리 「초안」→v1 (사용자)",
-    "main-tsx-boundary": "src/main.tsx:11 bridge 밖 @tauri-apps/api import (BRG-004)",
-    "overlay-docs": "RTM R-13 비고 core 적용 확인, RTM R-23~25 예정 TC 칸, requirements §3 「미확정 계약」 문구, scenarios v2.6 개정표 내용을 TC 본문(TC-043~046·054·080·105·142·143·198·213·322)에 직접 반영, §0.2 558,500",
-    "settings-docs": "scenarios v28 AA-1~AA-5(i18n §4.3 10키, RTM R-01 TC-306·308~310, CR 대장 TC-307·314 표기, kb_down_0 비우기 후 포커스 G-1), DragHit·mouseWizard 스펙 「기본 그림」 주석",
-    "manual": "두 화면 manual.md 미작성"
+    "settings-spec-comments": "Hair.test.tsx·ImagesTab.test.tsx 주석 「설계 확인 AA-4」 잔존(판정 영향 없음, ui-test-designer 예산 소진) / TimerTab.cr052.test.tsx 머리 주석 「CR-052 변경 행」 인용 잔존(AE-2)",
+    "core-CR047-gate": "CR-047 실측 게이트 G1~G5 기록이 doc/300_검증/에 없음 — tray SEC-001 추적 「부분」. 수동 확인 기록 필요",
+    "window-W1-W2": "window::apply_overlay_settings 호출자 없음 → 삭제(W-1) 가능. window→bridge 에러 타입 역참조(W-2)는 반환 타입 WindowError 전환과 함께 후속(core-manager)",
+    "tray-TM11": "tray.md §10 TM-11 2행 「소스 미적용」 — 이번 범위 밖, 다음 core 작업 때 대조",
+    "overlay-Q01": "scenarios Q-01(main.tsx 창 라벨 분기 자동화) 대기 유지 — 공용 진입점 작업 때",
+    "manual-pending": "수동 확인 대기: overlay MC-24·27~46·47(항상 위, core MC-51~62와 함께), settings M-27~32·45·50·64a~f·65a~c, CR-062·063·064·065 「적용·미검증」",
+    "tauri-driver": "E2E 미설치 — 설치는 사용자 승인 후 메인 세션",
+    "presets-CR001": "리뷰 CR-001 PresetsTab 255줄·PresetCard 150줄 분리 미적용(ui-postprocessor, 옵트인)",
+    "decided-20261015": "사용자 결정 완료(2026-10-15): R-41 문구 현행화(requirements v1.30) · main.tsx 창 라벨 조회는 contract §5.4 예외 명문화(H-1 종결) · contract v1.0 승격(§6.2 묶음 행 유지) · 알림음 카드 문구 1회 재생 CR-067(i18n 3개 국어+스펙, 「적용·미검증」 — 설정 창 실물 확인 대기). asset scope 점 폴더 검증은 미결(계약상 노출 경로 없음)",
+    "code-header-versions": "src/bridge/types.ts:2 「(v0.29)」·src-tauri/src/bridge/types.rs:1 「(v0.28)」 머리 주석 판 번호 낡음(현행 v1.0) / src-tauri/src/bridge/mod.rs:5 「22개」·commands/mod.rs:1 「23개」 핸들러 수 낡음(실제 30) — bridge-implementer 주석 정정"
   }
 }

@@ -793,6 +793,53 @@ describe('PresetsTab — 이름 바꾸기 (R-64)', () => {
       expect(within(card('고양이 A')).getByRole('button', { name: aria(KO.renameSave, '고양이 A') })).toBeEnabled()
     },
   )
+
+  // (v32 — 2026-10-15 doc-sync) presets-tab §5.1 구현 형태: onRenameCancel 은 busyRef 가 true 면 아무것도 하지 않는다,
+  // onRenameSave 는 run 을 쓰지 않는다(편집 유지·problems 비우지 않음). 실패 분기와 성공 분기를 같은 비중으로 본다.
+  it.each(['reject', 'resolve'] as const)(
+    'TC-363(%s): 이름 바꾸기 저장 대기 중 Esc 무시(busyRef 방어) → 편집·초안 유지, reject = onError(err)·포커스 입력칸·재조회 없음, resolve = 편집 종료·재조회·포커스 「이름 바꾸기」, 두 경우 모두 문제 목록 블록 유지',
+    async outcome => {
+      const err: BridgeError = { code: 'preset.io', message: '프리셋 폴더를 읽거나 쓰지 못했습니다.' }
+      const d = deferred<PresetSummary>()
+      vi.mocked(pickFolder).mockResolvedValueOnce(DIR_IN)
+      vi.mocked(importPreset).mockResolvedValueOnce({ preset: null, problems: [{ fileName: 'kb_up.png', code: 'asset.not_rgba' }] })
+      vi.mocked(renamePreset).mockReturnValueOnce(d.promise)
+      await renderTab([P1, P2])
+      // 문제 목록을 먼저 띄운다(가져오기 실패 보고서) — 이름 바꾸기는 이 블록을 지우지 않는다
+      fireEvent.click(importBtn())
+      await within(saveCard()).findByRole('alert')
+      await waitFor(() => expect(importBtn()).toHaveFocus())
+      fireEvent.click(cardBtn('고양이 A', '이름 바꾸기'))
+      fireEvent.change(renameInput('고양이 A'), { target: { value: '다른 이름' } })
+      fireEvent.keyDown(renameInput('고양이 A'), { key: 'Enter' })
+      await waitFor(() => expect(renamePreset).toHaveBeenCalledTimes(1))
+      expect(renameInput('고양이 A')).toHaveAttribute('readonly') // pending
+      // 대기 중 Esc — onRenameCancel 이 busyRef 로 막힌다
+      fireEvent.keyDown(renameInput('고양이 A'), { key: 'Escape' })
+      expect((renameInput('고양이 A') as HTMLInputElement).value).toBe('다른 이름')
+      expect(within(saveCard()).getByRole('alert')).toBeInTheDocument()
+      if (outcome === 'reject') {
+        await act(async () => d.reject(err))
+        await waitFor(() => expect(onError).toHaveBeenCalledWith(err))
+        const input = renameInput('고양이 A') as HTMLInputElement
+        expect(input.value).toBe('다른 이름')
+        await waitFor(() => expect(input).toHaveFocus())
+        expect(listPresets).toHaveBeenCalledTimes(1)
+      } else {
+        vi.mocked(listPresets).mockResolvedValueOnce([{ ...P1, name: '다른 이름' }, P2])
+        await act(async () => d.resolve({ ...P1, name: '다른 이름' }))
+        await waitFor(() => expect(cardNames()).toEqual(['다른 이름', '고양이 B']))
+        expect(within(listCard()).queryByRole('textbox')).toBeNull()
+        await waitFor(() => expect(cardBtn('다른 이름', '이름 바꾸기')).toHaveFocus())
+        expect(listPresets).toHaveBeenCalledTimes(2)
+        expect(nonNullErrors()).toEqual([])
+      }
+      expect(within(saveCard()).getByRole('alert')).toBeInTheDocument() // problems 비우지 않음
+      expect(renamePreset).toHaveBeenCalledTimes(1)
+      expect(renamePreset).toHaveBeenCalledWith('p1', '다른 이름')
+      expect(importPreset).toHaveBeenCalledTimes(1)
+    },
+  )
 })
 
 // ─── 진행 중·편집 버림·언마운트 (§4 · §5.1 공통 규칙 · §7.1) ──────────────────────

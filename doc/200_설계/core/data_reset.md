@@ -1,7 +1,8 @@
 # data_reset 모듈 설계
 
-- 상태: 감사 반영(범위·정책은 사용자 확정 🔒 2026-09-27, 배포 전 검증 WARN 6건 반영 🔒 2026-09-27) · 최종 갱신: 2026-09-30(presets U-1)
+- 상태: 감사 반영(범위·정책은 사용자 확정 🔒 2026-09-27, 배포 전 검증 WARN 6건 반영 🔒 2026-09-27) · 최종 갱신: 2026-10-15(doc-sync)
 - 변경이력:
+  - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**) §3.7에 현재 소스 순서 한 줄을 더했다. `seed_default_assets`와 `load_manifest` 사이에 내장 프리셋 시딩(PS-11)이 들어갔다(`lib.rs:117-119`, 커밋 7dc31a5). data-reset 순서 규칙은 바뀌지 않는다. data_reset 코드 변경 없음.
   - 2026-09-30 (6차, PS-11 내장 프리셋 — [presets.md](presets.md) §3.10) **data_reset 변경 없음.** §3.4에 한 줄: 세대 초기화·전체 초기화는 `presets/` 불변(U-1)이라 내장 프리셋 재시딩이 없다. 공개 API·화이트리스트·`DATA_GENERATION`(5) 불변.
   - 2026-09-30 (5차, presets — 🔒 확정사항 §6 「프리셋」 결정 U-1 = A 「초기화 때 프리셋 유지」, 새 모듈 문서 [presets.md](presets.md)) **data_reset 변경 없음.** 프리셋 폴더(`presets/`, 데이터 폴더 바로 아래 하위 폴더)는 전체 초기화·세대 초기화 대상이 아니다 — `wipe`가 하위 폴더에 들어가지 않으므로 코드 변경 0. §3.4 표 「지우지 않는 것」에 한 줄. 공개 API·`ResetError`·`code()`·화이트리스트 불변. U-1이 B(함께 삭제)로 바뀌면 이 문서를 다시 받는다.
   - 2026-09-30 (4차, doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 3차 ①에서 「작성 시점 값」으로 남겨 둔 본문 값을 현재 소스 값으로 고쳤다: §2 `DATA_GENERATION` 표 행·§2 코드 조각(`= 5`, 세대 주석 1~5, `DEFAULT_ASSETS_FINGERPRINT` = `(6, 336_217, 0x4522_7552_5289_deea)` — `data_reset/mod.rs:39-52`)·§2 지문 설명, §3 `//!` 조각 [순서] ③(「내장 기본 전부(`DEFAULT_ASSETS.len()`) 시딩」 — `mod.rs:8`과 일치), R-A 표 `(=5)`, §6 `Seed` 원인·§11.2 DR-3(「내장 전부 성공」), 비용 목표(내장 6장), §8.2 통합 테스트 기대값(표식 5·내장 6장·`DEFAULT_ASSETS` 6개·`["generation"] == DATA_GENERATION`), 수동 M3 로그(세대 5). v3 픽스처(`defaults-v3` 6장)·§11.4 C-6 이력 문구는 옛 세트 서술이라 그대로 둔다. 공개 API·`ResetError`·`code()` 불변.
@@ -515,6 +516,7 @@ fn startup_settings(paths: &AppPaths) -> Settings {
 
 - `AppState { settings: Mutex::new(settings.clone()), … }`(lib.rs:125)은 **그대로 둔다.** 패킷은 `settings_state`를 AppState에 옮겨 넣고 중간 코드가 잠금 복사본을 쓰게 했지만, `into_inner`로 값을 꺼내면 setup의 나머지 줄이 바뀌지 않는다(결과 동일, §11.1 Δ4). setup 클로저는 이미 50줄을 넘으므로(기존 부채) 줄을 늘리지 않는다 — 기존 `let settings = settings::load_or_default(..)` 한 줄이 `startup_settings` 한 줄로 바뀌고 `seed_default_assets` 줄과 자리를 바꾼다.
 - `seed_default_assets` 주석은 「CR-035 DA-02 — data-reset 뒤에 돈다(초기화 직후엔 Skipped)」로 고친다.
+- **현재 소스(2026-10-15 doc-sync, `lib.rs:116-119`)**: 위 ★ 순서 그대로다. `seed_default_assets`와 `load_manifest` 사이에 내장 프리셋 시딩 `seed_builtin_presets(&paths.presets_dir())`(PS-11, [presets.md](presets.md) §3.10)가 들어갔다. data-reset 판정·초기화는 그보다 먼저 끝나고 `presets/`는 건드리지 않는다(§3.4 U-1). 그래서 순서 규칙은 바뀌지 않는다.
 - 창·훅·트레이·자동 실행 보정 스레드의 순서와 내용은 바꾸지 않는다. 보정 스레드(:165)는 기존대로 `autostart`를 실제 등록 상태에 맞춘다.
 - 2차: setup 이전, Builder의 첫 플러그인으로 단일 인스턴스를 등록한다(§3.10). setup 안의 순서는 위와 같다.
 - `//!` [계층] 줄의 모듈 목록에 `data_reset`을 더한다. `generate_handler!` 목록은 건드리지 않는다(bridge 패킷이 `reset_app_data`를 등록한다 — §9).

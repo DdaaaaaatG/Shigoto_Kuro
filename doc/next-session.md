@@ -22,18 +22,21 @@
 ## 2. 남은 일
 
 ### 2-1. 우선
+-2. **CR-067 알림음 카드 문구 정정 (2026-10-15, settings, 미커밋)** — 사용자: 「알림음 반복해서 하는 거 아님」. CR-055가 재생 코드만 고치고 설정 창 안내 문구(CR-052 「반복해서 울립니다」)를 남긴 결함. `src/settings/i18n/{ko,ja,en}.ts` `alarmCardDesc` → ko 「타이머가 0이 되면 깜빡이는 동안 한 번 울립니다」. 스펙 TC-277·286·289·248 개정, scenarios v33, design/i18n.md·timer-tab.md §14.16·design.md 이력. 검증 vitest 883/883·tsc 0. 남은 것: 설정 창 실물 확인 후 CR-067 「검증됨」.
+-1. **항상 위 재적용 구현 완료·미커밋 (2026-10-15, overlay R-01 🔒 보강 WT-01~WT-09, 사용자 결정 2026-10-05 「전체 화면 위에서도 올려」)** — 베타 제보 「창을 오가다 보면 오버레이가 다른 창 아래에 깔림, 숨기기→표시로 안 돌아옴」. 원인: `alwaysOnTop`은 창 생성 때 1회뿐이고 복구 경로 없음 + tao 0.37.1은 `set_always_on_top(true)`를 캐시 때문에 무시하고 표시 전환은 `SWP_NOZORDER`라 TOPMOST를 되살리지 않음. 수정: `src-tauri/src/hook/topmost.rs` 신규(unsafe U20~U27 + U23-a, `SetWinEventHook(EVENT_SYSTEM_FOREGROUND)` 훅 스레드 메시지 루프에 부착, `SetWindowPos(HWND_TOPMOST, NOACTIVATE|ASYNC)`), `window::apply_overlay_window` ④단계·`set_overlay_visible`, 트레이 「새로고침」, `lib.rs` 오버레이 Destroyed 등록 해제, `Cargo.toml` `windows` feature `Win32_UI_Accessibility` 추가(기존 크레이트 feature — 새 의존성 아님으로 판단). 설계 `core/window.md` §3.2·`hook.md` §3.11·`tray.md` §3.8(소스 적용 표기 완료), 확정사항 §6 기록. 검증: fmt·clippy 0, cargo test lib 456·통합 102 통과(TP1~TP8 신규). **실물 확인(메인 세션, dev 앱, 스크립트 scratchpad `topmost-check.ps1`)**: 강제 NOTOPMOST → 2초 유지(폴링 없음) → 전경 창 전환 즉시 TOPMOST 복구. 남은 것: 수동 MC-51~MC-62(release·Win+D·전체 화면 게임·입력 지연), verify-manager 미실행, 커밋 안 함, 베타 테스터(반스님)에게 새 빌드 전달은 사용자 요청 시 `/deploy`. 참고: dev 앱 기동 로그에 「data-reset 저장 세대 None → 5 WipeAll 삭제 0 · 내장 프리셋 Seeded 2」가 찍힘 — 이 PC dev 데이터 폴더가 비어 있었다는 뜻(조사 안 함).
 0. **프리셋 기능 구현 완료·푸시 (2026-09-30, CR-064·CR-065, 🔒 PS-01~PS-10 + PS-09 개정, 커밋 13be83d~2270652)** — 설정 창 다섯째 「프리셋」 탭: 저장·목록·적용·내보내기(폴더)·가져오기(폴더)·이름 바꾸기·삭제, 세로형 카드 격자 + 오버레이 합성 미리보기(`PREVIEW_ORDER` 9키, asset scope `$APPDATA/presets/*/*.png`). core `src-tauri/src/presets/`(unsafe 없음) · 계약 v0.31(command 30·code 40) · 설계 `doc/200_설계/architecture/presets-*.md`·`core/presets.md`·`src/settings/design/presets-tab.md`. 검증: cargo 543 통과·clippy 0, vitest 876/876, 리뷰 SEC C0 H0(H1은 SEC-001로 수정) · CR APPROVE · CORE C0 H0. **dev 앱 실물 확인(2026-09-30 18:04~18:31, `doc/300_검증/screenshots/20260930-1803-presets/`)**: 저장(사용자 직접 「세바시에-기본」)·탭 렌더·세로형 카드·미리보기 합성 OK. **수동 미확인**: 내보내기·가져오기·적용(오버레이 즉시 반영)·삭제·이름 바꾸기·ja/en 문구 검수(M-64a~f·M-65a~c) → 확인 후 CR-064·065 「검증됨」. **남은 부채**: 리뷰 CR-001(`PresetsTab` 본문 255줄·`PresetCard` 150줄 → 훅/서브컴포넌트 분리, ui-postprocessor), CORE-003·005·006(LOW), 되돌림 실패(`changed:true`) 경로 테스트 미작성(재현 곤란). 프리셋 폴더 실물: `%APPDATA%\com.kuro.keyviewer\presets\1790759046103\`.
 0-1. **바운스 시작 규칙 변경 완료·검증됨 (2026-09-30, overlay CR-066, 🔒 확정사항 §5, 커밋 40c5d1d·131101c·4e8d628)** — 사용자 피드백 「게임 중 마우스 버튼 누른 채 키를 치면 안 튕김」. 새 키 누름·펜 모드 새 클릭마다 매번 젤리 재시작(다른 키·버튼을 누른 채여도, CR-027 대체), 자동 반복·부르르 불변. `src/state/inputMachine.ts` `startsBounce` 제거·`onMouseButton` 조건 제거. TC-331~335 신규·25건 개정, vitest 881/881. 사용자 dev 앱 확인 「맞음」. 남은 수동: MC-46(release). 수용한 경계: 부르르 중 클릭의 젤리는 자동 반복 신호로 번호가 동기화돼 실질 미발생(발생하면 조정).
 1. **커밋 완료 `2be41ce`(2026-09-29, 푸시 완료 — main = origin/main 확인 2026-09-30)** — 1-3 오른쪽 클릭 메뉴와 함께 커밋. 내용: verify PASS(`doc/300_검증/verify-20260929-1928.md`, C0 H0) 후 1~3 수정 완료 — core 7건(CORE-201 hook 테스트 직렬화 `KEYS_TEST_LOCK`, CORE-207·208 주석, SEC-201 로그 경로, SEC-205 JSON 1MiB 상한 `settings::read_capped_string`), TS 3건(CR-060 settings·CR-061 overlay: 음량 단일 소스·중첩 삼항·calcNow), 문서 동기화(contract v0.27, core 4문서, 두 화면 design·requirements·scenarios·manual-checklist, `//!` 주석 5곳). settings R-46 🔒 문구도 사용자 지시로 (268,402)·7°(requirements v1.25). 사후 검증: fmt·clippy 0, cargo test 429/429, tsc·lint 0, vitest 801/801. 커밋 전 release exe 실행·캡처 확인(사용자 OK 후, 실행 시 이 PC 데이터 초기화). 커밋 메시지에 「원격 첫 커밋 99fe564 메시지는 0.3.0이지만 내용은 0.4.0」 정정 한 줄.
 1-1. **예정(사용자 2026-09-29)**: 기본 알림음을 나중에 옛 합성 기본음(삐 소리)으로 되돌릴 계획 — CSP `media-src`의 `blob:`은 **유지**(빼지 않는다).
 1-3. **오버레이 오른쪽 클릭 메뉴(overlay R-40, CR-062) 구현 완료·수동 미검증(커밋 2be41ce, 2026-09-29)** — 사용자 피드백 "키뷰어 오른쪽클릭하면 트레이 옵션 같이". 🔒 결정: 잠금 중에도 뜸(전역 훅, 클릭은 아래 창에도 전달), 누른 곳·뗀 곳 둘 다 창 사각형 안, 전체 화면(전경 창 클라이언트 영역이 모니터 전체)이면 안 뜸, 포커스 이탈·메뉴 경합 수용, 브라우저 기본 메뉴 제거. 설계 `doc/200_설계/architecture/overlay-context-menu.md`, core hook·window·tray.md, overlay requirements v3.2·design §10.16. 소스: hook/{right_click,foreground}.rs·tray/popup.rs 신규(unsafe는 foreground.rs U12~U19만), `PopupGate` Idle→Pending→Open(CORE-301), 사각형 판정을 전경 조회보다 먼저(SEC-301), lib.rs `start_input_pipeline`·`initial_hand_anchor` 추출, overlay `.root` onContextMenu preventDefault. 검증: fmt·clippy 0, cargo test 466/466, vitest 803/803, 리뷰 core·security C0 H0. **남은 것: 수동 MC-31~MC-45(dev·release) — 사용자가 게임 끝나고 "띄워" 할 때만 앱 실행.** 관찰·수용: T-f(메뉴 바깥 오버레이 재클릭 시 닫힘→재표시), T-j(늦은 메뉴 최대 1개), 앱 시작 직후 로딩 전 구간 브라우저 메뉴. 문서 잔여: overlay design.md:724·manual-checklist.md:65·scenarios.md:3804의 `POPUP_OPEN` 이름 → `PopupGate`.
 1-2. **다음 방향(사용자 합의 2026-09-29)**: 커밋 → 피드백 받아 새 기능(요구ID로 정리, 계층 1개면 해당 리프, 여러 계층이면 system-architect 절차). 남은 구조 이슈(CORE-202 훅 콜백 Mutex·CORE-203 종료 경로 Unhook·CORE-204 채널 상한·CORE-205 set_settings 59줄·리뷰 CR-203 긴 함수 9개·SEC-202·204·206·CORE-206)는 새 기능이 그 영역을 건드릴 때 묶어서, 아니면 정식 배포 전에.
-2. `CLAUDE.md` §9 제품 규격 요약이 옛 규격(마우스 파츠 ≤256·키연타 쾅·팔 곡선·한국어 UI) — 확정사항 §3~§6에 맞춰 정정(메인 세션 소관).
+2. ~~`CLAUDE.md` §9 제품 규격 요약 정정~~ — 2026-10-15 완료(메인 세션 직접, 확정사항 §3~§6 기준).
 3. 병행 세션 주의: 한 작업 트리를 두 세션이 동시에 쓰면 커밋에 상대 세션의 미검증 변경이 섞인다. 커밋 전 `git status`로 내 변경만인지 확인하고, 병행 중이면 파일 단위로 `git add`.
 4. ja·en 문구 검수 — CR-057, 초기화 카드(`needs review` 주석 정리는 ui 위임).
 
 ### 2-2. 수동 확인 대기 (기록상 미확인 — 이미 봤으면 CR 「검증됨」 처리)
 - 오버레이: MC-24(뒷머리), MC-27~30(뽀모도·알림음 자동 재생·타이머), M-40a(알파 기준 끌기, dev·release), 펜 모드 특수 키, 트레이 「새로고침」·타이머 메뉴.
+- 오버레이 항상 위 재적용: MC-51~MC-62(window.md §3.2.4) — MC-52(강제 해제→전경 전환)는 메인 세션이 dev에서 확인, 나머지(release·Win+D·전체 화면 게임·입력 지연·로그 개인정보)는 미확인.
 - 설정 창: **프리셋 탭 M-64a~f·M-65a~c(내보내기·가져오기·적용·삭제·이름·열 수·ja/en)**, M-27(확인창 후 포커스), M-28·M-31(ja·en), M-29(새 PC 첫 실행 시딩), M-30(기본 이미지 다운로드), M-32, M-45a~f, M-50a~g, 창 닫았다 다시 열기(CR-041).
 - 자동 실행: 재로그온 후 실행, 클릭 통과, 작업표시줄 토글, 옛 레지스트리 Run 값 잔존 여부, M-T1.
 
@@ -42,14 +45,12 @@
 - 0.4.0 문서 잔여(2026-09-29 대부분 해소). 남은 것: core `settings.md` §3.7·§3.8·§3.10 코드 조각·S-T 표 옛 기본값, `data_reset.md` 본문 「=4·7장·376 708」(변경이력 행으로만 정리됨), `assets.md` §1 DA-01 「7장」, `timer.md` 「소스 미적용」 표기 확인. 테스트 스펙 주석: settings `AlarmSoundCard.test.tsx` TC-283 이름 「기본 80%」, `TimerTab.test.tsx:334·344`, `TimerTab.cr052.test.tsx:52` / overlay `TimerText.blink.test.tsx:98-111`·`OverlayApp.timerMode.test.tsx` 옛 `createObjectURL` stub 잔재, `timerClock.test.ts` 머리 R-34 옛 값 인용.
 - verify 잔여(2026-09-29 리포트 기준, 위 1-1 구조 이슈 외): 리뷰 CR-206(`src/bridge/commands.ts:124-129` resetAppData JSDoc 낡음), 이전 SEC-101·CORE-101·CORE-102, 이전 CR-003(`MousePartsTab.tsx:418` findUrl ↔ imageSlots.findEntry 중복).
 - window 6개 함수 반환 타입 `WindowError` 전환, From impl을 error.rs로 이관.
-- manual.md(두 화면) 미작성.
+- ~~manual.md(두 화면) 미작성~~ → 2026-10-15 작성 완료(`src/{overlay,settings}/manual.md` + manual/img/).
 - plugin-dialog JS는 2.2대(다른 tauri JS 패키지는 2.12).
 
-### 2-4. `/doc-sync` 대상 (문서 잔여)
-- **bridge·core 문서**: `contract.md`(v0.27) 이미 구현된 항목의 「미반영·소스 미적용」 표기(L14·15·358·114·651·680·719·1505·1508·1547·1561·1577, §8 v0.20~v0.26 행), 머리 「초안」→v1 승격 여부, §7 L1358 「확인 필요」, §5 옛 문구, 옛 겹침 순서(contract·`core/assets.md`·`slot.rs` 주석) / `bridge/types.rs:21`, `types.ts:155`·`types.rs`의 「같은 크기」 주석 / core 문서 CR-019·024 「소스 미적용」, `settings.md` 반영 표기.
-- **overlay**: design.md 「미확정 계약」·「소스 미적용」 표기, §10.12·`functions.md` §5.5 PenHand Props, RTM R-16의 TC-055 흔적·T-1·T-2 / scenarios TC-080·TC-143 옛 `.bounce`, R-09·R-23~25 추적표에 TC-204+ / manual-checklist 머리글 v1.4·변경 이력.
-- **settings**: requirements R-11·15·16·18 미작성, R-19·R-27 「초록 강조색」, S-14·S-17·S-22·S-24 / scenarios M-23(초록)·J-1(10키/11키)·V-1·V-3·Q-02·TC-208/209 번호 중복·TC-208/209 BDD / manual-checklist W-4·W-5·M-4 / design.md P-1 재시도 서술 / `i18n.md` 「24개」 / `images-tab.md` 머리 계약 v0.14·§3.1 `dialogPickImage`.
-- CR 「적용·미검증」 → 확인 끝난 것부터 「검증됨」.
+### 2-4. `/doc-sync` — 둘째 배치 완료 (2026-10-15, 미커밋)
+- 기준 `b5ff65b`→`da6a785` + 작업 트리. 화면 2(requirements·design·scenarios·manual-checklist)·core 6문서·contract v0.31 표기 정정 8건(계약 변경 없음, 감사 `.claude/reports/bridge-docsync-20261015.md` 불일치 0)·**manual.md 두 화면 신규**(overlay 이미지 4장, settings 11장). 검증: cargo 558/558, vitest 881/881, ui-tester overlay 331/331·settings 552/552 + 스크린샷 `doc/300_검증/screenshots/20261015-{overlay,settings}/`. 마킹: settings Q-01·Q-02·AA-1·2·4·5·AB-3·AD-1 해소, overlay Q-02 검증됨, 수동 TC-337(MC-47 항상 위 복구) 신설, settings TC-363 신설(PASS). 미해결은 `doc/doc-sync-state.json` openItems가 단일 소스(사용자 결정 5건 포함).
+- 이전 잔여 목록(contract 표기·overlay 미확정 계약 22곳·settings i18n 10키·R-13 비고 등)은 전부 해소. 남은 것: openItems 참조.
 
 - 2026-09-30: Alt+Tab 때 오버레이 사라짐 — 사용자 확인으로 해결됨(조사 항목 삭제). git 로컬 설정: 커밋·푸시 계정 DdaaaaaatG(noreply 주소), 원격 URL `https://DdaaaaaatG@github.com/...`.
 
@@ -61,6 +62,10 @@
 | # | 항목 | 비고 |
 |---|---|---|
 | 4 | 흰 글자 on 포인트색 #BE72AD 대비 3.38:1(AA 미달) | 판단 대기 |
+| ~~5~~ | ~~settings R-41 문구~~ → 결정 완료: 앱 그대로, 문장 현행화(requirements v1.30) | 2026-10-15 |
+| ~~6~~ | ~~main.tsx 직접 import~~ → 결정 완료: contract §5.4 예외 명문화(코드 변경 없음) | 2026-10-15 |
+| ~~7~~ | ~~contract 초안→v1~~ → 결정 완료: v1.0 승격(내용 v0.31 동일, 이후 v1.x/v2.0 규칙), §6.2 묶음 행 유지 | 2026-10-15 |
+| ~~8~~ | ~~알림음 카드 설명 문구~~ → 결정 완료: CR-067로 ko/ja/en 「한 번 울립니다」 정정, 스펙 4파일 개정, scenarios v33, 「적용·미검증」(설정 창 실물 확인 대기) | 2026-10-15 |
 
 결정 완료(2026-09-30): `Cargo.toml` rust-version 1.90으로 상향(tauri 2.12·single-instance 2.5 요구와 일치) / 그림 원본 보관 폴더 = 루트 `originals/`(그림은 git 제외, README만 커밋) / settings S-18·TC-FLOW-19는 폐기 유지(뒷머리 기본 그림 없음 확정, CR-063).
 

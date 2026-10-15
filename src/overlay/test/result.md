@@ -1,5 +1,33 @@
 # 테스트 결과 — overlay
 
+## 2026-10-15 실행 (scenarios v2.8 전건, doc-sync 배치)
+
+실행: vitest `yarn test --run src/overlay src/state src/components` · E2E 미설치(tauri-driver 없음) · 스크린샷 8장
+판정: **통과** (vitest 파일 40 / 테스트 331 전건 PASS, FAIL 0, SKIP(수동) 46)
+
+| 항목 | 실측 | 증거 |
+|---|---|---|
+| vitest | Test Files 40 passed (40) / Tests 331 passed (331), exit 0 | 실행 출력 말미(16:11) |
+| 메인 세션 전체 881/881 대비 | 차이 없음. 이번 범위(overlay·state·components)만 331건이며 settings 등은 범위 밖 | — |
+| 콘솔 오류 | dev 앱 로그 `.dev-tester.log`에 error/panic 0건 | `.dev-tester.log` |
+| 앱 기동 | 450x350 창, 기본 이미지·내장 프리셋 시딩 건너뜀(이미 존재) 로그 확인 | `.dev-tester.log` |
+
+스크린샷 (`doc/300_검증/screenshots/20261015-overlay/`, 8장, 육안 확인):
+- `1-idle.png` 대기: 몸통·타이머 말풍선(00:00:00)·펜 손 정상 표시, 투명 배경
+- `2-key-down.png` · `3-key-up.png` · `4-slam.png` 키 입력 상태
+- `5-mouse-topleft.png` · `6-mouse-bottomright.png` 마우스 이동 · `7-rest.png` 쉬는중
+- `context-menu.png` 오른쪽 클릭 메뉴: 설정 열기 / 새로고침 / 오버레이 표시·숨김 / 종료 4항목 표시 확인
+- 상태별 이미지 변화의 정밀 판정(팔 곡선·배율)은 육안 캡처만으로 확정하지 않는다. 수동 체크리스트로 인계.
+
+**Q-02 대상 TC 통과 여부:** Q-02(CR-017) 대상 TC-015~017·024·025·037~046·098·103~108·113~125 중 스펙에 등록된 TC는 전부 PASS. TC-042는 폐기(CR-015)이고 TC-045는 스펙(.test.*)에서 TC 번호로 검색되지 않음(시나리오상 바운스 래퍼 TC, 매핑 확인 필요 — 기대 영향 없음, 1차 분류: 스펙(추정)). 나머지 TC 단위 필터 실행은 하지 않고 파일 단위 PASS로 확인.
+
+SKIP(수동): `manual-checklist.md`의 MC 항목(MC-47 포함, 수동 TC 46건) 미실행, 인계.
+설치 승인 필요: tauri-driver (E2E 미실행).
+프로세스: 내가 띄운 kuro-keyviewer PID 13000만 종료, 종료 후 `kuro-keyviewer` 잔존 0.
+
+---
+
+
 ## 2026-09-27 실행 (타이머 알림음 TC-296·TC-299~TC-305·TC-307~TC-309·TC-313 재검증)
 
 대상 TC: TC-296(깜빡임), TC-299, TC-300~TC-305, TC-307~TC-309, TC-313.

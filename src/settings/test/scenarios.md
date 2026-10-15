@@ -1,6 +1,8 @@
 # settings 테스트 시나리오
 
-- **v28 기준(2026-09-30 doc-sync — 이 줄이 아래 모든 기준 줄보다 우선)**: `src/settings/requirements.md` **v1.26** · `src/settings/design.md` 변경이력 2026-09-30 doc-sync 행 · contract v0.27 · 현행 소스. 상태: **개정 v28**(증분 모드, 대기열 Q-02 전환). 개정 내용·수·제외 범위는 TC 목록 끝 「doc-sync 개정(v28)」 절. 수: 자동 TC 번호 310개(TC-001 ~ TC-310) 중 유효 301 · 폐기 8 · 결번 1(TC-307) · TC-FLOW 32 · 수동 54
+- **v33 기준(2026-10-15 CR-067 — 이 줄이 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-067 🔒 · `design/i18n.md` `alarmCardDesc` CR-067 변경 행 · `src/settings/design.md` 변경이력 CR-067 행 · 현행 사전 `src/settings/i18n/{ko,ja,en}.ts`. requirements v1.29 불변. 상태: **개정 v33**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v33 개정 — CR-067」 절. 수 불변: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
+- **v32 기준(2026-10-15 doc-sync — v33 줄 다음으로 아래 모든 기준 줄·절보다 우선)**: `src/settings/requirements.md` **v1.29**(요구 증감 없음) · `src/settings/design.md` 변경이력 2026-10-15 doc-sync 행 · `design/presets-tab.md`(§1.2 내장 프리셋 · §2 실측 · §5.1 구현 형태 표 · §11.8 ≤ 9장) · `design/i18n.md`(§4.3 11키 · §4.12 키 위치) · `design/images-tab.md` 머리(계약 v0.31) · 현행 소스. 상태: **개정 v32**(증분 모드 — 추가·수정만, 번호 보존). 개정 내용은 끝 「v32 doc-sync」 절. 수: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
+- **v28 기준(2026-09-30 doc-sync — v32 이전 기준 줄)**: `src/settings/requirements.md` **v1.26** · `src/settings/design.md` 변경이력 2026-09-30 doc-sync 행 · contract v0.27 · 현행 소스. 상태: **개정 v28**(증분 모드, 대기열 Q-02 전환). 개정 내용·수·제외 범위는 TC 목록 끝 「doc-sync 개정(v28)」 절. 수: 자동 TC 번호 310개(TC-001 ~ TC-310) 중 유효 301 · 폐기 8 · 결번 1(TC-307) · TC-FLOW 32 · 수동 54
 - 기준: `src/settings/design.md`(2026-09-24, 변경이력 마지막 행 CR-026) / `src/settings/requirements.md` v1.6 / `doc/200_설계/bridge/contract.md` v0.8 + CR-018 미확정 계약(`MouseSettings.area: [Point, Point, Point, Point]` 추가·`pad` 삭제. 기본 `area` = `DEFAULT_AREA` [(375,525), (495,525), (495,625), (375,625)] — 관리자 전달 core 기본값, 손 기준점 435,575 중심) + CR-020 미확정 계약(`Settings.slam`·`AssetSlot` `'slam'` 삭제) + **CR-026 미확정 계약**(`MouseSettings.penPos: Point | null` 기본 `null` = `DEFAULT_MOUSE_SETTINGS.penPos`, `AssetSlot` 펜 슬롯 — 이 화면은 `slotKey` `'pen_up'`만) + overlay CR-025 `resolvePenPos`(`src/state/mouseMapping.ts` import — overlay `design/functions.md` `defaultPenPos`: `penPos` null이면 손 그림 중심을 `mouse.hand ?? 이동 영역 중심`에 두고 정수 반올림) / CR 대장 `test/change-requests.md`(CR-003~006, CR-016, CR-018, CR-020, CR-026)
 - **CR-028 기준(v8, 이 줄이 위 줄보다 우선)**: `src/settings/design.md`(변경이력 마지막 행 CR-028) + `design/general-tab.md` · `design/images-tab.md` · `design/i18n.md` / `src/settings/requirements.md` **v1.7** / `doc/200_설계/bridge/contract.md` **v0.14**(소스 미적용 — 스펙은 v0.14 이름으로 쓰고 bridge는 mock) / 수용 기준 U-1 ~ U-13(`doc/200_설계/architecture/settings-v2-03-packet-ui.md` §6) / 결정: `idleSeconds` 정본 범위 60 ~ 3600초(1 ~ 60분), 표준 HTML 원소 직접 사용(D-3) 수용
 - **CR-031 기준(v9, 이 줄이 위 두 기준 줄보다 우선)**: `src/settings/design.md`(변경이력 마지막 행 CR-031 — §2·§2.1·§3·§4 `tabRefs`·§5.3 `onTabKeyDown`·렌더 골격 개정·§9·§11 D-4·RTM R-27·R-28) + `design/images-tab.md` §1·§6(2′·3′·6′·`AddSlotCard`)·§6.1 + `design/general-tab.md` §2.2 / `src/settings/requirements.md` **v1.8**(R-19 폐기 → R-27·R-28) / contract v0.14(변경 없음) / CR 대장 CR-031
@@ -2545,10 +2547,10 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 - When 입력 중(`01`) 잠금 → 풀림 / 되돌림 안내 뒤 잠금 → 풀림 / 탭 사례별 재렌더, `07` 입력 중 `running` 수신 → **묶음 blur(`focusOut`, relatedTarget null)** → `stopped` / **가드** ① 시 `01` 입력 → `locked` true 재렌더 → 묶음 blur ② 잠긴 채 시 `01` → blur → Enter → 분 `60` → blur
 - Then ⓐ 잠김 = 세 칸 disabled·안내 `멈춤 상태에서 바꿀 수 있습니다`(`msgError` 아님), 풀림 = 활성·빈 안내 / 탭: 타이머 `running`·`paused`·`finished`만 잠김(잠김 안내), **CR-052 개정: 타이머 켜짐 `stopped`만 입력 가능 — 타이머 모드 아님 4사례(스톱워치 `running`·`stopped`(사례 추가, 모두 8사례), 둘 다 꺼짐 `running`, 꺼진 타이머 모드 `paused`)는 회색 비활성(세 칸 disabled·`aria-disabled="true"`·안내 줄 빈 값, 옛 「나머지 4사례 입력 가능」 대체 — 컴포넌트 수준은 TC-288)**, 잠긴 뒤 blur 뒤에도 칸 `00:25:00`·잠김 안내 / 가드 ① 칸 `00`·`25`·`00`·잠김 안내 ② 세 칸 `aria-invalid` 없음·안내 = 잠김 문구·`msgError` 아님(invalid 불변) ⓑ 잠기면 draft·invalid 버림(칸 = 저장값 `00:25:00`, 풀린 뒤에도 저장값·`aria-invalid` 없음), 잠긴 동안 `commit`은 저장·되돌림 판정을 하지 않는다 ⓒ `onCommit`·`setSettings`·`controlTimer` 0회(잠금은 화면 판정 — core 호출 없음), 가드 ①·② blur·Enter 모두 `onCommit` 0회(가드가 없으면 ②에서 `onCommit(5100)`), 탭 잠긴 뒤 blur `setSettings` 0회
 
-### TC-277 · 알림음 카드 마운트·상태 문구 · 종류: 자동 · 요구: R-53 · 설계: §14.7.3 마운트 조회 효과(`alive`)·`statusText`, §14.6 `sound`(초기 `null` = 기본), 버튼 비활성 규칙, §14.8 렌더, §14.10 `get_alarm_sound`, §14.11 `aria-live` · 스펙: `test/AlarmSoundCard.test.tsx` · **신규(CR-050)**
+### TC-277 · 알림음 카드 마운트·상태 문구 · 종류: 자동 · 요구: R-53 · 설계: §14.7.3 마운트 조회 효과(`alive`)·`statusText`, §14.6 `sound`(초기 `null` = 기본), 버튼 비활성 규칙, §14.8 렌더, §14.10 `get_alarm_sound`, §14.11 `aria-live` · 스펙: `test/AlarmSoundCard.test.tsx` · **신규(CR-050)** · **개정(CR-067 — 설명 문구 1회 재생, 「v33 개정 — CR-067」 절)**
 - Given `getAlarmSound` deferred → `MP3` / `null` / `WAV`(1024B) / reject `sound.io` / 언마운트 뒤 reject
 - When 마운트(·응답)
-- Then ⓐ h2 `알림음`·설명 `타이머가 0이 되면 한 번 울립니다`·힌트 `wav·mp3·ogg, 1MB 이하`, 응답 전·`null`·실패 = `지금: 기본 알림음`·「기본값」 disabled, `MP3` = `지금: 등록한 알림음 (MP3 · 305 KB)`·「기본값」 활성, `WAV` = `(WAV · 1 KB)`, 「파일 등록」·「미리 듣기」 늘 활성·세 버튼 `type=button`, 상태 문구 `p[aria-live=polite]`·클래스 `soundStatus`(§14.3·§14.8 — CSS Modules 이름 포함 단언, TC-275 `msgError` 관례) ⓑ `onError` = 실패 1회 `{code:'sound.io', message}`, 언마운트 뒤 늦은 실패는 무시 ⓒ `getAlarmSound` 마운트마다 1회·인자 없음, `importAlarmSound`·`removeAlarmSound`·`pickAudioFile`·`playSound`·`onCommitVolume` 0회
+- Then ⓐ h2 `알림음`·설명 `타이머가 0이 되면 깜빡이는 동안 한 번 울립니다`(CR-067, 전체 일치), CR-052 반복 문구 `타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다`·CR-050 옛 문구 `타이머가 0이 되면 한 번 울립니다` 텍스트 없음(전체 일치 기준)·힌트 `wav·mp3·ogg, 1MB 이하`, 응답 전·`null`·실패 = `지금: 기본 알림음`·「기본값」 disabled, `MP3` = `지금: 등록한 알림음 (MP3 · 305 KB)`·「기본값」 활성, `WAV` = `(WAV · 1 KB)`, 「파일 등록」·「미리 듣기」 늘 활성·세 버튼 `type=button`, 상태 문구 `p[aria-live=polite]`·클래스 `soundStatus`(§14.3·§14.8 — CSS Modules 이름 포함 단언, TC-275 `msgError` 관례) ⓑ `onError` = 실패 1회 `{code:'sound.io', message}`, 언마운트 뒤 늦은 실패는 무시 ⓒ `getAlarmSound` 마운트마다 1회·인자 없음, `importAlarmSound`·`removeAlarmSound`·`pickAudioFile`·`playSound`·`onCommitVolume` 0회
 
 ### TC-278 · 파일 등록 · 종류: 자동 · 요구: R-53 · 설계: §14.7.3 `onImport`(`soundPending`·취소 null·성공 `onError(null)`), §14.9 T-13, §14.10 `pickAudioFile`·`import_alarm_sound` · 스펙: `test/AlarmSoundCard.test.tsx` · **신규(CR-050)**
 - Given `sound` null, `pickAudioFile` 1회차 deferred → `'C:/sounds/bell.mp3'`, `importAlarmSound` → `MP3` / 2회차 `null`(취소)
@@ -2590,10 +2592,10 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 - When 렌더
 - Then ⓐ h2 `[뽀모도 타이머, 알림음, 시간 글자]` ⓑ 활성 조작 DOM 순서 ① `[스톱워치 사용, 타이머 사용, 시, 분, 초, 파일 등록, 미리 듣기, 음량, 회전, 크기, 글자 색]`(세 버튼·「기본값」 건너뜀) ② `[스톱워치 사용, 타이머 사용, 시작, 일시정지, 멈춤, 파일 등록, 미리 듣기, 기본값, 음량, 회전, 크기, 글자 색]`(잠긴 세 칸 건너뜀) ⓒ `getAlarmSound` 2회(마운트마다), `setSettings`·`controlTimer` 0회
 
-### TC-286 · i18n 사전(CR-050) · 종류: 자동 · 요구: R-55 · 설계: i18n §4.10 표·주(`ERROR_CODES` 배치 확정)·§4.9 삭제·변경 표기, timer-tab §14.12 · 스펙: `test/i18n.test.ts` · **신규(CR-050)** · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)**
+### TC-286 · i18n 사전(CR-050) · 종류: 자동 · 요구: R-55 · 설계: i18n §4.10 표·주(`ERROR_CODES` 배치 확정)·§4.9 삭제·변경 표기, timer-tab §14.12 · 스펙: `test/i18n.test.ts` · **신규(CR-050)** · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)** · **개정(CR-067 — ko `alarmCardDesc` 기대값, 「v33 개정 — CR-067」 절)**
 - Given ko·ja·en 사전, `ERROR_CODES`
 - When 키·값 비교
-- Then ⓐ 해당 없음(사전) ⓑ ko 새 22키 = §4.10 ko 열 정확(`timerStopwatchEnabled` 스톱워치 사용 ~ `alarmPreviewFailed`), `timerStopHint` = `멈춤을 누르면 처음 시간으로 돌아갑니다`, `errors['timer.disabled']` = `스톱워치나 타이머가 꺼져 있습니다. 먼저 둘 중 하나를 켜 주세요.`(옛 CR-045 문구 아님), `format(alarmCurrentCustom,{format:'MP3',size:305})` = `지금: 등록한 알림음 (MP3 · 305 KB)`, 세 사전 `timerEnabled`·`timerEnabledDesc` 없음·단순 키 집합 동일, `ERROR_CODES` 25·`timer.disabled` 뒤 `[sound.not_audio, sound.too_many_bytes, sound.io, unknown]`, ja·en 22키 비어 있지 않음·ko와 다름·`{format}`·`{size}`·`99:59:59`·`00:00:01` 유지, ja·en `timerStopHint`·`errors['timer.disabled'|'sound.*']` 비어 있지 않음·ko와 다름·옛 ja·en `timer.disabled` 문구 아님, `%`·`:` 키 없음 ⓒ 해당 없음
+- Then ⓐ 해당 없음(사전) ⓑ ko 새 22키 = §4.10 ko 열 정확(`timerStopwatchEnabled` 스톱워치 사용 ~ `alarmPreviewFailed`. 그중 `alarmCardDesc` = `타이머가 0이 되면 깜빡이는 동안 한 번 울립니다` — i18n `alarmCardDesc` CR-067 변경 행, CR-052 반복 문구 대체), `timerStopHint` = `멈춤을 누르면 처음 시간으로 돌아갑니다`, `errors['timer.disabled']` = `스톱워치나 타이머가 꺼져 있습니다. 먼저 둘 중 하나를 켜 주세요.`(옛 CR-045 문구 아님), `format(alarmCurrentCustom,{format:'MP3',size:305})` = `지금: 등록한 알림음 (MP3 · 305 KB)`, 세 사전 `timerEnabled`·`timerEnabledDesc` 없음·단순 키 집합 동일, `ERROR_CODES` 25·`timer.disabled` 뒤 `[sound.not_audio, sound.too_many_bytes, sound.io, unknown]`, ja·en 22키 비어 있지 않음·ko와 다름·`{format}`·`{size}`·`99:59:59`·`00:00:01` 유지, ja·en `timerStopHint`·`errors['timer.disabled'|'sound.*']` 비어 있지 않음·ko와 다름·옛 ja·en `timer.disabled` 문구 아님, `%`·`:` 키 없음 ⓒ 해당 없음
 
 ### TC-287 · ja·en 렌더(두 토글 외 새 문구) · 종류: 자동 · 요구: R-55 · 설계: §14.8 렌더(`useMessages`), §14.12, i18n §4.10 ja·en 열 · 스펙: `test/TimerTab.test.tsx` · **신규(CR-050)**
 - Given 언어 ja / en × ① `SETTINGS`·파일 없음 ② `S_CD`·`cd('running')`·`MP3`
@@ -2643,10 +2645,10 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 | R-50 시작 시간 | 유효 🔒 | TC-269, TC-273, TC-274, TC-275, TC-276, TC-285 | TC-FLOW-28 | M-50d, M-50g |
 | R-51 두 모드 공통 버튼 | 유효 🔒 | TC-252(개정), TC-253, TC-254, TC-267, TC-286(`timerStopHint`) | TC-FLOW-28, TC-FLOW-29 | M-50g |
 | R-52 끝남 깜빡임 | 유효 🔒 | TC-284 | TC-FLOW-29 | M-50c, M-50f |
-| R-53 알림음 카드 | 유효 🔒 | TC-269, TC-277, TC-278, TC-279, TC-280, TC-281, TC-282, TC-285 | TC-FLOW-30 | M-50a, M-50b, M-50e, M-50f |
+| R-53 알림음 카드 | 유효 🔒 | TC-269, TC-277(개정 CR-067), TC-278, TC-279, TC-280, TC-281, TC-282, TC-285 | TC-FLOW-30 | M-50a, M-50b, M-50e, M-50f |
 | R-54 음량 | 유효 🔒 | TC-269, TC-281, TC-283 | TC-FLOW-30 | M-50a |
-| R-55 3개 국어 | 유효 🔒 | TC-273, TC-279, TC-286, TC-287, TC-268(개정), TC-246(개정) | TC-FLOW-28, TC-FLOW-30 | M-50e, M-50g |
-| R-44 | 유효(「on/off 토글」 부분 → R-49) | TC-247, TC-248, TC-266 | TC-FLOW-24 | M-45a |
+| R-55 3개 국어 | 유효 🔒 | TC-273, TC-279, TC-286(개정 CR-067), TC-287, TC-268(개정), TC-246(개정) | TC-FLOW-28, TC-FLOW-30 | M-50e, M-50g |
+| R-44 | 유효(「on/off 토글」 부분 → R-49) | TC-247, TC-248(개정 CR-067 — 알림음 설명 ko 문구), TC-266 | TC-FLOW-24 | M-45a |
 | R-43 · R-45 · R-48 | 유효(용어 주 CR-050 — 스톱워치 모드 값) | 앞 v19 표 그대로 + TC-252(개정) | TC-FLOW-24, TC-FLOW-27 | M-45b, M-45c |
 
 설계 항목 ↔ TC (CR-050 범위 — timer-tab §14)
@@ -2702,10 +2704,10 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 - When ① 생략 상태 ② 시 `01` 입력 중 `inactive` true → `secs` 3723 ③ `inactive` false ④ 분 `60` → 묶음 blur(되돌림 안내) → `inactive` true → false ⑤ `inactive` true에서 합성 입력 시 `05` → blur → Enter → 분 `60` → blur
 - Then ⓐ ① 세 칸 활성·`aria-disabled` 없음·group `aria-disabled` 없음·행 `durationOff` 없음 ② 세 칸 disabled·`aria-disabled="true"`, group `aria-disabled="true"`, 행 className = locked 때와 같음(`durationOff`), 라벨 「시작 시간」·힌트 「최대 99:59:59」 보임, 안내 줄 `''`·`msgError` 아님 ③ 활성 복귀·빈 안내 ④ 비활성 되는 순간 안내 `''`·`aria-invalid` 없음, 다시 활성에도 `''` ⑤ 안내 `''`·`aria-invalid` 없음 ⓑ ② 입력 중 값 버림 → 칸 `00:25:00`(저장값), `secs` 3723 → `01:02:03`(비활성 중에도 저장값을 따라감) ③ `01:02:03` ⓒ `onCommit` 전 과정 0회(가드가 없으면 ⑤에서 `onCommit(18123)`)
 
-### TC-289 · CR-052 문구 — `timerCardDesc` 삭제·스톱워치 설명 한 곳·ja·en 새 문구 · 종류: 자동 · 요구: R-44, R-49, R-53, R-55 · 설계: §14.16 카드 1 설명문·알림음 카드 설명 행, i18n `timerCardDesc` 삭제·`timerStopwatchDesc`·`alarmCardDesc` CR-052 변경 행 · 스펙: `test/TimerTab.cr052.test.tsx` · **신규(CR-052)**
-- Given ko·ja·en 사전, 탭 `SETTINGS`(둘 다 꺼짐)·`POMO`, 언어별 `MessagesProvider`, 옛 문구 표(패킷 §5 — 스톱워치 설명·「한 번 울립니다」 알림음 설명)
+### TC-289 · CR-052 문구 — `timerCardDesc` 삭제·스톱워치 설명 한 곳·ja·en 새 문구 · 종류: 자동 · 요구: R-44, R-49, R-53, R-55 · 설계: §14.16 카드 1 설명문·알림음 카드 설명 행, i18n `timerCardDesc` 삭제·`timerStopwatchDesc` CR-052 변경 행·`alarmCardDesc` **CR-067 변경 행** · 스펙: `test/TimerTab.cr052.test.tsx` · **신규(CR-052)** · **개정(CR-067 — 반복 재생 문구 부재 단언 추가, 「v33 개정 — CR-067」 절)**
+- Given ko·ja·en 사전, 탭 `SETTINGS`(둘 다 꺼짐)·`POMO`, 언어별 `MessagesProvider`, 옛 문구 표(패킷 §5 — 스톱워치 설명·「한 번 울립니다」 알림음 설명), **CR-052 반복 재생 문구 표(CR-067이 대체 — ko `타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다` · ja `タイマーが0になると点滅する10秒間くり返し鳴ります` · en `When the timer reaches zero, it repeats during the 10 seconds of blinking`)**
 - When 사전 조회 → ko·ja·en 차례로 탭 렌더
-- Then ⓐ 언어마다 `timerStopwatchDesc` 문장이 화면에 정확히 1번, 그 요소가 `#timer-stopwatch-desc` 안, 「스톱워치 사용」(언어별) 스위치의 접근 가능한 설명 = 그 문장, 옛 스위치 설명·옛 알림음 설명 텍스트 없음, `alarmCardDesc` 보임 ⓑ 세 사전 모두 `timerCardDesc` 키 없음, ko `timerStopwatchDesc` = 확정 문장, ja·en `timerStopwatchDesc`·`alarmCardDesc`는 비어 있지 않고 옛 문구·ko와 다름 ⓒ `setSettings`·`controlTimer`·`playSound` 0회, `getAlarmSound` 3회(마운트마다 1회)
+- Then ⓐ 언어마다 `timerStopwatchDesc` 문장이 화면에 정확히 1번, 그 요소가 `#timer-stopwatch-desc` 안, 「스톱워치 사용」(언어별) 스위치의 접근 가능한 설명 = 그 문장, 옛 스위치 설명·옛 알림음 설명·**그 언어의 반복 재생 문구** 텍스트 없음(전체 일치 기준), `alarmCardDesc` 보임 ⓑ 세 사전 모두 `timerCardDesc` 키 없음, ko `timerStopwatchDesc` = 확정 문장, ja·en `timerStopwatchDesc`·`alarmCardDesc`는 비어 있지 않고 옛 문구·ko와 다름, **세 사전 `alarmCardDesc` ≠ 그 언어의 반복 재생 문구(CR-067)** ⓒ `setSettings`·`controlTimer`·`playSound` 0회, `getAlarmSound` 3회(마운트마다 1회)
 
 ### TC-290 · 미리 듣기 1회 재생 유지(`loop` 인자 없음) · 종류: 자동 · 요구: R-53, R-54 · 설계: §14.16 미리 듣기 행(`playSound(url, v, onFail)`, `loop` 생략), §14.7.3 `onPreview`, overlay `design/functions.md` §5.7 ④(`loop = false` 기본 — 인용) · 스펙: `test/TimerTab.cr052.test.tsx` · **신규(CR-052)**
 - Given 탭 `S_CD`(`alarmVolume` 80), ① `getAlarmSound` → `null`·`defaultAlarmUrl` → `'blob:default'` ② → `MP3`, `playSound` → 호출마다 새 정지 함수
@@ -2718,12 +2720,12 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 |---|---|---|
 | TC-094 | `i18n.test.ts` | 단순 키 수 − 1(옛 129, `timerCardDesc` 삭제) |
 | TC-246 | `i18n.test.ts` | CR-045 15키 기대: `timerCardDesc` 부재, 같은 문장 = `timerStopwatchDesc` |
-| TC-286 | `i18n.test.ts` | ko `timerStopwatchDesc` 새 문장(옛 「00:00:00부터 올라갑니다…」 대체)·`alarmCardDesc` 반복 재생 문구(옛 「한 번 울립니다」 대체) |
-| TC-248 | `TimerTab.test.tsx` | 카드 머리 설명 없음(문장 1번 = 스톱워치 스위치 설명), 둘 다 꺼짐 → 세 칸 disabled·`aria-disabled`·안내 빈 값, 알림음 설명 반복 문구 |
+| TC-286 | `i18n.test.ts` | ko `timerStopwatchDesc` 새 문장(옛 「00:00:00부터 올라갑니다…」 대체)·`alarmCardDesc` 반복 재생 문구(옛 「한 번 울립니다」 대체) — **`alarmCardDesc` 부분은 CR-067이 대체(1회 재생 문구, 「v33 개정 — CR-067」 절)** |
+| TC-248 | `TimerTab.test.tsx` | 카드 머리 설명 없음(문장 1번 = 스톱워치 스위치 설명), 둘 다 꺼짐 → 세 칸 disabled·`aria-disabled`·안내 빈 값, 알림음 설명 반복 문구 — **알림음 설명 부분은 CR-067이 대체(새 1회 재생 문구 보임 + CR-050 옛 문구 없음)** |
 | TC-268 | `TimerTab.test.tsx` | ja·en 카드 설명 단언 → `timerStopwatchDesc` 1번·스위치 설명 |
 | TC-274 · TC-275 | `TimerTab.test.tsx` | 픽스처 → `S_CD`(타이머 켜짐·stopped — 입력 가능한 유일한 경우) |
 | TC-276 | `TimerTab.test.tsx` | 사례 7 → 8(스톱워치 `stopped` 추가), 타이머 모드 아님 4사례 = 비활성·안내 빈 값 — 본문 Then 개정 |
-| TC-277 | `AlarmSoundCard.test.tsx` | `alarmCardDesc` 반복 재생 문구 |
+| TC-277 | `AlarmSoundCard.test.tsx` | `alarmCardDesc` 반복 재생 문구 — **CR-067이 대체(1회 재생 문구 + 반복 문구·옛 문구 부재)** |
 | TC-285 | `TimerTab.test.tsx` | 포커스 순서: 끔·스톱워치 켜짐 → 시·분·초 건너뜀, 타이머 켜짐·stopped만 포함(마운트 사례 +2, 조회 4회) |
 | TC-287 | `TimerTab.test.tsx` | ja·en 렌더 픽스처 = 타이머 켜짐(둘 다 꺼짐이면 칸 disabled) |
 | TC-FLOW-28 | `SettingsApp.timer.test.tsx` | 끄기 단계: 세 칸 옛 `[false,false,false]` → disabled·안내 빈 값 |
@@ -2733,15 +2735,15 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 | 요구ID | TC |
 |---|---|
 | R-50 | 신규 TC-288 · 개정 TC-276(탭)·TC-248·TC-274·TC-275·TC-285·TC-FLOW-28 |
-| R-44 · R-49 | 신규 TC-289 · 개정 TC-248·TC-246·TC-268 |
-| R-53 | 신규 TC-289(`alarmCardDesc`)·TC-290 · 개정 TC-277·TC-286 |
+| R-44 · R-49 | 신규 TC-289 · 개정 TC-248·TC-246·TC-268 · **CR-067: 개정 TC-289·TC-248(R-44 — 알림음 설명 문구)** |
+| R-53 | 신규 TC-289(`alarmCardDesc`)·TC-290 · 개정 TC-277·TC-286 · **CR-067: 개정 TC-277·TC-286·TC-289(`alarmCardDesc` 1회 재생 문구)** |
 | R-54 | 신규 TC-290 |
-| R-55 | 신규 TC-289 · 개정 TC-268·TC-287·TC-286·TC-094 |
+| R-55 | 신규 TC-289 · 개정 TC-268·TC-287·TC-286·TC-094 · **CR-067: 개정 TC-286·TC-289(3개 국어 반복 문구 부재)** |
 
 | 설계 항목(§14.16) | TC |
 |---|---|
 | 카드 1 설명문 삭제(`timerCardDesc`) | TC-289, TC-248, TC-246, TC-094, TC-268 |
-| 알림음 카드 설명(`alarmCardDesc` 반복 문구) | TC-289, TC-277, TC-286 |
+| 알림음 카드 설명(`alarmCardDesc` 반복 문구 — **CR-067이 1회 재생 문구로 대체**) | TC-289, TC-277, TC-286, TC-248(모두 CR-067 개정) |
 | `CountdownTimeInput.inactive`(`off`·`.durationOff`·안내 빈 값·버림·가드) | TC-288, TC-276(탭) |
 | 파생 상태 `durationInactive`(= `!countdownOn`) | TC-276(탭), TC-248, TC-285, TC-FLOW-28 |
 | 미리 듣기 변경 없음(`loop` 생략 1회) | TC-290 |
@@ -3262,11 +3264,11 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 
 #### v28 설계 확인 필요 (관리자 인계 — 문서 수정은 소유자)
 
-- **AA-1. `design/i18n.md` §4.3 주 「위 10키」·「`Messages` 단순 키 수 +10」**(과 design 변경이력 CR-033 「문구 10키」)이 소스·표의 11키와 어긋난다(J-1 잔여). ui-designer 몫.
-- **AA-2. design RTM R-01 「예정 TC」**에 TC-306 · TC-308 ~ TC-310(CR-039 재시도)이 없다. ui-designer 몫.
+- **AA-1. `design/i18n.md` §4.3 주 「위 10키」·「`Messages` 단순 키 수 +10」**(과 design 변경이력 CR-033 「문구 10키」)이 소스·표의 11키와 어긋난다(J-1 잔여). ui-designer 몫. → **해소(2026-10-15, v32)**: `design/i18n.md` §4.3이 11키 · +11로 정정됐다. 스펙(TC-094 키 집합)은 이미 11키라 변경 없음
+- **AA-2. design RTM R-01 「예정 TC」**에 TC-306 · TC-308 ~ TC-310(CR-039 재시도)이 없다. ui-designer 몫. → **해소(2026-10-15, v32)**: design RTM R-01 행에 TC-306 · TC-308 · TC-309 · TC-310(TC-307 결번) 추가 확인
 - **AA-3. CR 대장 번호 잔재.** CR-052 검증 칸 「TC-307」, 한 CR 검증 칸의 「TC-314 신규」는 이 문서·settings 스펙 어디에도 없는 번호다(다른 화면 번호 혼입 추정). TC-307은 이 문서에서 결번 처리했다. CR-039 행 「신규 TC 스펙 2건」에 TC-306 · TC-308 병기 권고. 대장 수정은 이 에이전트 범위 밖.
-- **AA-4. `kb_down_0` 비우기 뒤 포커스(G-1 재확인).** 「기본값」(비우기) 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. 뒷머리·뽀모도 인물처럼 `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-236 · TC-FLOW-23은 응답 직후 포커스만 단언한다.
-- **AA-5. TC-309 해석.** 매니페스트 실패 오류 줄 문구는 ja 사전 code 문구라 개수만 단언했다. 한 조회의 오류가 다른 조회의 성공으로 지워지지 않는다(「오류 줄 건드리지 않음」)는 설계 문장은 TC-309에서 「설정 성공이 먼저 와도 1.7초 뒤 오류 줄이 뜬다」로 확인된다.
+- **AA-4. `kb_down_0` 비우기 뒤 포커스(G-1 재확인).** 「기본값」(비우기) 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. 뒷머리·뽀모도 인물처럼 `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-236 · TC-FLOW-23은 응답 직후 포커스만 단언한다. → **해소(2026-10-15, v32 — 현 동작 유지 결정, CR-063 기록 「kb_down_0과 같은 현재 동작 유지(새 focusAfter 없음)」)**. 확정 기대: ⓐ `remove_asset` 응답 직후(수신 전) 포커스 = 누른 「기본값」(`onConfirmClear` `c.focusAfter ?? c.trigger`, 비우기 칸에는 `focusAfter` 없음) ⓑ `assets://changed` 수신 뒤 그 「기본값」은 비활성 · 「이미지 변경」 활성, 수신 뒤 포커스 위치는 **판정 대상이 아니다**(실물에서 body로 빠질 수 있음 — M-32 · M-43 관찰 기록) ⓒ `removeAsset` 1회 · `restoreDefaultAsset` 0회. 현행 스펙 TC-236(`ImagesTab.test.tsx`) · TC-196(`Hair.test.tsx`)이 이 기대 그대로라 스펙 변경 없음
+- **AA-5. TC-309 해석.** 매니페스트 실패 오류 줄 문구는 ja 사전 code 문구라 개수만 단언했다. 한 조회의 오류가 다른 조회의 성공으로 지워지지 않는다(「오류 줄 건드리지 않음」)는 설계 문장은 TC-309에서 「설정 성공이 먼저 와도 1.7초 뒤 오류 줄이 뜬다」로 확인된다. → **해소(2026-10-15, v32)**: 현행 `SettingsApp.retry.test.tsx` TC-309가 오류 줄을 `getAllByRole('alert')` **개수 1**로만 단언해 이 해석과 같다. design §6 P-1 서술도 소스와 같아(변경 없음 확인) 닫는다
 
 ## 추적표
 
@@ -3645,13 +3647,14 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 
 | Q-nn | 일자 | CR-ID | 변경 요약 | 변경 파일 | 영향 TC 후보 | 신규 TC 필요 | 상태 |
 |---|---|---|---|---|---|---|---|
-| Q-01 | 2026-09-23 | — (bridge 구현 대기, contract v0.3 §3.6 · CR-007 계열) | hand-anchor 「호출 없음」 검사 재실행 고리. 조건: bridge 래퍼 `getHandAnchor`(commands)·`onHandAnchorChanged`(events) 생성 후, 설정 화면이 이를 호출·구독하지 않음을 재확인한다 | `src/bridge/commands.ts` · `src/bridge/events.ts`(bridge-implementer 소관) | TC-031, TC-040, TC-041, TC-042, TC-043, TC-FLOW-02, TC-FLOW-05 | 없음(기존 TC 재실행. 스펙은 실물 export 위에 mock을 덮어쓴다 — `bridge/events` mock의 `EVENTS`에 `handAnchorChanged` 추가) | 전환됨(TC-031, TC-040~TC-043, TC-FLOW-02) · 재실행 대기(**조건 충족 2026-09-23** — 두 래퍼 존재 확인, 다음 `/test ui`에서 재실행) |
-| Q-02 | 2026-09-25 | CR-039 | 초기 조회 실패 시 200·500·1000ms 간격 최대 3회 재시도, 끝내 실패할 때만 오류 줄 | `src/settings/index.tsx` · `src/components/utils/fetchWithRetry.ts`(신규) | TC-033·TC-034(조회 1회·즉시 오류 → 4회 뒤 오류)·TC-155·TC-102(오류 줄 대기 시간) | 예 — `SettingsApp.retry.test.tsx` 2건(ui-fixer 초안, TC-ID 부여 필요). v28: 가번호 TC-208 → TC-306 · TC-209 → TC-308 이동(CR-040 TC-208·TC-209와 중복 해소) + 신규 TC-309(설정·매니페스트 따로 판정)·TC-310(언마운트 취소). 영향 TC TC-033·TC-034·TC-155·TC-102는 스펙이 이미 CR-039 개정(`mountUntilGaveUp`) — 추가 개정 없음 | 전환됨(TC-306, TC-308, TC-309, TC-310) · 검증 대기(v28 — 다음 `/test ui` 실행) |
+| Q-01 | 2026-09-23 | — (bridge 구현 대기, contract v0.3 §3.6 · CR-007 계열) | hand-anchor 「호출 없음」 검사 재실행 고리. 조건: bridge 래퍼 `getHandAnchor`(commands)·`onHandAnchorChanged`(events) 생성 후, 설정 화면이 이를 호출·구독하지 않음을 재확인한다 | `src/bridge/commands.ts` · `src/bridge/events.ts`(bridge-implementer 소관) | TC-031, TC-040, TC-041, TC-042, TC-043, TC-FLOW-02, TC-FLOW-05 | 없음(기존 TC 재실행. 스펙은 실물 export 위에 mock을 덮어쓴다 — `bridge/events` mock의 `EVENTS`에 `handAnchorChanged` 추가) | 전환됨(TC-031, TC-040~TC-043, TC-FLOW-02) · **검증됨(2026-10-15, vitest 881/881 — 메인 세션 실행 근거, v32 위임 지시로 마킹)**. TC-040 ~ TC-043은 CR-028에서 폐기돼 실행 대상은 TC-031 · TC-FLOW-02(· TC-FLOW-05)의 현행 스펙 |
+| Q-02 | 2026-09-25 | CR-039 | 초기 조회 실패 시 200·500·1000ms 간격 최대 3회 재시도, 끝내 실패할 때만 오류 줄 | `src/settings/index.tsx` · `src/components/utils/fetchWithRetry.ts`(신규) | TC-033·TC-034(조회 1회·즉시 오류 → 4회 뒤 오류)·TC-155·TC-102(오류 줄 대기 시간) | 예 — `SettingsApp.retry.test.tsx` 2건(ui-fixer 초안, TC-ID 부여 필요). v28: 가번호 TC-208 → TC-306 · TC-209 → TC-308 이동(CR-040 TC-208·TC-209와 중복 해소) + 신규 TC-309(설정·매니페스트 따로 판정)·TC-310(언마운트 취소). 영향 TC TC-033·TC-034·TC-155·TC-102는 스펙이 이미 CR-039 개정(`mountUntilGaveUp`) — 추가 개정 없음 | 전환됨(TC-306, TC-308, TC-309, TC-310) · **검증됨(2026-10-15, vitest 881/881 — 메인 세션 실행 근거, v32 위임 지시로 마킹)** |
 | Q-03 | 2026-09-26 | CR-049 | 자동 실행 취소(`autostart.cancelled`) 분기·안내·사전 키 삭제, 오류 code 23 → 22, `autostartDesc`·`autostartPending` 일반 권한 기준 문구로 | `src/settings/components/GeneralTab.tsx` · `src/settings/i18n/{types,ko,ja,en}.ts` | TC-093·TC-094·TC-246(code 수·사전), TC-104·TC-113(설명·대기 문구), TC-114(취소 → 폐기 또는 「모든 실패 = 오류 줄」로 대체), TC-FLOW-09(취소 단계 제거), SettingsApp·GeneralTab·i18n 스펙 | TC-114 대체 필요(모든 `setAutostart` 실패가 오류 줄로 가고 안내 줄은 비는지) | 검증됨(2026-09-26, 328 PASS) |
 | Q-04 | 2026-09-26 | CR-052 | 카드 1 설명문(timerCardDesc) 삭제·스톱워치 토글 설명 새 문장(3개 국어), alarmCardDesc 반복 재생 문구, 스톱워치 모드·둘 다 꺼짐일 때 시작 시간 입력 회색 비활성(disabled + aria-disabled, 안내 줄 비움, 잠김과 같은 `.durationOff`), 탭 UI 다듬기(구분선 `.group`·카드 간격 12px·시·분·초 한 상자·슬라이더 값 `.value`) | `src/settings/components/{TimerTab,CountdownTimeInput,AlarmSoundCard}.tsx` · `TimerTab.module.css` · `src/settings/i18n/{types,ko,ja,en}.ts` | TC-094·TC-246·TC-286(i18n 사전), TC-248·TC-268·TC-285·TC-287·TC-274·TC-275·TC-276(TimerTab), TC-277(AlarmSoundCard 문구), TC-FLOW-28, CountdownTimeInput 컴포넌트 스펙(TC-276 컴포넌트) | 예(inactive 비활성 TC — 스톱워치·둘 다 꺼짐·타이머 켜짐 stopped 3경우, aria-disabled·안내 줄 빈 값·입력 중 값 버림) | 검증됨(2026-09-27) |
 | Q-05 | 2026-09-27 | CR-053 | hair·pomo_char = 복원 칸(「기본값」 = restoreDefaultAsset 늘 활성) + 셋째 버튼 「비우기」(removeAsset, 등록 시만 활성, 비운 뒤 포커스 「이미지 변경」). kb_down_0 = 비우기 칸(「기본값」 = removeAsset, 마지막 장 규칙), 셋째 버튼 제거. 기본 그림 7장(다운로드 설명·덮어쓰기 개수 7). DEFAULT_TIMER_SETTINGS textPos (142,458)·rotation 9 | `src/settings/imageSlots.ts` · (bridge v0.24 `src/bridge/types.ts` 인용) | Hair.test.tsx TC-193·196·200·201·202·206·207·TC-FLOW-18 · imageSlots.test.ts TC-133·135·177·192·229·232 · ImagesTab.test.tsx TC-142·147·179·182·189·233·236·237·TC-FLOW-15·17·22·23 · PomoCards.test.tsx TC-241·242·TC-FLOW-25 · TimerTab.test.tsx TC-249 · timerValues.test.ts TC-239·269 | 예 — pomo_char 「비우기」·복원 TC | 검증됨(2026-09-27) |
 | Q-07 | 2026-09-27 | CR-054 | 「기본 설정」 탭 맨 아래 「초기화」 카드(`ResetAllCard` — 위험 버튼·확인창·`resetAppData()`·상태 줄 `role=status`), 화면 값은 기존 `settings://changed`·`assets://changed` 구독으로만(낙관적 갱신 없음), i18n 단순 키 +8(128 → 136)·errors +2(`ERROR_CODES` 25 → 27) | `src/settings/components/ResetAllCard.tsx`(신규) · `GeneralTab.tsx` · `GeneralTab.module.css` · `src/settings/i18n/{types,ko,ja,en}.ts` | 개정 TC-093 · TC-094 · TC-246 · TC-286(`i18n.test.ts`), TC-104 · TC-130(`GeneralTab.test.tsx`), TC-099 · TC-101(`SettingsApp.test.tsx`) — 스펙 개정 완료. mock 목록 정합 11개 스펙 — **불필요 확정(v25)**: 11개 모두 `...actual` 전개라 실물 `resetAppData` export 포함·「전체 초기화」 미조작으로 결과 불변(「CR-054 개정 TC」 표 사유) | 예 — 신규 TC-293 ~ TC-304, TC-FLOW-31 · TC-FLOW-32(TDD 선행 — 구현 전 Red) | 전환됨(TC-293 ~ TC-304, TC-FLOW-31, TC-FLOW-32) · 잔여 없음(v25 닫힘) |
 | Q-08 | 2026-09-27 | CR-057 | 이동 영역 문구 개선 — 새 키 `areaDesc`(idle에서 안내 줄 아래 `.guide` 줄로 표시, 다른 단계에서는 없음), `areaStart`·`areaPick1~4`·`areaReview` 문구 교체(ko 🔒·ja·en) | `src/settings/i18n/{types,ko,ja,en}.ts` · `src/settings/components/MousePartsTab.tsx` | TC-009(labels 이관 문구)·TC-094(ko 새 키 개수·문구)·i18n 키 수(simpleKeys)·TC-016·TC-024·TC-064~TC-074·TC-077·TC-049·TC-082·TC-086·TC-222·TC-225·TC-FLOW-02·04·06 및 ja·en 문구 단언 | 예 — areaDesc 표시(idle만·3개 국어) 1건 | 검증됨(2026-09-27) — 신규 TC-305, 개정 TC-009 · TC-094 · `IDLE_BUTTONS` 단언 전부 · TC-024 · TC-063 ~ TC-074 · TC-086 · TC-222 · TC-225 · TC-077 · TC-FLOW-02 · TC-FLOW-04 · TC-FLOW-06(「CR-057 개정」 절) |
+| Q-09 | 2026-10-15 | CR-067 | `alarmCardDesc` 1회 재생 문구로 정정(ko 「타이머가 0이 되면 깜빡이는 동안 한 번 울립니다」·ja·en) — CR-052 반복 문구 대체 | `src/settings/i18n/{ko,ja,en}.ts` | TC-277(AlarmSoundCard 문구 — ui-fixer가 새 문구로 개정)·TC-286(i18n KO_NEW — 개정)·TC-289(REPEAT_ALARM 부재 단언 추가)·TimerTab.test.tsx ko 문구 단언(개정) — 시나리오 본문 「반복 재생 문구」 서술 개정 필요 | 아니오 | 전환됨(개정 TC-277·TC-286·TC-289) · TC-248은 스펙만 개정(본문 불변) · 「v33 개정 — CR-067」 절(2026-10-15). 「검증됨」 마킹은 실행 근거 확인 뒤 메인 세션 · 검증됨(2026-10-15 — 메인 세션 vitest 전체 883/883·tsc 0) |
 
 ## v29 개정 — 뒷머리 내장 기본 없음 (🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29, 증분 모드 — 개정만)
 
@@ -3737,7 +3740,7 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 
 - **AB-1. 화면 문서 동기화.** `requirements.md`(R-35 · R-36 「7장」 · S-14 · S-17), `design/images-tab.md` §15(hair = 복원 칸 + 「비우기」, `EMPTYABLE_SLOT_KEYS` `['hair','pomo_char']`, 첫 실행 7칸, 다운로드 n = 7), `design/i18n.md` §4.8(`emptyImageAria` 사용처 뒷머리)이 v29와 어긋날 수 있다. 이 패스는 위임 확정 동작 · contract v0.29 · 현행 `types.ts`를 기준으로 썼다 — ui-designer 개정 뒤 설계↔TC 표의 절 번호를 맞춘다.
 - **AB-2. R-35 처리(W-2 재발).** 「뒷머리 카드에만 비우기」 요구가 다시 「기본값」(비우기 칸)에 흡수됐다. 폐기할지 문구만 고칠지 requirements 결정 필요. 추적은 R-35 → TC-196 · TC-206(비우기 기능) · TC-200 · TC-201 · TC-234(셋째 버튼 없음).
-- **AB-3. 뒷머리 비우기 뒤 포커스(W-5 · AA-4 재발).** 「기본값」 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-196 · TC-206 · TC-FLOW-18은 응답 직후(수신 전) 포커스만 단언하고, M-32는 관찰 기록.
+- **AB-3. 뒷머리 비우기 뒤 포커스(W-5 · AA-4 재발).** 「기본값」 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-196 · TC-206 · TC-FLOW-18은 응답 직후(수신 전) 포커스만 단언하고, M-32는 관찰 기록. → **해소(2026-10-15, v32 — AA-4와 같은 결정, CR-063 「kb_down_0과 같은 현재 동작 유지」)**. 확정 기대: 응답 직후 포커스 = 누른 「기본값」, 수신 뒤 「기본값」 비활성 · 포커스 위치 판정 없음, `removeAsset('hair')` 1회 · `restoreDefaultAsset` 0회. 실패(TC-206) 뒤 포커스 = 다시 활성인 「기본값」. 현행 `Hair.test.tsx` TC-196 · TC-206 그대로 — 스펙 변경 없음
 - **AB-4. CR-ID 미부여.** 이 결정의 CR 행이 대장에 없다. 관리자가 기록하면 이 절 · 스펙 제목의 「v29」에 CR-ID를 병기한다.
 - **AB-5. 픽스처 이름 옛 개수.** `imageSlots.test.ts` `FIRST7`(내용 6장) · `DEFAULT7`(사용자 설치 예) · `ImagesTab.test.tsx` `d7()` · `D7`은 이름만 옛 개수(W-8 관례, 판정 무관). `ImagesTab.test.tsx` 194행 주석의 `DEFAULT_KEYS7` 언급은 이름 변경(→ `BUILTIN_KEYS`) 뒤 남은 주석 잔재 — 다음 위임에서 정리.
 
@@ -4167,15 +4170,131 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 
 ### v31 설계 확인 필요 (관리자 인계 — 문서 수정은 소유자)
 
-- **AD-1(ui-designer · 사용자)**: 겹침 순서의 `body` · `idle` 위치. 위임문은 「… pomo_bubble → body → idle → mouse_base → kb_up …」(팔 앞)이지만 오버레이 정본(§11.3 근거표 4 · 5행, `.jellyWrap` 안 `MouseArm` → `LayerStack` 몸통 → 상태 → 키보드)과 §11.9-2 권고는 **팔 다음 · kb_up 앞**이다. 스펙 `EXPECTED_ORDER`는 정본 쪽(`mouse_base` → `body` → `idle` → `kb_up`)으로 두었다. 현재 §11.3 `PREVIEW_ORDER` 표는 7키(`body` · `idle` 없음)라 확정본 반영 뒤 한 줄 대조 필요. 확정본이 7키 그대로면 `EXPECTED_ORDER`에서 두 키를 빼고 TC-355 「9장」 → 「7장」
+- **AD-1(ui-designer · 사용자)**: 겹침 순서의 `body` · `idle` 위치. 위임문은 「… pomo_bubble → body → idle → mouse_base → kb_up …」(팔 앞)이지만 오버레이 정본(§11.3 근거표 4 · 5행, `.jellyWrap` 안 `MouseArm` → `LayerStack` 몸통 → 상태 → 키보드)과 §11.9-2 권고는 **팔 다음 · kb_up 앞**이다. 스펙 `EXPECTED_ORDER`는 정본 쪽(`mouse_base` → `body` → `idle` → `kb_up`)으로 두었다. 현재 §11.3 `PREVIEW_ORDER` 표는 7키(`body` · `idle` 없음)라 확정본 반영 뒤 한 줄 대조 필요. 확정본이 7키 그대로면 `EXPECTED_ORDER`에서 두 키를 빼고 TC-355 「9장」 → 「7장」 → **해소(2026-10-15, v32)**: `design/presets-tab.md` §11.3 `PREVIEW_ORDER` 표가 9키(`… mouse_base → body → idle → kb_up → pen_up`, 관리자 결정 2026-09-30)로 확정됐고 §11.8도 「≤ 9장」으로 정정됐다. 스펙 `EXPECTED_ORDER`와 같아 TC-355 「9장」 유지 · 스펙 변경 없음
 - **AD-2(bridge · ui-designer)**: §11.9-3 `penPos: null` → 펜 손 생략(오버레이는 기본 위치 계산). TC-356 · TC-358은 생략으로 판정한다. v0.31이 `penPos`를 항상 해석된 값으로 준다면 차이 없음
 - **AD-3(구현 참고)**: TC-357 · 358 · 359는 박스 비율을 `element.style.aspectRatio`로 읽는다. jsdom의 CSS 파서가 `aspect-ratio`를 버리는 버전이면 이 단언만 Red가 난다 — 그때는 구현을 바꾸지 말고 이 단언을 수동(M-65b)으로 옮길지 관리자 판단
 - **AD-4(메인 · bridge)**: 미리보기 실물은 asset protocol scope `presets/**` 반영이 선행(§11.9-4). 미반영이면 M-65a는 「선행 미충족」
+
+## v32 doc-sync — 2026-10-15 (증분 모드 — 추가·수정만, 번호 보존)
+
+비유: 이사 뒤 집 도면(설계 문서)을 다시 그렸으니, 검사표도 새 도면의 방 번호와 맞는지 한 줄씩 대 보았다. 방 번호는 그대로였고, 도면에 새로 적힌 「문 잠금 장치」(이름 바꾸기 저장 중 Esc를 막는 방어) 하나만 검사 항목이 없어 TC-363을 더했다.
+
+- **기준**: 문서 머리 「v32 기준」 줄. 소스 변경 없음 — 메인 세션 vitest 전체 881/881 통과(2026-10-15)가 이 패스의 실행 근거다(이 에이전트는 실행하지 않음)
+- **CR-ID**: 없음(문서 동기화 배치). TC-363은 CR-064 범위의 as-built 설계 항목(presets-tab §5.1 구현 형태 표) 추적용
+- **번호**: 자동 **TC-363**(1개) 신설. TC-FLOW · 수동 신설 없음
+- **수(v32)**: 자동 번호 363(유효 350 · 폐기 8 · 결번 5 — TC-307 · TC-311 ~ TC-314) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
+
+### v32 항목별 결과
+
+| 항목 | 결과 | 근거 | 스펙 |
+|---|---|---|---|
+| AA-1(i18n §4.3 10키 → 11키) | **해소** | `design/i18n.md` §4.3 정정(2026-10-15) | 변경 없음(TC-094 키 집합은 이미 11키) |
+| AA-2(RTM R-01 재시도 TC) | **해소** | design RTM R-01 행에 TC-306 · TC-308 · TC-309 · TC-310 기입 확인 | 변경 없음 |
+| AA-4(`kb_down_0` 비우기 뒤 포커스) | **해소 — 현 동작 유지** | CR-063 기록 「kb_down_0과 같은 현재 동작 유지(새 focusAfter 없음)」 · `ImagesTab.tsx` `onConfirmClear`(`focusAfter ?? trigger`) | 변경 없음 — TC-236 · TC-237이 확정 기대(아래 본문) 그대로 |
+| AB-3(뒷머리 비우기 뒤 포커스) | **해소 — 현 동작 유지** | AA-4와 같은 결정 | 변경 없음 — `Hair.test.tsx` TC-196 · TC-206 그대로 |
+| AA-5(TC-309 해석) | **해소** | TC-309가 오류 줄을 개수 1로만 단언(`SettingsApp.retry.test.tsx`) · design §6 P-1 소스 일치 | 변경 없음 |
+| AD-1(미리보기 겹침 순서 · 장수) | **해소** | presets-tab §11.3 `PREVIEW_ORDER` 9키 확정 · §11.8 「≤ 9장」 정정 | 변경 없음(`EXPECTED_ORDER` 9키 = 설계) |
+| 「7장」 → 「9장」 | **정정 대상 없음** | 이 문서에서 프리셋 미리보기 장수를 「7장」으로 적은 곳은 AD-1 조건문뿐이고 AD-1 해소로 닫았다. TC-355는 이미 「9장」. 다른 「7장」은 기본 그림 세트(CR-053 · v29 6장) 맥락이라 무관 | 변경 없음 |
+| `presetPreviewUnavailable` 위치 | **서술만 맞춤** | i18n §4.12 정정 = `presetNoAlarm` 뒤. TC-094 · TC-352 · TC-362는 키 집합 · 개수(174) 비교라 위치와 무관 | 변경 없음 |
+| TC-207(CR-063 「Hair TC-207 ja 실패 → 회부」) | **해소 — 스펙 정정으로** | 실패 원인은 스펙 결함(ja 사전 `clearImageAria` = `emptyImageAria` = `'{name}の画像を削除'`이라 「`emptyImageAria` 이름 버튼 없음」이 정상 「기본값」에 걸림). 「v29 개정」 절 「TC-207 정정」 행(2026-09-30)이 셋째 버튼 부재를 카드 버튼 **정확히 2개** + `emptyImageAria` 이름 버튼에서 「기본값」 자신을 뺀 **0개**로 바꿨다. 현행 `Hair.test.tsx` TC-207이 정정본이고 vitest 881/881에 포함돼 통과. 제품 문구 · 소스 불변 | 변경 없음(v29 정정 그대로) |
+| Q-01 · Q-02 | **검증됨(2026-10-15, vitest 881/881)** | 메인 세션 실행 근거 · 위임 지시로 마킹(「변경 대기열」 표) | 변경 없음 |
+| v30 · v31 추적표 절 번호 | **어긋남 없음** | presets-tab 절 체계(§1.1 ~ §11.9) 불변. §5.1 「구현 형태」 표는 같은 절 안 추가라 기존 행 번호 그대로 — 새 설계 항목은 아래 표로 덧붙임 | — |
+
+### v32 신규 TC
+
+### TC-363 · 이름 바꾸기 저장 대기 중 Esc 무시(`busyRef` 방어) · 편집 유지 · 문제 목록 유지 · 종류: 자동 · 요구: R-64 · 설계: presets-tab §5.1 구현 형태 표(`busyRef` · `onRenameCancel` 방어 조건 · `onRenameSave`는 `run`을 쓰지 않음 — 편집 유지 · `problems` 비우지 않음) · §7.1 · 스펙: `test/PresetsTab.test.tsx`(`it.each` reject · resolve) · **신규(v32)**
+- Given 목록 [P1, P2], 가져오기 문제 보고서(`kb_up.png` · `asset.not_rgba`)로 저장 카드에 문제 목록 블록(`role=alert`)이 떠 있음, `renamePreset` 지연 promise
+- When 「이름 바꾸기: 고양이 A」 → 초안 「다른 이름」 Enter(대기) → 대기 중 Esc → reject `{preset.io}` / resolve(이름 「다른 이름」, 재조회 [다른 이름, 고양이 B])
+- Then ⓐ 대기 중 입력칸 `readonly`, Esc 뒤에도 입력칸 · 값 「다른 이름」 그대로. reject: 입력칸 값 그대로 · 포커스 입력칸. resolve: 카드 이름 [다른 이름, 고양이 B] · 입력칸 없음 · 포커스 「이름 바꾸기: 다른 이름」. 두 경우 모두 문제 목록 블록 유지 ⓑ 대기 중 `renamingId` 유지(Esc가 편집을 버리지 않음), `problems` 불변 ⓒ `renamePreset('p1','다른 이름')` 정확히 1회, `importPreset` 1회. reject = `onError(err)` · `listPresets` 1회(재조회 없음). resolve = null 아닌 `onError` 0회 · `listPresets` 2회
+- 비고: `renamingId === null` 방어 분기는 화면 경로가 없다(입력칸이 없으면 키 이벤트가 생기지 않음) — 판정 대상 아님. as-built 항목이라 TDD Red가 아니다 — 현행 소스(`onRenameCancel` 첫 줄 `busyRef` 검사) 기준 통과가 기대값, 실행은 ui-tester
+
+### v32 추적 (v30 · v31 추적표에 덧붙임)
+
+**요구 → TC**
+
+| 요구ID | TC | TC-FLOW | 수동 |
+|---|---|---|---|
+| R-64 이름 바꾸기 · 삭제 | v30 행 + **TC-363** | TC-FLOW-33 | M-64f |
+| R-66 화면(내장 프리셋 = 보통 카드) | v30 · v31 행 그대로(TC-319 · TC-347 · TC-348 회귀) | TC-FLOW-33, TC-FLOW-34 | M-64f |
+
+**설계 항목(2026-10-15 doc-sync 보강분) → TC**
+
+| 설계 항목 | TC |
+|---|---|
+| presets-tab §1.2 내장 프리셋(PS-11) = 보통 카드 · 구분 없음 | TC-319(목록 = `listPresets` 순서 그대로), TC-347 · TC-348(카드 요약 · 버튼 4 동일) — ui 코드 변경 없음, 회귀 감시 |
+| §2 실측 줄 수 · CR-001 분리 후속 | 정적 항목 — 분리 뒤 회귀 = `PresetsTab.test.tsx` · `PresetCard.test.tsx` · `PresetPreviewBox.test.tsx` 전체. 줄 한계 판정은 ui-reviewer |
+| §2 타입 export(`PresetSaveFocusTarget` · `PresetCardFocusTarget` · `PresetsTabProps`) | §8.2 포커스 TC(TC-322 · 324 · 326 ~ 342) — 타입 정합은 `yarn tsc --noEmit` |
+| §2.3 `.problems p` | TC-328(구조 — 문제 줄 `li`), M-64d(실물 모양) |
+| §5.1 `busyRef`(같은 렌더 연속 입력 차단) | TC-343(Enter 재진입 0), TC-363 |
+| §5.1 `aliveRef` · `live(write)` | TC-345 |
+| §5.1 `run`(base 포커스 · reject → `onError` · `onExport`만 `mapError`) | TC-322 · 324(저장), TC-326 ~ 329(가져오기), TC-330 ~ 332(적용), TC-334 ~ 336(내보내기 — TC-336 사전 문구 변환), TC-337 ~ 339(삭제) |
+| §5.1 `finish`(busyRef · pending · 포커스 한 배치) | TC-343(풀림), §8.2 포커스 TC 전부 |
+| §5.1 `onRequest`(apply · delete 한 함수) | TC-330, TC-337, TC-344 ① |
+| §5.1 마운트 효과 `[reload]`(실제 1회) | TC-319, TC-320(`listPresets` 1회) |
+| §5.1 `onRenameCancel` 방어 조건 | **TC-363**(busyRef), TC-341(정상 Esc) |
+| §5.1 `onRenameSave` `run` 미사용(편집 유지 · problems 비우지 않음) | TC-342(실패 편집 유지), **TC-363**(대기 중 편집 · problems 유지) |
+| §10 · §11.2 실측 | §2 실측 행과 같음 |
+| §11.8 PR-1 그림 ≤ 9장(정정) | TC-355(9장 · 같은 키 첫째만 — 키마다 최대 1장), M-65a |
+| i18n §4.3 펜 손 11키 · +11(정정) | TC-094(키 집합) — 불변 |
+| i18n §4.12 `presetPreviewUnavailable` 위치 | TC-362 · TC-094 · TC-352(키 집합 · 174) — 불변 |
+| images-tab 머리 계약 v0.31 줄 | 서술 갱신만 — 동작 불변, 이미지 탭 기존 TC 회귀 |
+| design RTM R-58 ~ R-68 「ui-test-designer 부여」 → TC 기입 | v30 · v31 추적표 번호가 출처 — 이 문서 변경 없음 |
+
+**사용자행 → TC-FLOW**: 새 사용자행 없음(requirements v1.29 불변). S-34는 TC-FLOW-33 그대로.
+
+### v32 설계 확인 필요
+
+- 새 항목 없음. AA-3 · AB-1 · AB-2 · AB-4 · AB-5 · AC-2 · AC-6 · AD-2 ~ AD-4는 이번 위임 범위 밖이라 상태 불변.
+- CR 대장 CR-063 비고에 적을 결과(마킹은 메인 세션): 「Hair TC-207 ja 실패 = 스펙 결함. scenarios v29 「TC-207 정정」(2026-09-30)으로 해소, 2026-10-15 vitest 881/881 통과. 제품 문구 · 소스 불변」.
+
+## v33 개정 — CR-067 알림음 카드 문구 1회 재생 (「CR-067 개정」 · 대기열 Q-09 정식 TC 전환 · 증분 모드 — 개정만, 번호 보존)
+
+비유: 안내판에는 「10초 동안 계속 울림」이라고 적혀 있었지만 실제 종은 한 번만 울린다. 안내판 글씨를 실제에 맞게 고쳤으니, 검사표도 새 글씨를 읽고 옛 글씨가 남지 않았는지 함께 본다.
+
+- **기준**: CR 대장 CR-067(🔒 사용자 2026-10-15 「알림음 반복해서 하는 거 아님」) · `design.md` 변경이력 CR-067 행 · `design/i18n.md` `alarmCardDesc` CR-067 변경 행(ko 「타이머가 0이 되면 깜빡이는 동안 한 번 울립니다」 · ja 「タイマーが0になると点滅中に1回鳴ります」 · en 「Plays once when the timer reaches zero, while it blinks」) · 현행 사전 `src/settings/i18n/{ko,ja,en}.ts` · 대기열 Q-09. requirements 변경 없음
+- **CR-ID**: CR-067 — CR-052 ②(`alarmCardDesc` 반복 재생 문구)만 대체한다. CR-052 나머지(`timerCardDesc` 삭제 · 스톱워치 설명 · `inactive` 회색 비활성 · 미리 듣기 1회)는 유효. 키 · 컴포넌트 · 동작 변경 없음
+- **번호**: 신규 TC · TC-FLOW · 수동 없음. 수 불변 — 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
+- **스펙**: ui-fixer가 먼저 개정했다(2026-10-15, vitest 4파일 49건 통과 · `tsc` 0 — CR 대장 CR-067 근거, 이 에이전트는 실행하지 않음). 이 패스는 본문을 스펙에 맞췄고 스펙은 고치지 않았다. 시간 의존 없음
+- **부재 단언 기준**: CR-050 옛 문구 「타이머가 0이 되면 한 번 울립니다」(en 「Plays once when the timer reaches zero」)는 새 문구의 앞부분과 같다. 부재 단언은 `queryByText` 기본 전체 일치라 새 문구와 겹치지 않는다
+
+#### CR-067 개정 TC (앞 본문을 개정 — 번호 유지, 스펙 개정 완료)
+
+| TC | 스펙 | 처리(CR-067) | 본문 |
+|---|---|---|---|
+| TC-277 | `AlarmSoundCard.test.tsx` | ⓐ 설명 = 새 ko 문구(전체 일치), CR-052 반복 문구 · CR-050 옛 문구 텍스트 없음 | 「CR-050 개정」 절 TC-277 머리 · Then ⓐ 개정 |
+| TC-286 | `i18n.test.ts` | ⓑ `KO_NEW.alarmCardDesc` = 새 ko 문구(22키 대조 안) | 「CR-050 개정」 절 TC-286 머리 · Then ⓑ 개정 |
+| TC-289 | `TimerTab.cr052.test.tsx` | Given 반복 재생 문구 표(`REPEAT_ALARM` 3개 국어) 추가, ⓑ 세 사전 `alarmCardDesc` ≠ 그 언어의 반복 문구, ⓐ 언어마다 화면에 반복 문구 없음 | 「CR-052 개정」 절 TC-289 머리 · Given · Then ⓐ ⓑ 개정 |
+| TC-248 | `TimerTab.test.tsx` | ko 탭 렌더(둘 다 꺼짐)에서 알림음 설명 = 새 ko 문구, CR-050 옛 문구 없음 — 「CR-052 개정 TC」 표가 TC-248에 둔 「알림음 설명 반복 문구」 단언의 대체 | 본문 불변(CR-045 본문 Then에 알림음 설명 서술 없음). 「CR-052 개정 TC」 표 행에 CR-067 표기 |
+
+회귀만(개정 불필요): TC-287(ja · en `alarmCardDesc` 보임)은 사전 값을 그대로 읽어 단언하므로 문구가 바뀌어도 기대가 같다. TC-278 ~ TC-283 · TC-290은 문구를 단언하지 않는다.
+
+추적(CR-067)
+
+| 요구ID | TC |
+|---|---|
+| R-44 | 개정 TC-248(ko 탭 알림음 설명) · TC-289 |
+| R-53 | 개정 TC-277 · TC-286 · TC-289 |
+| R-55 | 개정 TC-286 · TC-289(3개 국어 반복 문구 부재) · 회귀 TC-287 |
+
+| 설계 항목 | TC |
+|---|---|
+| i18n `alarmCardDesc` CR-067 변경 행 — ko 값 | TC-286(사전), TC-277 · TC-248(화면) |
+| i18n `alarmCardDesc` CR-067 변경 행 — ja · en 값(비어 있지 않음 · ko와 다름 · 반복 문구 아님) | TC-289, 회귀 TC-287(화면) |
+| design.md 변경이력 CR-067(CR-052 반복 문구 대체 · 키 · 동작 불변) | TC-289(반복 문구 3개 국어 부재), TC-277(반복 문구 부재) |
+
+사용자행 ↔ TC-FLOW(CR-067): 새 사용자행 없음. TC-FLOW-30(S-29)은 TC-277 마운트 부분을 Step으로 쓰지만 설명 문구를 단언하지 않아 불변. CR ↔ TC: CR-067 → 개정 TC-277 · TC-286 · TC-289 · TC-248(스펙만) / 대기열 Q-09 전환.
+
+### v33 설계 확인 필요
+
+- **AE-1. `design/timer-tab.md` §14.16 「알림음 카드 설명」 행 미갱신.** 아직 `alarmCardDesc` = 「반복 재생 기준 문구(overlay CR-052와 일치)」로 남아 i18n CR-067 변경 행 · design.md CR-067 행과 어긋난다(design.md 변경이력이 「ui-designer 후속」으로 기록). 이 문서는 i18n CR-067 행 · CR 대장을 기준으로 삼았다. ui-designer 정정 필요.
+- **AE-2. 스펙 머리 주석의 옛 인용.** `TimerTab.cr052.test.tsx` 머리 주석이 「`alarmCardDesc` CR-052 변경 행」을 인용한다. 단언 · 결과 영향 없음. 다음에 이 스펙을 손볼 때 「CR-067 변경 행」으로 정정 권고(이 에이전트는 스펙 읽기만).
 
 ## 변경이력
 
 | 일자 | 내용 |
 |---|---|
+| 2026-10-15 | v33 — **CR-067 반영(알림음 카드 문구 1회 재생, 대기열 Q-09 정식 TC 전환, 증분 모드 — 개정만)**. 기준 CR 대장 CR-067 🔒 · i18n `alarmCardDesc` CR-067 변경 행 · 현행 사전. 끝에 「v33 개정 — CR-067」 절 신설(개정 표 · 추적 · 설계 확인 필요 AE-1 · AE-2). 개정 TC-277(Then ⓐ 새 ko 문구 + 반복 · 옛 문구 부재) · TC-286(Then ⓑ `alarmCardDesc` 새 ko 값) · TC-289(Given 반복 문구 표 · Then ⓐ ⓑ 반복 문구 부재) · TC-248(스펙만, 본문 불변). 「CR-052 개정 TC」 표 TC-286 · TC-248 · TC-277 행, CR-052 추적 R-44 · R-53 · R-55 행과 설계 항목 행, CR-050 요구 표 R-44 · R-53 · R-55 행에 CR-067 표기. Q-09 → 전환됨. 스펙 변경 없음(ui-fixer 선개정과 일치). 수 불변: 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63 |
+| 2026-10-15 | v32 — **doc-sync 배치(requirements v1.29 · design 2026-10-15 행 · presets-tab · i18n · images-tab 머리)**, 증분 모드. 문서 머리 「v32 기준」 줄 신설. 닫음: AA-1 · AA-2 · AA-5(설계 · 스펙 일치), AA-4 · AB-3(CR-063 「현 동작 유지」 — 응답 직후 포커스 = 누른 「기본값」, 수신 뒤 판정 없음), AD-1(`PREVIEW_ORDER` 9키 · ≤ 9장). TC-207 결과 기록(v29 스펙 정정으로 해소). 대기열 Q-01 · Q-02 「검증됨(2026-10-15, vitest 881/881)」(메인 세션 근거 · 위임 지시). 신규 **TC-363**(`PresetsTab.test.tsx` — 이름 바꾸기 저장 대기 중 Esc 무시 · 편집 · problems 유지, reject · resolve) + presets-tab §1.2 · §2 · §2.3 · §5.1 구현 형태 표 · §11.8 설계↔TC 덧붙임. v30 · v31 절 번호 어긋남 없음. 수: 자동 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34 · 수동 63 |
 | 2026-09-30 | (최신 행) v31 — **CR-065 세로형 카드 격자 · 그림 미리보기(R-66 개정 · R-68 🔒, requirements v1.29 · presets-tab §11 · i18n §4.12 CR-065 · contract v0.31, 증분 모드 · TDD 선행).** 「v31 개정」 절 신설(기준 · 픽스처 규약 · 신규 TC · TC-FLOW · 개정 표 · 추적 3종 · 설계 확인 AD-1 ~ AD-4). 신규 TC-354 ~ TC-356(`presetValues.preview.test.ts` 신규 — `previewLayout` 검증 예 · 순서 · 표시 불가), TC-357 ~ TC-359(`PresetPreviewBox.test.tsx` 신규 — 합성 렌더 · 안내 · 로드 실패), TC-360(`PresetCard.test.tsx` — 세로형 구조 · title), TC-361(`PresetsTab.test.tsx` — 카드별 미리보기 · 실패 격리), TC-362(`i18n.test.ts` — `presetPreviewUnavailable`), TC-FLOW-34(S-35). 개정: TC-347(요약 두 줄) · TC-319 · TC-346 · TC-FLOW-33(`expectMeta`) · TC-094 · TC-352(단순 키 174), 픽스처 `preview` 추가(tsc 오류 7건 해소). `manual-checklist.md` v23(M-65a ~ M-65c). 수: 자동 번호 362(유효 349 · 폐기 8 · 결번 5) · TC-FLOW 34 · 수동 63 |
 | 2026-09-30 | v30 정정 — **ui-test-checker FAIL 지적 반영(BLOCKER 1 · MAJOR 2 · MINOR 4).** ① BLOCKER-1: TC-325 · 340 · 342 · 348 · 349 편집 저장·취소 접근 이름 = `presetActionAria` 형식(설계 §5.3) — AC-4 해소 ② MAJOR-1: TC-345 ⓒ 언마운트 뒤 흐름 진행(resolve = `onError(null)` · `listPresets` 2회, 로컬 상태 쓰기만 생략) — AC-3 해소 ③ MAJOR-2: 신규 TC-353(이름 중복 허용 — 같은 이름 저장·이름 바꾸기 호출), 추적 R-64 · 설계 §5.1 행 ④ MINOR-1: 탭 루트 `<section aria-label={t.tabPresets} aria-busy>` 확정 — TC-343 · TC-156(프리셋 탭도 region) 반영, AC-1 · AC-5 해소 ⑤ MINOR-2: TC-FLOW-33 Step 1 ~ 5 번호, 원래 저장 날짜 판정을 FLOW 자체 판정으로 ⑥ MINOR-3: TC-334 픽스처 폴더 이름 번호 없음(「고양이 A」) ⑦ MINOR-4: `tone='danger'` 판정 TC 추가 안 함 — AC-6 권고. 수: 자동 번호 353(유효 340 · 폐기 8 · 결번 5) · TC-FLOW 33 · 수동 60 |
 | 2026-09-30 | v30 — **CR-064 「프리셋」 탭(R-58 ~ R-67 🔒, requirements v1.28 · presets-tab · i18n §4.12 · §4.6 · contract v0.30, 증분 모드 · TDD 선행).** 「v30 개정」 절 신설(기준 · mock 규약 · 신규 TC · TC-FLOW · 추적 3종 · 설계 확인 AC-1 ~ AC-5). 신규 TC-315 ~ TC-352(38개 — 스펙 `presetValues.test.ts` · `PresetsTab.test.tsx` · `PresetCard.test.tsx` 신규, `SettingsApp.test.tsx` TC-351, `i18n.test.ts` TC-352), TC-FLOW-33(S-31 ~ S-34). TC-311 ~ TC-314 결번(AC-2). 개정: `SettingsApp.test.tsx`(프리셋 래퍼 일반 함수 mock · 메뉴 5항목 — TC-031 · 032 · 099 · 100 · 101 · 153 · 154 · 156 · 1078행), `i18n.test.ts`(TC-093 · 094 · 246 · 286 — `ERROR_CODES` 39 · 단순 키 173). `manual-checklist.md` v22(M-64a ~ M-64f). 수: 자동 번호 353(유효 340 · 폐기 8 · 결번 5 — v30 정정 반영) · TC-FLOW 33 · 수동 60 |

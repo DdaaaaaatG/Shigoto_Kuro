@@ -75,6 +75,7 @@
 - 「사용 중」 표시·선택 강조·정렬 전환·검색·복제·덮어쓰기 저장 **없음**(R-67, 패킷 §6). (CR-065) 옛 「썸네일 없음」은 PS-09 개정으로 **폐기** — 미리보기는 R-68(§11).
 - 상태 줄(`role=status`)은 저장 카드 안 한 곳뿐이다. 목록 카드 조작(적용·내보내기·삭제)의 성공 안내도 이 줄에 쓴다 — 탭 안 안내 위치를 하나로 모은다.
 - 날짜 줄 구분자 ` · `, 문제 줄 구분자 ` — `는 세 언어 공통 리터럴(키 없음 — 타이머 `:` 선례).
+- (2026-10-15 doc-sync) 내장 프리셋(확정사항 §6 PS-11 — core가 `presets/`가 없을 때만 `builtin-1`·`builtin-2`를 시딩)은 `listPresets()` 결과의 보통 카드로 보인다. 화면은 내장·사용자 프리셋을 구분하지 않는다(표시·버튼·이름 바꾸기·삭제 동일, ui 코드 변경 없음).
 
 ## 2. 컴포넌트
 
@@ -90,6 +91,8 @@
 | `Shell`·`SettingsApp` | `src/settings/index.tsx` (기존, 개정) | 화면 진입 | `Tab`에 `'presets'`, `TAB_IDS` 다섯째(맨 끝), `TAB_KEY.presets = 'tabPresets'`, 패널 `{tab === 'presets' && <PresetsTab manifest={manifest} onError={onError} />}`. 머리 주석 「탭 4개」 → 「탭 5개」 | R-66, R-27 |
 
 - (CR-065) 컴포넌트 1개 추가(`PresetPreviewBox`, 신규 파일)와 `PresetCard`·`presetValues` 개정은 **§11.2**. 위 표의 `PresetCard` 「책임」에 「위 미리보기」가 더해진다.
+- (2026-10-15 doc-sync, 실측) 현재 줄 수: `PresetsTab.tsx` 304 · `PresetSaveCard.tsx` 130 · `PresetCard.tsx` 184 · `PresetPreviewBox.tsx` 51 · `presetValues.ts` 97 · `PresetsTab.module.css` 177. 모두 400줄 이하. 다만 컴포넌트 함수 본문이 50줄 한계를 넘는다(`PresetsTab` ≈ 255줄·`PresetCard` ≈ 150줄 — 리뷰 지적 CR-001). 분리(핸들러 → 훅, 카드 편집 줄·버튼 격자 → 서브컴포넌트)는 **후속**(ui-postprocessor, 동작 불변)이며 아직 적용되지 않았다.
+- 타입 export(as-built): `PresetSaveCard.tsx` `PresetSaveFocusTarget = 'name' | 'save' | 'import'`, `PresetCard.tsx` `PresetCardFocusTarget = 'apply' | 'export' | 'rename' | 'delete' | 'renameInput'`, `PresetsTab.tsx` `PresetsTabProps`. §4 `focusRequest`의 `target`은 이 두 타입을 쓴다.
 - 공용 `src/components/ui`는 비어 있다(`design.md` §3·§11 D-1) — 입력칸·버튼·목록은 표준 원소를 화면 로컬 컴포넌트 안에서 쓴다(기존 편차 D-1 그대로, 새 편차 없음).
 - 새 이벤트 구독 없음. `useBridgeEvent`를 이 탭에서 쓰지 않는다(계약 §5.11 — 새 이벤트 없음).
 
@@ -136,7 +139,7 @@
 | `.nameInput` | `flex: 1 1 200px; min-width: 0; padding: 6px 10px; border: 1px solid var(--st-border); border-radius: 8px; font: inherit` / `:focus-visible { outline: 2px solid var(--st-accent); outline-offset: 1px }` |
 | `.primaryButton` (저장·이름 저장) | `padding: 6px 14px; border: 0; border-radius: 999px; background: var(--st-accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer` / `:hover:not(:disabled) { background: var(--st-accent-hover) }` / `:disabled { opacity: 0.5; cursor: not-allowed }` / `:focus-visible { outline: 2px solid var(--st-ink); outline-offset: 2px }` |
 | `.divider` | `border: 0; border-top: 1px solid var(--st-border); margin: var(--st-gap-md) 0` (`<hr>`) |
-| `.problems` | `margin: 8px 0 0; padding: 8px 12px; background: #fde8e8; color: var(--st-danger); border-radius: 8px; font-size: 13px`(창 오류 줄 `.error`와 같은 값) / `.problems ul { margin: 4px 0 0; padding-left: 18px }` |
+| `.problems` | `margin: 8px 0 0; padding: 8px 12px; background: #fde8e8; color: var(--st-danger); border-radius: 8px; font-size: 13px`(창 오류 줄 `.error`와 같은 값) / `.problems p { margin: 0 }`(머리 문단 여백 제거 — 2026-10-15 doc-sync 소스 대조 추가) / `.problems ul { margin: 4px 0 0; padding-left: 18px }` |
 | `.list` | `list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--st-gap-sm)` |
 | `.item` | `padding: var(--st-gap-md); border: 1px solid var(--st-border); border-radius: 8px` |
 | `.itemName` (`h3`) | `margin: 0; font-size: 14px; font-weight: 700; color: var(--st-ink); overflow-wrap: anywhere` |
@@ -195,6 +198,21 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 ### 5.1 `PresetsTab`
 
 공통 규칙 — **작업 시작 `begin()`**: `pending = true`, `status = ''`, `problems = []`, `renamingId = null`(다른 조작이 시작되면 인라인 편집은 버린다 — 이름 바꾸기 저장 자신은 예외, 아래). **작업 끝 `end()`**: `pending = false`. 모든 reject는 `onError(toBridgeError(e))`, 성공은 `onError(null)`. `pending`이면 모든 핸들러는 즉시 반환(재진입 방지).
+
+**구현 형태(as-built, 2026-10-15 doc-sync — 동작은 아래 표와 같다):**
+
+| 내부 함수·ref | 시그니처 | 뜻 |
+|---|---|---|
+| `busyRef` | `useRef(false)` | 재진입 판정은 `pending` 상태 대신 이 ref로 한다(같은 렌더 안 연속 클릭도 막음). `begin` 때 `true`, `finish` 때 `false` |
+| `aliveRef` · `live(write)` | `(write: () => void) => void` | `aliveRef.current`가 true일 때만 `write()` — §4 언마운트 규칙의 로컬 상태 쓰기 |
+| `run` | `(base: FocusRequest, task: () => Promise<FocusRequest \| void>, mapError?: (e: BridgeError) => BridgeError) => Promise<void>` | `begin()`에 해당하는 상태 쓰기 → `task()` → 반환한 포커스(없으면 `base`)로 `finish`. reject면 `onError(mapError(toBridgeError(e)))`, 포커스 = `base`. `onSave`·`onImport`·`applyConfirmed`·`deleteConfirmed`·`onExport`가 쓴다(`onExport`만 `mapError = presetErrorForDisplay`) |
+| `finish` | `(focus: FocusRequest \| null) => void` | `end()`에 해당 — `busyRef = false`, (살아 있으면) `pending = false`·`focusRequest = focus`를 한 배치로 |
+| `onRequest` | `(kind: 'apply' \| 'delete', preset: PresetSummary) => void` | 아래 표의 `onApplyRequest`·`onDeleteRequest` 두 행을 한 함수로 합친 것(카드 `onApply` → `onRequest('apply', p)`, `onDelete` → `onRequest('delete', p)`) |
+| 마운트 효과 | `useEffect(() => { void reload() }, [reload])` | `reload`는 `useCallback(…, [onError])`. `onError` = `SettingsApp`의 `setError`(항등 고정)라 실제로 마운트 1회 |
+
+- `onRenameCancel`은 `busyRef`가 true이거나 `renamingId === null`이면 아무것도 하지 않는다(아래 표 「예외 없음」의 방어 조건).
+- `onRenameSave`는 `run`을 쓰지 않는다 — 편집을 유지한 채 진행하고 `problems`를 비우지 않는다(아래 표 그대로).
+- 리뷰 지적 CR-001(본문 50줄 초과)의 분리는 후속(§2 실측 줄).
 
 | function | 시그니처 | 입력 | 출력(상태 변경) | 동작 | 예외 | 요구ID |
 |---|---|---|---|---|---|---|
@@ -353,7 +371,7 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 
 ## 10. 파일 크기 · 예정 TC · 추가 후보 · 확인 필요
 
-- 파일 크기(TSX·TS 400줄, 함수 50줄): `PresetsTab.tsx` ~260(핸들러 11개 — 50줄 넘는 것 없음. 넘으면 `usePresetActions` 훅으로 빼되 동작 불변), `PresetSaveCard.tsx` ~140, `PresetCard.tsx` ~130, `presetValues.ts` ~60, `PresetsTab.module.css` ~80.
+- 파일 크기(TSX·TS 400줄, 함수 50줄): `PresetsTab.tsx` ~260(핸들러 11개 — 50줄 넘는 것 없음. 넘으면 `usePresetActions` 훅으로 빼되 동작 불변), `PresetSaveCard.tsx` ~140, `PresetCard.tsx` ~130, `presetValues.ts` ~60, `PresetsTab.module.css` ~80. **(2026-10-15 doc-sync 실측)** 파일 한계는 모두 지킨다(§2 실측 줄). 핸들러 하나하나는 50줄 이하지만 컴포넌트 함수 본문(`PresetsTab` ≈ 255줄·`PresetCard` ≈ 150줄)이 함수 한계를 넘는다 — 리뷰 CR-001, `usePresetActions` 훅·카드 서브컴포넌트 분리는 **후속**(미적용).
 - 예정 TC: 번호는 **ui-test-designer가 부여**한다(`test/scenarios.md` 마지막 번호 다음). 수용 기준 = 패킷 §5 표 그대로 + 이 문서가 더한 것: ① `presetErrorForDisplay`(`preset.export_exists` → message 빈 문자열, 다른 code 불변) ② `formatSavedAt` 무효 입력 → `''` ③ IME 조합 중 Enter 무시(저장·편집) ④ 포커스 표 §8.2(확인창 취소 복귀·삭제 뒤 이웃 카드·편집 저장 뒤 「이름 바꾸기」) ⑤ 적용 뒤 `listPresets` 추가 호출 0회·`getAlarmSound` 호출 0회 ⑥ 다른 조작 시작 시 편집 버림 ⑦ 탭 5개·End 키 = 프리셋.
 - (CR-065) 파일 크기·예정 TC·확인 필요 추가분은 §11.8·§11.9.
 - 추가 후보(요구 밖 — 넣지 않음): ~~썸네일~~(CR-065로 요구 R-68 승격), 「사용 중」 표시, 정렬·검색, 복제, 덮어쓰기 저장, 자동 백업, 가져오기 진행률. 필요하면 관리자 판단.
@@ -435,9 +453,9 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 
 | 컴포넌트/모듈 | 파일 | 분류 | props / export | 책임 | 요구ID |
 |---|---|---|---|---|---|
-| `PresetPreviewBox` (default·named) | `src/settings/components/PresetPreviewBox.tsx` (**신규**, ~60줄 예상) | 화면 로컬 | `{ preview: PresetPreview }` | 합성 미리보기 박스 1개 — `previewLayout` 결과대로 `<img>`를 겹친다. 그림 불러오기 실패·그림 없음 안내. bridge 호출 없음 | R-68, R-66 |
-| `PresetCard` (개정) | `src/settings/components/PresetCard.tsx` (177 → ~195줄 예상) | 화면 로컬 | props 불변(§2.2) | 맨 위에 `<PresetPreviewBox preview={preset.preview} />`, 요약 두 줄, 버튼 `div.actionGrid`(2×2), 버튼 `title`, `h3` `title`, 편집 줄 `.cardNameRow` | R-66, R-68 |
-| `presetValues` (개정) | `src/settings/presetValues.ts` (45 → ~95줄 예상) | 화면 로컬 순수 모듈 | §11.3 | 미리보기 배치 계산(순수) | R-68 |
+| `PresetPreviewBox` (default·named) | `src/settings/components/PresetPreviewBox.tsx` (**신규**, ~60줄 예상 → 실측 51줄, 커밋 2270652) | 화면 로컬 | `{ preview: PresetPreview }` | 합성 미리보기 박스 1개 — `previewLayout` 결과대로 `<img>`를 겹친다. 그림 불러오기 실패·그림 없음 안내. bridge 호출 없음 | R-68, R-66 |
+| `PresetCard` (개정) | `src/settings/components/PresetCard.tsx` (177 → ~195줄 예상 → 실측 184줄) | 화면 로컬 | props 불변(§2.2) | 맨 위에 `<PresetPreviewBox preview={preset.preview} />`, 요약 두 줄, 버튼 `div.actionGrid`(2×2), 버튼 `title`, `h3` `title`, 편집 줄 `.cardNameRow` | R-66, R-68 |
+| `presetValues` (개정) | `src/settings/presetValues.ts` (45 → ~95줄 예상 → 실측 97줄. 내부 판정 `isPositive(n)` = 유한한 양수, export 아님) | 화면 로컬 순수 모듈 | §11.3 | 미리보기 배치 계산(순수) | R-68 |
 | `PresetsTab` | 불변 | — | — | 목록 `ul`의 `className=list`는 그대로(격자는 CSS만 바뀐다) | R-66 |
 
 - 공용화 후보 아님: 합성 미리보기는 `MousePartsTab`(끌기·영역 선)·`TimerTab`(글자 끌기)에도 있지만 각자 조작과 결합돼 있어 「비중복」 조건을 못 채운다. `PresetPreviewBox`는 조작 없는 읽기 전용이라 화면 로컬에 둔다.
@@ -534,13 +552,13 @@ React·bridge 호출 없음(타입·상수 import만). 모든 함수 50줄 이�
 
 | # | 흐름 | 정상 | 오류 |
 |---|---|---|---|
-| PR-1 (보강) | 탭 진입 | `listPresets()` → 카드마다 `preset.preview` → `previewLayout` → 그림 ≤ 7장을 `url`로 표시(`loading="lazy"` — 스크롤해 보일 때 읽음) | 그림 한 장이라도 로드 실패 → 그 카드 미리보기 = `presetPreviewUnavailable`. 창 오류 줄·상태 줄 불변, 버튼 동작 불변 |
+| PR-1 (보강) | 탭 진입 | `listPresets()` → 카드마다 `preset.preview` → `previewLayout` → 그림 ≤ 9장(`PREVIEW_ORDER` 9키 — 2026-10-15 doc-sync 정정, 옛 「≤ 7장」)을 `url`로 표시(`loading="lazy"` — 스크롤해 보일 때 읽음) | 그림 한 장이라도 로드 실패 → 그 카드 미리보기 = `presetPreviewUnavailable`. 창 오류 줄·상태 줄 불변, 버튼 동작 불변 |
 | PR-6 (보강) | 이름 바꾸기 성공 뒤 재조회 | 같은 폴더라 `url`이 같으면 미리보기 그대로 | — |
 
 - 새 command·event·재조회 없음. 미리보기 데이터는 `list_presets` 반환에 실려 온다(§11.9).
 - `url`은 core가 준 값을 그대로 `src`에 넣는다(ui가 경로를 조립하지 않음 — 화면 코드에 `convertFileSrc` 호출 없음). 표시 가능 조건 = Tauri asset protocol scope `$APPDATA/presets/*/*.png` 읽기(PNG만) — **반영됨**(사용자 승인 2026-09-30, 확정사항 §6 PS-09 개정). scope가 빠지면 모든 미리보기가 안내 문구로 보인다(§11.9 결정 4).
-- 성능: 카드 N장 × ≤ 7장 `<img>`. 브라우저 이미지 디코딩만 쓰고 캔버스 합성·JS 픽셀 처리는 하지 않는다. `previewLayout`은 카드당 `useMemo` 1회.
-- 파일 크기(400줄·함수 50줄): `PresetCard.tsx` ~195 · `PresetPreviewBox.tsx` ~60 · `presetValues.ts` ~95 · `PresetsTab.module.css` ~150. 넘는 것 없음.
+- 성능: 카드 N장 × ≤ 9장 `<img>`(`PREVIEW_ORDER` 9키, 키마다 최대 1장). 브라우저 이미지 디코딩만 쓰고 캔버스 합성·JS 픽셀 처리는 하지 않는다. `previewLayout`은 카드당 `useMemo` 1회.
+- 파일 크기(400줄·함수 50줄): `PresetCard.tsx` ~195 · `PresetPreviewBox.tsx` ~60 · `presetValues.ts` ~95 · `PresetsTab.module.css` ~150. 넘는 것 없음. **(2026-10-15 doc-sync 실측)** 184 · 51 · 97 · 177 — 파일 한계 이내. `PresetCard` 함수 본문 ≈ 150줄은 함수 한계 초과(리뷰 CR-001, 분리 후속 — §10).
 - 예정 TC(번호는 ui-test-designer 부여) 수용 기준: ① `previewLayout` — 순서 = `PREVIEW_ORDER`, 캔버스 레이어 (0,0,100,100), `partPos`·`penPos` % 계산(§11.3 예), `penPos: null` → `pen_up` 없음, 목록 밖 슬롯 무시, 같은 키 여럿 → 첫째, `canvas: null`·0 크기 → `null`, `layers: []` → items 빈 배열 ② 박스 `aspect-ratio` 인라인 값(`"900 / 700"`, 캔버스 없음 → `"450 / 350"`) ③ 모든 미리보기 `img`의 `alt === ""`, `h3` `title` = 이름 ④ `img` `error` 이벤트 → 안내 문구만 보이고 `img` 0개, 다른 `url` 목록으로 다시 렌더 → 안내 해제 ⑤ 버튼 4개 DOM 순서(적용·내보내기·이름 바꾸기·삭제)·`title`, §8.2 포커스 표 회귀 ⑥ 요약 두 줄(`metaDate`·`metaInfo`) ⑦ 시간 글자 요소 없음 ⑧ 열 수·버튼 줄바꿈 없음은 jsdom이 레이아웃을 하지 않으므로 **`/run-app` 스크린샷**(창 900·720, ko·ja·en)으로 확인.
 
 ### 11.9 계약 사용 · 확인 필요 (CR-065)

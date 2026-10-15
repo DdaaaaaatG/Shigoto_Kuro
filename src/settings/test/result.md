@@ -1,101 +1,40 @@
-# 테스트 결과 — settings / 2026-09-27 15:52 ~ 15:53
+# 테스트 결과 — settings / 2026-10-15 16:08 ~ 16:20
 
-실행: vitest (아래 3개 명령) · E2E 없음(대상 아님) · 스크린샷 0장(앱 실행 금지 지시)
-판정: 통과 (PASS 486건 합산 / FAIL 0 / SKIP 6 수동)
+실행: vitest `yarn test --run src/settings src/bridge src/components` · E2E 미설치(tauri-driver 없음) · 스크린샷 5장(앱 실행 캡처)
+판정: 통과 (vitest PASS 552 / FAIL 0 · 스크린샷 5장 확인 · SKIP 63 수동)
+시나리오: `test/scenarios.md` v32 — TC 행 281개. 수동 체크리스트 M-항목 63개는 실행하지 않고 SKIP(수동)으로 집계만 했다.
 
-## 1. 대상 범위 (CR-054 증분)
+## 1. vitest
 
-명령: `yarn test --run src/settings/test/ResetAllCard.test.tsx src/settings/test/i18n.test.ts src/settings/test/GeneralTab.test.tsx src/settings/test/SettingsApp.test.tsx`
-
-결과: 4 files passed (4) · 95 tests passed (95) · Duration 3.75s
-
-| 파일 | 결과 | 커버 |
-|---|---|---|
-| ResetAllCard.test.tsx | PASS 25/25 | TC-293 ~ TC-304 · TC-FLOW-31 · TC-FLOW-32 (it.each 사례 포함) |
-| i18n.test.ts | PASS 11/11 | TC-093·094·246·286·301 (CR-054 개정 포함) |
-| GeneralTab.test.tsx | PASS 27/27 | TC-099·101·104·130 (CR-054 개정 포함) |
-| SettingsApp.test.tsx | PASS 32/32 | TC-099·101(창 단위)·TC-102 등 |
-
-콘솔 관찰: SettingsApp.test.tsx 실행 중 `TimerTab` 관련 `act(...)` 경고 4건(TC-153·TC-156·TC-099·TC-101). 테스트는 모두 PASS했으나 콘솔 경고는 0이 아니다. 원인은 TimerTab 내부 비동기 상태 갱신 추정(1차 분류: 화면(추정) — 이번 CR-054 변경분과 직접 관련 없음, TimerTab은 CR-054 대상 파일 아님). FAIL 아님, 참고 기록만.
-
-## 2. 회귀 확인
-
-명령: `yarn test --run src/settings`
-
-결과: 24 files passed (24) · 391 tests passed (391) · Duration 4.90s. FAIL 0.
-동일한 TimerPreview `act(...)` 경고 1건 추가 관찰(TC-264, TimerPreview.test.tsx) — 위와 같은 분류.
-
-## 3. 정적 검사
-
-| 명령 | exit code | 비고 |
-|---|---|---|
-| `yarn tsc --noEmit` | 0 | 오류 없음 |
-| `yarn lint` (`eslint .`) | 0 | 경고 없음 |
-
-## 4. 버전 대조 (읽기)
-
-| 파일 | version |
+| 항목 | 값 |
 |---|---|
-| package.json | 0.1.1 |
-| src-tauri/tauri.conf.json | 0.1.1 |
-| src-tauri/Cargo.toml | 0.1.1 |
+| 파일 | 32 passed (32) |
+| 테스트 | 552 passed (552) |
+| 실패 | 없음 |
+| Duration | 8.71s |
 
-세 파일 일치. change-requests.md CR-054 기록(0.1.0 → 0.1.1, tauri.conf.json·Cargo.toml은 이미 0.1.1이라 대조만)과 부합.
+메인 세션 보고(전체 881/881, PresetsTab 40/40)와 범위가 다르다. 이번 실행은 settings·bridge·components 한정이라 552건이다. 차이는 범위 차이이며 실패 차이는 없다. PresetsTab.test.tsx 단독 40건 재확인은 이번 범위 밖(파일 목록 일부만 출력 확인).
 
-## 5. 수동 항목 (M-54a ~ M-54f)
+콘솔 관찰: TimerPreview·TimerTab 관련 `act(...)` 경고가 출력된다. 모든 테스트는 PASS. 1차 분류: 화면(추정) 또는 스펙(추정). 이전 결과(2026-09-27)와 동일한 경고이며 FAIL이 아니다.
 
-판정: **미실행 — 선행 미충족(D-7: 개발 PC 앱 데이터 백업 확인 대기)**. 지시에 따라 앱 실행(`yarn tauri dev`·`/run-app`·exe)을 하지 않았다. 백업/세대 표식 확인은 메인 세션이 사용자 확인 후 수행 예정.
+## 2. 앱 스크린샷 (dev 앱, 설정 값 변경 없음)
 
-| 항목 | 상태 |
-|---|---|
-| M-54a ~ M-54f | SKIP(선행 미충족 D-7) — `src/settings/test/manual-checklist.md` 기존 기록(⚠ 전제 D-7 문단, v18) 그대로 유효, 이번 패스에서 추가 수정 없음 |
+경로: `doc/300_검증/screenshots/20261015-settings/` (916x679, 한국어 UI)
 
-## 6. TC 수 대조
-
-`scenarios.md` CR-054 절 표기 TC(TC-293~304, TC-FLOW-31·32, 개정 TC-093·094·099·101·104·130·246·286)는 모두 위 4개 스펙 파일에 존재함을 grep으로 확인(`test/ResetAllCard.test.tsx`에 TC-293~304·FLOW-31·32 전건, 개정 TC는 `i18n.test.ts`·`GeneralTab.test.tsx`·`SettingsApp.test.tsx`에 분산). 누락 없음.
-
-## 종합
-
-CR-054 관련 자동 테스트 전건 PASS(95/95), 회귀 전건 PASS(391/391), 정적 검사 exit 0/0, 버전 파일 3종 일치. 수동 M-54a~f는 D-7 대기로 미실행(SKIP, 사유 명시). 이번 패스는 **통과**로 기록하되 수동 확인은 별도 인계 대상이다.
-
----
-
-# CR-057 재검증 — 2026-09-27 19:06 ~ 19:07
-
-실행: vitest만 (앱 실행·스크린샷·%APPDATA% 접근 금지 지시 준수). 소스·스펙 미수정.
-판정: **통과** (PASS 934건 합산 / FAIL 0 / SKIP 0)
-
-## 1. 대상 범위 명령
-
-`yarn vitest --run src/settings/test/labels.test.ts src/settings/test/i18n.test.ts src/settings/test/MousePartsTab.test.tsx src/settings/test/DragHit.test.tsx src/settings/test/SettingsApp.test.tsx`
-
-결과: **5 files passed (5) · 133 tests passed (133)**, Duration 4.03s. FAIL 0.
-
-| 파일 | 결과 | 비고 |
+| 파일 | 탭 | 확인 |
 |---|---|---|
-| labels.test.ts | PASS 4/4 | — |
-| i18n.test.ts | 파일 목록에 포함, 합산 133건 중 통과 | TC-305 관련 언급(라인 284, 값 단언은 MousePartsTab 쪽) 확인 |
-| MousePartsTab.test.tsx | PASS 72/72 | TC-305(ko·ja·en 3건, areaDesc 안내 줄) 라인 1748·1780 확인 — grep으로 스펙 내 존재·실행 확인 |
-| DragHit.test.tsx | 파일 목록에 포함, 통과 | — |
-| SettingsApp.test.tsx | PASS 32/32 | TC-153·TC-156·TC-099·TC-101·TC-102 등 |
+| 1-general.png | 기본 설정 | 언어·배율·유휴 시간·창 카드 표시 |
+| 2-images.png | 이미지 설정 | 캡처 저장(육안 판정은 수동 체크리스트로) |
+| 3-shoulder.png | 어깨축·손 위치 | 제목·안내·미리보기·버튼 3개 표시 |
+| 4-timer.png | 타이머 | 캡처 저장(육안 판정은 수동 체크리스트로) |
+| 5-presets.png | 프리셋 | 저장 폼·가져오기·내장 프리셋 카드 표시 |
 
-콘솔 관찰: `MousePartsTab`·`TimerTab` 관련 `act(...)` 경고 다수(TC-153·156·099·101 실행 중). 이전 CR-054 재검증에서도 동일 패턴 관찰됨(1차 분류: 화면(추정), TimerTab 비동기 상태 갱신 — CR-057 변경분과 무관, FAIL 아님).
+1·3·5번은 육안으로 탭 전환과 본문 렌더를 확인했다. 2·4번은 파일만 저장했다. 스크린샷은 증거 자료이며 M-항목 합격 판정이 아니다.
 
-grep으로 TC-305 3건(ko·ja·en) 및 개정 TC(TC-009·TC-094·TC-016·TC-019·TC-020·TC-022·TC-024·TC-049·TC-063~074·TC-077·TC-082·TC-086·TC-222·TC-225·TC-FLOW-02·04·06)이 대상 스펙 파일에 산재해 실행됨을 파일 통과 수(133/133 FAIL 0)로 확인. 개별 TC 이름 단위 실패 없음.
+## 3. 집계
 
-## 2. 정적 검사
+PASS 552(vitest) / FAIL 0 / SKIP 63(수동, M-01~) / E2E 미실행(tauri-driver 미설치 — 설치 승인 필요)
 
-| 명령 | exit code | 비고 |
-|---|---|---|
-| `yarn tsc --noEmit` | 0 | 오류 없음 |
-| `yarn lint` (`eslint .`) | 0 | 경고 없음 |
+## 4. 프로세스
 
-## 3. 전체 회귀 (`yarn test --run`)
-
-결과: **66 files passed (66) · 801 tests passed (801)**, Duration 10.08s. FAIL 0.
-
-src/overlay 쪽(다른 세션 동시 작업 중)도 이번 실행에서는 전건 PASS로 관찰됨 — 별도 조치 불필요, 목록만 기록.
-
-## 종합
-
-CR-057(이동 영역 문구 개선) 대상 범위 vitest 133/133 PASS, tsc/lint exit 0, 전체 회귀 801/801 PASS. FAIL 없음, SKIP 없음. 앱 실행·스크린샷·%APPDATA% 접근은 지시대로 수행하지 않음(수동 확인 항목 없음, 전량 자동화 스펙으로 커버됨). 이번 재검증은 **통과**.
+dev 앱(kuro-keyviewer PID 26752)과 하위 프로세스를 종료했다. 종료 뒤 kuro-keyviewer 잔존 없음. `.dev-tester.log` 끝의 오류 2줄은 종료 신호로 인한 exit code 이며 앱 결함이 아니다.
