@@ -16,7 +16,8 @@
 //!        실제로 본 오른쪽 버튼 누름→뗌 한 쌍을 두 번째 채널로 내보내고(메뉴를 띄울지는 tray가
 //!        판단), 메인 스레드가 아닌 곳에서 전경 창을 조회하는 안전 래퍼를 둔다.
 //! [공개 API] `start(tx, clicks) -> HookHandle`, `HookHandle::stop()`, `InputEvent`, `MouseButton`,
-//!        `SpecialKey`, `HookError`. `pub(crate) fn refresh`
+//!        `SpecialKey`, `HookError`. `topmost::{OverlayHwnd, set_topmost_target,
+//!        reassert_topmost_now}`(overlay R-01 보강 WT, 항상 위 재적용). `pub(crate) fn refresh`
 //!        — 트레이 「새로고침」 전용 진입점(tray.md, 훅 스레드가 실행 중이어도 안전 — `KEYS`·
 //!        `MOUSE_BUTTONS`는 Mutex 라 콜백과 경합하지 않는다). `right_click::{RightClick,
 //!        ScreenPoint}`, `foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect}`
@@ -24,17 +25,20 @@
 //! [방식] Microsoft 공식 `windows` 크레이트로 `SetWindowsHookExW(WH_KEYBOARD_LL / WH_MOUSE_LL)` 직접 호출.
 //!        포장 크레이트(rdev 등) 사용 금지(확정사항 §2).
 //! [스레드] 전용 스레드 하나가 두 훅을 설치하고 `GetMessageW` 메시지 루프를 돈다.
+//!        같은 스레드의 같은 루프에 전경 창 변화 WinEvent 감시를 붙인다(WT-02, 새 스레드 없음).
 //!        저수준 훅은 설치한 스레드의 메시지 루프가 있어야 콜백이 불린다.
 //!        콜백은 Windows 가 그 스레드에서 호출한다. 콜백 안에서는 채널 send 만 하고 즉시 반환한다
 //!        (느리면 Windows 가 훅을 강제 해제한다 — LowLevelHooksTimeout).
-//! [unsafe] 이 모듈이 프로젝트에서 unsafe 를 쓰는 **유일한** 자리다. 모든 블록에 `// SAFETY:` 를 단다.
+//! [unsafe] 이 모듈이 프로젝트에서 unsafe 를 쓰는 **유일한** 자리다. WT: `topmost.rs`에 U20~U27
+//!        (WinEvent 훅·창 조회·비동기 SetWindowPos) — 이 파일(`mod.rs`)에는 새 unsafe 블록이 없다. 모든 블록에 `// SAFETY:` 를 단다.
 //!        CR-021·CR-023 은 unsafe 블록을 추가·변경하지 않는다 — `classify`·`KeyTable`·반복 판정은
 //!        안전한 Rust다. CR-046: `async_key_down`(U11) 하나 — `GetAsyncKeyState` 호출. 키 표
 //!        칸(0..255)과 마우스 좌·우 버튼 가상 키 코드(`VK_LBUTTON`·`VK_RBUTTON`) 조회에 함께
 //!        쓴다(포인터·핸들 인자가 없어 대상이 늘어도 안전 조건은 같다). overlay R-40:
 //!        `foreground.rs`에 U12~U19(전경 창 조회, 훅 콜백·훅 스레드와 무관) — 이 파일(`mod.rs`)
 //!        에는 새 unsafe 블록이 없다. `right_click.rs`는 unsafe 0.
-//! [개인정보] `vkCode`는 눌린 키 표(`KeyTable`)와 `classify` 안에서만 쓴다. 키 코드·스캔 코드·문자는
+//! [개인정보] WT: 전경이 된 창이 무엇인지 보지 않고 창 제목·클래스명을 조회하지 않는다(`topmost.rs`).
+//!        `vkCode`는 눌린 키 표(`KeyTable`)와 `classify` 안에서만 쓴다. 키 코드·스캔 코드·문자는
 //!        저장(이력)·전달·로그하지 않는다(확정사항 §5). 표는 `start`·`stop`·`refresh` 때 비운다.
 //!        밖으로는 개수·분류값·**반복 여부**만 나간다. 반복 횟수·시각은 세지 않는다.
 //!        CR-046 조회 대상은 표에 이미 있는 칸·눌린 걸로 믿는 마우스 버튼뿐이다(256칸 전수
@@ -84,9 +88,11 @@ use windows::Win32::UI::WindowsAndMessaging::{
 
 mod foreground;
 mod right_click;
+mod topmost;
 
 pub use foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect};
 pub use right_click::{RightClick, ScreenPoint};
+pub use topmost::{reassert_topmost_now, set_topmost_target, OverlayHwnd};
 
 // windows 크레이트의 VIRTUAL_KEY(u16) 상수를 match 패턴·배열 인덱스용 정수로 옮긴다(값을 새로
 // 정의하지 않는다 — hook.md §11 D10).
@@ -736,6 +742,14 @@ fn run_message_loop(ready_tx: Sender<Result<u32, HookError>>) {
         }
     };
 
+    // 전경 창 변화 감시(WT-02). 실패해도 훅은 계속 동작한다(트리거 ⓑ·ⓒ는 그대로).
+    let watch = topmost::install_foreground_watch();
+    if watch.is_none() {
+        log::warn!(
+            "전경 창 변화 감시를 시작하지 못했습니다 — 항상 위 재적용은 수동 트리거만 동작합니다."
+        );
+    }
+
     // SAFETY: 단순 시스템 호출. 현재 스레드 id 를 돌려준다.
     let thread_id = unsafe { GetCurrentThreadId() };
     let _ = ready_tx.send(Ok(thread_id));
@@ -753,6 +767,10 @@ fn run_message_loop(ready_tx: Sender<Result<u32, HookError>>) {
             let _ = TranslateMessage(&msg);
             DispatchMessageW(&msg);
         }
+    }
+
+    if let Some(w) = watch {
+        topmost::remove_foreground_watch(w);
     }
 
     // SAFETY: 이 스레드가 설치한 훅 핸들 두 개를 해제한다. 실패해도 스레드 종료로 훅은 사라진다.

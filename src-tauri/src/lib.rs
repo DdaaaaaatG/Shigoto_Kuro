@@ -94,6 +94,11 @@ pub fn run() {
                 window.label(),
                 window_event_kind(event)
             );
+            if window.label() == window::OVERLAY_LABEL
+                && matches!(event, tauri::WindowEvent::Destroyed)
+            {
+                hook::set_topmost_target(None); // WT-08 — 파괴된 창을 가리키지 않게 등록 해제
+            }
             if window.label() == window::SETTINGS_LABEL {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     log::debug!("설정 창 CloseRequested 수신 — hide로 전환");

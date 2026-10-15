@@ -21,7 +21,9 @@
 //! [좌표] 위치는 물리 픽셀(훅이 주는 마우스 좌표와 같은 좌표계). 크기(`OverlaySize`)는 논리
 //!        px(= ui CSS px). `list_monitors`의 모니터 사각형도 물리 px, 가상 화면 좌표(모니터
 //!        전체 — 작업 영역 아님).
-//! [저수준 호출] 없음.
+//! [저수준 호출] 없음. 항상 위 재적용(WT)은 `hook::{set_topmost_target, reassert_topmost_now,
+//!        OverlayHwnd}`에 위임한다(HWND 는 `hwnd()?.0 as isize` 정수로만 건넨다). 의존: `window → hook`.
+//!        [unsafe] 없음. [스레드] 새 스레드 없음. [개인정보] 창 정보를 읽지 않는다.
 //! [에러] `WindowError`(모듈 신규). `code()`는 기존 bridge 코드값과 같다. 이 모듈의 공개
 //!        함수 중 기존 6개(`overlay_position`·`set_overlay_position`·`set_overlay_visible`·
 //!        `apply_overlay_settings`·`show_settings_window`·`screen_bounds`)는 **당분간
@@ -39,6 +41,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Manager, PhysicalPosition, Position};
 
 use crate::error::BridgeError;
+use crate::hook::{self, OverlayHwnd};
 use crate::settings::{OverlaySettings, Settings};
 
 mod placement;
@@ -183,10 +186,26 @@ pub fn set_overlay_visible(app: &AppHandle, visible: bool) -> Result<(), BridgeE
     let win = overlay(app)?;
     if visible {
         win.show()?;
+        keep_overlay_on_top(&win)?;
     } else {
+        release_overlay_top();
         win.hide()?;
     }
     Ok(())
+}
+
+/// ④ 항상 위 재적용 대상 등록 + 즉시 1회(WT-03). **보이는 상태일 때만** 부른다.
+/// HWND 는 정수로만 옮긴다 — window 는 `windows` 크레이트를 import하지 않는다.
+fn keep_overlay_on_top(win: &tauri::WebviewWindow) -> Result<(), WindowError> {
+    let raw = win.hwnd()?.0 as isize;
+    hook::set_topmost_target(OverlayHwnd::from_raw(raw));
+    hook::reassert_topmost_now();
+    Ok(())
+}
+
+/// 숨기기 전에 부른다(WT-05). 이후 어떤 트리거도 오버레이를 건드리지 않는다.
+fn release_overlay_top() {
+    hook::set_topmost_target(None);
 }
 
 /// 오버레이 설정 중 창에 적용할 부분을 반영한다. **`s.x/y`는 읽지 않는다** — 위치의 주인은
@@ -203,17 +222,22 @@ pub fn default_overlay_position() -> Point {
 }
 
 /// 오버레이 창 상태를 설정대로 맞춘다(SV2-03·04). 멱등. 창 위치는 읽지도 옮기지도 않는다(§2.1.1).
-/// 순서 고정: ① 표시/숨김 ② 작업표시줄 ③ 클릭 통과. 중간 실패는 그 오류를 반환하고 앞 단계는
+/// 순서 고정: ① 표시/숨김(숨길 때는 hide 앞에서 항상 위 등록 해제) ② 작업표시줄 ③ 클릭 통과
+/// ④ 항상 위 재적용(보일 때만, WT-03·WT-05). 중간 실패는 그 오류를 반환하고 앞 단계는
 /// 되돌리지 않는다(다음 호출이 다시 맞춘다).
 pub fn apply_overlay_window(app: &AppHandle, settings: &Settings) -> Result<(), WindowError> {
     let win = overlay(app)?;
     if settings.overlay.visible {
         win.show()?;
     } else {
+        release_overlay_top();
         win.hide()?;
     }
     win.set_skip_taskbar(!settings.show_in_taskbar)?;
     win.set_ignore_cursor_events(settings.position_lock)?;
+    if settings.overlay.visible {
+        keep_overlay_on_top(&win)?;
+    }
     Ok(())
 }
 

@@ -1,7 +1,10 @@
 # window 모듈 설계
 
-- 상태: 확정(사용자) — §3.1(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정 · **소스 반영**(커밋 2be41ce) · 최종 갱신 2026-09-30(doc-sync)
+- 상태: 확정(사용자) — §3.1(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정 · **소스 반영**(커밋 2be41ce) · **§3.2(항상 위 재적용 WT-01~WT-09)는 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · 수동 MC-51~MC-62 미확인** · 최종 갱신 2026-10-15
 - 변경이력:
+  - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**) ① §4 「앱 시작 순서」 제목의 setup 단계 번호를 현재 `lib.rs`에 맞췄다(오버레이 = 5단계 `setup_overlay`, 당시 4단계). 현재 순서 한 줄을 더했다(`apply_overlay_window` 포함, 매니페스트는 기본 그림·내장 프리셋 시딩 뒤 값). §11 파급 표의 「setup 4단계」도 같이 고쳤다. ② openItem window-bridge-error 판정을 §11 항목 14로 남겼다. core → bridge 역참조가 맞고, 후속 W-2로 둔다. `apply_overlay_settings` 호출자 0도 적었다. WT 절은 손대지 않았다. 공개 API 불변.
+  - 2026-10-15 (WT 소스 적용 표기 — 설계 변경 없음) §3.2와 §10 WT 9행을 「확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인」으로 바꿨다. 근거는 메인 세션 보고(fmt·clippy 0, `cargo test` lib 456·통합 102 통과)다. 수동 MC-51~MC-62는 미확인이다.
+  - 2026-10-05 (overlay **R-01 보강 — 항상 위 재적용**, 🔒 사용자 결정 2026-10-05 ①~⑤, 베타 제보) 신규 **§3.2**(WT-01~WT-09). 공개 함수 시그니처 불변, `apply_overlay_window`에 ④단계(보일 때만 대상 등록 + 즉시 재적용), 숨김 경로는 `hide()` 앞에서 등록 해제. `set_overlay_visible`도 같은 처리. 비공개 도우미 `keep_overlay_on_top`·`release_overlay_top`. HWND는 Tauri `WebviewWindow::hwnd()` → 정수(`isize`)로만 hook에 넘긴다. Win32는 hook 안전 래퍼([hook.md](hook.md) §3.11, U20~U27), 트레이 「새로고침」 트리거는 [tray.md](tray.md) §3.8. **의존 추가 `window → hook`.** 새 에러 변형·스레드·설정 필드 없음. 수동 MC-51~MC-62. §1·§2·§3.2·§5·§10·§11(D34~D38, 파급) 갱신. **소스 미적용.**
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) §3.1(overlay R-40)의 「소스 미적용」을 걷어냈다. 대조 결과: `pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, WindowError>`(`window/mod.rs:157`)와 `ScreenBounds::contains(&self, x: i32, y: i32) -> bool`(`:108`)이 있고, 호출자는 `tray/popup.rs`다(`should_popup`:125, 조회는 `overlay-menu` 스레드에서 상태가 Idle일 때만 — PU-h). §10 R-40 행을 「소스 반영」으로 바꿨다. 같은 날 2차로 §10(SV2-03~06, CR-017 `list_monitors`, OV-R-13 위치 불간섭·이동 감지, OV-R-03 표시 크기)의 「✅ 설계 · 소스 미적용」 8곳도 「소스 반영」으로 바꿨다. 근거 공개 함수: `window/mod.rs` `list_monitors`:134·`apply_overlay_settings`:194·`default_overlay_position`:200·`apply_overlay_window`:208, `window/placement.rs` `watch_overlay_moves`:198·`persist_overlay_position`:224·`keep_overlay_position`:240·`keep_core_owned`:256·`reset_overlay_position`:265, `window/sizing.rs` `overlay_display_size`:54. 「(요구ID 확인 필요)」 꼬리는 그대로 둔다.
   - 2026-09-29 (R-40 감사 반영, 리뷰 SEC-301 — 문서 주석만, 시그니처·본문·에러 불변) `overlay_screen_rect`의 호출자가 tray `popup_now`(메인)에서 **tray `overlay-menu` 스레드(비메인)**로 바뀐다. 전경 창 조회보다 먼저 사각형을 판정하기 위해서다. 비메인 호출 안전 근거(tauri-runtime-wry 2.12.0 getter = 메인 스레드 동기 왕복)와 호출 조건(메뉴 상태 Idle일 때만)을 §3.1 문서 주석·스레드 줄에 적었다. 정본 [tray.md](tray.md) §3.7.3 PU-h·§11 T17. **소스 미적용**(`window/mod.rs:151-153` 문서 주석 교체).
   - 2026-09-29 (overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.3·§4.2) **신규 공개 항목 2개**: `impl ScreenBounds { pub fn contains(&self, x: i32, y: i32) -> bool }`(반열림 `[x, x+w) × [y, y+h)`, i64 계산, 순수)·`pub fn overlay_screen_rect(app) -> Result<Option<ScreenBounds>, WindowError>`(보이는 오버레이 창의 바깥 사각형, 물리 px — 숨김이면 `Ok(None)`). 호출자는 [tray.md](tray.md) §3.7 `popup_now`(메인 스레드). 새 에러 변형·unsafe·스레드·설정 없음. 테스트 WR1~WR3(`mod.rs` 테스트). 증분 전체 **§3.1**, §1·§2·§5·§6·§8.8·§10·§11 갱신.
@@ -20,7 +23,7 @@
 
 | 요구ID | 내용 | 이 모듈의 몫 |
 |---|---|---|
-| OV-R-01 | 투명·테두리 없음·항상 위 | `tauri.conf.json` 창 속성(기존). 코드 변경 없음 |
+| OV-R-01 | 투명·테두리 없음·항상 위 | `tauri.conf.json` 창 속성(기존). **2026-10-05 보강(WT-01~WT-09)**: 항상 위가 풀려도 전경 변화·창 속성 적용·트레이 「새로고침」 때 다시 맨 위로 — 대상 등록·해제는 window(`apply_overlay_window`·`set_overlay_visible`), Win32 재적용은 hook 안전 래퍼(§3.2) |
 | OV-R-12 | 드래그로 위치 이동 | ui의 `data-tauri-drag-region`(Tauri 내장). window는 이동 결과(`WindowEvent::Moved`)만 받는다 |
 | OV-R-13 | 창 위치는 설정에 저장 | **신규**: 이동 감지·디바운스 저장(`watch_overlay_moves`·`persist_overlay_position`), 시작 시 복원·화면 밖 보정(`restore_overlay_position`·`resolve_overlay_position`) |
 | OV-R-03 | 창 크기 = 표시 크기 자동 조절(확정사항 §3·§6) | **신규**: 표시 크기 계산(`overlay_display_size`, 순수)·창 리사이즈(`resize_overlay`). 호출 시점 3곳(시작·배율 변경·캔버스 변경)은 setup·bridge가 부른다(§4, §9.1) |
@@ -420,6 +423,141 @@ pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, Wind
 - 테스트: §8.8 WR1~WR3. `overlay_screen_rect`는 Tauri 런타임이 필요해 수동([tray.md](tray.md) §8.3 MC-31·MC-35·MC-36·MC-45 ③).
 - 파급: 신규만. 호출자는 `tray/popup.rs` 하나. 기존 `ScreenBounds` 사용처(`bridge/types.rs:18` 재노출, `placement.rs`, `list_monitors`, `union`)는 바뀌지 않는다.
 
+### 3.2 항상 위 재적용 (WT-01~WT-09, overlay R-01 🔒 보강 — 사용자 결정 2026-10-05, 구현자가 그대로 옮길 것)
+
+결론: 오버레이가 다른 창 아래로 밀려도 **전경 창이 바뀔 때마다·창 속성을 적용할 때마다·트레이 「새로고침」 때** Win32 `SetWindowPos(HWND_TOPMOST)`로 다시 맨 위에 올린다. Win32 호출은 전부 hook의 안전 래퍼([hook.md](hook.md) §3.11 `topmost.rs`, U20~U27)가 하고, window는 **대상 등록·해제와 즉시 1회 요청**만 한다. 사용자가 숨긴 오버레이(`overlay.visible=false`)는 절대 올리거나 보이지 않는다.
+
+비유: 게시판 맨 위에 붙인 공지(오버레이)가 누가 다른 종이를 덧붙이면 가려진다. 이제는 게시판 관리인(hook 스레드)이 "누가 게시판을 건드렸다"는 소리(전경 창 변화)가 날 때마다 공지를 다시 맨 위로 꽂는다. 공지를 떼어 둔 상태(숨김)면 관리인 명단에서 지워 두므로 다시 꽂지 않는다.
+
+#### 3.2.1 원인과 요구
+
+- 결함(베타 제보·사용자 재현 2026-10-05): 여러 창을 오가다 오버레이가 다른 창 아래에 깔리고, 트레이 「숨기기→표시」로도 돌아오지 않는다.
+- 근거(메인 세션 확인, tao 0.37.1 `window_state.rs` `apply_diff`): 항상 위는 `tauri.conf.json` `alwaysOnTop: true` 한 번뿐이다. tao의 플래그 캐시가 이미 `ALWAYS_ON_TOP=true`라 `set_always_on_top(true)`는 diff가 없어 무효다. 표시 전환은 `SetWindowLongW(GWL_EXSTYLE)`로 스타일 비트만 쓰고 `SetWindowPos`를 `SWP_NOZORDER`로 부르므로 Z 순서가 복구되지 않는다. 그래서 **Tauri API가 아니라 Win32 `SetWindowPos(HWND_TOPMOST)` 직접 호출**이 필요하다.
+- 풀리는 트리거(OS·다른 앱의 `HWND_NOTOPMOST` 등)는 특정하지 못했다. 이 설계는 트리거와 무관하게 복구 경로를 만든다.
+
+| 설계ID | 내용 | 근거(🔒 사용자 결정 2026-10-05) | 담당 |
+|---|---|---|---|
+| WT-01 | 재적용 = `SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0, SWP_NOMOVE｜SWP_NOSIZE｜SWP_NOACTIVATE｜SWP_ASYNCWINDOWPOS)` 1회. tao 캐시를 거치지 않는다 | 배경 분석 | hook `topmost.rs` U27 |
+| WT-02 | 트리거 ⓐ 전경 창 변화 — `SetWinEventHook(EVENT_SYSTEM_FOREGROUND, WINEVENT_OUTOFCONTEXT｜WINEVENT_SKIPOWNPROCESS)`를 훅 스레드의 기존 메시지 루프에 붙인다. 주기 폴링 없음 | 결정 2ⓐ | hook §3.11 |
+| WT-03 | 트리거 ⓑ `apply_overlay_window` 끝(④단계)·`set_overlay_visible` 표시 경로 끝 — 대상 등록 + 즉시 1회 | 결정 2ⓑ | **window(이 절)** |
+| WT-04 | 트리거 ⓒ 트레이 「새로고침」 — 등록된 대상에 즉시 1회 | 결정 2ⓒ | [tray.md](tray.md) §3.8 |
+| WT-05 | `overlay.visible=false`면 절대 올리거나 보이지 않는다. 숨길 때 **숨기기 전에** 대상 등록을 해제하고, 등록이 없으면 어떤 트리거도 아무것도 하지 않는다 | 결정 3 | window(등록) + hook(판정) |
+| WT-06 | 최소화(`IsIconic`)이고 보이는 창이면 `ShowWindowAsync(SW_SHOWNOACTIVATE)`로 복원한 뒤 WT-01 | 결정 4 | hook U25·U26 |
+| WT-07 | 포커스를 빼앗지 않는다(`SWP_NOACTIVATE`·`SW_SHOWNOACTIVATE`). 다른 앱이 전체 화면이어도 판정 없이 재적용한다(R-40 U-3 생략 규칙과 무관) | 결정 1·5 | hook |
+| WT-08 | 무효·재사용 HWND 방어 — 매번 `IsWindow` + 창 pid == 자기 pid를 확인. 오버레이 `Destroyed` 때 등록 해제. 앱·훅 종료 시 `UnhookWinEvent` | 위임문 설계 요구 | hook U22·U23·U21, `lib.rs` |
+| WT-09 | 과잉 방지·로그 — 트리거 1건당 `SetWindowPos` 최대 1회. 로그는 `kuro_diag` debug에 동작 종류·누적 횟수만. 창 제목·클래스명은 조회도 기록도 하지 않는다(P7) | 위임문 설계 요구 | hook |
+
+#### 3.2.2 window 공개 API 변경 (§2 증분 — 시그니처 불변, 동작 추가)
+
+| 함수 | 변경 | 설계ID |
+|---|---|---|
+| `pub fn apply_overlay_window(app: &AppHandle, settings: &Settings) -> Result<(), WindowError>` | 순서 ① 표시/숨김 ② 작업표시줄 ③ 클릭 통과 **④ 항상 위 재적용(보일 때만)**. 숨길 때는 ①의 `hide()` **앞에서** 등록 해제 | WT-03·WT-05 |
+| `pub fn set_overlay_visible(app: &AppHandle, visible: bool) -> Result<(), BridgeError>` | 표시면 `show()` 뒤 ④와 같은 처리, 숨김이면 `hide()` 앞에서 등록 해제. 반환 타입 불변(`BridgeError` 임시 유지 — §11 파급) | WT-03·WT-05 |
+
+새 공개 함수는 없다. 비공개 도우미 2개를 `window/mod.rs`에 둔다.
+
+```rust
+use crate::hook::{self, OverlayHwnd};
+
+/// ④ 항상 위 재적용 대상 등록 + 즉시 1회(WT-03). **보이는 상태(설정 visible=true)일 때만** 부른다.
+/// HWND 값은 정수로만 옮긴다 — 포인터→정수 `as` 변환은 안전 Rust이고, window는 `windows`
+/// 크레이트를 import하지 않는다(Tauri의 `HWND`는 Tauri가 쓰는 windows 버전의 타입이라 우리
+/// 0.58 `HWND`와 타입이 다르다 — 정수로 건너면 버전 차이가 문제되지 않는다).
+fn keep_overlay_on_top(win: &tauri::WebviewWindow) -> Result<(), WindowError> {
+    let raw = win.hwnd()?.0 as isize;
+    hook::set_topmost_target(OverlayHwnd::from_raw(raw));
+    hook::reassert_topmost_now();
+    Ok(())
+}
+
+/// 숨기기 전에 부른다(WT-05). 이후 어떤 트리거도 오버레이를 건드리지 않는다.
+fn release_overlay_top() {
+    hook::set_topmost_target(None);
+}
+
+pub fn apply_overlay_window(app: &AppHandle, settings: &Settings) -> Result<(), WindowError> {
+    let win = overlay(app)?;
+    if settings.overlay.visible {
+        win.show()?;
+    } else {
+        release_overlay_top();
+        win.hide()?;
+    }
+    win.set_skip_taskbar(!settings.show_in_taskbar)?;
+    win.set_ignore_cursor_events(settings.position_lock)?;
+    if settings.overlay.visible {
+        keep_overlay_on_top(&win)?;
+    }
+    Ok(())
+}
+
+pub fn set_overlay_visible(app: &AppHandle, visible: bool) -> Result<(), BridgeError> {
+    let win = overlay(app)?;
+    if visible {
+        win.show()?;
+        keep_overlay_on_top(&win)?;
+    } else {
+        release_overlay_top();
+        win.hide()?;
+    }
+    Ok(())
+}
+```
+
+- `win.hwnd()`는 Tauri 2.12.0 `WebviewWindow::hwnd(&self) -> crate::Result<HWND>`(안전 함수, `webview_window.rs:1971`). `?`는 기존 `WindowError::Tauri`로 바뀐다 — **새 에러 변형 없음**.
+- `OverlayHwnd::from_raw(0)`은 `None`이라 등록 해제와 같다(HWND가 비정상으로 0이면 아무것도 하지 않음).
+- 순서 근거: ④를 끝에 둔 것은 결정 2ⓑ "표시·속성 적용 끝에"를 따른 것이다. `set_skip_taskbar`·`set_ignore_cursor_events`는 Z 순서를 바꾸지 않지만, 앞으로 단계가 늘어도 마지막에 다시 올리면 안전하다.
+- 비메인 스레드 호출: bridge command가 비메인 스레드에서 부르면 Tauri `show()`는 메인 스레드로 비동기 전달돼 ④ 시점에 아직 안 보일 수 있다. hook 판정은 "보이지 않으면 복원(ShowWindow)은 하지 않고 Z 순서만 올린다"(hook.md §3.11.3 TP5·TP6)라서, 숨김 상태 창의 Z 순서만 먼저 맨 위로 잡히고 이어서 `show()`가 그 자리에서 보인다. 창을 보이게 만드는 것은 여전히 `show()`뿐이다.
+- `placement::restore_overlay_position`(시작 시 1회)의 `show()`/`hide()`는 바꾸지 않는다. setup은 바로 뒤에 `apply_overlay_window`를 불러 등록을 맞춘다(`lib.rs` `setup_overlay` 순서). 시작 전 등록은 비어 있다(정적 초기값 0).
+- `lib.rs` `on_window_event`(core-implementer): 라벨 `overlay`의 `WindowEvent::Destroyed`면 `hook::set_topmost_target(None)`(WT-08). 정상 운영에서 오버레이는 파괴되지 않는다 — 방어용 한 줄이다.
+
+#### 3.2.3 스레드·채널 (§4 증분 — 새 스레드·채널 없음)
+
+```
+[메인 스레드 또는 command 스레드]                         [win32-input-hook 스레드 (기존)]
+ apply_overlay_window / set_overlay_visible              GetMessageW 루프
+   표시 → show() → keep_overlay_on_top                     ├ 저수준 키보드·마우스 콜백(기존)
+            ├ hook::set_topmost_target(Some(h)) ─┐         └ WinEvent 콜백(EVENT_SYSTEM_FOREGROUND, 다른 프로세스만)
+            └ hook::reassert_topmost_now() ──┐   │              └ reassert(TARGET) ── 같은 판정·같은 Win32 호출
+   숨김 → set_topmost_target(None) → hide()  │   ▼
+ tray 「새로고침」 → hook::reassert_topmost_now()  [정적 TARGET: AtomicIsize — 0 = 등록 없음]
+                                             ▼
+                         판정 decide(등록, 자기 창, 보임, 최소화) → SetWindowPos(…ASYNCWINDOWPOS) [+ ShowWindowAsync]
+                                             │ (비동기 요청 — 메인 스레드가 자기 메시지 루프에서 처리)
+                                             ▼
+                                   [메인 스레드] 오버레이 Z 순서 = 맨 위
+```
+
+- 공유 상태는 hook의 원자 변수 `TARGET` 하나다. 잠금이 없어 교착 경로가 없다.
+- 종료: 트레이 「종료」(`app.exit(0)`) → 오버레이 `Destroyed`면 등록 해제. 훅 스레드는 `HookHandle` 종료 경로에서 `UnhookWinEvent` 후 끝난다([hook.md](hook.md) §3.11.5). 프로세스가 먼저 끝나도 OS가 WinEvent 훅을 함께 거둔다.
+
+#### 3.2.4 테스트 (§8 증분)
+
+- 단위: 판정 순수 함수 `decide`·`OverlayHwnd::from_raw`는 hook `topmost.rs`의 TP1~TP8([hook.md](hook.md) §3.11.6). window 도우미 2개는 Tauri 런타임이 필요해 자동 테스트 없음 — 코드 리뷰 + 아래 수동.
+- 수동 MC-51~MC-62(`yarn tauri dev`와 release 각각, `RUST_LOG=kuro_diag=debug`, 증거는 `/run-app` 스크린샷·로그를 `doc/300_검증/`에). **강제 해제 재현**: 트리거를 특정하지 못했으므로 PowerShell로 직접 `HWND_NOTOPMOST`를 걸어 결함 상태를 만든다.
+
+```powershell
+# 결함 상태 만들기(MC-52~MC-54): 오버레이 창을 항상 위에서 내린다. 창 제목은 tauri.conf.json의 오버레이 title.
+Add-Type -Name W -Namespace K -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int cx, int cy, uint f); [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern IntPtr FindWindow(string c, string t);'
+$h = [K.W]::FindWindow($null, "<오버레이 창 제목>")
+[K.W]::SetWindowPos($h, [IntPtr](-2), 0, 0, 0, 0, 0x13)   # HWND_NOTOPMOST, NOSIZE|NOMOVE|NOACTIVATE
+```
+
+| # | 조건 | 절차 | 기대 | 설계ID |
+|---|---|---|---|---|
+| MC-51 | 제보 재현 | 그림 앱(레이어 패널 등 보조 창 포함)·브라우저·메모장을 5분 이상 오가며 클릭·Alt+Tab | 오버레이가 다른 창 아래에 남지 않는다. 잠깐 가려져도 다음 창 전환 때 바로 위로 온다 | WT-01·WT-02 |
+| MC-52 | 강제 해제 → ⓐ | 위 스크립트로 내린 뒤 메모장을 오버레이 위로 끌어 겹치고 → 다른 앱 창 클릭 | 클릭(전경 변화) 직후 오버레이가 메모장 위로 온다. 로그에 재적용 1줄도 남지 않는다(콜백은 로그 없음 — 누적 횟수는 다음 ⓑ·ⓒ 줄에서 늘어난 값으로 확인) | WT-02 |
+| MC-53 | 강제 해제 → ⓑ | 내린 뒤 트레이 「표시/숨김」 두 번 | 다시 보일 때 맨 위. 로그 `topmost reassert … action=Raise` | WT-03 |
+| MC-54 | 강제 해제 → ⓒ | 내린 뒤 트레이 「새로고침」 | 맨 위. 로그 `action=Raise`(트레이 클릭으로 ⓐ도 함께 일어날 수 있어 화면만으로는 구분되지 않는다 — 로그 줄로 ⓒ 실행을 확인) | WT-04 |
+| MC-55 | 🔒 숨김 유지 | 트레이로 숨긴 뒤 창 전환 20회·「새로고침」·설정 창에서 다른 설정 저장 | 오버레이가 한 번도 보이지 않는다. 로그 `action=Skip` | WT-05 |
+| MC-56 | 🔒 최소화 | ① Win+D ② Win+M ③ 바탕 화면 보기(작업표시줄 오른쪽 끝) | 바탕 화면이 보인 직후 오버레이가 다시 보이고 맨 위다. 포커스는 바탕 화면에 남는다. **관찰 기록**: 각 경우 오버레이가 실제로 최소화됐는지(로그 `RestoreThenRaise` 여부) | WT-06 |
+| MC-57 | 🔒 포커스 | 메모장에 타자하면서 Alt+Tab·클릭으로 창 전환 반복, R-40 오른쪽 클릭 메뉴 열기·닫기, 설정 창 열기 | 키 입력은 늘 사용자가 고른 창으로 간다. 오른쪽 클릭 메뉴가 오버레이 뒤로 가려지지 않는다. 설정 창은 정상 조작된다(오버레이가 설정 창 위에 뜨는 것은 원래 동작) | WT-07 |
+| MC-58 | 🔒 전체 화면 | 브라우저 F11·동영상 전체 화면·테두리 없는 전체 화면 게임 | 오버레이가 그 위에 보인다. **독점 전체 화면 게임은 관찰**: 게임 최소화·화면 깜박임·프레임 저하 여부 기록(§11 D37) | WT-07 |
+| MC-59 | 입력 지연 | Alt+Tab을 1초에 여러 번 누르며 다른 손으로 타자·마우스 이동 1분 | 키·마우스 입력 지연·누락 없음(hook.md H4와 같음), CPU 급증 없음 | WT-02·WT-09 |
+| MC-60 | 다른 항상 위 앱 | 작업 관리자 「옵션 → 항상 위」를 켜고 두 창을 겹친 뒤 창 전환 반복 | 전경이 바뀔 때마다 오버레이가 위로 온다. 두 창이 서로 번갈아 끝없이 깜박이지 않는다(되먹임 없음) | WT-01·WT-02 |
+| MC-61 | 종료 | 트레이 「종료」 뒤 창 전환·타자 | 오류 대화상자·잔존 프로세스 없음, 시스템 입력 정상(hook.md H5) | WT-08 |
+| MC-62 | 개인정보 | MC-51~MC-61 뒤 `.dev-tauri.log` 확인 | `topmost` 줄에는 동작 종류·누적 횟수만 있다. 창 제목·클래스명·pid 없음 | WT-09 |
+
 ## 4. 스레드·채널
 
 ```
@@ -472,12 +610,13 @@ pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, Wind
 - R-13과의 상호작용: 리사이즈는 위치를 바꾸지 않고 `Moved`도 내지 않으므로 위치 저장·`settings://changed`가 생기지 않는다. 설령 다른 경로로 같은 자리의 `Moved`가 와도 `persist`의 비교가 no-op으로 막는다(이중 안전).
 - DPI가 다른 모니터로 끌어 옮기면 Windows가 `WM_DPICHANGED`로 창을 옮기고 tao가 **논리 크기를 보존**해 물리 크기를 다시 잡는다(tao 0.35.3 `event_loop.rs` 1966–1973행). 논리 px로 지정했으므로 창과 CSS 콘텐츠가 계속 일치한다. 이때의 `Moved`는 실제 이동이라 R-13 규칙대로 저장된다.
 
-### 앱 시작 순서 (`lib.rs` setup 4단계 교체)
+### 앱 시작 순서 (`lib.rs` setup 5단계 `setup_overlay` — 설계 당시 4단계, 2026-10-15 doc-sync 번호 현행화)
 
 0. (OV-R-03) `assets::load_manifest(&paths.assets_dir)` — 실패는 경고 로그 후 `canvas = None`(ui도 매니페스트 실패 시 빈 매니페스트로 동작). → `window::resize_overlay(&handle, canvas, settings.scale)` — 실패는 경고 로그 후 계속.
 1. `window::restore_overlay_position(&handle, &settings.overlay)` — 실패는 경고 로그 후 계속(기존 `apply_overlay_settings` 호출을 대체).
 2. 반환 위치 ≠ 저장 위치(화면 밖 보정) → `window::persist_overlay_position(&state.settings, &state.paths.settings_file, pos)` — 실패는 경고 로그.
 3. `window::watch_overlay_moves(&handle, 콜백)` — 실패는 경고 로그(위치 저장만 안 될 뿐 앱은 동작).
+- **현재 소스(2026-10-15 doc-sync, `lib.rs:385-425` `setup_overlay`)**: `resize_overlay` → `restore_overlay_position` → 보정 저장 → **`apply_overlay_window`**(§2 SV2 「§4 증분」) → `watch_overlay_moves`. setup 1단계는 기본 그림 시딩 → 내장 프리셋 시딩(PS-11) → `load_manifest` 순서다(`lib.rs:117-119`). 그래서 0단계의 매니페스트는 시딩 뒤 값이다. 자동 실행 보정은 setup 6단계다([tray.md](tray.md) §4).
 - 0이 1보다 먼저인 이유: `restore`는 `outer_size()`로 화면 밖 여부를 판정한다. 리사이즈 전이면 `tauri.conf.json`의 450×350으로 판정해, 25% 창(113×88)이 실제로는 화면 밖인데 "보인다"고 오판하거나 200% 창의 가시 영역을 과소 계산한다. setup은 메인 스레드이므로 `set_size`가 즉시 처리돼 이어지는 `outer_size()`가 새 크기를 돌려준다는 전제다(수동 R10으로 확인).
 - 1·2가 3보다 먼저인 이유: 복원 이동이 만든 `Moved`는 이벤트 루프 시작 뒤 도착하고, 그때는 메모리 값이 이미 같아 no-op이다.
 - 0단계의 매니페스트는 계약 v0.3 손 기준점 초기 계산(contract §5.1 ①)과 같은 값이므로 setup에서 한 번만 읽어 둘 다에 쓴다.
@@ -491,6 +630,8 @@ pub fn overlay_screen_rect(app: &AppHandle) -> Result<Option<ScreenBounds>, Wind
 ## 5. unsafe
 
 없음. 이동 감지는 Tauri `WindowEvent::Moved`, 모니터는 Tauri `available_monitors()`, 리사이즈는 Tauri `set_size`로 한다. R-40 창 사각형(§3.1)도 Tauri `is_visible`·`outer_position`·`outer_size`만 쓴다(전경 창 조회 Win32는 hook의 안전 래퍼 — [hook.md](hook.md) §3.10). Win32 직접 호출(`WM_EXITSIZEMOVE` 서브클래싱 등)이 필요해지면 hook 모듈에 안전한 래퍼를 두는 방향으로 재설계한다.
+
+- **항상 위 재적용(§3.2, 2026-10-05)도 unsafe 없음.** `SetWindowPos`·`IsIconic`·`ShowWindowAsync`·`SetWinEventHook` 등은 hook `topmost.rs`의 안전 함수 `set_topmost_target`·`reassert_topmost_now`만 부른다(SAFETY 근거 [hook.md](hook.md) §3.11.4 U20~U27). window가 하는 저수준 작업은 Tauri `hwnd()`가 준 값의 포인터→정수 변환(`as isize`, 안전 Rust)뿐이고 `windows` 크레이트를 import하지 않는다.
 
 ## 6. 에러 타입
 
@@ -755,6 +896,15 @@ ui 영향(ui-manager 인계, 참고): overlay 초기 로드 P-1의 `getScreenBou
 | OV-R-03 — 드래그 영역이 창 전체 | §9.2 UI-1 | 부분(ui 인계 필요) |
 | OV-R-12 | §1(ui 내장 드래그, 결과만 수신) | ✅(기존) |
 | OV-R-01 | §1(`tauri.conf.json`) | ✅(기존) |
+| **overlay R-01 🔒 보강 — WT-01 재적용 = Win32 `SetWindowPos(HWND_TOPMOST, …NOACTIVATE｜ASYNCWINDOWPOS)`** | §3.2.1, [hook.md](hook.md) §3.11 U27, MC-51~MC-54·MC-60 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-02 트리거 ⓐ 전경 창 변화(WinEvent, 폴링 없음)** | §3.2.3, [hook.md](hook.md) §3.11 U20·U21, MC-51·MC-52·MC-59 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-03 트리거 ⓑ `apply_overlay_window` ④·`set_overlay_visible` 표시 끝** | §3.2.2 `keep_overlay_on_top`, MC-53 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-04 트리거 ⓒ 트레이 「새로고침」** | [tray.md](tray.md) §3.8, MC-54 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-05 (🔒 결정 3) 숨김이면 올리지도 보이지도 않음** | §3.2.2 `release_overlay_top`(hide 앞), [hook.md](hook.md) §3.11.3 TP1·TP5·TP6, MC-55 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-06 (🔒 결정 4) 최소화면 복원 후 재적용** | [hook.md](hook.md) §3.11.3 TP4, U25·U26, MC-56 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-07 (🔒 결정 1·5) 포커스 비탈취·전체 화면에서도 재적용** | §3.2.1, [hook.md](hook.md) §3.11.3, MC-57·MC-58 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인(독점 전체 화면은 관찰) |
+| **R-01 보강 — WT-08 무효·재사용 HWND 방어, 종료 시 UnhookWinEvent** | §3.2.2(`Destroyed` 해제), [hook.md](hook.md) §3.11.3 TP2·§3.11.5, U22·U23, MC-61 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-09 트리거당 1회·debug 횟수만·제목/클래스 미기록** | [hook.md](hook.md) §3.11.2, MC-59·MC-62 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
 | **overlay R-40 (CR-062) — "오버레이 위" = 보이는 창 사각형(투명 포함), 누름·뗌 두 점 판정의 재료(🔒 U-1)·숨김이면 없음(AC-4)** | §1, §2 `contains`·`overlay_screen_rect`, §3.1, §6, §8.8 WR1~WR3 | 설계 확정 · 소스 반영(두 점 조합 판정 `should_popup`은 [tray.md](tray.md) §3.7) |
 
 ## 11. 설계 결정 노트
@@ -788,6 +938,23 @@ ui 영향(ui-manager 인계, 참고): overlay 초기 로드 P-1의 `getScreenBou
 | **D25** | 모니터 구성 변경 event 없음, ui 재조회 규칙으로 대체 | core event(`WM_DISPLAYCHANGE` 래퍼) / ui 주기 폴링 | §9.4. unsafe 래퍼 비용 대비 요구가 없다. 주기 폴링은 평상시 헛호출이라 조건부 재조회가 낫다 |
 | **D32** | (R-40) 점 판정을 기존 `ScreenBounds`의 메서드 `contains`로(반열림, i64) | ① tray 안의 비공개 함수 ② 새 사각형 타입 | 창·모니터 사각형의 주인이 window다(좌표계 정의 §1 [좌표]). 반열림은 `list_monitors` 경계 규칙과 같다. i64는 `x + width`가 `i32` 범위를 넘는 극단값에서 넘침 패닉(디버그)을 막는다. 새 타입은 bridge 재노출 타입과 중복된다 |
 | **D33** | (R-40) `overlay_screen_rect`는 숨김만 `None`, 최소화는 판정하지 않는다 | `is_minimized()` 검사 추가 | 오버레이는 최소화 버튼이 없고, 최소화돼도 창이 (−32000, −32000)으로 가 실제 클릭이 그 안에 들 수 없다(WR-e). 요구에 없는 분기를 더하지 않는다(스킬 §10) |
+| **D34** | (WT) 재적용은 **Win32 `SetWindowPos(HWND_TOPMOST)` 직접**(hook 래퍼) | ① Tauri `set_always_on_top(false)` → `(true)` 토글 ② tao 패치 | ①은 diff가 생겨 동작할 수 있으나 매번 `HWND_NOTOPMOST`를 거쳐 한순간 아래로 내려가고(깜박임), tao 내부 구현에 기대는 우회다. 비메인 스레드 WinEvent 콜백에서 Tauri setter를 부르면 메인 스레드 왕복도 생긴다. ②는 크레이트 수정이라 금지 범위다 |
+| **D35** | (WT) 등록 상태(`TARGET`)를 **hook 정적 원자 변수**에 두고 window가 채운다. 등록 = "사용자가 보이게 둔 오버레이" | ① WinEvent 콜백이 매번 Tauri `is_visible()` 조회 ② 설정 `Mutex`를 hook이 읽음 | ①은 비메인 스레드 getter = 메인 스레드 동기 왕복이라 콜백이 메인 스레드를 기다리고, 그동안 같은 스레드의 저수준 훅 콜백도 밀린다(시스템 입력 지연). ②는 hook → settings 의존이라 방향 위반이다(스킬 §1). 표시/숨김의 모든 경로(`apply_overlay_window`·`set_overlay_visible`)가 window를 지나므로 등록 지점이 둘로 끝난다 |
+| **D36** | (WT) `set_overlay_visible`에도 같은 처리 | `apply_overlay_window`만(위임문 문자 그대로) | bridge `set_overlay_visible` command와 트레이 대체 경로(`AppState` 없음)가 이 함수로 표시한다. 여기서 등록하지 않으면 그 경로로 다시 보인 오버레이는 감시 대상이 아니고, 숨길 때 해제하지 않으면 결정 3이 판정의 `IsWindowVisible`에만 기댄다. 같은 요구(R-01)의 같은 "표시" 경로라 범위 확장이 아니라 누락 방지로 판단했다 |
+| **D37** | (WT, 🔒 결정 1) 전체 화면 판정 없이 재적용 | R-40처럼 전체 화면이면 건너뜀 | 사용자 결정. `SWP_NOACTIVATE`라 전경·포커스는 바뀌지 않는다(R-40 U-3의 "게임 최소화" 위험은 메뉴가 `SetForegroundWindow`를 부르는 경로였다). **관찰**: 독점 전체 화면 게임에서는 DWM을 거치지 않아 오버레이가 보이지 않거나, 맨 위 창이 생기면서 일부 게임이 독점 모드를 잃고 깜박일 수 있다 — MC-58 기록 |
+| **D38** | (WT, 🔒 결정 4) 최소화면 복원 | 최소화는 그대로 둠 | "항상 위 = 항상 보임"이 요구다. 오버레이는 최소화 버튼이 없어 최소화되는 경로가 Win+D·Win+M 같은 일괄 최소화뿐이다. **부작용**: 바탕 화면 보기 직후 전경이 바탕 화면으로 바뀌는 순간 오버레이가 곧바로 되살아나 "바탕 화면만 보기"가 오버레이에는 통하지 않는다. 숨기려면 트레이 「표시/숨김」을 쓴다. Win+D가 최소화 없이 바탕 화면을 앞으로 올리는 방식이면 복원 분기 없이 WT-01만으로 위에 남는다 — MC-56 관찰 |
+
+### 파급 (WT 항상 위 재적용, Grep 2026-10-05)
+
+| 파일·위치 | 현재 | 필요한 수정 | 소관 |
+|---|---|---|---|
+| `src-tauri/src/window/mod.rs` `set_overlay_visible`(:182)·`apply_overlay_window`(:208) | `show()`/`hide()`만 | §3.2.2 코드대로(도우미 2개 추가). `//!` [방식]·[저수준 호출]에 "Win32는 hook `topmost` 안전 래퍼 경유" 한 줄, [공개 API] 설명에 ④단계 | core-implementer |
+| `src-tauri/src/lib.rs` `on_window_event` | 설정 창 `CloseRequested`만 | 라벨 `overlay` + `WindowEvent::Destroyed` → `hook::set_topmost_target(None)` | core-implementer |
+| 호출자 `bridge/commands/mod.rs:206`(`set_settings`)·`:696`(data-reset)·`tray/mod.rs:296`(`toggle_overlay`)·`lib.rs:402`(`setup_overlay`) | `apply_overlay_window` | 수정 없음 — 시그니처 불변, 동작만 추가(보일 때 재적용 1회) | — |
+| 호출자 `bridge/commands/mod.rs:383`(`set_overlay_visible` command)·`tray/mod.rs:290`(대체 경로)·`window/mod.rs:195`(`apply_overlay_settings`) | `set_overlay_visible` | 수정 없음 — 같은 이유 | — |
+| `window/placement.rs:119-121` `restore_overlay_position` | 시작 시 `show()`/`hide()` | 수정 없음 — 바로 뒤 `apply_overlay_window`가 등록을 맞춘다(§3.2.2) | — |
+| 테스트 | 이 함수들은 자동 테스트 없음(Tauri 런타임) | 없음 — 순수 판정은 hook TP1~TP8 | — |
+| bridge 계약·ui | — | **변경 없음**(새 command·event 없음, §9 결론 그대로) | — |
 
 ### 파급 (CR-017 `list_monitors`, Grep 2026-09-23)
 
@@ -833,7 +1000,7 @@ OV-R-03 추가분(기존 시그니처 변경 없음, 호출 추가만):
 
 | 파일·위치 | 추가 |
 |---|---|
-| `src-tauri/src/lib.rs` setup 4단계 | §4 시작 순서 0단계(매니페스트 로드 → `resize_overlay`) |
+| `src-tauri/src/lib.rs` setup 5단계(`setup_overlay`, 설계 당시 4단계) | §4 시작 순서 0단계(매니페스트 로드 → `resize_overlay`) |
 | `src-tauri/src/bridge/commands.rs` `set_settings`(43–57행) | 이전 scale 복사, scale 변경 시 `resize_overlay`(§9.1) |
 | `src-tauri/src/bridge/commands.rs` `import_asset`·`remove_asset`(71–92행) | 상태 레이어 슬롯이면 `resize_overlay`(§9.1) |
 | `src/overlay/overlay.module.css` `.root` | UI-1(ui 소관) |
@@ -854,3 +1021,6 @@ OV-R-03 추가분(기존 시그니처 변경 없음, 호출 추가만):
 9. **(관찰)** Ctrl+휠마다 `set_settings`가 settings.json을 쓰고 리사이즈한다(기존 동작 + 리사이즈 1회). 휠을 빠르게 굴리면 쓰기가 연속된다 — 현재 요구 범위에서는 수용.
 10. **(확인 필요, CR-017)** R-tmp-4(커서 모니터 기준 매핑) 요구ID 미부여 — overlay 요구 문서(ui-designer)에 추가 필요. 이동 영역 필드는 [settings.md](settings.md) R-tmp-3.
 11. **(전제, CR-017)** 훅 마우스 좌표 = 물리 px(Per-Monitor v2 DPI 인식)이라는 전제는 수동 L3·L4로 확인한다. 어긋나면(논리 px로 오면) 변환 책임을 어디에 둘지 재설계한다 — core가 추측으로 보정하지 않는다.
+12. **(확인 필요, WT)** 요구ID — 이 보강은 overlay `requirements.md` R-01(🔒)에 새 요구ID를 만들지 않고 설계ID WT-01~WT-09로만 추적한다. R-01 문구에 "풀려도 다시 맨 위로 돌아온다"를 수용 기준으로 덧붙일지는 ui-designer(요구 문서 소유자)·사용자 판단이다.
+13. **(관찰, WT)** 풀리는 원인은 여전히 모른다. 이 설계는 전경 변화 때 복구할 뿐이라, 전경 변화 없이 다른 창이 오버레이 위로 올라오는 경우(예: 다른 앱이 비활성 상태에서 스스로 `HWND_TOPMOST`를 거는 알림 창)는 다음 전경 변화까지 가려질 수 있다. 신고가 이어지면 원인 진단(`kuro_diag` 로그에 `EVENT_OBJECT_REORDER` 개수 등)을 별건 요구로 올린다 — 주기 폴링은 결정 2로 배제됐다.
+14. **(판정, window-bridge-error — 2026-10-15 doc-sync)** `window`가 `crate::error::BridgeError`를 import한다(`window/mod.rs:43`). `error.rs`는 「bridge 에러 타입」(계약 `BridgeError`)이다. 기존 공개 함수 6개(`overlay_position`·`set_overlay_position`·`set_overlay_visible`·`apply_overlay_settings`·`show_settings_window`·`screen_bounds`)가 이 타입을 반환하고, `impl From<WindowError> for BridgeError`도 `window/mod.rs:92`에 있다. **core → bridge 역참조가 맞다**(스킬 §1·§5, 이 문서 §2 머리말 「core는 bridge 타입을 모른다」). 모듈 `//!` [에러]가 적은 임시 부채다. **지금 고치지 않는다 → 후속 W-2(core·bridge 묶음)**: 6개 반환을 `WindowError`로 바꾸고 `From` impl을 `error.rs`로 옮긴다. 파급은 `bridge/commands/mod.rs:335·354·366·383·447`, `tray/mod.rs:89·293`, `lib.rs:207`이다. `apply_overlay_settings`는 호출자가 0이다(2026-10-15 Grep, `//!` 언급만). 그래서 후속 W-1(삭제)은 W-2를 기다리지 않고 착수할 수 있다.

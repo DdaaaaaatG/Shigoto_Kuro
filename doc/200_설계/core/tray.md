@@ -1,7 +1,10 @@
 # tray 모듈 설계
 
-- 상태: 확정(사용자) — §3.5(CR-047)는 초안(범위는 사용자 확정, **실측 게이트 G1·G2 통과 조건부**) · §3.6(CR-048)은 인계 패킷 기준 확정 · §3.7(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정, **§3.7.3·§3.7.5·§3.7.6은 7차 감사 반영(소스 반영 — 커밋 2be41ce `tray/popup.rs`)** · 최종 갱신: 2026-09-30(doc-sync)
+- 상태: 확정(사용자) — §3.5(CR-047)는 **소스 반영**(`tray/autostart.rs` — `LeastPrivilege`·`reconcile`·승격 경로 삭제, 2026-10-15 doc-sync 확인). 실측 게이트 G1~G5 기록은 `doc/300_검증/`에 없음(확인 필요) · §3.6(CR-048)은 인계 패킷 기준 확정 · §3.7(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6) 기준 확정, **§3.7.3·§3.7.5·§3.7.6은 7차 감사 반영(소스 반영 — 커밋 2be41ce `tray/popup.rs`)** · §3.8(WT-04)은 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · 수동 MC 미확인 · 최종 갱신: 2026-10-15
 - 변경이력:
+  - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**, 마커 b5ff65b 이후 대조, openItem core-CR047) CR-047(§3.5)이 소스에 들어간 것을 반영했다. 근거는 `RunLevel=LeastPrivilege`(`autostart.rs:194`), `pub fn reconcile`(`:340`), `query` 비공개(`:326`), `AutostartError` = `Failed`·`Io`·`Settings` 3변형(`:39-46`), `hook/elevate.rs` 없음이다. 고친 곳은 머리 상태 줄, §2(`set_enabled` 실패 조건, `query` → `reconcile` 행, 🔒 이름·블로킹 줄), §3.5.8 추적 줄, §6 표(`Cancelled`·`StatePoisoned` 삭제 표기, `Failed`·`Settings` 원인), §8 CR-047 대체 안내, §10 SV2-05 행이다. **실측 게이트 G1~G5 기록은 `doc/300_검증/`에서 찾지 못했다**(확인 필요 — 추적은 「부분」 유지). `decode_task_xml`의 UTF-16 해독은 `chunks_exact(2)` → `as_chunks::<2>()`로 바뀌었다(8ffb3a9, 동작 불변). 이 문서에 그 코드 조각이 없어 고칠 곳은 없다. 이번 범위의 공개 API·code 값 변경 없음.
+  - 2026-10-15 (9차, WT 소스 적용 표기 — 설계 변경 없음) §3.8과 §10 WT 2행을 「확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인」으로 바꿨다. 근거는 메인 세션 보고(fmt·clippy 0, `cargo test` lib 456·통합 102 통과)다. 수동 MC-54·MC-55는 미확인이다.
+  - 2026-10-05 (8차, overlay **R-01 🔒 보강 — 항상 위 재적용**, 사용자 결정 2026-10-05 ②ⓒ·③, 정본 [window.md](window.md) §3.2) 신규 **§3.8**: `refresh_overlay`가 `hook::refresh()` 다음·`reload()` 앞에서 `hook::reassert_topmost_now()`를 부른다(WT-04). 숨김 판정은 hook 등록 상태가 맡아 tray는 설정을 읽지 않는다. `toggle_overlay`는 수정 없음 — `apply_overlay_window` ④단계가 표시 때 재적용한다(WT-03). 메뉴 항목·문구·시그니처·에러 코드 불변, unsafe·새 의존 없음(`tray → hook` 기존). §1·§3.8·§5·§10·§11(T20) 갱신. **소스 미적용.**
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) §3.7(overlay R-40)의 「소스 미적용」을 걷어냈다. 대조 결과는 다음과 같다. `pub fn spawn_popup_listener(app: AppHandle, rx: Receiver<RightClick>) -> std::io::Result<()>`(`popup.rs:44`, `tray/mod.rs:54` `pub use`)가 §2와 같다. 비공개 판정 `should_request`(:110)·`suppress_for_fullscreen`(:120)·`should_popup`(:125)이 있다. `popup.rs` `//!`와 §3.7.3이 일치한다: `PopupGate` Idle→Pending→Open(CORE-301), 판정 순서 상태 → 창 사각형 → 전경 화면(SEC-301, PU-h), 스레드 "overlay-menu", 팝업은 `run_on_main_thread`, 전역 `on_menu_event` 공유, unsafe 없음, 테스트 PM1~PM15·FS1~FS7. `window::overlay_screen_rect`(`window/mod.rs:157`)·`hook::foreground_snapshot`(`hook/foreground.rs:63`)도 있다. §3.7.3 제목과 §10 R-40 행 8개(AC-6 「부분」의 ui 몫 문구는 유지)를 「소스 반영」으로 바꿨다. §3.5(CR-047 실측 게이트)·340행의 「소스 미적용」은 이번에 구현을 확인하지 못해 그대로 둔다. 6차 변경이력의 `POPUP_OPEN` 가드는 7차에서 `PopupGate`로 대체된 당시 기록이다.
   - 2026-09-29 (7차, overlay R-40 **감사 반영** — 리뷰 CORE-301(MEDIUM)·SEC-301(LOW)·CORE-302(LOW)·CORE-304(MEDIUM, 기존 위반). 요구·사용자 결정 U-1~U-5·메뉴 항목·공개 API 시그니처 **불변**, 새 크레이트·unsafe 없음) ① **CORE-301 상태 3단계**: `POPUP_OPEN: AtomicBool` + `OpenGuard::try_begin` → `static POPUP: PopupGate`(`AtomicU8`, **Idle → Pending → Open → Idle**). `overlay-menu`가 post **전에** `Idle→Pending`(`try_reserve`), post 실패 시 `cancel`(→Idle), 메인 `popup_now`가 `begin_open`(Pending→Open), 모든 반환 경로에서 가드 Drop(→Idle). 근거: tao 0.37.1은 핸들러 실행 중(= `TrackPopupMenu` 모달) 온 사용자 이벤트를 버퍼링했다가 모달 뒤 실행한다(`runner.rs:143-148·208-226`). 그래서 옛 PU-b 전제("재진입을 `try_begin`이 막는다")가 틀렸다. PU-b·PU-c 개정, 상태 전이표 신설. ② **SEC-301 판정 순서**: ① 상태 → ② 오버레이 창 사각형(`overlay_screen_rect`, **`overlay-menu`에서**) → ③ 전경 창 전체 화면 → ④ 예약·post. 순수 `should_request`(단락 평가)로 고정했다. 사각형 밖 클릭은 다른 프로세스 창을 조회하지 않는다. 비메인 스레드 getter 안전 근거는 tauri-runtime-wry 2.12.0 `lib.rs:196-210·263-278`(동기 왕복). Pending·Open이면 getter를 부르지 않아 모달과 겹치지 않는다(PU-h·PU-i 신설). `popup_now`는 인자 `click`을 받지 않고 사각형 판정을 하지 않는다. ③ **CORE-302**: [hook.md](hook.md) §3.10.3 공통 전제를 코드 SAFETY에 넣고 U13 문구를 "실패 시 pid는 쓰지 않는다(tid 0이면 버림)"로 바꾸라는 인계(§3.7.9 표). ④ **CORE-304**: `lib.rs` setup 4단계를 `fn start_input_pipeline`으로 추출(§3.7.6, 필요 시 `initial_hand_anchor`·`build_app_state`). 테스트 PM5 개정 + **PM6~PM15 신설**. §1·§3·§3.7.3·§3.7.5~§3.7.9·§4 R-40·§8.2a·§10·§11(T16~T19, T12·T13 주석, T-j, T-f 보충) 갱신. 상대 [window.md](window.md) §3.1(스레드 문장), [hook.md](hook.md) §3.10.2·§3.10.3. **소스 미적용.**
   - 2026-09-29 (6차, overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1·U-3·U-5, 수용 U-2·U-4 — 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2·§4·§7) **오버레이 오른쪽 클릭 = 트레이와 같은 메뉴.** 신규 `tray/popup.rs`(unsafe 없음) — 스레드 `overlay-menu`(`pub fn spawn_popup_listener(app, rx)`)가 훅의 `RightClick`을 받아 ① `POPUP_OPEN` 가드 ② **전체 화면이면 생략**(`hook::foreground_snapshot()` → 순수 `suppress_for_fullscreen`, fail-open) ③ 메인 스레드 post → `popup_now`: 창 사각형 두 점 판정(순수 `should_popup`, `window::overlay_screen_rect`) → `current_view` → **기존 `build_menu`** → `WebviewWindow::popup_menu`. **메뉴 클릭은 기존 `on_menu_event`(Tauri 전역 메뉴 리스너)가 처리 — 새 핸들러 등록 금지.** `tray/mod.rs`는 `sync_timer_menu_now`의 보기 계산을 `current_view`로 추출(동작 불변). `lib.rs` 4단계 배선(채널 1개·`hook::start(tx, click_tx)`·`spawn_popup_listener`). 메뉴 항목·문구·순서 불변. 의존 확장 `tray → hook`(`RightClick`·`foreground_snapshot`)·`tray → window`(`overlay_screen_rect`). 테스트 PM1~PM5·FS1~FS7, 수동 MC-31~MC-45(§8.3). 증분 전체 **§3.7**. 상대 [hook.md](hook.md) §3.9·§3.10, [window.md](window.md) §3.1.
@@ -23,6 +26,7 @@
 |---|---|---|
 | (확정사항 §6 트레이, 요구ID 미부여) | 트레이 아이콘, 메뉴: 설정 열기 / **새로고침** / 오버레이 표시·숨김 / 종료 | `init`(기존 + 새로고침 항목). 표시/숨김은 **SV2부터 `window::apply_overlay_window`로 창 속성 전체를 다시 적용**(§3.3) |
 | **CR-046 보강(🔒 사용자 승인 2026-09-26, 요구ID 미부여)** | 뗌 유실로 고착된 그림을 수동으로 되돌리는 「새로고침」 | `refresh_overlay(app)` — `hook::refresh()` + 오버레이 `WebviewWindow::reload()`(§3.4) |
+| **overlay R-01 🔒 보강 WT-04(사용자 결정 2026-10-05 ②ⓒ)** | 「새로고침」을 누르면 다른 창 아래로 밀린 오버레이가 다시 맨 위로(숨김이면 그대로 숨김) | `refresh_overlay`에 `hook::reassert_topmost_now()` 한 줄(§3.8) |
 | **SV2-05 (🔒 D-4·D-5)** | 컴퓨터 시작 시 자동 실행 토글 — 작업 스케줄러, 관리자 권한(자동 실행 작업만), 기본 꺼짐 | `autostart::{set_enabled, query, persist_autostart, build_task_xml}`, 시작 시 보정(§4) |
 | SV2-03·04 | 숨김 → 표시 뒤에도 위치 잠금·작업표시줄 상태 유지 | 트레이 표시 경로에서 `apply_overlay_window` 호출(§3.3) |
 | **TM-11 (CR-048, 🔒 D-11 A·A-3)** | 스톱워치·타이머가 켜져 있을 때만 메뉴 맨 위에 「시작」(흐르면 「일시정지」)·「멈춤」, 트레이 조작이 두 창에 반영 | `sync_timer_menu`·`tray_timer_view`·메뉴 핸들러(§3.6), 반영은 깔때기 `crate::publish_timer_change`([timer.md](timer.md) §3.7) |
@@ -38,13 +42,14 @@
 | **`pub const TASK_NAME: &str = "kuro_keyviewer"`** (`autostart`) | — | — | — | SV2-05 |
 | **`pub enum AutostartError`** + **`impl AutostartError { pub fn code(&self) -> &'static str }`** | — | §6 | — | SV2-05 |
 | **`pub fn build_task_xml(exe_path: &Path, user_id: &str) -> String`** | 실행 파일 경로, `도메인\사용자` | 작업 XML 문자열(순수) | 없음 | SV2-05 |
-| **`pub fn set_enabled(enabled: bool) -> Result<bool, AutostartError>`** | 켜기/끄기 | 끝난 뒤 실제 등록 상태 | `Cancelled`, `Failed`, `Io` | SV2-05 |
-| **`pub fn query() -> Option<bool>`** | — | 있음 `Some(true)` / 없음 `Some(false)` / 판정 불가 `None`(승격 없음) | 없음 | SV2-05 |
+| **`pub fn set_enabled(enabled: bool) -> Result<bool, AutostartError>`** | 켜기/끄기 | 끝난 뒤 실제 등록 상태 | `Failed`, `Io`(CR-047 — `Cancelled` 삭제) | SV2-05, SEC-001 |
+| ~~`pub fn query() -> Option<bool>`~~ | — | CR-047로 **비공개**(`autostart.rs:326`, 본문 불변) | — | SV2-05 |
+| **`pub fn reconcile() -> Option<bool>`** (CR-047) | — | 실제 등록 여부. 옛 관리자 작업(`HighestAvailable`)이면 일반 권한으로 다시 등록한 뒤의 상태. 판정 불가 `None`(§3.5.4) | 없음(실패는 로그) | SV2-05, SEC-001 |
 | **`pub fn persist_autostart(settings: &Mutex<Settings>, path: &Path, enabled: bool) -> Result<Option<Settings>, AutostartError>`** | 설정 상태, settings.json 경로, 실제 등록 상태 | 바뀌어 저장했으면 `Some(스냅샷)`, 같으면 `None` | `StatePoisoned`, `Settings` | SV2-05 |
 | **`pub fn spawn_popup_listener(app: AppHandle, rx: std::sync::mpsc::Receiver<crate::hook::RightClick>) -> std::io::Result<()>`** (`popup.rs`, `tray/mod.rs`에서 `pub use`) | 앱 핸들(소유), 훅의 오른쪽 클릭 한 쌍 수신자 | () — 스레드 `overlay-menu`를 띄우고 바로 반환(수신자가 끊기면 스레드 종료) | 스레드 생성 실패(`io::Error`) — 호출자(`lib.rs`)는 경고 로그 후 앱 시작 계속 | overlay R-40 |
 
-- 🔒 이름(bridge 착수 조건, 패킷 §7): `tray::autostart::{set_enabled, query, AutostartError::code}` + `persist_autostart`(core-designer 추가 — §11 T3).
-- **블로킹**: `set_enabled`는 UAC 창에서 사용자가 누르고 `schtasks.exe`가 끝날 때까지 돌아오지 않는다. **메인 스레드에서 부르지 않는다**(bridge는 `tauri::async_runtime::spawn_blocking` — §9). `query`도 자식 프로세스를 기다린다(보통 0.1초 안팎) — setup에서는 백그라운드 스레드로(§4).
+- 🔒 이름(bridge 착수 조건, 패킷 §7): `tray::autostart::{set_enabled, query, AutostartError::code}` + `persist_autostart`(core-designer 추가 — §11 T3). **CR-047 이후 외부 이름은 `set_enabled`·`reconcile`·`persist_autostart`·`AutostartError::code`다.** `query`는 비공개이고, 호출자 `lib.rs spawn_autostart_sync`는 `reconcile`을 부른다.
+- **블로킹**: `set_enabled`는 `schtasks.exe`가 끝날 때까지 돌아오지 않는다(CR-047 — UAC 창 없음, 자식 프로세스 대기만. 옛 문안 「UAC 창에서 사용자가 누르고」는 폐기). **메인 스레드에서 부르지 않는다**(bridge는 `tauri::async_runtime::spawn_blocking` — §9). `query`도 자식 프로세스를 기다린다(보통 0.1초 안팎) — setup에서는 백그라운드 스레드로(§4).
 - `persist_autostart`는 window `persist_overlay_position`과 같은 모양이다: 잠금 안에서 비교·갱신·clone만, 저장은 잠금 밖.
 
 ## 3. 내부 구조
@@ -338,7 +343,7 @@ fn parse_run_level(stdout: &[u8]) -> Option<TaskState>
 - **D47-4** `query` 비공개화 — 외부 사용처 0(verify CORE-013 과다 pub 방향과 일치).
 - Q47-1 README 문구(메인 세션): 「포터블 exe를 지우기 전에 설정 창에서 자동 실행 끄기」「이미 지웠으면 작업 스케줄러 라이브러리에서 `kuro_keyviewer` 삭제 또는 `schtasks /Delete /TN kuro_keyviewer /F`」「관리자로 실행된 게임 안 입력이 필요하면 exe를 직접 관리자로 실행」「(G3이 B 경로면) 옛 버전에서 자동 실행을 켰던 사용자는 관리자 PowerShell에서 위 삭제 명령 후 다시 켜기」.
 - Q47-2 `Cargo.toml` `windows` 기능 2개 제거 승인(사용자).
-- 추적: SEC-001 → §3.5 **부분**(설계 완료, 실측 게이트 대기, 소스 미적용) · CORE-001(tray 몫 S3·S4) → §3.5.3·§3.5.4 ✅(설계).
+- 추적: SEC-001 → §3.5 **부분**(설계 완료 · **소스 반영** — `autostart.rs:194` `LeastPrivilege`·`:340` `reconcile`·`hook/elevate.rs` 없음, 2026-10-15 doc-sync. 실측 게이트 G1~G5 기록 없음 — 확인 필요) · CORE-001(tray 몫 S3·S4) → §3.5.3·§3.5.4 ✅(설계).
 
 ### 3.6 CR-048 — 타이머 메뉴 「시작/일시정지」·「멈춤」 (TM-11, 🔒 패킷 §2.5, 사용자 결정 D-11 A, 아키텍트 결정 A-3, 구현자가 그대로 옮길 것)
 
@@ -822,6 +827,37 @@ fn start_input_pipeline(handle: &tauri::AppHandle) -> Result<(), Box<dyn std::er
 - 수용 증거(횡단 §4.5): `cargo fmt --check`·`cargo clippy -- -D warnings` 0·`cargo test` 전건 PASS(신규 RC/WR/PM/FG/FS 포함). Grep `unsafe` in `src-tauri/src/tray`·`src-tauri/src/window` = 0. Grep `on_menu_event` in `src-tauri/src` = `tray/mod.rs` 1건. `git diff --stat`에 `Cargo.toml`·`Cargo.lock`·`src-tauri/src/bridge/`·`capabilities/`·`tauri.conf.json`·`src/` 없음.
 - **주의(횡단 §4.7)**: core만 반영된 상태에서는 비잠금 오른쪽 클릭에 WebView2 기본 메뉴와 새 메뉴가 **둘 다** 뜬다. ui 패킷(`.root` `onContextMenu` preventDefault) 완료 전에는 배포하지 않는다.
 
+### 3.8 「새로고침」에 항상 위 재적용 추가 (WT-04, overlay R-01 🔒 보강 — 사용자 결정 2026-10-05 ②ⓒ, 정본 [window.md](window.md) §3.2, 구현자가 그대로 옮길 것)
+
+결론: 트레이 「새로고침」(오버레이 오른쪽 클릭 메뉴의 같은 항목 포함 — 전역 `on_menu_event` 공유)이 눌린 키 표 비우기·WebView 다시 불러오기에 더해 **오버레이를 다시 맨 위로 올린다.** 사용자가 "오버레이가 밑에 깔렸다"고 느낄 때 누르는 비상 스위치가 이 항목이라 같은 자리에 둔다.
+
+```rust
+pub(crate) fn refresh_overlay(app: &AppHandle) -> Result<(), BridgeError> {
+    crate::hook::refresh();
+    // WT-04: 등록된(= 사용자가 보이게 둔) 오버레이만 맨 위로. 숨김이면 아무것도 하지 않는다(🔒 결정 3).
+    // reload 실패와 무관하게 실행되도록 reload 앞에 둔다.
+    crate::hook::reassert_topmost_now();
+    let win = app
+        .get_webview_window(window::OVERLAY_LABEL)
+        .ok_or_else(|| BridgeError::new("window.not_found", "오버레이 창을 찾을 수 없습니다."))?;
+    win.reload().map_err(|e| {
+        BridgeError::new(
+            "window.reload_failed",
+            format!("오버레이를 새로고침하지 못했습니다: {e}"),
+        )
+    })
+}
+```
+
+- 추가는 한 줄이다. 시그니처·반환·에러 코드·메뉴 항목·문구 불변.
+- `hook::reassert_topmost_now()`는 안전 함수다(SAFETY 근거 [hook.md](hook.md) §3.11.4 U22~U27). tray는 여전히 unsafe 0이고 `windows` 크레이트를 import하지 않는다.
+- 숨김 판정을 tray가 하지 않는다. 등록·해제는 window(`apply_overlay_window`·`set_overlay_visible`)가 하고, 미등록이면 hook 판정이 `Skip`이다([hook.md](hook.md) §3.11.3). 그래서 tray는 설정을 읽지 않는다.
+- 호출 스레드는 메뉴 핸들러(메인 스레드)라 `SetWindowPos`가 즉시 실행된다. 메뉴가 닫힌 뒤 핸들러가 돌므로 팝업 메뉴와 겹치지 않는다.
+- 다른 호출자: bridge `reset_app_data`(data-reset R-B2)도 마지막 단계에서 이 함수를 부른다 — 초기화 뒤 오버레이가 보이는 설정이면 맨 위로 한 번 더 올라갈 뿐이라 부작용이 없다(초기화 경로는 그 전에 `apply_overlay_window`도 부른다).
+- 트레이 「표시/숨김」(`toggle_overlay`)은 이미 `window::apply_overlay_window`를 부르므로 tray 쪽 수정 없이 트리거 ⓑ가 적용된다(§3.3 불변).
+- `//!` [목적]의 새로고침 설명에 "오버레이를 다시 맨 위로(WT-04)"를, [unsafe]에 "`hook::reassert_topmost_now`(안전 래퍼)"를 한 줄씩 더한다(스킬 §11).
+- 테스트: 자동 테스트 없음(Tauri 런타임). 수동은 [window.md](window.md) §3.2.4 MC-54·MC-55.
+
 ## 4. 스레드·채널
 
 ```
@@ -880,7 +916,7 @@ win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶
 
 ## 5. unsafe
 
-없음. 승격 실행은 `hook::run_elevated`(안전 래퍼, SAFETY 근거는 [hook.md](hook.md) §3.6.3). 조회는 `std::process::Command`(안전). **R-40**: 전경 창 조회는 hook의 안전 함수 `hook::foreground_snapshot()`만 부른다(SAFETY 근거 [hook.md](hook.md) §3.10.3 U12~U19). `popup.rs`는 `windows` 크레이트를 import하지 않는다. 팝업·창 사각형은 Tauri 안전 API(`run_on_main_thread`·`popup_menu`·`overlay_screen_rect`).
+없음. 승격 실행은 `hook::run_elevated`(안전 래퍼, SAFETY 근거는 [hook.md](hook.md) §3.6.3). 조회는 `std::process::Command`(안전). **R-40**: 전경 창 조회는 hook의 안전 함수 `hook::foreground_snapshot()`만 부른다(SAFETY 근거 [hook.md](hook.md) §3.10.3 U12~U19). `popup.rs`는 `windows` 크레이트를 import하지 않는다. 팝업·창 사각형은 Tauri 안전 API(`run_on_main_thread`·`popup_menu`·`overlay_screen_rect`). **WT-04(§3.8)**: 항상 위 재적용은 hook 안전 함수 `hook::reassert_topmost_now()`만 부른다(SAFETY 근거 [hook.md](hook.md) §3.11.4 U22~U27).
 
 ## 6. 에러 타입
 
@@ -888,12 +924,13 @@ win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶
 
 | 변형 | 한국어 메시지 | 원인 | `code()` |
 |---|---|---|---|
-| `Cancelled` | 권한 확인이 취소되어 자동 실행 설정을 바꾸지 않았습니다. | UAC에서 「아니요」(`ERROR_CANCELLED`) | `autostart.cancelled` |
-| `Failed(String)` | 자동 실행 설정을 바꾸지 못했습니다. ({0}) | `schtasks` 0 아닌 종료 코드, 승격 실행 실패, 사용자 이름 없음 | `autostart.error` |
+| ~~`Cancelled`~~ (CR-047 삭제) | ~~권한 확인이 취소되어 자동 실행 설정을 바꾸지 않았습니다.~~ | 승격 경로 삭제로 없어짐(§3.5.3) | ~~`autostart.cancelled`~~ |
+| `Failed(String)` | 자동 실행 설정을 바꾸지 못했습니다. ({0}) | `schtasks` 0 아닌 종료 코드, 실행 실패, 사용자 이름 없음(CR-047 — 승격 없음) | `autostart.error` |
 | `Io(#[from] std::io::Error)` | 자동 실행 설정 파일을 만들지 못했습니다. | `current_exe`·임시 XML 쓰기 실패 | `io.error` |
-| **`StatePoisoned`** | 설정 상태가 손상되었습니다. 앱을 다시 시작하세요. | 설정 `Mutex` 독(`persist_autostart`) | `state.poisoned` |
-| **`Settings(#[from] SettingsError)`** | {0} (`#[error(transparent)]`) | `settings::save` 실패(`persist_autostart`) | 내부 `SettingsError::code()` |
+| ~~**`StatePoisoned`**~~ (CR-047 삭제) | — | 잠금 오염은 `Settings(SettingsError::StatePoisoned)`로 온다(`settings::update` 경유, §3.5.3) | `state.poisoned`(같은 값) |
+| **`Settings(#[from] SettingsError)`** | {0} (`#[error(transparent)]`) | `settings::update` 실패(`persist_autostart`, CR-047 — 잠금 오염 포함) | 내부 `SettingsError::code()` |
 
+- **현재 소스(2026-10-15 doc-sync, `autostart.rs:39-46`)**: `Failed`·`Io`·`Settings` 3변형. 아래 「굵은 2개」 중 `StatePoisoned`는 CR-047로 없어졌다.
 - 굵은 2개는 패킷 §3.1 표에 없던 변형이다 — `persist_autostart`(§11 T3) 때문에 더했다. 코드 값은 기존 window와 같은 문자열이라 계약에 새 코드가 생기지 않는다.
 - bridge: `impl From<AutostartError> for BridgeError { BridgeError::new(e.code(), e.to_string()) }`(bridge 소관). 기존 `From<tauri_plugin_autostart::Error>`(`error.rs:51-58`)는 삭제.
 - **R-40**: 에러 변형 추가 없음. `spawn_popup_listener`는 `std::io::Result<()>`(스레드 생성 실패 — 호출자 경고 로그). 그 밖의 실패(메인 스레드 post·창 위치·메뉴 생성·팝업)는 `popup.rs` 안에서 `log::warn!`으로 끝나고 밖으로 나가지 않는다(메뉴 경로는 command가 아니라 ui에 알릴 곳이 없다). 판정으로 버리는 경우는 오류가 아니다(로그 없음).
@@ -938,6 +975,7 @@ win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶
 | P3 | 독이 든 `Mutex` | `persist_autostart` | `Err(AutostartError::StatePoisoned)` |
 
 - `set_enabled`·`query`·`toggle_overlay`는 UAC·작업 스케줄러·Tauri 런타임이 필요해 자동 테스트하지 않는다 → §8.3.
+- **CR-047(소스 반영, 2026-10-15 doc-sync)**: 위 X12·P3은 §3.5.6 X12′·P3′로 대체됐다(`Cancelled`·`StatePoisoned` 없음). 수동 M-T2~M-T5·M-T10의 UAC 항목과 M-T6의 「상승된 권한 = 예」는 옛 기록이다. §3.5.2 G1·G2·G5와 §3.5.6 끝 줄이 대체한다.
 
 ### 8.2a 단위 — `popup.rs` `#[cfg(test)] mod tests` (overlay R-40)
 
@@ -1009,7 +1047,7 @@ win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶
 
 | 요구ID | 반영 절 | 상태 |
 |---|---|---|
-| SV2-05 — 작업 스케줄러 등록·해제(관리자, 로그온, 현재 사용자) | §2, §3.1, §3.2, §6, §8.1 X1~X12, §8.3 M-T2~M-T7 | ✅ 설계 · 소스 미적용 |
+| SV2-05 — 작업 스케줄러 등록·해제(~~관리자~~ → 일반 권한 CR-047, 로그온, 현재 사용자) | §2, §3.1, §3.2, §3.5, §6, §8.1 X1~X12(CR-047 X2′·X12′), §8.3 M-T2~M-T7 | ✅ 설계 · 소스 반영 |
 | SV2-05 — UAC 취소 구분 | §3.2, §6 `Cancelled`, M-T3 · [hook.md](hook.md) §3.6 | ✅ 설계 |
 | SV2-05 — 시작 시 실제 상태로 보정 | §4, §2 `persist_autostart`, §8.2 P1~P3, M-T8·M-T9 | ✅ 설계 |
 | SV2-05 — `set_settings`가 `autostart`를 바꾸지 않음 | §7, [window.md](window.md) §2.4 `keep_core_owned` | ✅ 설계 |
@@ -1028,6 +1066,8 @@ win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶
 | **R-40 AC-7 — 합성 뗌·드래그로는 안 뜸** | [hook.md](hook.md) §3.9.3 RC-c·RC-e, RC2·RC4·RC6, MC-36 | 설계 확정 · 소스 반영 |
 | **R-40 AC-8 (🔒 U-3) — 전체 화면이면 안 뜸(테두리 있는 창·바탕 화면·작업표시줄·이 앱 창이면 뜸)** | §3.7.5 `suppress_for_fullscreen`, FS1~FS7·PM14·PM15, [hook.md](hook.md) §3.10 FG1~FG6, MC-40~MC-45 | 설계 확정 · 소스 반영 |
 | **R-40 AC-9 (U-2 수용) — 포커스 자동 복귀 없음** | §3.7.3 PU-f, MC-39(기록) | 수용(구현 없음) |
+| **overlay R-01 🔒 보강 WT-04 — 「새로고침」이 오버레이를 다시 맨 위로(숨김이면 그대로)** | §1, §3.8, §5, [window.md](window.md) §3.2.4 MC-54·MC-55 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 WT-03 — 트레이 「표시/숨김」 표시 때 재적용** | §3.3(불변 — `apply_overlay_window` ④단계가 처리, [window.md](window.md) §3.2.2), MC-53 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인(tray 수정 없음) |
 
 ## 11. 설계 결정 노트
 
@@ -1075,3 +1115,9 @@ win32-input-hook ──(InputEvent)──▶ input-forwarder ──emit──▶
 - **T-j (관찰, 7차)**: 메인 스레드가 우리 메뉴가 아닌 이유로 tao 핸들러 안에 오래 머물면 `overlay-menu`가 창 getter에서 그만큼 기다린다. 현재 코드에서 그런 경로는 알려져 있지 않다. 트레이 메뉴는 tray-icon 창 프로시저의 모달이라 핸들러 밖이라고 보지만 미확인이다 — MC-38 관찰. 그 사이 온 오른쪽 클릭은 채널에 쌓인다. 풀린 뒤 첫 클릭이 판정을 통과하면 Pending이 되고, 나머지는 ①에서 버려진다. 그래서 늦게 뜨는 메뉴는 **많아야 1개**다. 늦은 클릭까지 버리려면 `RightClick`에 시각이 필요하다(T-f와 같은 횡단 D-8 변경). 관찰 결과로 아키텍트 세션이 판단한다.
 - **T-f 보충(7차)**: 3단계 상태로도 T-f는 그대로다. 메뉴 바깥의 오버레이를 오른쪽 **누르면** 메뉴가 닫혀 Idle이 된다. 그 뒤 **뗌**이 도착하므로 새 요청이 정상 통과한다. CORE-301이 막는 것은 "post됐지만 실행 전" 요청이 모달 뒤에 실행되는 경우다. 누름·뗌이 모두 메뉴가 열린 동안 끝난 클릭은 옛 설계에서도 `load`가 걸렀고 새 설계에서도 ①이 거른다.
 - **T-i (요구ID)**: overlay `requirements.md` R-40은 ui-designer가 동시에 추가 중이다(횡단 §9 문구). 번호가 바뀌면 §1·§10을 맞춘다. 확정사항 §6 트레이 행 갱신(U-6)은 메인 세션 몫이다.
+
+### WT 결정 (2026-10-05, overlay R-01 🔒 보강)
+
+| # | 결정 | 대안 | 근거 |
+|---|---|---|---|
+| T20 | 「새로고침」은 `hook::reassert_topmost_now()`를 **직접** 부르고, 위치는 `hook::refresh()` 다음·`reload()` 앞 | ① `window`에 전달용 함수를 새로 만들어 경유 ② `reload()` 뒤 | ①은 한 줄짜리 전달 함수가 늘 뿐이다. `tray → hook`은 이미 있고(`refresh`·`foreground_snapshot`), 숨김 판정은 hook 등록 상태에 있어 window를 거칠 이유가 없다. ②는 `reload()` 실패(`?` 조기 반환) 때 재적용이 빠진다 |

@@ -6,6 +6,8 @@
 //!        2026-09-26)은 훅의 눌린 키·마우스 버튼 표를 비우고(`hook::refresh`) 오버레이
 //!        WebView 를 다시 불러온다(`WebviewWindow::reload`) — 뗌 유실로 그림이 눌림에
 //!        고착됐을 때 사용자가 수동으로 되돌리는 비상 스위치다.
+//!        또한 새로고침은 `hook::reassert_topmost_now()`로 오버레이의 항상 위를 다시 적용한다(WT-04,
+//!        등록이 없으면 아무 일도 하지 않는다).
 //!        CR-048 TM-11 — 스톱워치나 타이머가 켜져 있을 때만(`timer.enabled`) 메뉴 맨 위에
 //!        「시작」(흐르는 중이면 「일시정지」)·「멈춤」·구분선을 더 보인다(`sync_timer_menu`).
 //!        overlay R-40(CR-062) — 훅이 넘긴 오른쪽 누름→뗌 한 쌍을 받아 열림 가드·전체 화면
@@ -265,6 +267,7 @@ fn control_timer_from_tray(app: &AppHandle, toggle: bool) {
 /// 눌림에 고착됐을 때 사용자가 수동으로 되돌리는 비상 스위치다. 설정 창은 건드리지 않는다.
 pub(crate) fn refresh_overlay(app: &AppHandle) -> Result<(), BridgeError> {
     crate::hook::refresh();
+    crate::hook::reassert_topmost_now(); // WT-04 — 등록된 오버레이를 다시 맨 위로(숨김이면 아무 일 없음)
     let win = app
         .get_webview_window(window::OVERLAY_LABEL)
         .ok_or_else(|| BridgeError::new("window.not_found", "오버레이 창을 찾을 수 없습니다."))?;

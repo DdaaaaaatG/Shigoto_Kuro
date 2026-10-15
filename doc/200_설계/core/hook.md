@@ -3,10 +3,14 @@
 - 상태: 확정(사용자) — §3.7(CR-046) 키보드 부분은 **소스 반영 완료**(사용자 승인 2026-09-26,
   `cargo fmt --check`·`cargo clippy --all-targets -D warnings`·`cargo test` 273건 PASS). §3.7.10
   (마우스 버튼 보강)은 **core-implementer가 같은 원리로 추가 구현·소스 반영 완료**, 단 설계
-  자체는 core-designer·사용자 재확인 대기(아래 8차 항목). §3.8(CR-047)은 초안(실측 게이트
-  G1·G2 통과 조건부) · §3.9·§3.10(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6 반영) 기준
-  확정 · **소스 반영**(커밋 2be41ce — `hook/right_click.rs`·`hook/foreground.rs`) · 최종 갱신: 2026-09-30(doc-sync)
+  자체는 core-designer·사용자 재확인 대기(아래 8차 항목). §3.8(CR-047)은 **소스 반영**(`hook/elevate.rs` 없음, 2026-10-15 doc-sync 확인 — 실측 게이트
+  G1·G2 기록은 확인 필요) · §3.9·§3.10(overlay R-40, CR-062)은 횡단 설계 v2(사용자 결정 U-1~U-6 반영) 기준
+  확정 · **소스 반영**(커밋 2be41ce — `hook/right_click.rs`·`hook/foreground.rs`) · §3.11(항상 위 재적용 `topmost.rs`,
+  WT-01~WT-09)은 **확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · 수동 MC-51~MC-62 미확인** · 최종 갱신: 2026-10-15
 - 변경이력:
+  - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**, openItem core-CR047) CR-047 §3.8이 소스에 들어간 것을 반영했다. `src-tauri/src/hook/`에 `elevate.rs`가 없고 `run_elevated`·`ElevateError` 사용처도 0이다. 머리 상태 줄, §3.6 제목(삭제된 옛 기록 표시), §3.8 추적 줄, §5 끝 줄의 「승격 E1~E4」를 고쳤다. 실측 게이트 G1·G2 기록은 찾지 못했다(확인 필요). WT 절(§3.11)은 손대지 않았다.
+  - 2026-10-15 (15차, WT 소스 동기화 — **설계 변경 아님, 소스가 정본**, `src-tauri/src/hook/topmost.rs` 대조) ① §3.11과 §10 WT 7행을 「확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인」으로 바꿨다. 근거는 메인 세션 보고(fmt·clippy 0, `cargo test` lib 456·통합 102 통과)다. ② §3.11.4 U 표에 **U23-a `GetCurrentProcessId()`** 행을 더했다. 구현자가 `is_own_window` 안 U23 pid 대조용으로 추가한 블록이고 기존 번호는 밀지 않았다. ③ U20 모듈 인자를 실물대로 `HMODULE::default()`로 고쳤고 §3.11.2 해당 줄도 맞췄다. ④ §3.11.8 feature 표에 `Win32_System_Threading`(기존) 행을 더했다. 수동 MC-51~MC-62는 미확인이다.
+  - 2026-10-05 (14차, overlay **R-01 🔒 보강 — 항상 위 재적용**, 사용자 결정 2026-10-05 ①~⑤, 정본 [window.md](window.md) §3.2) 신규 **`hook/topmost.rs`**(§3.11). 공개 3항목 `OverlayHwnd`(정수 HWND, `from_raw`)·`set_topmost_target(Option<OverlayHwnd>)`·`reassert_topmost_now()`. 훅 스레드의 기존 `GetMessageW` 루프에 `SetWinEventHook(EVENT_SYSTEM_FOREGROUND, OUTOFCONTEXT | SKIPOWNPROCESS)`를 붙이고(새 스레드 없음), 콜백에서 판정 `decide` → `SetWindowPos(HWND_TOPMOST, …NOACTIVATE | ASYNCWINDOWPOS)`(최소화·보임이면 먼저 `ShowWindowAsync(SW_SHOWNOACTIVATE)`)를 직접 부른다. 종료는 루프 뒤 `UnhookWinEvent` → 기존 `UnhookWindowsHookEx`. **unsafe U20~U27**(모두 `topmost.rs`, `mod.rs`는 새 블록 0). 필요 feature **`Win32_UI_Accessibility`**. 에러 변형·설정 없음. 테스트 TP1~TP8. §2·§3.11(개인정보 P7 연장은 §3.11.7)·§4·§5·§10·§11(D33~D37, 확인 필요 14~16) 갱신. 구현 시 `mod.rs` `//!` [공개 API]·[스레드]·[unsafe]·[개인정보]에 각 한 줄을 더한다(스킬 §11). **소스 미적용.**
   - 2026-09-30 (13차, doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) §3.9·§3.10(overlay R-40)의 「소스 미적용」을 걷어냈다. 대조 결과는 다음과 같다. `pub fn start(tx: Sender<InputEvent>, clicks: Sender<RightClick>) -> Result<HookHandle, HookError>`(`hook/mod.rs:678`)가 §2와 같다. 재노출 `pub use foreground::{foreground_snapshot, ForegroundSnapshot, ScreenRect}; pub use right_click::{RightClick, ScreenPoint};`(`mod.rs:88-89`)가 있다. `right_click.rs` `//!`(스레드·unsafe·에러·설정 없음, 테스트 RC1~RC6)와 `foreground.rs` `//!`(unsafe U12~U19 8종, fail-open `None`, 훅 콜백 안에서는 부르지 않음, 테스트 FG1~FG6)는 §3.9·§3.10과 어긋나지 않는다. 12차 ② 호출 순서(Idle + 두 점이 사각형 안일 때만 전경 조회)는 `tray/popup.rs` `//!` [스레드]와 같다. §10 R-40 두 행을 「소스 반영」으로 바꿨다. §3.8(CR-047, 실측 게이트)·§3.7 E-U/E-M 행·1291행의 「소스 미적용」은 이번에 구현을 확인하지 못해 그대로 둔다.
   - 2026-09-29 (12차, R-40 감사 반영 — 리뷰 CORE-302(LOW)·SEC-301(LOW). 공개 API·동작·unsafe 블록 수·테스트 불변) ① §3.10.3: 핸들 유효성 공통 전제를 코드 SAFETY 주석(U13~U18 첫 문장)에도 넣으라는 구현 인계 한 줄. U13 근거 문구를 "실패 시 pid는 쓰지 않는다(tid 0이면 버림)"로 교체(옛 문구는 API가 출력 포인터를 건드리지 않는다고 단정 — 문서화된 보장 아님). ② §3.10.2 스레드 줄: `foreground_snapshot()` 호출 조건이 "뗌마다"에서 "메뉴 Idle + 두 점이 오버레이 사각형 안일 때만"으로 좁아짐(호출자 순서 변경 — 정본 [tray.md](tray.md) §3.7.3 PU-h·§11 T17). **소스 미적용**(`foreground.rs` 주석만).
   - 2026-09-29 (11차, overlay **R-40** 오버레이 오른쪽 클릭 메뉴, CR-062, 🔒 사용자 결정 U-1·U-3 2026-09-29, 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.4·§2.8·§2.14·§4) ① **오른쪽 클릭 신호**: 신규 `hook/right_click.rs`(unsafe 없음) — `ScreenPoint`·`RightClick { down, up }`·비공개 `RightClickTracker`. 훅이 실제로 본 오른쪽 누름→뗌 한 쌍을 **두 번째 채널 `Sender<RightClick>`**으로 내보낸다. **`start` 시그니처 변경** `start(tx)` → `start(tx, clicks)`(호출자 `lib.rs` 1곳). 합성 뗌(CR-046 정리)이면 기억한 누름을 버린다. `InputEvent`·`input://mouse-button` **불변**. ② **전경 창 조회 안전 래퍼**: 신규 `hook/foreground.rs` — `ScreenRect`(+순수 `covers`)·`ForegroundSnapshot`·`pub fn foreground_snapshot() -> Option<ForegroundSnapshot>`, 새 unsafe **U12~U19**(Win32 조회 8종, 훅 콜백·훅 스레드와 무관). `mod.rs`에는 새 unsafe 없음. 개인정보 P7 신설. 테스트 RC1~RC6·FG1~FG6(각 새 파일 안 — `tests.rs`는 792줄). §1·§1.1·§2·§3·§3.9(신설)·§3.10(신설)·§4·§5·§8·§10·§11 갱신. 새 크레이트·feature 없음. 상대 문서 [tray.md](tray.md) §3.7, [window.md](window.md) §3.1.
@@ -94,6 +98,9 @@
 | `pub const MOUSE_MOVE_MIN_INTERVAL_MS: u64 = 16` | — | — | — | 마우스(기존) |
 | `pub enum SpecialKey` | — | — | — | OV-R-22 |
 | **`pub(crate) fn refresh()`** | — | () | 없음(내부는 `reset_keys("refresh")`) | CR-046 보강(§3.7.10) — 트레이 「새로고침」 전용, crate 밖에서는 호출할 수 없다 |
+| **`pub struct OverlayHwnd(isize)`** + **`pub fn from_raw(raw: isize) -> Option<OverlayHwnd>`** (`topmost.rs`, §3.11) | Tauri `hwnd()?.0 as isize` 값 | 0이면 `None` | 없음 | overlay R-01 보강 WT-08 |
+| **`pub fn set_topmost_target(target: Option<OverlayHwnd>)`** (`topmost.rs`) | 등록할 오버레이(보일 때) / `None`(숨김·파괴) | () — 원자 변수 저장, 즉시 반환 | 없음 | WT-03·WT-05 |
+| **`pub fn reassert_topmost_now()`** (`topmost.rs`) | — | () — 등록 대상에 판정 후 재적용 1회, 메인 스레드를 기다리지 않음. 훅 콜백 안에서는 부르지 않는다 | 없음(Win32 실패는 버림, §3.11.7) | WT-01·WT-03·WT-04·WT-06 |
 
 - CR-023은 공개 함수(`start`·`stop`) 시그니처를 바꾸지 않는다. 바뀌는 공개 항목은 `InputEvent::Keyboard`의 필드 하나뿐이다. CR-046도 `start`·`stop`·`InputEvent`·`MouseButton` 시그니처를 바꾸지 않는다 — 늘어난 것은 crate 내부 전용 `refresh()` 하나뿐이다.
 
@@ -356,7 +363,7 @@ unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARA
 
 - 한계(스로틀 없음의 대가): 매크로·자동 입력 프로그램이 `SendInput`으로 같은 키의 누름을 아주 빠르게 주입하면(OS 반복 속도 제한을 받지 않음) 반복 이벤트도 그 빈도로 나간다. 첫 누름·뗌도 지금까지 스로틀이 없었던 것과 같은 성격이다 — 실제 키보드 입력에는 해당하지 않는다. 문제가 실측되면 §11 후보 C1(전역 하한)로 대응한다.
 
-### 3.6 UAC 승격 실행 래퍼 `elevate.rs` (SV2-05, 🔒 D-4 A안 — 구현자가 그대로 옮길 것)
+### 3.6 UAC 승격 실행 래퍼 `elevate.rs` (SV2-05, 🔒 D-4 A안) — **CR-047로 삭제된 옛 기록(§3.8). 다시 만들지 않는다**
 
 결론: `run_elevated`는 프로그램 하나를 **관리자 권한("runas")으로 숨김 실행하고 끝날 때까지 기다려 종료 코드를 돌려주는** 안전 함수다. 호출자는 unsafe를 모른다. 사용자가 UAC에서 「아니요」를 누르면 `Cancelled`로 구분된다.
 
@@ -818,7 +825,7 @@ core에 눌림 상태 자체가 없어(패스스루) 뗌 유실이 나면 복구
 - 전제: tray.md §3.5.2 G1·G2 통과. 실패하면 이 절은 적용하지 않는다(tray.md D47-3 — `elevate.rs` 유지 + XML만 `LeastPrivilege`).
 - 순서: tray의 호출 제거(`run_schtasks_elevated`·`From<ElevateError>` 삭제)와 **같은 변경**에서 지운다 — 한쪽만 지우면 컴파일 오류가 난다.
 - bridge 요구: 없음(bridge가 쓰는 `start`·`HookHandle`·`InputEvent` 불변).
-- **D25** 죽은 unsafe 삭제(검토 표면 축소, golden-principles §6 「unsafe는 필요한 곳에만」). 추적: SEC-001(hook 몫) → §3.8 설계 완료, 실측 게이트 대기, 소스 미적용.
+- **D25** 죽은 unsafe 삭제(검토 표면 축소, golden-principles §6 「unsafe는 필요한 곳에만」). 추적: SEC-001(hook 몫) → §3.8 설계 완료 · **소스 반영**(`hook/` 안에 `elevate.rs` 없음, `run_elevated`·`ElevateError` 사용처 0 — 2026-10-15 doc-sync). 실측 게이트 G1·G2 기록은 `doc/300_검증/`에 없다(확인 필요).
 
 ### 3.9 오버레이 오른쪽 클릭 신호 `right_click.rs` (overlay R-40, CR-062, 🔒 사용자 결정 U-1 2026-09-29 — 정본 `doc/200_설계/architecture/overlay-context-menu.md` v2 §2.4·§2.8·§4.2·§4.3, 구현자가 그대로 옮길 것)
 
@@ -1069,6 +1076,216 @@ fn is_shell_class(name: &[u16]) -> bool {
 
 - 없음. 신규 공개 항목만 생기고 호출자는 `tray/popup.rs` 하나다. hook은 여전히 다른 모듈을 의존하지 않는다(`std::process::id`만).
 
+### 3.11 항상 위 재적용 래퍼 `topmost.rs` (overlay R-01 🔒 보강 WT-01~WT-09, 사용자 결정 2026-10-05 — 정본 [window.md](window.md) §3.2, 구현자가 그대로 옮길 것)
+
+결론: 오버레이를 다시 맨 위에 올리는 Win32 호출(`SetWindowPos(HWND_TOPMOST)`·`IsIconic`·`ShowWindowAsync`)과 전경 창 변화 감시(`SetWinEventHook(EVENT_SYSTEM_FOREGROUND)`)를 hook 안 새 파일 `topmost.rs`에 감싼다. 감시는 **기존 훅 스레드의 `GetMessageW` 루프에 붙인다**(새 스레드 없음). window는 "누구를 올릴지"(등록)만 정하고, 판정·호출은 여기서 한다.
+
+비유: 경비실(훅 스레드)에 초인종(전경 변화 알림)을 하나 더 단다. 초인종이 울리면 경비원은 명단(등록)을 보고, 명단에 있는 우리 집 창이 아직 우리 집 것인지 확인한 뒤, 창을 맨 앞으로 밀어 두라는 쪽지만 관리실(메인 스레드)에 넣고 바로 자리로 돌아온다. 직접 가서 기다리지 않는다(`ASYNC`).
+
+#### 3.11.1 공개 API (§2 증분 — `hook/mod.rs`에 `mod topmost; pub use topmost::{reassert_topmost_now, set_topmost_target, OverlayHwnd};`)
+
+```rust
+/// 오버레이 창 핸들 값(정수). Win32 `HWND`(= `*mut c_void`)는 `Send`가 아니어서 정적 변수·
+/// 스레드 간 전달에 쓸 수 없고, Tauri의 `HWND`는 Tauri가 쓰는 windows 버전(0.62)의 타입이라
+/// 우리 0.58 `HWND`와 다르다 — 그래서 정수로 받는다. 값이 가리키는 창의 유효성은 보장하지
+/// 않는다(쓸 때마다 확인, WT-08).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct OverlayHwnd(isize);
+
+impl OverlayHwnd {
+    /// window가 `WebviewWindow::hwnd()?.0 as isize`로 만든 값을 받는다. 0이면 `None`.
+    pub fn from_raw(raw: isize) -> Option<Self>;
+}
+
+/// 재적용 대상 등록(WT-03·WT-05). `Some` = 사용자가 보이게 둔 오버레이, `None` = 숨김·파괴·
+/// 미등록 — 이후 어떤 트리거도 아무것도 하지 않는다. 어느 스레드에서나, 즉시 반환.
+pub fn set_topmost_target(target: Option<OverlayHwnd>);
+
+/// 등록된 대상에 지금 한 번 재적용(트리거 ⓑ·ⓒ — WT-03·WT-04). 등록이 없으면 아무것도 하지
+/// 않는다. 어느 스레드에서나 부를 수 있고 메인 스레드를 기다리지 않는다(SWP_ASYNCWINDOWPOS).
+/// **훅 콜백 안에서는 부르지 않는다**(로그를 남긴다). 실패는 밖으로 내지 않는다(§3.11.7).
+pub fn reassert_topmost_now();
+```
+
+- 기존 `start`·`stop`·`refresh`·`InputEvent` 등 시그니처 불변. `HookError` 변형 추가 없음.
+
+#### 3.11.2 비공개 항목 (`topmost.rs`, 예상 180줄 — 테스트 포함. `mod.rs` 766 → 약 775줄, 800줄 한계 안)
+
+```rust
+use std::sync::atomic::{AtomicIsize, AtomicU64, Ordering};
+use windows::Win32::Foundation::HWND;
+use windows::Win32::UI::Accessibility::{SetWinEventHook, UnhookWinEvent, HWINEVENTHOOK};
+use windows::Win32::UI::WindowsAndMessaging::{
+    GetWindowThreadProcessId, IsIconic, IsWindow, IsWindowVisible, SetWindowPos, ShowWindowAsync,
+    EVENT_SYSTEM_FOREGROUND, HWND_TOPMOST, SWP_ASYNCWINDOWPOS, SWP_NOACTIVATE, SWP_NOMOVE,
+    SWP_NOSIZE, SW_SHOWNOACTIVATE, WINEVENT_OUTOFCONTEXT, WINEVENT_SKIPOWNPROCESS,
+};
+
+/// 등록된 오버레이 HWND 값. 0 = 등록 없음. 쓰기 = window(set_topmost_target), 읽기 = 트리거 3곳.
+static TARGET: AtomicIsize = AtomicIsize::new(0);
+/// Skip이 아닌 재적용 누적 횟수(진단 로그용 — 시각·대상 창 정보는 담지 않는다, WT-09).
+static REASSERTS: AtomicU64 = AtomicU64::new(0);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TopmostAction { Skip, Raise, RestoreThenRaise }
+
+/// 순수 판정(TP1~TP8). registered = TARGET ≠ 0, own = IsWindow && 창 pid == 자기 pid,
+/// visible = IsWindowVisible, iconic = IsIconic.
+fn decide(registered: bool, own: bool, visible: bool, iconic: bool) -> TopmostAction {
+    if !registered || !own {
+        return TopmostAction::Skip;              // WT-05 숨김·미등록 / WT-08 파괴·재사용 HWND
+    }
+    if iconic && visible {
+        TopmostAction::RestoreThenRaise          // WT-06
+    } else {
+        TopmostAction::Raise                     // 안 보이면 Z 순서만 — 절대 보이게 하지 않는다
+    }
+}
+
+/// 트리거 3곳의 공통 절차. 잠금·로그·할당·panic 경로 없음(콜백에서도 부른다).
+fn reassert(raw: isize) -> TopmostAction {
+    let hwnd = HWND(raw as *mut core::ffi::c_void);
+    let registered = raw != 0;
+    let own = registered && is_own_window(hwnd);
+    let (visible, iconic) = if own { (is_visible(hwnd), is_iconic(hwnd)) } else { (false, false) };
+    let action = decide(registered, own, visible, iconic);
+    match action {
+        TopmostAction::Skip => return action,
+        TopmostAction::RestoreThenRaise => show_no_activate(hwnd),
+        TopmostAction::Raise => {}
+    }
+    raise(hwnd);
+    REASSERTS.fetch_add(1, Ordering::Relaxed);
+    action
+}
+
+fn is_own_window(hwnd: HWND) -> bool   // U22 IsWindow → false면 바로 false, U23 pid 대조
+fn is_visible(hwnd: HWND) -> bool      // U24
+fn is_iconic(hwnd: HWND) -> bool       // U25
+fn show_no_activate(hwnd: HWND)        // U26 ShowWindowAsync(hwnd, SW_SHOWNOACTIVATE), 반환 무시
+fn raise(hwnd: HWND)                   // U27 SetWindowPos(hwnd, HWND_TOPMOST, 0,0,0,0,
+                                       //     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS), 결과 무시
+
+/// 훅 스레드 전용 감시 핸들. HWINEVENTHOOK은 Send가 아니라 훅 스레드 지역 변수로만 둔다.
+pub(super) struct ForegroundWatch(HWINEVENTHOOK);
+
+/// run_message_loop가 저수준 훅 두 개 설치 직후·준비 신호 전에 부른다. 실패하면 None
+/// (호출자가 log::warn! 1줄 후 계속 — 트리거 ⓑ·ⓒ는 그대로 동작).
+pub(super) fn install_foreground_watch() -> Option<ForegroundWatch>   // U20
+/// run_message_loop가 루프를 빠져나온 뒤, UnhookWindowsHookEx 앞에서 부른다(설치 스레드와 같은 스레드).
+pub(super) fn remove_foreground_watch(w: ForegroundWatch)             // U21
+
+/// WinEvent 콜백(훅 스레드, GetMessageW 디스패치 안). 인자는 모두 쓰지 않는다 — 어느 창이
+/// 전경이 됐는지 보지 않는다(P7). 원자 변수 읽기 + reassert 한 번. 로그 없음.
+unsafe extern "system" fn on_foreground_event(
+    _hook: HWINEVENTHOOK, _event: u32, _hwnd: HWND,
+    _id_object: i32, _id_child: i32, _thread: u32, _time: u32,
+) {
+    let _ = reassert(TARGET.load(Ordering::SeqCst));
+}
+
+pub fn set_topmost_target(target: Option<OverlayHwnd>) {
+    TARGET.store(target.map_or(0, |t| t.0), Ordering::SeqCst);
+}
+
+pub fn reassert_topmost_now() {
+    let action = reassert(TARGET.load(Ordering::SeqCst));
+    log::debug!(
+        target: "kuro_diag",
+        "topmost reassert action={action:?} total={}",
+        REASSERTS.load(Ordering::Relaxed)
+    );
+}
+```
+
+- `on_foreground_event`는 `unsafe extern "system" fn`으로 선언한다(기존 `keyboard_proc`·`mouse_proc`와 같은 모양, `WINEVENTPROC` 타입과 일치). 본문에 unsafe 연산이 없어 SAFETY 블록이 없다. **panic 금지**: 잠금·`unwrap`·할당·로그 없이 원자 변수와 안전 래퍼만 부른다.
+- `SetWinEventHook`의 `hmodwineventproc`는 **`HMODULE::default()`**(NULL)로 구현됐다(2026-10-15 소스 대조, 설계안의 `None`은 쓰지 않음) — 의미는 같다(OUTOFCONTEXT는 모듈 핸들을 쓰지 않음).
+- `mod.rs` `run_message_loop` 증분(새 unsafe 블록 없음): 마우스 훅 설치 성공 뒤 `let watch = topmost::install_foreground_watch();` → 실패면 `log::warn!("전경 창 변화 감시를 시작하지 못했습니다 — 항상 위 재적용은 표시·새로고침 때만 동작합니다")`(훅 스레드, 콜백 밖) → 준비 신호 → 루프 → **루프 뒤 `if let Some(w) = watch { topmost::remove_foreground_watch(w) }`** → 기존 `UnhookWindowsHookEx` ×2.
+
+#### 3.11.3 규칙 (판정표 — 구현자가 그대로 옮길 것)
+
+| 등록(registered) | 자기 창(own) | 보임(visible) | 최소화(iconic) | 동작 | 근거 |
+|---|---|---|---|---|---|
+| 거짓 | — | — | — | **Skip** | WT-05 🔒 결정 3: 숨김이면 절대 건드리지 않는다 |
+| 참 | 거짓 | — | — | **Skip** | WT-08: 파괴된 창·같은 값을 재사용한 남의 창을 올리지 않는다 |
+| 참 | 참 | 참 | 참 | **RestoreThenRaise** | WT-06 🔒 결정 4 |
+| 참 | 참 | 참 | 거짓 | **Raise** | WT-01 |
+| 참 | 참 | 거짓 | 참·거짓 | **Raise**(Z 순서만, 보이게 하지 않음) | 등록 직후 `show()`가 아직 처리 전인 순간(비메인 스레드 command) — `SetWindowPos`에 `SWP_SHOWWINDOW`가 없어 숨은 창은 숨은 채 맨 위 자리만 잡는다 |
+
+- **TO-a 포커스(WT-07, 🔒 결정 5)**: `SWP_NOACTIVATE`·`SW_SHOWNOACTIVATE`만 쓴다. 전경 창·키보드 포커스를 바꾸지 않는다.
+- **TO-b 전체 화면(🔒 결정 1)**: 전경 창이 무엇이든 판정하지 않는다. `foreground_snapshot()`을 부르지 않는다(R-40 U-3 생략 규칙은 메뉴 전용 — 그대로).
+- **TO-c 자기 프로세스 전경 제외**: `WINEVENT_SKIPOWNPROCESS`로 자기 프로세스 창(오버레이·설정 창·오른쪽 클릭 팝업 메뉴)이 전경이 될 때는 콜백이 오지 않는다. 결정 5가 이 경우를 "해도 되나 필요 없음"으로 뒀고, 막는 이유가 있다 — R-40 메뉴는 muda가 오버레이를 전경으로 만든 뒤 `TrackPopupMenu`로 띄우는데, 그 순간 오버레이를 맨 위 띠의 꼭대기로 다시 올리면 **메뉴 창(역시 맨 위 띠)이 오버레이 아래로 가려질 수 있다**(MC-57).
+- **TO-d 되먹임 없음**: 재적용은 전경을 바꾸지 않으므로 `EVENT_SYSTEM_FOREGROUND`를 새로 만들지 않는다. 다른 "항상 위" 앱과 번갈아 올리는 끝없는 루프가 생기지 않는다(MC-60).
+- **TO-e 비동기**: 훅 스레드는 오버레이 창을 소유한 메인 스레드와 입력 큐가 다르므로 `SWP_ASYNCWINDOWPOS`·`ShowWindowAsync`가 요청을 메인 스레드에 넣고 바로 돌아온다. 메인 스레드에서 부르면(ⓑ·ⓒ가 메인일 때) 같은 스레드라 즉시 실행된다. 복원 요청이 먼저 들어가고 재적용 요청이 뒤에 들어가며, 순서가 바뀌어도 복원은 TOPMOST를 지우지 않으므로 결과가 같다.
+
+#### 3.11.4 unsafe (§5 증분 — U20~U27, 각 블록 바로 위 `// SAFETY:` 주석에 이 문장을 적는다)
+
+공통 전제(HWND 인자 블록 U22~U27): 인자 HWND는 등록 값(정수)을 되돌린 것이라 그 창이 이미 파괴됐거나 값이 다른 창에 재사용됐을 수 있다. 이 함수들은 커널이 핸들을 검증해 무효면 실패 값만 돌려주므로 핸들 유효성은 메모리 안전의 전제가 아니다(U13~U18과 같은 근거). 재사용 창을 건드리지 않는 것은 정확성 규칙이고 U22·U23 판정이 맡는다. 호출 스레드 조건이 없다.
+
+| # | 함수 | 호출 | SAFETY 근거 |
+|---|---|---|---|
+| U20 | `install_foreground_watch` | `SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, HMODULE::default(), Some(on_foreground_event), 0, 0, WINEVENT_OUTOFCONTEXT \| WINEVENT_SKIPOWNPROCESS)` | 콜백은 이 파일의 `extern "system"` 함수라 프로세스 수명 동안 유효하다. OUTOFCONTEXT라 다른 프로세스에 코드가 주입되지 않고, 콜백은 이 스레드의 메시지 루프 안에서만 불린다(호출 스레드 = 훅 스레드, 메시지 루프 있음). 포인터 인자 없음. NULL 반환은 실패로 처리한다 |
+| U21 | `remove_foreground_watch` | `UnhookWinEvent(w.0)` | U20이 이 스레드에서 돌려준 NULL 아닌 핸들을 같은 스레드에서 한 번만 해제한다(`ForegroundWatch`를 값으로 받아 소비). 실패해도 스레드·프로세스 종료로 훅이 사라진다 |
+| U22 | `is_own_window` | `IsWindow(hwnd)` | (공통 전제) 포인터 인자 없음. 반환 BOOL만 읽는다 |
+| U23 | `is_own_window` | `GetWindowThreadProcessId(hwnd, Some(&mut pid))` | (공통 전제) 출력 포인터는 이 스택 프레임의 지역 `u32`. 실패 시 pid는 쓰지 않는다(tid 0이면 거짓) |
+| U23-a | `is_own_window` | `GetCurrentProcessId()` | 인자·포인터가 없는 단순 조회이고 반환 `u32`만 읽는다. U23이 얻은 창 pid와 비교하는 데만 쓴다. 구현자 추가(2026-10-15), `Win32_System_Threading` 기존 feature |
+| U24 | `is_visible` | `IsWindowVisible(hwnd)` | (공통 전제) 포인터 인자 없음. 반환 BOOL만 읽는다 |
+| U25 | `is_iconic` | `IsIconic(hwnd)` | (공통 전제) 포인터 인자 없음. 반환 BOOL만 읽는다 |
+| U26 | `show_no_activate` | `ShowWindowAsync(hwnd, SW_SHOWNOACTIVATE)` | (공통 전제) 포인터 인자 없음. 다른 스레드 창이면 요청을 넣고 바로 돌아와 이 스레드가 막히지 않는다. 반환값은 이전 가시성일 뿐 오류가 아니라 버린다 |
+| U27 | `raise` | `SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE \| SWP_NOSIZE \| SWP_NOACTIVATE \| SWP_ASYNCWINDOWPOS)` | (공통 전제) 포인터 인자 없음(`HWND_TOPMOST`는 상수 −1). `SWP_ASYNCWINDOWPOS`로 다른 스레드 창이면 요청만 넣어 막히지 않는다. 실패(`Err`)는 버린다 |
+
+- `#![deny(unsafe_op_in_unsafe_fn)]` 유지. `mod.rs`·`foreground.rs`·`right_click.rs`에는 새 unsafe 블록이 없다. U13(`foreground.rs`)과 U23은 같은 API지만 공통 전제 문장(HWND 출처)이 달라 래퍼를 공유하지 않는다(§11 D35).
+
+#### 3.11.5 스레드·종료 (§4 증분)
+
+```
+[win32-input-hook 스레드]
+ SetWindowsHookExW ×2 → install_foreground_watch (U20, 실패면 warn 후 계속) → 준비 신호
+ GetMessageW 루프
+   ├ keyboard_proc / mouse_proc            (기존)
+   └ on_foreground_event (다른 프로세스 창이 전경이 될 때)
+        └ reassert(TARGET) ── SetWindowPos(…ASYNC) [+ ShowWindowAsync] ──post──▶ [메인 스레드: 오버레이 Z 순서]
+ WM_QUIT → remove_foreground_watch (U21) → UnhookWindowsHookEx ×2 → 스레드 끝
+```
+
+- **콜백 최소 작업(스킬 훅 콜백 규칙)**: WinEvent 콜백은 저수준 훅 콜백과 **같은 스레드**에서 차례로 불린다. 콜백이 늦으면 그동안 키보드·마우스 저수준 콜백이 밀려 **시스템 전체 입력이 늦어진다**(LowLevelHooksTimeout을 넘기면 Windows가 저수준 훅을 해제). 그래서 콜백 안 작업을 "원자 변수 읽기 + 조회 4개(메시지 없음) + 비동기 요청 1~2개"로 묶었다. 모두 마이크로초 단위이고 다른 스레드를 기다리지 않는다.
+- **채널로 넘기지 않고 콜백에서 직접 호출하는 근거**: 채널로 넘기면 받을 스레드가 하나 더 필요하다(스레드·종료 경로 추가). 직접 호출의 위험은 "`SetWindowPos`가 창 소유 스레드(메인)를 기다리는 것" 하나뿐인데 `SWP_ASYNCWINDOWPOS`·`ShowWindowAsync`가 그 대기를 없앤다. 메인 스레드가 모달(트레이·오른쪽 클릭 메뉴) 안이어도 훅 스레드는 막히지 않는다(§11 D33).
+- 빈도: 다른 프로세스 창으로 전경이 바뀔 때마다 1건(사람의 창 전환 속도 — 초당 몇 건 이하). 트리거당 `SetWindowPos` 최대 1회(WT-09).
+- 종료 순서: `HookHandle::shutdown`은 그대로다 — `SENDER`·`CLICK_SENDER` 비움 → `WM_QUIT` → (루프 뒤 U21 → U10) → `join` → `reset_keys()`. `UnhookWinEvent` 뒤에는 루프가 끝나 큐에 남은 WinEvent가 디스패치되지 않는다. `TARGET`은 window 소유라 `stop`에서 지우지 않는다(오버레이 `Destroyed` 때 window·`lib.rs`가 지운다 — [window.md](window.md) §3.2.2).
+- `reassert_topmost_now`(ⓑ·ⓒ)는 메인·command 스레드에서 돈다. 콜백과 동시에 돌아도 공유 상태는 원자 변수뿐이고, 두 요청이 겹치면 `SetWindowPos`가 두 번 들어갈 뿐 결과가 같다(멱등).
+
+#### 3.11.6 테스트 (§8 증분 — `topmost.rs` `#[cfg(test)] mod tests`, 순수 부분만, 전역 `TARGET`을 거치지 않는다)
+
+| # | 이름(안) | 입력 `decide(registered, own, visible, iconic)` / 호출 | 기대 |
+|---|---|---|---|
+| TP1 | `unregistered_always_skips` | `registered=false`, 나머지 8조합 전부 | 모두 `Skip`(🔒 결정 3) |
+| TP2 | `foreign_or_dead_window_skips` | `(true, false, *, *)` 4조합 | 모두 `Skip`(WT-08) |
+| TP3 | `visible_normal_raises` | `(true, true, true, false)` | `Raise` |
+| TP4 | `visible_minimized_restores_then_raises` | `(true, true, true, true)` | `RestoreThenRaise`(🔒 결정 4) |
+| TP5 | `hidden_minimized_never_restores` | `(true, true, false, true)` | `Raise` — `RestoreThenRaise`가 아니다(보이게 하지 않음) |
+| TP6 | `hidden_normal_raises_zorder_only` | `(true, true, false, false)` | `Raise` |
+| TP7 | `from_raw_zero_is_none` | `OverlayHwnd::from_raw(0)` | `None` |
+| TP8 | `from_raw_nonzero_round_trips` | `OverlayHwnd::from_raw(0x1234)`·`from_raw(-8)` | `Some`이고 서로 다르다(음수 핸들 값도 받는다) |
+
+- `reassert`·`on_foreground_event`·`install/remove_foreground_watch`는 실제 창·데스크톱이 필요해 자동 테스트하지 않는다(D31과 같은 이유) — 코드 리뷰 + [window.md](window.md) §3.2.4 MC-51~MC-62.
+
+#### 3.11.7 에러·설정·개인정보 (§6·§7·§1.1 증분)
+
+- 에러: **변형 추가 없음.** 감시 설치 실패는 기능 저하(ⓐ만 꺼짐)라 `start`를 실패시키지 않고 경고 1줄로 끝낸다. 재적용 Win32 실패는 버린다 — 호출자가 할 수 있는 일이 없고 다음 트리거가 다시 시도한다(D29와 같은 근거).
+- 설정: 읽는 필드 없음. `overlay.visible`은 window가 등록·해제로 전달한다(hook → settings 의존을 만들지 않는다).
+- 개인정보(P7 연장): 콜백 인자(전경 창 HWND·스레드 id·시각)를 읽지 않는다. 창 제목·클래스명을 조회하지 않는다. 로그는 `reassert_topmost_now`의 `action`·누적 횟수 한 줄뿐이고 콜백 안에서는 로그를 호출하지 않는다.
+
+#### 3.11.8 필요 feature (`src-tauri/Cargo.toml` — 새 크레이트 없음)
+
+| feature | 쓰는 항목 | 현재 |
+|---|---|---|
+| **`Win32_UI_Accessibility`** | `SetWinEventHook`·`UnhookWinEvent`·`HWINEVENTHOOK`(windows 0.58 `Win32/UI/Accessibility/mod.rs:309·910·9678`, 추가 하위 feature 게이트 없음) | **없음 → 추가 필요** |
+| `Win32_UI_WindowsAndMessaging` | `SetWindowPos`·`IsIconic`·`IsWindow`·`IsWindowVisible`·`ShowWindowAsync`·`GetWindowThreadProcessId`·`HWND_TOPMOST`·`SWP_*`·`SW_SHOWNOACTIVATE`·`EVENT_SYSTEM_FOREGROUND`·`WINEVENT_OUTOFCONTEXT`·`WINEVENT_SKIPOWNPROCESS` | 있음 |
+| `Win32_Foundation` | `HWND`·`HMODULE` | 있음 |
+| `Win32_System_Threading` | `GetCurrentProcessId`(U23-a, 2026-10-15 구현자 추가) | 있음 |
+
+- 같은 `windows = "0.58"` 줄의 feature 목록에 한 줄 추가하는 변경이다. 의존성 변경 허가 정책(CLAUDE.md §5-2)에 해당하는지는 메인 세션이 판단한다 — 해당하면 사용자 승인 뒤 메인 세션이 넣는다.
+
 ## 4. 스레드·채널
 
 ```
@@ -1090,6 +1307,7 @@ fn is_shell_class(name: &[u16]) -> bool {
 - 종료 순서(불변): `SENDER` 비움 → `PostThreadMessageW(WM_QUIT)` → `join` → `reset_keys()`.
 - 재시작: 반드시 `stop()` 후 `start()`(이중 등록 금지 — 기존).
 - **R-40(§3.9·§3.10)**: `mouse_proc`가 오른쪽 뗌에서 `send_click(RightClick)` ──`mpsc::Sender<RightClick>`──▶ tray `overlay-menu` 스레드(수신·전경 창 조회·메인 스레드 post — [tray.md](tray.md) §3.7). 종료 순서는 `SENDER`·`CLICK_SENDER` 비움 → `WM_QUIT` → `join` → `reset_keys()`(`RIGHT_CLICK` 포함). `foreground_snapshot()`은 훅 스레드가 아니라 `overlay-menu` 스레드에서 돈다.
+- **항상 위 재적용(§3.11, WT)**: 같은 훅 스레드에 WinEvent 훅(`EVENT_SYSTEM_FOREGROUND`, 다른 프로세스만)을 하나 더 단다 — 설치는 저수준 훅 두 개 뒤·준비 신호 전, 해제는 루프 뒤·`UnhookWindowsHookEx` 앞(U21). 콜백은 원자 변수 `TARGET`을 읽고 비동기 `SetWindowPos`를 넣고 돌아온다(채널 없음). 새 스레드·채널 없음. 종료 순서는 `SENDER`·`CLICK_SENDER` 비움 → `WM_QUIT` → `UnhookWinEvent` → `UnhookWindowsHookEx` ×2 → `join` → `reset_keys()`.
 
 ## 5. unsafe
 
@@ -1109,10 +1327,11 @@ fn is_shell_class(name: &[u16]) -> bool {
 | U10 | 같음(루프 뒤) | `UnhookWindowsHookEx` ×2 | 이 스레드가 설치한 핸들. 실패해도 스레드 종료로 훅이 사라진다 |
 | **U11** | `async_key_down` (CR-046) | `GetAsyncKeyState(vk as i32)` | 포인터·핸들·버퍼 인자가 없는 조회 함수이고 반환 `i16`만 읽는다. 어떤 정수 vk에도 동작이 정의되어 있어(지원하지 않는 키·비활성 데스크톱이면 0) 메모리 안전 전제가 없다. 인자는 표 칸 번호(0..=255). 호출 스레드 조건 없음. "지금 콜백의 키는 조회하지 않는다"는 정확성 규칙(§3.7 L2)이다 |
 | **U12~U19** | `foreground.rs` (R-40) | `GetForegroundWindow`·`GetWindowThreadProcessId`·`GetShellWindow`·`GetClassNameW`·`GetClientRect`·`ClientToScreen`·`MonitorFromWindow`·`GetMonitorInfoW` | §3.10.3 표(블록마다 한 문장). 훅 콜백·훅 스레드와 무관한 조회 래퍼. 공통: 인자 HWND는 방금 받은 값, 무효면 실패 값만 돌려줌, 출력 포인터는 지역 변수, `cbSize`·버퍼 길이는 호출 전에 정해짐 |
+| **U20~U27 (+U23-a)** | `topmost.rs` (WT, 2026-10-05 · 소스 적용 2026-10-15) | `SetWinEventHook`·`UnhookWinEvent`·`IsWindow`·`GetWindowThreadProcessId`·`GetCurrentProcessId`·`IsWindowVisible`·`IsIconic`·`ShowWindowAsync`·`SetWindowPos` | §3.11.4 표(블록마다 한 문장). 공통: 인자 HWND는 등록 정수를 되돌린 값이라 무효·재사용일 수 있으나 커널이 검증하므로 메모리 안전 전제가 아니다. 재사용 창 방어는 U22·U23 판정(정확성 규칙). 다른 스레드 창은 비동기 요청(`ASYNCWINDOWPOS`·`ShowWindowAsync`)이라 훅 스레드가 막히지 않는다 |
 
 - `#![deny(unsafe_op_in_unsafe_fn)]` 유지.
 - **R-40은 `mod.rs`에 unsafe 블록을 추가·변경하지 않는다**(U1~U11 문구 그대로). 새 블록 U12~U19는 모두 `foreground.rs` 안이다. `right_click.rs`는 unsafe 0.
-- **CR-046은 unsafe 블록을 U11 하나만 추가한다**(§3.7.5). 정리 로직 `release_stale`·`recover_missed_releases`는 안전한 Rust다. U1~U3의 SAFETY 문구는 바뀌지 않는다. unsafe 블록 수: 훅 U1~U11 + 승격 E1~E4.
+- **CR-046은 unsafe 블록을 U11 하나만 추가한다**(§3.7.5). 정리 로직 `release_stale`·`recover_missed_releases`는 안전한 Rust다. U1~U3의 SAFETY 문구는 바뀌지 않는다. unsafe 블록 수(CR-046 당시): 훅 U1~U11 + 승격 E1~E4. **CR-047로 E1~E4는 `elevate.rs`와 함께 삭제됐다** — 현재 승격 블록은 없고 위 표의 U 블록뿐이다.
 
 ## 6. 에러 타입
 
@@ -1293,6 +1512,13 @@ fn is_shell_class(name: &[u16]) -> bool {
 | 마우스 이동·좌우 클릭 | §2, §4 | ✅(기존, 영향 없음. CR-046: 버튼 누름이 정리 트리거 — 마우스 이벤트 자체는 불변. R-40: `InputEvent`·`input://mouse-button` 불변) |
 | **overlay R-40 (CR-062) — 실제 오른쪽 누름·뗌 좌표 한 쌍 전달(🔒 U-1의 입력), 잠금 무관·입력 통과(AC-3), 합성 뗌 제외(AC-7)** | §1, §1.1 P7, §2 `start`·`RightClick`·`ScreenPoint`, §3.9, §4, §8 RC1~RC6 | 설계 확정 · 소스 반영 |
 | **overlay R-40 AC-8 (🔒 U-3) — 전체 화면 판정용 전경 창 조회 안전 래퍼(fail-open)** | §2 `foreground_snapshot`·`ForegroundSnapshot`·`ScreenRect`, §3.10, §5 U12~U19, §8 FG1~FG6 | 설계 확정 · 소스 반영(생략 판정은 [tray.md](tray.md) §3.7) |
+| **overlay R-01 🔒 보강 — WT-01 Win32 `SetWindowPos(HWND_TOPMOST)` 재적용 래퍼** | §3.11.2 `raise`, §3.11.4 U27, [window.md](window.md) MC-51~MC-54 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-02 전경 변화 감시(훅 스레드 메시지 루프, 폴링 없음)** | §3.11.2 `install/remove_foreground_watch`·`on_foreground_event`, §3.11.5, §4, U20·U21, MC-52·MC-59 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-05 (🔒 결정 3) 미등록이면 아무것도 안 함, 안 보이면 보이게 하지 않음** | §3.11.3 판정표, TP1·TP5·TP6, MC-55 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-06 (🔒 결정 4) 최소화·보임이면 `SW_SHOWNOACTIVATE` 복원** | §3.11.3, U25·U26, TP4, MC-56 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-07 (🔒 결정 1·5) 포커스 비탈취·전체 화면 판정 없음·자기 프로세스 전경 제외** | §3.11.3 TO-a~TO-c, MC-57·MC-58 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-08 무효·재사용 HWND 방어, 종료 시 `UnhookWinEvent`** | §3.11.3, U22·U23, TP2·TP7·TP8, §3.11.5, MC-61 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
+| **R-01 보강 — WT-09 트리거당 1회·debug 횟수만·창 정보 미조회** | §3.11.2 `REASSERTS`, §3.11.7, MC-62 | 확정(사용자) · 소스 적용(2026-10-15, 커밋 전) · MC 미확인 |
 
 ## 11. 설계 결정 노트
 
@@ -1382,3 +1608,19 @@ fn is_shell_class(name: &[u16]) -> bool {
 
 12. **요구ID**: overlay `requirements.md` R-40은 ui-designer가 동시에 추가 중이다(횡단 §9 문구). 이 문서는 "overlay R-40"으로 추적한다 — 번호가 바뀌면 §1·§10을 맞춘다.
 13. **(관찰) SwapMouseButton(왼손잡이 설정)**: 저수준 훅이 전달하는 버튼 메시지가 물리 버튼 기준인지 논리(교체 후) 기준인지는 실측하지 않았다. 기존 `MouseButton` 매핑과 같은 조건이라 R-40만의 새 위험은 아니다. 수동 확인이 필요하면 tray.md §8.3 MC-31에 비고로 적는다.
+
+### WT 결정 (2026-10-05, overlay R-01 🔒 보강 — 정본 [window.md](window.md) §3.2)
+
+| # | 결정 | 대안 | 채택 근거 |
+|---|---|---|---|
+| D33 | WinEvent 콜백 안에서 **직접** `reassert`(비동기 `SetWindowPos`·`ShowWindowAsync`) | 채널로 다른 스레드에 넘겨 그 스레드가 호출 | 채널은 받을 스레드·종료 경로가 하나 더 필요하다. 직접 호출의 유일한 위험(창 소유 스레드 대기 → 같은 스레드의 저수준 훅 콜백 지연)은 `SWP_ASYNCWINDOWPOS`·`ShowWindowAsync`가 없앤다. 나머지 조회 4개는 메시지를 보내지 않는 커널 조회다 |
+| D34 | 감시를 **기존 훅 스레드**의 메시지 루프에 붙인다 | 전용 스레드 + 메시지 루프 / 주기 폴링 | 🔒 결정 2(폴링 금지, 기존 루프 권장). OUTOFCONTEXT WinEvent는 설치 스레드의 메시지 루프가 필요한데 이미 있다. 시작·종료 경로를 그대로 탄다 |
+| D35 | `GetWindowThreadProcessId`를 `foreground.rs` U13과 **공유하지 않고** `topmost.rs`에 따로 둔다(U23) | U13 `window_pid`를 `pub(super)`로 열어 재사용 | U13의 SAFETY 공통 전제는 "`GetForegroundWindow`가 방금 준 값"이다. 다른 출처의 HWND로 부르려면 U13 문구를 바꿔야 하고 R-40 코드 리뷰 결과(CORE-302)를 다시 건드린다. 중복은 세 줄이다 |
+| D36 | `WINEVENT_SKIPOWNPROCESS` | 자기 프로세스 전경 변화도 받음(🔒 결정 5는 "해도 됨") | 자기 창이 전경이 될 때 오버레이를 맨 위 띠 꼭대기로 다시 올리면 R-40 팝업 메뉴(같은 맨 위 띠)가 오버레이 아래로 가려질 위험이 있다(§3.11.3 TO-c). 결정 5가 이 경우를 필수로 두지 않았고 콜백 횟수도 준다 |
+| D37 | 감시 설치 실패는 `start` 실패가 아니라 경고 1줄 | `HookError::WinEvent` 변형 추가 후 `start` 실패 | 감시는 복구 경로 셋 중 하나다. 입력 후킹(앱의 본 기능)을 이것 때문에 멈출 이유가 없고, ⓑ·ⓒ는 계속 동작한다. 호출자가 다르게 처리할 일이 없어 변형을 만들 이득이 없다(스킬 §10) |
+
+### WT 확인 필요 · 관찰
+
+14. **(관찰)** WinEvent는 다른 프로세스 창이 전경이 될 때만 온다. 전경 변화 없이 다른 앱 창이 오버레이 위로 올라오면 다음 전경 변화까지 가려질 수 있다([window.md](window.md) §11 확인 필요 13).
+15. **(전제)** 훅 스레드와 메인 스레드는 `AttachThreadInput`으로 묶여 있지 않아 입력 큐가 다르다 — 그래야 `SWP_ASYNCWINDOWPOS`가 요청만 넣고 돌아온다. 우리 코드는 `AttachThreadInput`을 쓰지 않는다. muda·tao가 쓰는지는 확인하지 않았다 — 묶여 있으면 `SetWindowPos`가 동기로 돌 수 있으므로 MC-59(Alt+Tab 연타 중 입력 지연 없음)로 확인한다.
+16. **(관찰)** tao 내부 플래그 캐시와의 관계: 우리 재적용은 `WS_EX_TOPMOST`를 켜는 쪽이라 tao 캐시(`ALWAYS_ON_TOP=true`)와 어긋나지 않는다. `ShowWindowAsync` 복원 뒤 tao의 `MINIMIZED` 플래그는 tao가 `WM_SIZE`로 갱신한다고 보지만 확인하지 않았다 — MC-56 뒤 트레이 「표시/숨김」이 정상인지 함께 본다.
