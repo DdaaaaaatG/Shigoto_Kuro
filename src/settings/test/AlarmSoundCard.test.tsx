@@ -102,8 +102,9 @@ describe('AlarmSoundCard — 마운트·상태 문구 (R-53, §14.7.3 마운트 
     const r1 = render(tree(80))
     // ⓐ 응답 전 = 기본으로 보임
     expect(screen.getByRole('heading', { level: 2, name: '알림음' })).toBeInTheDocument()
-    // CR-052: 반복 재생 문구(옛 「타이머가 0이 되면 한 번 울립니다」 대체)
-    expect(screen.getByText('타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다')).toBeInTheDocument()
+    // CR-067: 1회 재생 문구(CR-052 반복 문구·CR-050 「한 번 울립니다」 대체)
+    expect(screen.getByText('타이머가 0이 되면 깜빡이는 동안 한 번 울립니다')).toBeInTheDocument()
+    expect(screen.queryByText('타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다')).toBeNull()
     expect(screen.queryByText('타이머가 0이 되면 한 번 울립니다')).toBeNull()
     expect(screen.getByText('wav·mp3·ogg, 1MB 이하')).toBeInTheDocument()
     expect(status().textContent).toBe(DEFAULT_TEXT)

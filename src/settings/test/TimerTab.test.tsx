@@ -239,7 +239,7 @@ describe('TimerTab — 레이아웃·초기 표시 (R-43 ~ R-47 · R-49 ~ R-54, 
     }
     expect(screen.getByText('멈춤을 누르면 처음 시간으로 돌아갑니다')).toBeInTheDocument()
     expect(screen.queryByText('멈춤을 누르면 00:00:00으로 돌아갑니다')).toBeNull()
-    expect(screen.getByText('타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다')).toBeInTheDocument() // CR-052
+    expect(screen.getByText('타이머가 0이 되면 깜빡이는 동안 한 번 울립니다')).toBeInTheDocument() // CR-067
     expect(screen.queryByText('타이머가 0이 되면 한 번 울립니다')).toBeNull()
     expect(screen.getByText('지금: 기본 알림음')).toBeInTheDocument()
     expect([btn('파일 등록').disabled, btn('미리 듣기').disabled, btn('기본값').disabled]).toEqual([false, false, true])

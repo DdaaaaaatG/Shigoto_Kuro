@@ -125,7 +125,7 @@ export const en: Messages = {
   timerStopHint: 'Stop returns to the starting time', // CR-050 change (was "resets to 00:00:00")
   timerControlsAria: 'Timer controls',
   alarmCardTitle: 'Alarm sound',
-  alarmCardDesc: 'When the timer reaches zero, it repeats during the 10 seconds of blinking', // CR-052
+  alarmCardDesc: 'Plays once when the timer reaches zero, while it blinks', // CR-067(1회 재생, CR-055 문구 정정)
   alarmCurrentDefault: 'Current: default sound',
   alarmCurrentCustom: 'Current: custom sound ({format} · {size} KB)',
   alarmImport: 'Choose file',

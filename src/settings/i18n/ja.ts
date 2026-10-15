@@ -124,7 +124,7 @@ export const ja: Messages = {
   timerStopHint: 'ストップを押すと最初の時間に戻ります', // CR-050 変更(旧「00:00:00に」)
   timerControlsAria: 'タイマー操作',
   alarmCardTitle: '通知音',
-  alarmCardDesc: 'タイマーが0になると点滅する10秒間くり返し鳴ります', // CR-052
+  alarmCardDesc: 'タイマーが0になると点滅中に1回鳴ります', // CR-067(1회 재생, CR-055 문구 정정)
   alarmCurrentDefault: '現在: 標準の通知音',
   alarmCurrentCustom: '現在: 登録した通知音（{format}・{size} KB）',
   alarmImport: 'ファイルを登録',

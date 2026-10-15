@@ -618,7 +618,7 @@ export const useSliderDraft = (saved: number, commit: (v: number) => Promise<voi
 | 항목 | 결정 | 소스 |
 |---|---|---|
 | 카드 1 설명문 | `timerCardDesc` 키 삭제(ko·ja·en·types). 같은 문장은 스톱워치 토글 설명 `timerStopwatchDesc` 한 곳뿐 — §14.15 「timerCardDesc 문구 확인 필요」 해소 | `TimerTab.tsx`, `i18n/*.ts` |
-| 알림음 카드 설명 | `alarmCardDesc` = 반복 재생 기준 문구(overlay CR-052와 일치) | `i18n/*.ts` |
+| 알림음 카드 설명 | `alarmCardDesc` = **1회 재생 기준 문구**(CR-067, CR-055 1회 재생과 일치) — ko 「타이머가 0이 되면 깜빡이는 동안 한 번 울립니다」·ja 「タイマーが0になると点滅中に1回鳴ります」·en 「Plays once when the timer reaches zero, while it blinks」. (옛: 반복 재생 기준 문구, overlay CR-052 — CR-067로 대체) | `i18n/*.ts` |
 | `CountdownTimeInput.inactive` | `inactive?: boolean`(기본 false). TimerTab이 `!countdownOn`(스톱워치 모드·둘 다 꺼짐) 전달. `off = locked ∥ inactive` → 세 칸 `disabled`·`aria-disabled`, `role=group`에 `aria-disabled`, 행 `.durationOff`(라벨·콜론 muted, 상자 `--st-page` 배경·opacity 0.6). 안내 줄: locked → `timerDurationLocked`, inactive → 빈 값. `off`가 참이 되면 입력 중 값·되돌림 안내 버림, `commit` 첫 줄 가드도 `off` | `CountdownTimeInput.tsx` |
 | 파생 상태 | `durationInactive`(= `!countdownOn`, 저장값 기준, 초기값 = 저장된 설정에서 계산) — TimerTab 렌더 파생, 소유 TimerTab | `TimerTab.tsx` |
 | 간격 | 탭 카드 간격 `--st-gap-md`(12px — 일반·마우스 탭과 같음). 카드 안 묶음 구분 `.group` = 위 여백 8px + 위 패딩 12px + 1px `--st-border` 구분선: 카드 1(모드 토글 ∣ 시작 시간·조작), 카드 2(등록·미리 듣기·기본값 ∣ 음량) | `TimerTab.module.css` |

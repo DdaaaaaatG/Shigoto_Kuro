@@ -96,6 +96,12 @@ const OLD = {
   ja: { stopwatch: '00:00:00から数えます。休憩中は自動で止まります', alarm: 'タイマーが0になると一度鳴ります' },
   en: { stopwatch: 'Counts up from 00:00:00. Pauses automatically while resting', alarm: 'Plays once when the timer reaches zero' },
 } as const
+// CR-067: CR-052 반복 재생 문구 — 1회 재생(CR-055)과 모순이라 대체됨, 사전·화면 어디에도 없어야 한다
+const REPEAT_ALARM = {
+  ko: '타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다',
+  ja: 'タイマーが0になると点滅する10秒間くり返し鳴ります',
+  en: 'When the timer reaches zero, it repeats during the 10 seconds of blinking',
+} as const
 
 let onError: Mock
 let stops: Mock[] = []
@@ -144,6 +150,12 @@ describe('TimerTab — CR-052 문구 (R-44 · R-49 · R-53 · R-55, §14.16 카�
       expect(d.alarmCardDesc, lang).not.toBe(OLD[lang].alarm)
       expect(d.alarmCardDesc, lang).not.toBe(ko.alarmCardDesc)
     }
+    for (const [lang, d] of [
+      ['ko', ko],
+      ['ja', ja],
+      ['en', en],
+    ] as const)
+      expect(d.alarmCardDesc, lang).not.toBe(REPEAT_ALARM[lang])
 
     // ⓐ 화면 — 언어마다 탭을 그려 스톱워치 설명 문장이 스위치 설명 한 곳에만 있는지
     for (const [lang, d] of [
@@ -162,6 +174,7 @@ describe('TimerTab — CR-052 문구 (R-44 · R-49 · R-53 · R-55, §14.16 카�
       // 옛 문구(카드 머리 설명·옛 스위치 설명·옛 알림음 설명)는 화면 어디에도 없다
       expect(screen.queryByText(OLD[lang].stopwatch), lang).toBeNull()
       expect(screen.queryByText(OLD[lang].alarm), lang).toBeNull()
+      expect(screen.queryByText(REPEAT_ALARM[lang]), lang).toBeNull()
       expect(screen.getByText(d.alarmCardDesc), lang).toBeInTheDocument()
       r.unmount()
     }

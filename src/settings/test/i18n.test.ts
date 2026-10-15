@@ -564,7 +564,7 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
       timerMinutesAria: '분',
       timerSecondsAria: '초',
       alarmCardTitle: '알림음',
-      alarmCardDesc: '타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다', // CR-052(반복 재생) — 옛 「한 번 울립니다」
+      alarmCardDesc: '타이머가 0이 되면 깜빡이는 동안 한 번 울립니다', // CR-067(1회 재생) — CR-052 반복 문구 대체
       alarmCurrentDefault: '지금: 기본 알림음',
       alarmCurrentCustom: '지금: 등록한 알림음 ({format} · {size} KB)',
       alarmImport: '파일 등록',

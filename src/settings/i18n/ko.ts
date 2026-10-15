@@ -124,7 +124,7 @@ export const ko: Messages = {
   timerStopHint: '멈춤을 누르면 처음 시간으로 돌아갑니다', // CR-050 변경(옛 「00:00:00으로」)
   timerControlsAria: '타이머 조작',
   alarmCardTitle: '알림음',
-  alarmCardDesc: '타이머가 0이 되면 깜빡이는 10초 동안 반복해서 울립니다', // CR-052
+  alarmCardDesc: '타이머가 0이 되면 깜빡이는 동안 한 번 울립니다', // CR-067(1회 재생, CR-055 문구 정정)
   alarmCurrentDefault: '지금: 기본 알림음',
   alarmCurrentCustom: '지금: 등록한 알림음 ({format} · {size} KB)',
   alarmImport: '파일 등록',
