@@ -59,7 +59,7 @@ cp src-tauri/target/release/kuro_keyviewer.exe "deploy/$VERSION/kuro_keyviewer-$
 - 인스톨러 exe, 포터블 exe
 - `deploy/{version}/읽어주세요.txt` (아래 4단계 내용을 평문으로) — 개발용 README.md는 패키지에 넣지 않는다
 - 라이선스 파일(있으면)
-- 사용자 매뉴얼: `src/overlay/manual.md`·`src/settings/manual.md`를 합쳐 **`deploy/{version}/사용설명서.html`** 한 파일로 만든다(최종 사용자는 개발자가 아니다 — .md를 주지 않는다). 그림은 base64로 내장해 파일 하나로 열리게 하고(python `markdown` 패키지, `tables` 확장), 머리에 README 내용(「시작하기」)과 차례를 넣는다. README도 **`읽어주세요.txt`**(UTF-8 BOM, CRLF, 마크다운 기호 제거)로 함께 둔다. 매뉴얼이 아직 없으면 읽어주세요.txt에 그 사실을 적는다. (2026-10-17 사용자 지시 — 0.5.1부터)
+- 사용자 매뉴얼: `src/overlay/manual.md`·`src/settings/manual.md`를 합쳐 **`deploy/{version}/사용설명서.html`** 한 파일로 만든다(최종 사용자는 개발자가 아니다 — .md를 주지 않는다). 생성기 `python scripts/dev/build-manual-html.py {version} <README.md> deploy/{version}/사용설명서.html` — 그림 base64 내장, 왼쪽 고정 차례(현재 부만 펼침), 다크 모드·인쇄 스타일. **생성 후 headless Edge로 열어 캡처해 눈으로 확인한다**(`msedge --headless=new --screenshot`). README도 **`읽어주세요.txt`**(UTF-8 BOM, CRLF, 마크다운 기호 제거)로 함께 둔다. 매뉴얼이 아직 없으면 읽어주세요.txt에 그 사실을 적는다. (2026-10-17 사용자 지시 — 0.5.1부터)
 
 ## 4. README.md 생성
 
