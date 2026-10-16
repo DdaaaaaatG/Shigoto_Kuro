@@ -57,9 +57,9 @@ cp src-tauri/target/release/kuro_keyviewer.exe "deploy/$VERSION/kuro_keyviewer-$
 
 **포함**
 - 인스톨러 exe, 포터블 exe
-- `deploy/{version}/README.md` (아래 4단계)
+- `deploy/{version}/읽어주세요.txt` (아래 4단계 내용을 평문으로) — 개발용 README.md는 패키지에 넣지 않는다
 - 라이선스 파일(있으면)
-- 사용자 매뉴얼: `src/overlay/manual.md`·`src/settings/manual.md`를 합쳐 `deploy/{version}/사용설명서.md`로 복사(스크린샷 상대 경로가 깨지지 않게 이미지도 함께). 매뉴얼이 아직 없으면 README에 그 사실을 적는다.
+- 사용자 매뉴얼: `src/overlay/manual.md`·`src/settings/manual.md`를 합쳐 **`deploy/{version}/사용설명서.html`** 한 파일로 만든다(최종 사용자는 개발자가 아니다 — .md를 주지 않는다). 그림은 base64로 내장해 파일 하나로 열리게 하고(python `markdown` 패키지, `tables` 확장), 머리에 README 내용(「시작하기」)과 차례를 넣는다. README도 **`읽어주세요.txt`**(UTF-8 BOM, CRLF, 마크다운 기호 제거)로 함께 둔다. 매뉴얼이 아직 없으면 읽어주세요.txt에 그 사실을 적는다. (2026-10-17 사용자 지시 — 0.5.1부터)
 
 ## 4. README.md 생성
 
@@ -95,7 +95,7 @@ cp src-tauri/target/release/kuro_keyviewer.exe "deploy/$VERSION/kuro_keyviewer-$
 배포 패키지: deploy/{version}/
 - kuro_keyviewer_{version}_x64-setup.exe  (N MB)
 - kuro_keyviewer-{version}-portable.exe   (N MB)
-- README.md · 사용설명서.md
+- 읽어주세요.txt · 사용설명서.html(그림 내장) · {version}.zip(전부 묶음)
 제외 확인: .claude/ · doc/ · 개인 데이터 없음 (ls 결과 첨부)
 ```
 
