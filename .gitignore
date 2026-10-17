@@ -38,3 +38,6 @@ doc/300_검증/screenshots/
 .DS_Store
 Thumbs.db
 *.swp
+
+# Python 캐시 (scripts/dev)
+__pycache__/
