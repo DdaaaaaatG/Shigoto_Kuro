@@ -1,4 +1,4 @@
-# 다음 세션 인계 (2026-10-17 갱신)
+# 다음 세션 인계 (2026-10-18 갱신)
 
 - 날짜별 경과 기록(2026-09-23~27)은 `doc/archive/next-session-20260923-0927.md`로 옮겼다. 결정은 `doc/000_프로젝트_확정사항.md`, 화면별 이력은 각 `test/change-requests.md`가 단일 소스다.
 - 이 문서는 **지금 상태 · 남은 일 · 결정 대기 · 꼭 지킬 것**만 담는다. 항목을 끝내면 지우고, 새 일은 해당 절에 짧게 추가한다.
@@ -7,8 +7,10 @@
 - 세션은 **프로젝트 루트**에서 연다(`.claude` 폴더에서 열면 가드 경로가 어긋나 에이전트 Bash·Write가 막힌다).
 - 진행 방식: 메인 세션은 소스·산출 문서를 직접 고치지 않고 리프 에이전트에 위임한다(CLAUDE.md §5-0).
 
-## 1. 현재 상태 (2026-09-30)
-- **버전 0.5.0** (2026-09-30) — `deploy/0.5.0/`에 포터블 exe(5.9MB)·NSIS setup(2.5MB)·README·0.5.0.zip. 내용: 프리셋 탭(CR-064·065, 세로형 카드·미리보기), **내장 프리셋 2개**(PS-11 — 「세바시에-기본」=기본 세트 4차와 동일, 「게님드림」 7장; `presets/` 폴더가 없을 때만 `builtin-1`·`builtin-2` 시딩, 원본 `doc/assets/presets/{1,2}`), 바운스 규칙 CR-066. 기본 세트·`DATA_GENERATION` 5 **불변**(업데이트 시 데이터 초기화 없음). 검증: cargo 550 통과·clippy 0, vitest 881/881, 리뷰 C0 H0. **release exe 실행·캡처 확인함**(2026-09-30 20:33, `doc/300_검증/screenshots/20260930-2033-release-0.5.0/` — 오버레이·설정 창·프리셋 탭 카드 2장). 이 PC는 `presets/`가 있어 내장 시딩은 통합 테스트로만 확인(새 PC 첫 실행 수동 확인 M 대기). 남은 부채: 시딩 실패 경로 테스트(CORE-001, `seed_from` 주입 리팩터), `PresetsTab`·`PresetCard` 분리(CR-001), CORE-002·003·005(LOW), Cargo.lock 형식 v4(cargo ≥1.78).
+## 1. 현재 상태 (2026-10-18)
+- **버전 0.5.1** (2026-10-17) — `deploy/0.5.1/`: 포터블 exe(5.9MB)·NSIS setup(2.5MB)·**읽어주세요.txt·사용설명서.html**(두 화면 manual 합본, 그림 15장 base64 내장, `scripts/dev/build-manual-html.py` — 🔒 2026-10-17 사용자 지시: 최종 사용자용 .md 금지, 만든 뒤 headless Edge로 렌더 확인)·0.5.1.zip. 내용: 0.5.0 + 오버레이 항상 위 재적용(WT-01~09, `hook/topmost.rs`) + 알림음 카드 문구(CR-067). 데이터 초기화 없음(`DATA_GENERATION` 5). 검증: tsc·lint 0, vitest 883/883, fmt·clippy 0, cargo 558 통과, build exit 0. release exe 실행·캡처 확인(`doc/300_검증/screenshots/20261017-0010-release-0.5.1/`). 캡처 도구 `scripts/dev/capture-windows.ps1`. CR-067 수동 확인은 사용자 몫. 설명서 오버레이 사진 4장 뒤에 개발 터미널 글자가 비침(재촬영 여부 사용자 결정 대기).
+- **0.5.1 basic 변형** (2026-10-18, 🔒) — `deploy/0.5.1-basic/`: 같은 코드를 Cargo 피처 `presets-basic`으로 빌드(`yarn tauri build -- --features presets-basic`, `/deploy` §1-b). 내장 프리셋 「세바시에-기본」 1개(「게님드림」·그림 344KB 제외 → 포터블 5.56MB). 두 모드 fmt·clippy 0·cargo test 통과. release exe 실행 확인(`doc/300_검증/screenshots/20261018-0105-release-0.5.1-basic/` — 이 PC는 presets/가 있어 내장 시딩은 안 보임, 통합 테스트로 확인). manual.md 내장 프리셋 문장 변형 중립화.
+- (이전) **버전 0.5.0** (2026-09-30) — `deploy/0.5.0/`에 포터블 exe(5.9MB)·NSIS setup(2.5MB)·README·0.5.0.zip. 내용: 프리셋 탭(CR-064·065, 세로형 카드·미리보기), **내장 프리셋 2개**(PS-11 — 「세바시에-기본」=기본 세트 4차와 동일, 「게님드림」 7장; `presets/` 폴더가 없을 때만 `builtin-1`·`builtin-2` 시딩, 원본 `doc/assets/presets/{1,2}`), 바운스 규칙 CR-066. 기본 세트·`DATA_GENERATION` 5 **불변**(업데이트 시 데이터 초기화 없음). 검증: cargo 550 통과·clippy 0, vitest 881/881, 리뷰 C0 H0. **release exe 실행·캡처 확인함**(2026-09-30 20:33, `doc/300_검증/screenshots/20260930-2033-release-0.5.0/` — 오버레이·설정 창·프리셋 탭 카드 2장). 이 PC는 `presets/`가 있어 내장 시딩은 통합 테스트로만 확인(새 PC 첫 실행 수동 확인 M 대기). 남은 부채: 시딩 실패 경로 테스트(CORE-001, `seed_from` 주입 리팩터), `PresetsTab`·`PresetCard` 분리(CR-001), CORE-002·003·005(LOW), Cargo.lock 형식 v4(cargo ≥1.78).
 - (이전) **버전 0.4.0** (2026-09-28) — `deploy/0.4.0/`에 포터블 exe(5.4MB)·NSIS setup(2.0MB)·README. 기본 세트 = 사용자가 쓰던 그림 6장(뒷머리 제외, 옛 세트 `doc/assets/defaults-v4/`)·기본 알림음 = 사용자 mp3(`src/assets/sounds/default-alarm.mp3`)·타이머 기본 textPos(268,402)·rotation 7·음량 44. `DATA_GENERATION` 5(기존 사용자 초기화). CR-058(overlay)·CR-059(settings) 「적용·미검증」. verify-manager 미실행.
 - 마지막 검증(2026-09-28): cargo fmt·clippy 0, cargo test lib 375·통합 49 전부 통과 / vitest 801 / tsc·lint 0 / `yarn tauri build` exit 0.
 - 사용자 앱 데이터 백업: `%USERPROFILE%\kuro-appdata-backup-20260928`(0.4.0 세대 5로 이 PC 데이터가 초기화되기 전 상태).
