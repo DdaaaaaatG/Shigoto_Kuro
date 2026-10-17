@@ -38,10 +38,11 @@ const MAX_STARTUP_ATTEMPTS: u32 = 3;
 
 /// 앱 데이터 세대. doc/assets/defaults/ = 내장 DEFAULT_ASSETS = 세대 5 (0.4.0, 사용자 확정 배포
 /// 세트 — hair 제외 6장). 1=defaults-v1(CR-035), 2=defaults-v2(CR-038), 3=defaults-v3(CR-044),
-/// 4=defaults-v4(CR-053, hair 포함 7장). 기본 그림을 바꾸면: 옛 폴더를 doc/assets/defaults-v{N}으로
-/// 옮기고, 이 값을 +1 하고, 아래 DEFAULT_ASSETS_FINGERPRINT를 새로 잰 값으로 바꾼다
+/// 4=defaults-v4(CR-053, hair 포함 7장),
+/// 6 = 0.5.1 (2026-10-18) — 기본 세트는 5와 동일(defaults 폴더 불변), 프리셋 도입에 맞춰
+/// 전원 초기화 결정. 기본 그림을 바꾸면: 옛 폴더를 doc/assets/defaults-v{N}으로 옮기고, 이 값을 +1 하고, 아래 DEFAULT_ASSETS_FINGERPRINT를 새로 잰 값으로 바꾼다
 /// (generation_fingerprint_guard가 강제).
-pub const DATA_GENERATION: u32 = 5;
+pub const DATA_GENERATION: u32 = 6;
 
 /// 내장 기본 그림 지문(장수, 바이트 합, FNV-1a 64 — generation::fingerprint). 테스트 전용.
 #[cfg(test)]
