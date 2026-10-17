@@ -26,12 +26,20 @@ fn names(dir: &Path) -> BTreeSet<String> {
         .collect()
 }
 
+const BASIC: bool = cfg!(feature = "presets-basic");
+const COUNT: usize = if BASIC { 1 } else { 2 };
+const IDS: &[&str] = if BASIC {
+    &["builtin-1"]
+} else {
+    &["builtin-1", "builtin-2"]
+};
+
 fn set(items: &[&str]) -> BTreeSet<String> {
     items.iter().map(|s| s.to_string()).collect()
 }
 
 #[test]
-fn seed_creates_two_when_dir_missing() {
+fn seed_creates_builtins_when_dir_missing() {
     let tmp = tempfile::tempdir().expect("tmp");
     let paths = make_paths(tmp.path());
     let dir = paths.presets_dir();
@@ -39,11 +47,11 @@ fn seed_creates_two_when_dir_missing() {
     assert_eq!(
         out,
         SeedOutcome::Seeded {
-            count: 2,
+            count: COUNT,
             failed: vec![]
         }
     );
-    assert_eq!(names(&dir), set(&["builtin-1", "builtin-2"]));
+    assert_eq!(names(&dir), set(IDS));
     assert_eq!(
         names(&dir.join("builtin-1")),
         set(&[
@@ -57,17 +65,19 @@ fn seed_creates_two_when_dir_missing() {
             "alarm.mp3"
         ])
     );
-    assert_eq!(names(&dir.join("builtin-2")).len(), 9);
+    if !BASIC {
+        assert_eq!(names(&dir.join("builtin-2")).len(), 9);
+    }
     assert!(!paths.data_dir.join(".presets-seed").exists());
 
-    let before: Vec<Vec<u8>> = ["builtin-1", "builtin-2"]
+    let before: Vec<Vec<u8>> = IDS
         .iter()
         .map(|i| std::fs::read(dir.join(i).join("preset.json")).expect("json"))
         .collect();
     let again = presets::seed_builtin(&dir).expect("seed again");
     assert_eq!(again, SeedOutcome::Skipped(SeedSkip::Exists));
-    assert_eq!(names(&dir), set(&["builtin-1", "builtin-2"]));
-    let after: Vec<Vec<u8>> = ["builtin-1", "builtin-2"]
+    assert_eq!(names(&dir), set(IDS));
+    let after: Vec<Vec<u8>> = IDS
         .iter()
         .map(|i| std::fs::read(dir.join(i).join("preset.json")).expect("json"))
         .collect();
@@ -113,14 +123,25 @@ fn seed_output_listed_and_applicable() {
             )
         })
         .collect();
-    assert_eq!(
-        got,
-        [
-            ("builtin-2", "게님드림", 1_790_765_304_848, 7, true),
-            ("builtin-1", "세바시에-기본", 1_790_764_144_068, 6, true),
-        ]
-    );
+    let basic1 = ("builtin-1", "세바시에-기본", 1_790_764_144_068, 6, true);
+    if BASIC {
+        assert_eq!(got, [basic1]);
+    } else {
+        assert_eq!(
+            got,
+            [
+                ("builtin-2", "게님드림", 1_790_765_304_848, 7, true),
+                basic1
+            ]
+        );
+    }
 
+    if !BASIC {
+        apply_builtin_2(&paths);
+    }
+}
+
+fn apply_builtin_2(paths: &AppPaths) {
     let mut cur = Settings::default();
     cur.overlay.x = 321;
     cur.autostart = true;
@@ -129,7 +150,7 @@ fn seed_output_listed_and_applicable() {
     cur.show_in_taskbar = true;
     let before = cur.clone();
     let state = Mutex::new(cur);
-    let applied = presets::apply(&paths, "builtin-2", &state).expect("apply");
+    let applied = presets::apply(paths, "builtin-2", &state).expect("apply");
     assert_eq!(applied.manifest.entries.len(), 7);
     assert!(applied
         .manifest
@@ -162,13 +183,10 @@ fn seed_clears_leftover_staging() {
     assert_eq!(
         out,
         SeedOutcome::Seeded {
-            count: 2,
+            count: COUNT,
             failed: vec![]
         }
     );
     assert!(!leftover.exists());
-    assert_eq!(
-        names(&paths.presets_dir()),
-        set(&["builtin-1", "builtin-2"])
-    );
+    assert_eq!(names(&paths.presets_dir()), set(IDS));
 }

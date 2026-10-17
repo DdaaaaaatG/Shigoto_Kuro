@@ -9,7 +9,8 @@
 //! [unsafe] 없음.
 //! [에러] `PresetError::Io`(메타데이터 읽기·임시 폴더 준비·최종 rename 실패). 프리셋 하나의 실패는
 //!        `Ok(Seeded{failed})`에 (id, code)로 담고 나머지를 계속한다.
-//! [설정] 없음. `preset.json` 원문을 그대로 쓴다(재직렬화 없음).
+//! [설정] 없음. `preset.json` 원문을 그대로 쓴다(재직렬화 없음). Cargo 피처 `presets-basic`이 켜지면
+//!        ②「게님드림」과 전용 PNG·JSON을 exe에서 빼고 ①「세바시에-기본」 1개만 내장한다(배포 변형).
 //! [테스트] 이 파일 `#[cfg(test)]`(형식·id·원본 바이트 대조), 통합 `tests/presets_builtin.rs`.
 
 use std::fs;
@@ -50,12 +51,14 @@ static PRESET1_JSON: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../doc/assets/presets/1/preset.json"
 ));
+#[cfg(not(feature = "presets-basic"))]
 static PRESET2_JSON: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../doc/assets/presets/2/preset.json"
 ));
 
 /// ② 신규 그림(doc/assets/presets/2/). defaults.rs `default_png!`와 같은 모양.
+#[cfg(not(feature = "presets-basic"))]
 macro_rules! preset2_png {
     ($name:literal) => {
         include_bytes!(concat!(
@@ -67,6 +70,7 @@ macro_rules! preset2_png {
 }
 
 /// `DEFAULT_ASSETS`에서 file_key가 같은 항목의 바이트. 없으면 `None`(패닉 금지 — 검증이 그 프리셋만 실패시킨다).
+#[cfg(not(feature = "presets-basic"))]
 fn defaults_bytes(file_key: &str) -> Option<&'static [u8]> {
     DEFAULT_ASSETS
         .iter()
@@ -81,18 +85,12 @@ fn alarm_entry() -> BuiltinFile {
     )
 }
 
-/// 내장 프리셋 표. 함수인 이유: ①의 PNG를 `DEFAULT_ASSETS`에서 빌려 쓰기 위해서다(D-P9).
-/// 순서 = 시딩 순서(builtin-1 → builtin-2).
-pub(super) fn builtin_presets() -> [BuiltinPreset; 2] {
-    let mut files1: Vec<BuiltinFile> = DEFAULT_ASSETS
-        .iter()
-        .map(|d| (stored_file_name(&d.slot), d.bytes))
-        .collect();
-    files1.push(alarm_entry());
-
-    let mut files2: Vec<BuiltinFile> = Vec::new();
+/// ② 「게님드림」. basic 빌드에는 없다.
+#[cfg(not(feature = "presets-basic"))]
+fn builtin_2() -> BuiltinPreset {
+    let mut files: Vec<BuiltinFile> = Vec::new();
     if let Some(bytes) = defaults_bytes("background") {
-        files2.push(("background.png".to_string(), bytes));
+        files.push(("background.png".to_string(), bytes));
     }
     let own: [(&str, &'static [u8]); 6] = [
         ("hair.png", preset2_png!("hair.png")),
@@ -102,21 +100,33 @@ pub(super) fn builtin_presets() -> [BuiltinPreset; 2] {
         ("pen_up.png", preset2_png!("pen_up.png")),
         ("pomo_char.png", preset2_png!("pomo_char.png")),
     ];
-    files2.extend(own.iter().map(|(n, b)| (n.to_string(), *b)));
-    files2.push(alarm_entry());
+    files.extend(own.iter().map(|(n, b)| (n.to_string(), *b)));
+    files.push(alarm_entry());
+    BuiltinPreset {
+        id: "builtin-2",
+        json: PRESET2_JSON,
+        files,
+    }
+}
 
-    [
-        BuiltinPreset {
-            id: "builtin-1",
-            json: PRESET1_JSON,
-            files: files1,
-        },
-        BuiltinPreset {
-            id: "builtin-2",
-            json: PRESET2_JSON,
-            files: files2,
-        },
-    ]
+/// 내장 프리셋 표. 함수인 이유: ①의 PNG를 `DEFAULT_ASSETS`에서 빌려 쓰기 위해서다(D-P9).
+/// 순서 = 시딩 순서(builtin-1 → builtin-2). `presets-basic` 피처면 builtin-1만.
+pub(super) fn builtin_presets() -> Vec<BuiltinPreset> {
+    let mut files1: Vec<BuiltinFile> = DEFAULT_ASSETS
+        .iter()
+        .map(|d| (stored_file_name(&d.slot), d.bytes))
+        .collect();
+    files1.push(alarm_entry());
+
+    #[allow(unused_mut)]
+    let mut presets = vec![BuiltinPreset {
+        id: "builtin-1",
+        json: PRESET1_JSON,
+        files: files1,
+    }];
+    #[cfg(not(feature = "presets-basic"))]
+    presets.push(builtin_2());
+    presets
 }
 
 /// 시딩을 건너뛴 사유.
@@ -203,6 +213,10 @@ pub fn seed_builtin(presets_dir: &Path) -> Result<SeedOutcome, PresetError> {
         remove_best_effort(&staging);
         return Err(PresetError::io(e));
     }
+    log::info!(
+        "preset: 내장 프리셋 {count}개 시딩 (실패 {}개)",
+        failed.len()
+    );
     Ok(SeedOutcome::Seeded { count, failed })
 }
 
@@ -210,6 +224,12 @@ pub fn seed_builtin(presets_dir: &Path) -> Result<SeedOutcome, PresetError> {
 mod tests {
     use super::*;
     use crate::presets::format::{is_valid_id, parse_preset};
+
+    const EXPECTED_COUNT: usize = if cfg!(feature = "presets-basic") {
+        1
+    } else {
+        2
+    };
 
     fn expected_names(json: &[u8]) -> Vec<String> {
         let text = std::str::from_utf8(json).expect("utf8");
@@ -232,7 +252,7 @@ mod tests {
         assert_eq!(
             outcome,
             SeedOutcome::Seeded {
-                count: 2,
+                count: EXPECTED_COUNT,
                 failed: vec![]
             }
         );
@@ -242,14 +262,18 @@ mod tests {
     fn seed_ids_valid() {
         let presets = builtin_presets();
         let ids: Vec<&str> = presets.iter().map(|p| p.id).collect();
-        assert_eq!(ids, ["builtin-1", "builtin-2"]);
+        if cfg!(feature = "presets-basic") {
+            assert_eq!(ids, ["builtin-1"]);
+        } else {
+            assert_eq!(ids, ["builtin-1", "builtin-2"]);
+        }
         assert!(ids.iter().all(|id| is_valid_id(id) && !id.starts_with('.')));
         let saved = |p: &BuiltinPreset| {
             parse_preset(std::str::from_utf8(p.json).expect("utf8"))
                 .expect("parse")
                 .saved_at
         };
-        assert!(saved(&presets[0]) < saved(&presets[1]));
+        assert!(presets.windows(2).all(|w| saved(&w[0]) < saved(&w[1])));
     }
 
     #[test]

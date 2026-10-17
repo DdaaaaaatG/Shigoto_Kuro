@@ -44,3 +44,8 @@ lto = true
 opt-level = "s"
 panic = "abort"
 strip = true
+
+[features]
+# 배포 변형(🔒 2026-10-18): 내장 프리셋을 「세바시에-기본」 1개만 넣는다(「게님드림」 제외). `yarn tauri build -- --features presets-basic`.
+# 기본(피처 없음) = 내장 프리셋 2개.
+presets-basic = []

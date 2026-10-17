@@ -36,6 +36,18 @@ yarn tauri build 2>&1 | tail -40
 - 첫 빌드는 NSIS 도구를 내려받느라 인터넷이 필요하다.
 - 빌드 실패는 `/dev-build` 라우팅 표를 따른다. 이 명령은 고치지 않는다.
 
+## 1-b. 배포 변형 「basic」 (🔒 2026-10-18)
+
+내장 프리셋을 「세바시에-기본」 1개만 넣는 변형. 같은 소스에서 Cargo 피처로 만든다.
+
+```bash
+yarn tauri build -- --features presets-basic 2>&1 | tail -20
+```
+
+- 산출물 경로는 같다(이름에 변형 표기가 없다) → 바로 `deploy/{version}-basic/`으로 옮기며 이름을 바꾼다: `kuro_keyviewer_{version}-basic_x64-setup.exe`, `kuro_keyviewer-{version}-basic-portable.exe`.
+- 일반 판과 basic 판을 **연달아** 빌드할 때는 먼저 만든 exe를 먼저 옮겨 둔다(두 번째 빌드가 같은 경로에 덮어쓴다).
+- 읽어주세요.txt·사용설명서.html은 basic용 README 원문(「basic 판이란」 절, 내장 프리셋 1개 표기)으로 다시 만든다. 매뉴얼 본문은 변형 중립 문장이라 공통.
+
 ## 2. 산출물 정리
 
 ```bash
