@@ -211,3 +211,24 @@ describe('timerText · isTimerBlinking (design.md §10.15 15.1 표, design/funct
     }
   })
 })
+
+// ─── CR-069 카운트다운 쉬는중 자동 일시정지 표시(R-37 개정·R-35, contract v1.1 — set_resting 두 모드 공통) ───
+// 근거: design.md §10.15 「(v1.1) 카운트다운도 restPaused — 표시는 timerText가 남은 시간 고정」·§10.17 17.3 타이머 행, RD-04.
+// 소스 변경 없음(design.md §10.17 17.2 「변경 없음(확인만)」 timerClock.ts) — 처음부터 green이 정상, red면 회귀.
+// 시나리오: scenarios.md TC-346 (패킷 rest-display-03-packet-ui.md §A.5 O-9)
+describe('timerDisplayMs · timerText — 카운트다운 restPaused (CR-069)', () => {
+  it('TC-346: 카운트다운 restPaused {elapsedMs 3000, durationMs 1500000} → now 0·10초·1시간 모두 1_497_000·00:24:57(남은 시간 고정), elapsedMs 2500 → 00:24:58(올림), 깜빡임 없음, running은 흐름', () => {
+    const s = Object.freeze(cd('restPaused', 3_000))
+    for (const now of [0, 10_000, 3_600_000]) {
+      expect(timerDisplayMs(s, 0, now), `${now}`).toBe(1_497_000)
+      expect(timerText(s, 0, now), `${now}`).toBe('00:24:57')
+    }
+    expect(timerDisplayMs(cd('restPaused', 2_500), 0, 3_600_000)).toBe(1_497_500)
+    expect(timerText(cd('restPaused', 2_500), 0, 3_600_000)).toBe('00:24:58')
+    expect(snapshotMode(s)).toBe('countdown')
+    expect(isTimerBlinking(s)).toBe(false)
+    expect(s).toEqual({ status: 'restPaused', elapsedMs: 3_000, mode: 'countdown', durationMs: DUR })
+    // 대비: 같은 elapsedMs의 running은 받은 뒤 흐른 시간만큼 줄어든다(복귀 뒤 이어서)
+    expect(timerText(cd('running', 3_000), 0, 10_000)).toBe('00:24:47')
+  })
+})

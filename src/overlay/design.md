@@ -3,16 +3,16 @@
 | 항목 | 값 |
 |---|---|
 | 화면 | 오버레이 — `src/overlay/` · Tauri 창 라벨 `overlay` |
-| 요구 | `src/overlay/requirements.md` **v3.4** (확정, R-01~R-40 — v3.4 = doc-sync 2026-10-15: R-01 비고 항상 위 재적용(core 담당, ui 변경 없음 — §7)·§3 계약 상태 표기 정정(요구ID 증감 없음). v3.3 = 바운스 시작 규칙 CR-066 용어 주(요구ID 증감 없음, 계약 변경 없음). v3.2 = R-40 오버레이 오른쪽 클릭 메뉴 CR-062(§10.16, ui 몫 = WebView2 기본 메뉴 억제뿐, 계약 변경 없음)·R-28 용어 주. v3.1 = R-34 글자 기본값·R-39 기본 음량·내장 기본음 문구 갱신(CR-058 🔒, 요구ID 증감 없음). R-37~R-39 타이머 모드 CR-050(§10.15, contract v0.23 확정·TS 반영됨 — `get_alarm_sound`·`TimerSnapshot.mode/durationMs`·`'finished'`·`TimerSettings.alarmVolume`), R-33~R-36 뽀모도 타이머 CR-045(§10.14, timer 타입·`get_timer`·`set_resting`·`timer://changed`·슬롯 `pomo_char`·`pomo_bubble` — contract v0.21 확정·반영됨), R-32 타자 입력 1 선택 강등 CR-043, R-31 펜 손 단순화 CR-042, R-30 헤어(뒷머리) 파츠 CR-037, R-29 펜 모드 = `pen_up` && `mouse.penMode` CR-033, R-27 필수 이미지 강등(`idle`·`rest` 선택)·R-28 위치 잠금 중 동작 CR-029(소스 변경 없음), R-26 펜 모드 마우스 클릭 = 키 누름 CR-027, R-25 펜 쥔 손 파츠 CR-025, R-24 키 꾹 누름 부르르 CR-023, R-23 젤리 바운스 CR-022, R-22 특수 키 이미지 CR-021, R-10 폐기 → R-14, R-08 폐기 → R-18, R-02 폐기 → R-19, R-14 폐기 → R-20·R-21, R-06 폐기(CR-019, 대체 없음 — 쾅 메커니즘 삭제)) |
+| 요구 | `src/overlay/requirements.md` **v3.5** (확정, R-01~R-41 — v3.5 = CR-069 rest-display(🔒 2026-10-24): R-41 쉬는중 단독 표시 신설(§10.17), R-37 개정(카운트다운도 쉬는중 자동 일시정지), R-35·R-30·R-33 끝 주석, S-19 개정·S-22 신설. v3.4 = doc-sync 2026-10-15: R-01 비고 항상 위 재적용(core 담당, ui 변경 없음 — §7)·§3 계약 상태 표기 정정(요구ID 증감 없음). v3.3 = 바운스 시작 규칙 CR-066 용어 주(요구ID 증감 없음, 계약 변경 없음). v3.2 = R-40 오버레이 오른쪽 클릭 메뉴 CR-062(§10.16, ui 몫 = WebView2 기본 메뉴 억제뿐, 계약 변경 없음)·R-28 용어 주. v3.1 = R-34 글자 기본값·R-39 기본 음량·내장 기본음 문구 갱신(CR-058 🔒, 요구ID 증감 없음). R-37~R-39 타이머 모드 CR-050(§10.15, contract v0.23 확정·TS 반영됨 — `get_alarm_sound`·`TimerSnapshot.mode/durationMs`·`'finished'`·`TimerSettings.alarmVolume`), R-33~R-36 뽀모도 타이머 CR-045(§10.14, timer 타입·`get_timer`·`set_resting`·`timer://changed`·슬롯 `pomo_char`·`pomo_bubble` — contract v0.21 확정·반영됨), R-32 타자 입력 1 선택 강등 CR-043, R-31 펜 손 단순화 CR-042, R-30 헤어(뒷머리) 파츠 CR-037, R-29 펜 모드 = `pen_up` && `mouse.penMode` CR-033, R-27 필수 이미지 강등(`idle`·`rest` 선택)·R-28 위치 잠금 중 동작 CR-029(소스 변경 없음), R-26 펜 모드 마우스 클릭 = 키 누름 CR-027, R-25 펜 쥔 손 파츠 CR-025, R-24 키 꾹 누름 부르르 CR-023, R-23 젤리 바운스 CR-022, R-22 특수 키 이미지 CR-021, R-10 폐기 → R-14, R-08 폐기 → R-18, R-02 폐기 → R-19, R-14 폐기 → R-20·R-21, R-06 폐기(CR-019, 대체 없음 — 쾅 메커니즘 삭제)) |
 | 구성안 | ui-layout-designer 구성안 없음. **현행 소스 배치(as-built)를 수용**해 확정 표기한다 — 오버레이는 사용자 이미지만 겹치는 단일 캔버스라 선택할 레이아웃 패턴이 없다 |
-| 계약 | `doc/200_설계/bridge/contract.md` 현행 **v0.31** (doc-sync 2026-10-15 확인 — v0.28 표기 정정, v0.29 `DEFAULT_ASSET_SLOTS`에서 `hair` 제외, v0.30·v0.31 프리셋 command·타입은 설정 창 몫이다. 이 화면이 쓰는 command·event·타입의 모양은 바뀌지 않아 아래 v0.27 값을 그대로 인용한다. v0.27 = CR-058/059 0.4.0 기본 세트: `DEFAULT_TIMER_SETTINGS` textPos (268, 402)·rotation 7·alarmVolume 44 — §3.3. 인용만, 재정의 금지. 본문의 「v0.6」 등 옛 버전 표기는 그 행이 처음 인용된 시점의 버전이다) |
+| 계약 | `doc/200_설계/bridge/contract.md` 현행 **v1.1** (CR-069 — v1.1은 비파괴 의미 변경: `set_resting`이 카운트다운에도 `running ↔ restPaused`(두 모드 공통), `TimerStatus` `'restPaused'` 주석 「두 모드 공통」. 타입·시그니처·래퍼·event 불변이라 이 화면 소스의 계약 사용은 그대로다 — §7). 이전: **v0.31** (doc-sync 2026-10-15 확인 — v0.28 표기 정정, v0.29 `DEFAULT_ASSET_SLOTS`에서 `hair` 제외, v0.30·v0.31 프리셋 command·타입은 설정 창 몫이다. 이 화면이 쓰는 command·event·타입의 모양은 바뀌지 않아 아래 v0.27 값을 그대로 인용한다. v0.27 = CR-058/059 0.4.0 기본 세트: `DEFAULT_TIMER_SETTINGS` textPos (268, 402)·rotation 7·alarmVolume 44 — §3.3. 인용만, 재정의 금지. 본문의 「v0.6」 등 옛 버전 표기는 그 행이 처음 인용된 시점의 버전이다) |
 | 분할 문서 | §3 → `src/overlay/design/components.md` · §5 → `src/overlay/design/functions.md` · §9 → `src/overlay/design/a11y.md`(40KB 기준 분할, 절 번호 유지). RTM은 이 문서 §13 |
 | 상태기계 | `src/state/inputMachine.ts`(순수 TS, §5 전이의 단일 구현) · `src/state/mouseMapping.ts`(좌표 순수 함수) |
 | 레이아웃 확정 상태 | **확정(as-built 수용)** |
 | 라이브러리 | 새 설치 없음 — react ^18.3.1·@tauri-apps/api ^2.2.0(bridge 래퍼 안에서만)·vitest ^2.1.8·@testing-library/react ^16.1.0 모두 `package.json`에 있음(`requirements.md` §4) |
 | 모드 범위 | 마우스 파츠 모드는 **하나**다(CR-015, R-18 🔒 2026-09-23): 작은 손 그림을 `mouse.partPos`에 자연 크기로 놓고 어깨 축 회전. 손바닥 모드·팔 곡선(svg path)·모드 판별(`isMouseLayerMode`)은 **삭제**. 이 문서의 「레이어 이동 모드」 표현은 이 한 모드를 뜻한다 |
 | 미확정 계약 | **없음(doc-sync 2026-09-30)** — 아래 CR-015·017·019·021·023·025·045의 계약은 contract v0.8~v0.21에서 모두 확정되어 `src/bridge/types.ts`·`commands.ts`·`events.ts`에 반영됐고 이 화면 소스가 사용한다(§7 표의 각 행에 확정 판 표기). 아래 원문은 설계 당시 기록으로 남긴다. / (당시 기록) **CR-025**: `AssetSlot` 펜 슬롯 `pen_up`·`pen_down_{n}`·`pen_key_{special}` 7종(🔒 이름, 선택, 캔버스 레이어 아님)·`MouseSettings.penPos: Point \| null`(🔒 이름, 기본 `null`) 추가 — **bridge 인계 필요**(`requirements.md` §3). 계약 확정 전 R-25 구현 금지(§10.7). / **CR-023**: `KeyboardInputEvent.repeat: boolean`(🔒 이름·의미 — 자동 반복 누름이면 `true`, 그때 `pressed = true`·`heldCount` 불변·`special`은 처음 값) 추가 — **bridge 인계 필요(core·bridge 설계 중)**(`requirements.md` §3). `src/bridge/types.ts`에 필드가 들어온 뒤 R-24 구현(§10.3). / **CR-021**: `KeyboardInputEvent.special`(🔒 이름·값 7종 — `undo` = Ctrl+Z 포함 — + `null`, 뗌 이벤트도 분류값) 추가·`AssetSlot` `'key_space'`·`'key_z'`·`'key_question'`·`'key_exclamation'`·`'key_enter'`·`'key_backspace'`·`'key_undo'`(🔒, 캔버스 레이어·선택) 추가(contract v0.10에 없음) — **bridge 인계 필요**(`requirements.md` §3). 계약 확정 전 R-22 구현 금지(§10.6). / **CR-019**: `Settings.slam`(`SlamSettings`) 삭제·`AssetSlot` `'slam'` 삭제(contract v0.9에 아직 있음) — **bridge 인계 필요**(`requirements.md` §3). 계약 개정 전에도 이 화면은 `slam` 필드·슬롯을 읽지 않는다(§4·§5.2·§5.3). / **CR-017**: `MouseSettings.area: [Point, Point, Point, Point]`(🔒 이름, 기본값 = core `settings.md` 기본값) 추가·`MouseSettings.pad` 삭제, 새 command `get_monitors` / 래퍼 `getMonitors(): Promise<ScreenBounds[]>`(🔒 이름) — **bridge 인계 필요**(`requirements.md` §3). 계약 확정 전 R-20·R-21 구현 금지. / CR-015(bridge v0.8에서 해소 — CR 대장 기준): `MouseSettings.partPos`(🔒 이름·기본 (389, 492)) 추가·`armWidth`·`armColor` 삭제, 기준점 `anchor` = 그림 좌표 + `partPos` — **bridge 인계 필요**(`requirements.md` §3). 계약 확정 전 이 부분 구현 금지 |
-| 문서 상태 | **(doc-sync 2026-09-30) 설계 완료 R-01~R-40(폐기 R-02·R-06·R-08·R-10·R-14 제외) — 전부 소스 적용됨.** 근거: `src/overlay/index.tsx`·`components/*.tsx`·`src/state/*.ts`에 CR-008~CR-062 설계 요소(`getMonitors`·`jellyClass`·`.hairWrap`·`PomodoroLayer`·`setResting`·`special`·`repeat`·`pickPenKeyboardEntry`·`pickKeyboardEntry`의 `kb_up` 폴백·`preventContextMenu` 등)가 존재한다. 이 행 아래 「소스 미적용」·「계약 선행」 표기와 변경이력 각 행의 **소스 미적용** 표기는 그 행이 쓰인 시점의 기록이다. 동작 검증(「적용·미검증」 CR의 수동 확인)은 CR 대장이 기준이다. / (당시 기록) (CR-029 갱신) 설계 완료 R-27·R-28 — **오버레이 소스 변경 없음**(§10.9), 선행 조건 = core·bridge의 `positionLock` 창 속성 적용(contract v0.14). / (CR-027 갱신) 설계 완료 R-26(펜 모드 마우스 클릭 = 키 누름 — 새 계약 없음, 소스 미적용, 선행 조건 없음). / (CR-025 갱신) 설계 완료 R-25(펜 쥔 손 — 소스 미적용, bridge 펜 슬롯·`penPos` 계약 선행). / (CR-023 갱신) 설계 완료 R-24(키 꾹 누름 부르르 — 소스 미적용, bridge `repeat` 필드 선행). / (CR-022 갱신) 설계 완료 R-23(젤리 바운스, 새 계약 없음 — 소스 미적용, bridge 선행 조건 없음). / (CR-021 갱신) 설계 완료 R-22. 소스 미적용: R-22(bridge `special`·`key_*` 계약 선행). / (CR-017 갱신) 설계 완료 R-20·R-21(R-14 폐기). 소스 미적용: R-20·R-21(CR-017 — bridge `area`·`get_monitors` 계약 선행). / (CR-015 갱신) 설계 완료 R-01·R-03~R-07·R-09·R-11~R-19(R-02·R-08·R-10 폐기). 소스 미적용: R-18·R-19(CR-015 — bridge `partPos` 계약 선행). CR별 적용 여부의 최신 값은 RTM 비고·CR 대장이 기준이다. 아래는 CR-014 시점 기록: 설계 완료 R-01~R-09·R-11~R-17(R-10 폐기). 소스 미적용: R-11·R-14·R-15·R-16·R-17(CR-008·009·011·014 — R-17은 bridge `AssetSlot`에 `'background'` 추가(UI-B5)가 선행), R-03 창 자동 크기·조작 영역(CR-012, core·bridge·ui 모두 미적용) / core 구현 대기: R-13(CR-010, ui 변경 없음) / 계약 확정: `get_hand_anchor`·`assets://hand-anchor-changed`(contract v0.3 §3.6·§4·§5) |
+| 문서 상태 | **(CR-069, 2026-10-24) 설계 완료 R-41(쉬는중 단독 표시, §10.17) — 소스 적용 2026-10-24**(`index.tsx` `hasRest`·`restOnly`·`.canvas` className, `LayerStack.tsx` `Layer` `className` prop, `overlay.module.css` `.restOnly` 규칙 2개). R-37 개정은 표시 코드 변경 없음(공용 `timerClock`·`useElapsedText`가 카운트다운 `restPaused`를 이미 고정 표시). / **(doc-sync 2026-09-30) 설계 완료 R-01~R-40(폐기 R-02·R-06·R-08·R-10·R-14 제외) — 전부 소스 적용됨.** 근거: `src/overlay/index.tsx`·`components/*.tsx`·`src/state/*.ts`에 CR-008~CR-062 설계 요소(`getMonitors`·`jellyClass`·`.hairWrap`·`PomodoroLayer`·`setResting`·`special`·`repeat`·`pickPenKeyboardEntry`·`pickKeyboardEntry`의 `kb_up` 폴백·`preventContextMenu` 등)가 존재한다. 이 행 아래 「소스 미적용」·「계약 선행」 표기와 변경이력 각 행의 **소스 미적용** 표기는 그 행이 쓰인 시점의 기록이다. 동작 검증(「적용·미검증」 CR의 수동 확인)은 CR 대장이 기준이다. / (당시 기록) (CR-029 갱신) 설계 완료 R-27·R-28 — **오버레이 소스 변경 없음**(§10.9), 선행 조건 = core·bridge의 `positionLock` 창 속성 적용(contract v0.14). / (CR-027 갱신) 설계 완료 R-26(펜 모드 마우스 클릭 = 키 누름 — 새 계약 없음, 소스 미적용, 선행 조건 없음). / (CR-025 갱신) 설계 완료 R-25(펜 쥔 손 — 소스 미적용, bridge 펜 슬롯·`penPos` 계약 선행). / (CR-023 갱신) 설계 완료 R-24(키 꾹 누름 부르르 — 소스 미적용, bridge `repeat` 필드 선행). / (CR-022 갱신) 설계 완료 R-23(젤리 바운스, 새 계약 없음 — 소스 미적용, bridge 선행 조건 없음). / (CR-021 갱신) 설계 완료 R-22. 소스 미적용: R-22(bridge `special`·`key_*` 계약 선행). / (CR-017 갱신) 설계 완료 R-20·R-21(R-14 폐기). 소스 미적용: R-20·R-21(CR-017 — bridge `area`·`get_monitors` 계약 선행). / (CR-015 갱신) 설계 완료 R-01·R-03~R-07·R-09·R-11~R-19(R-02·R-08·R-10 폐기). 소스 미적용: R-18·R-19(CR-015 — bridge `partPos` 계약 선행). CR별 적용 여부의 최신 값은 RTM 비고·CR 대장이 기준이다. 아래는 CR-014 시점 기록: 설계 완료 R-01~R-09·R-11~R-17(R-10 폐기). 소스 미적용: R-11·R-14·R-15·R-16·R-17(CR-008·009·011·014 — R-17은 bridge `AssetSlot`에 `'background'` 추가(UI-B5)가 선행), R-03 창 자동 크기·조작 영역(CR-012, core·bridge·ui 모두 미적용) / core 구현 대기: R-13(CR-010, ui 변경 없음) / 계약 확정: `get_hand_anchor`·`assets://hand-anchor-changed`(contract v0.3 §3.6·§4·§5) |
 
 ## 변경이력
 
@@ -62,6 +62,7 @@
 | 2026-09-30 | CR-066 | **바운스 시작 규칙 변경(🔒 사용자 지정, 확정사항 §5 「바운스 시작 규칙」)** — 새 키 누름(자동 반복 아님)은 다른 키·마우스 버튼(펜 모드 클릭 포함)을 누른 채여도 **매번** `bounceSeq + 1`(젤리 재시작). CR-027의 `!isPressing(state)` 조건(ⓐ 「모든 키가 떼진 상태의 첫 누름」)을 대체, ⓑ(특수 키 새 누름)는 포함된다. **클릭 포함(🔒 같은 날 추가 결정)**: 펜 모드 클릭 누름도 키를 누른 채여도 새 클릭마다 `bounceSeq + 1`(`onMouseButton` ④의 `isPressing` 조건 대체), 뗌 불변, 펜 모드 아닌 클릭은 바운스 없음(불변). 자동 반복(`repeat && pressed`)·부르르(CR-023 `shiverSeq`) 규칙 불변. 델타 반영: `design/functions.md` §5.2 `reduce` 바운스 재생 카운터 행·`mouseButton` 펜 모드 클릭 누름 행 ④·예. 본문 §10.3·§10.6·§10.8 규칙표의 「재생 없음」 서술 개정은 ui-designer 몫(미반영) |
 | 2026-09-30 | CR-066 | **본문 동기화(ui-designer, 위 행의 미반영분 — 소스 `src/state/inputMachine.ts`가 정본, 동작 설계 변경 없음)**. 옛 문장은 취소선으로 보존. 헤더 요구 v3.3, §10.3 젤리 행 트리거 칸·재생 조건 문단(누름 유지 중 새 누름도 재생)·특수 키 문단(ⓑ는 새 누름 규칙에 포함)·부르르 규칙 2(반복 중 일반 키 새 누름 → 새 번호 젤리, 부르르 중 클릭 젤리는 부르르 끝날 때)·3(어떤 키든), §10.6 3·13행(재생)·팔 바운스 줄, §10.8 상태기계 요지(새 클릭마다 +1)·결정한 규칙 머리글·규칙표 4·7·8·9·11·12·13행, §10.12 바운스·부르르 줄·동작 표 7·10·11행, RTM R-22·R-23·R-24·R-26 비고. 분할 문서 `design/functions.md` §5.2 `isPressing` 쓰는 곳(`startsBounce` ⓐ·`onMouseButton` ④ 삭제)·`wrapMotion` 예(반복 중 일반 키 새 누름 → 젤리), §5.4 `.armWrap` 5 재생 조건. requirements v3.3(용어 주 CR-066 신설, 용어 주 CR-022 재생 시점 문장·S-10 취소선) |
 | 2026-10-15 | — (doc-sync, b5ff65b 이후) | **문서 동기화 — ui 소스 변경 없음, 동작 설계 변경 없음.** ① CR-066 반영 대조: §10.3·§10.6·§10.8·§10.12, `design/functions.md` §5.2(바운스 재생 카운터·`onMouseButton` ④·`isPressing` 쓰는 곳·`wrapMotion` 예), RTM R-22~R-24·R-26이 `src/state/inputMachine.ts`(`startsBounce` 없음, `onKey` `pressed`면 +1, `onMouseButton` 새 클릭 +1)와 일치 확인 — 보충 없음 ② 항상 위 재적용(R-01 🔒 2026-10-05, core WT-01~WT-09): §7에 「항상 위 재적용」 창 기능 행 추가(ui 변경 없음, core 담당), RTM R-01 비고 ③ RTM R-13 비고 정정(위치 저장·복원은 core 구현됨 — window.md §2.1·§2.1.1) ④ RTM R-23·R-24·R-25 예정 TC 칸을 `test/scenarios.md` 실제 번호(v2.6 통합 표 + v2.7 CR-066 절)로 교체, R-23 비고 「CR-066 TC 번호 미정」 정정. scenarios v2.8 보고 반영으로 RTM R-26에 TC-332·TC-334·TC-335·수동 TC-336, R-09에 TC-335(펜 모드 아닌 클릭은 바운스 불변)·수동 TC-336, R-01에 수동 TC-337(MC-47 항상 위 복구) 추가 ⑤ 헤더 요구 v3.4·계약 v0.31 ⑥ `design/functions.md` 모니터 목록 로드 행의 「미확정」 표기 정정. requirements v3.4(R-01 비고, §3 「미확정 계약」 15행 확정 판 표기) |
+| 2026-10-24 | CR-069 | **쉬는중 단독 표시(R-41 신설) + 카운트다운 쉬는중 자동 일시정지(R-37 개정)** — 사용자 지정 🔒 2026-10-24(확정사항 §4 「쉬는중 단독 표시」·§5 「쉬는중 화면」·§6 「쉬는중 정리」), 정본 `doc/200_설계/architecture/rest-display-03-packet-ui.md` §A.2~A.4, `rest-display-02-design.md` §2.3·§5a D-1~D-3(RD-04·RD-07~RD-09). ① 쉬는중 && `rest` 등록이면 `.canvas`에 `.restOnly` → CSS `visibility`로 `.hairWrap`·`.pomodoro`·`.jellyWrap` 숨김, `.jellyWrap` 안의 rest `<img>`(`.restLayer`)만 되살림. 언마운트·새 상태·새 효과·새 prop(Background/Hair/Pomodoro) 없음, 전환 애니메이션 없음 ② 카운트다운 `restPaused`(contract v1.1) — 글자는 남은 시간 고정(공용 훅 코드 변경 없음). 반영: 헤더(요구 v3.5·계약 v1.1·문서 상태), §2 bullet, §4 파생값 `hasRest`·`restOnly`, §6 P-3·P-8 ②④·P-9 ①, §7 `set_resting` 행, §10.1 표, §10.9.2 표·회귀 ⑩, §10.11, §10.14 14.5, §10.15 15.1 끝 문단·TC-312 수동 기대, **§10.17 신설**, §13 RTM R-41 행·R-35·R-37 비고. 분할 문서 `design/functions.md` §5.1·§5.3, `design/components.md` 렌더 조건 표. requirements v3.5. **소스 미적용** |
 
 ---
 
@@ -103,6 +104,7 @@
 - `[pen]` 펜 쥔 손(CR-025, R-25)은 `.jellyWrap`의 **마지막 자식**이라 모든 레이어 위다. `pen_up`이 등록돼 있을 때만 그린다(§10.7). 팔(`[z0]`)은 몸통 아래, 손은 몸통·키보드 위 — 레퍼런스처럼 팔은 몸 뒤로 들어가고 펜 쥔 손은 몸 앞(책상 위)에 보인다.
 - `[z1]` 몸통은 **선택**이다(R-19). 없으면 그 자리는 투명이며 정상 상태다(오류·안내 없음). 디폴트 상태 그림은 `[z3]` `kb_up`이다 — 캐릭터 전체를 `kb_up` 한 장에 그려도 된다.
 - `.canvas`는 매니페스트 `canvas`가 있을 때만 렌더한다. `canvas === null`이면 빈 투명 창.
+- (CR-069, R-41) `.canvas.restOnly` — 쉬는중이고 `rest`가 등록돼 있으면 `.canvas`에 `restOnly` 클래스가 붙어 `[bg]` 배경과 `[z2]` rest만 보인다(나머지는 DOM에 남은 채 `visibility: hidden`). 위 그림의 배치·DOM 순서는 바뀌지 않는다 — §10.17.
 - `.root` = **창 전체**(`src/overlay/overlay.module.css` `.root`: `width: 100vw; height: 100vh; overflow: hidden`, CR-012). 창 크기는 core window 모듈이 표시 크기로 맞춘다(`doc/200_설계/core/window.md` §2.2 `resize_overlay` — 시작·배율 변경·캔버스 변경 시, 좌상단 고정, 논리 px. 호출 시점은 contract v0.6 §5.2 창 리사이즈 부수 효과). ui는 창 크기를 받지 않고 같은 식(§10.5)으로 스스로 그린다.
 - 이전 450×350 고정·`overflow: visible`은 폐기한다. 고정 크기이면 배율 > 100%(예: 200% = 900×700 창)에서 450×350 밖 영역이 `.root`에 속하지 않아 드래그(R-12)·Ctrl+휠(R-04)이 먹지 않는다. `100vw×100vh`이면 창 어디를 잡아도 `.root`가 받는다(`.canvas`는 `pointer-events: none`, P-7).
 - `overflow: hidden`: 배율 변경 직후 core 리사이즈가 끝나기 전 1~2프레임 동안 콘텐츠가 창보다 크면 잘리고, 작으면 투명 여백이 보인다. **수용**(추가 동기화 없음, window.md §9.2 UI-3). 스크롤바는 생기지 않는다.
@@ -130,6 +132,8 @@
 | `fromEvent` (CR-050) | 스냅숏을 이벤트로 받았는지(첫 조회 `finished` 무음 판정, R-39) | `boolean \| undefined`(`TimerSnapshotState.fromEvent?`) | `false`(초기), 조회 결과 `false`, 이벤트 `true` | 공용 훅 `useTimerSnapshot` 내부 `useState`(스냅숏과 한 객체) — `design/functions.md` §5.7 ③ |
 | 깜빡임 여부 (CR-050, 파생) | `finished`면 글자 깜빡임 | `boolean` | `isTimerBlinking(snapshot)` — 초기 `false` | 파생(`TimerText` 렌더 지역값, 상태 아님) |
 | `prevStatusRef`·`stopRef`·`genRef`·`gainRef` (CR-050) | 알림음 전이 판정·정지 함수·비동기 결과 폐기 회차·최신 음량 | `TimerStatus \| null` · `(() => void) \| null` · `number` · `number` | `null` · `null` · `0` · `alarmGain(timer)` | 화면 로컬 훅 `useAlarmOnFinish`의 ref(React state 없음 — 리렌더를 일으키지 않는다, 호출자 `TimerText`) — `design/functions.md` §5.7 ⑤ |
+| `hasRest` (CR-069, 파생) | 쉬는중 그림 `rest`가 등록돼 있는지(R-41 판정의 한쪽, D-1) | `boolean` | `useMemo(() => findEntry(manifest, 'rest') !== undefined, [manifest])` — 초기 `EMPTY_MANIFEST`면 `false` | 파생(`OverlayApp`, `hasHair` 바로 아래 — 같은 모양) |
+| `restOnly` (CR-069, 파생) | 쉬는중 단독 표시 여부 — 참이면 `.canvas`에 `styles.restOnly` 추가 | `boolean` | `machine.layer === 'rest' && hasRest` — 초기 `layer = 'idle'`이라 `false` | 파생(`OverlayApp` 렌더 지역값, 상태·효과 없음 — §10.17) |
 
 (CR-045) 타이머 경과·상태의 소유자는 core `timer` 하나다. 오버레이는 경과를 저장하거나(localStorage 등) 쉬는 동안 스스로 멈추지 않는다 — 받은 스냅숏만 표시한다.
 
@@ -154,13 +158,13 @@
 |---|---|---|---|
 | P-1 | 초기 로드 | 마운트 시 `getSettings`·`getAssetManifest`·`getMonitors`(CR-017, 옛 `getScreenBounds` 대체 — 앱 시작 1회, 실행 중 재조회 없음)를 동시에 호출 → 각각 상태 교체 → 렌더. 손 기준점(CR-008)은 별도 기준점 효과(§5.1)가 계약 §3.6 순서대로 `onHandAnchorChanged` 구독 완료 **후** `getHandAnchor()`를 호출해 `anchor`를 채운다(앱 시작 계산값은 이벤트로 오지 않고 조회로만 받는다 — contract §4). 이 시점 `armAtRest = true`라 손 그림은 `partPos`에 회전 0°(CR-009, CR-015) | 각 호출 실패는 무시하고 초기값 유지: 설정 실패 = 기본값으로 동작, 매니페스트 실패 = 빈 창(`.canvas` 없음), 모니터 목록 실패 = `monitors = []` → 마우스 파츠 미표시, 기준점 실패 = `anchor = null` → 폴백(`mouse.hand` → 이동 영역 중심, CR-017). 오버레이는 문구를 표시하지 않는다(R-01) |
 | P-2 | 키 입력 | `input://keyboard` → `dispatch({type:'key', pressed, heldCount, special, repeat, ts})`(CR-021: `special` = 7종 분류값 또는 `null`, 보관·로그 없음. CR-023: `repeat` = 자동 반복 누름 여부) → `LayerStack` 재렌더(누름 프레임 또는 특수 키 그림(`pickKeyboardEntry`, §10.6). 상태 레이어는 `idle` — 동시 키 수와 무관, CR-019) + `.jellyWrap` 클래스 = `jellyClass(wrapMotion(machine))`(CR-022 — 첫 누름·특수 키 새 누름마다 `bounceSeq` +1로 `.jelly`/`.jellyAlt` 교대 재생, 배경 뺀 모든 레이어가 한 덩어리로 출렁임. CR-023 — 자동 반복 누름이 오면 `.shiver`(부르르)로 바뀌어 반복이 이어지는 동안 계속 떨고, 뗌·다른 키 새 누름이면 멈춤. 반복 누름은 프레임·특수 키 그림·`bounceSeq`를 바꾸지 않음, §10.3). `LayerStack`·`MouseArm`에는 바운스 값을 넘기지 않는다. `armAtRest`는 바뀌지 않음. (CR-025 → CR-042 개정, §10.12) 펜 모드면 키보드 `Layer`는 `pickPenKeyboardEntry`(특수 키 누름 중 `key_*`, 아니면 `kb_up`)이고 `PenHand` 그림이 `pickPenEntry`로 바뀐다(누름 중 `pen_down_0` → 없으면 `pen_up`, 모두 뗌 `pen_up`), 손 위치·각도는 그대로 | 없음 |
-| P-3 | 시간 경과 | 100ms tick → 유휴 판정(`rest`)(쾅 만료 규칙은 CR-019로 삭제) + 반복 끊김 방어(CR-023: `repeating`이고 마지막 반복 누름 뒤 `REPEAT_TIMEOUT_MS` 500ms 경과면 `repeating = false` → 부르르 정지, 같은 번호 젤리 재생 없음). `rest` 진입 순간 쉬는중 진입 효과가 `armAtRest = true`(CR-009) → 손 그림 회전 0° | 없음 |
+| P-3 | 시간 경과 | 100ms tick → 유휴 판정(`rest`)(쾅 만료 규칙은 CR-019로 삭제) + 반복 끊김 방어(CR-023: `repeating`이고 마지막 반복 누름 뒤 `REPEAT_TIMEOUT_MS` 500ms 경과면 `repeating = false` → 부르르 정지, 같은 번호 젤리 재생 없음). `rest` 진입 순간 쉬는중 진입 효과가 `armAtRest = true`(CR-009) → 손 그림 회전 0°. (CR-069, R-41) 같은 순간 `rest`가 등록돼 있으면 `.canvas.restOnly`(§10.17) → 배경 + `rest`만 보임. 입력으로 `idle` 복귀 → 같은 커밋에 `restOnly` 해제·전부 다시 보임 | 없음 |
 | P-4 | 마우스 | `input://mouse-move` → 좌표 갱신 + `armAtRest = false`(커서 추종 재개) / `input://mouse-button` → 버튼 상태(`armAtRest` 유지) → `MouseArm` 재렌더: 커서가 있는 모니터(`pickMonitor`) → 모니터 내 (u, v)(`cursorUv`) → 영역 쌍선형 보간 목표점(`bilerpQuad`) → 회전 + 늘어나기(`armTransform`, k 0.5~1.6)(CR-017, `design/functions.md` §5.4). (CR-025) 같은 렌더에서 `PenHand`가 같은 팔 변형(`armTransformFor`)으로 손을 팔 끝 붙은 점 P'에 옮기고 θt−θh만큼 기울인다(크기 불변, §10.7). (CR-027) 펜 모드가 아니면 마우스 버튼은 손 그림·젤리에 영향이 없다(클릭 파츠 교체만). 펜 모드면 `input://mouse-button` 누름 → `onMouseButton`이 `kbFrame` +1·(아무것도 안 눌렸으면) `bounceSeq` +1·`clickHeld` 추가 → `PenHand` = `pen_down_{kbFrame}`(`pickPenEntry`), `.jellyWrap` 젤리 재생(`wrapMotion`), 클릭 파츠도 기존대로 교체 / 뗌 → `clickHeld`에서 제거 → 키·버튼이 남지 않으면 `pen_up`·젤리 클래스 없음(§10.8) | `monitors`가 비었으면 마우스 파츠를 그리지 않음. 커서가 모든 모니터 밖(모니터 사이 빈 곳·구성 변경 후)이면 가장 가까운 모니터 기준으로 계속 계산 |
 | P-5 | Ctrl+휠 배율 | §5.1 `onWheel` → 로컬 즉시 반영 → `setSettings` → core가 저장·창 리사이즈(`resize_overlay`, 좌상단 고정, window.md §2.2) → `settings://changed`로 같은 값 재수신. **`set_settings`는 창을 옮기지 않는다**(CR-013, window.md §2.1.1, contract v0.6 §5.3 위치 불간섭): 사본의 `overlay.x/y`가 드래그 전 값으로 낡아도 무해하며 반환값·`settings://changed`로 교정된다. 로컬 반영과 리사이즈 사이 1~2프레임은 `.root` `overflow: hidden`으로 잘리거나 투명 여백이 보일 수 있다 — 수용(CR-012, §2). 휠 이벤트는 `.root`(= 창 전체)가 받으므로 배율 > 100%에서도 창 어디서나 동작. **위치 잠금 중(R-28)에는 휠이 창에 오지 않아 이 흐름이 시작되지 않는다** — 코드 분기 없음, 잠금 중 배율은 설정 창 슬라이더 → P-6(§10.9.1 L-3·L-6) | `setSettings` 실패 시 로컬 배율만 바뀐 채 유지(저장 안 됨), 문구 없음. 다음 `settings://changed` 수신 시 저장된 값으로 덮임 |
 | P-6 | 설정·이미지 변경 | `settings://changed` → `settings` 교체(config 재계산. 설정 창에서 옮긴 `mouse.partPos`도 이 경로로 와서 손 그림 자리가 바뀐다 — CR-015. 설정 창에서 지정한 `mouse.area`도 이 경로로 와서 다음 렌더부터 새 영역으로 목표점을 계산한다 — CR-017. 설정 창에서 옮긴 `mouse.penPos`도 이 경로로 와서 펜 쥔 손 자리가 바뀐다 — CR-025) / `assets://changed` → `manifest` 교체(프레임 수·손 그림 자연 크기 재계산. 배경 등록·교체·삭제도 이 이벤트로 오며, `BackgroundLayer`는 이때만 다시 그린다 — CR-014, R-17. 펜 슬롯 등록·삭제도 이 이벤트로 와서 펜 모드 켜짐·꺼짐(`isPenMode`)과 `kbFrames`가 다시 계산된다 — CR-025) / `assets://hand-anchor-changed` → `anchor` 교체(CR-008. contract §4·§5·§5.1: `import_asset`·`remove_asset`의 슬롯이 `mouse_base`일 때, `set_settings`에서 `mouse.shoulder`가 바뀌었거나 `mouse`가 켜짐·꺼짐일 때 재계산해 이전 캐시와 값이 다를 때만 보냄. CR-015 이후 `mouse.partPos` 변경도 재계산 조건이다 — contract v0.8 확정. 같은 command 안에서 주 이벤트 `assets://changed`/`settings://changed`가 먼저 오고 이 이벤트가 뒤에 온다) | 없음. `anchor`가 `null`로 오면 폴백 |
 | P-7 | 드래그 이동·위치 저장 | `.root`의 `data-tauri-drag-region`으로 Tauri가 창 이동. `.canvas`는 `pointer-events: none`이라 이미지 위를 잡아도 `.root`가 받는다. **위치 저장·복원은 core window 담당**(CR-010): 이동이 500ms 멎으면 core가 `overlay.x/y`를 저장하고 `settings://changed`를 보낼 수 있다 → P-6대로 `settings` 교체(화면 변화 없음). 시작 시 위치 복원도 core. `set_settings`(P-5 Ctrl+휠 등)는 창 위치를 적용하지 않으므로 드래그한 자리가 유지된다(CR-013). ui 코드 변경 없음. **위치 잠금 중(R-28)에는 core가 창을 클릭 통과로 바꿔 마우스 누름이 창에 오지 않으므로 끌기가 시작되지 않는다** — `data-tauri-drag-region`은 그대로 두며 잠금 해제 즉시 다시 동작(§10.9.1 L-2) | 저장 실패는 core 로그만(ui 표시 없음) |
-| P-8 | 타이머 (CR-045) | ① 시작: `TimerText`가 마운트되면(글자 조건 참일 때만, §10.14) `useTimerSnapshot`이 `onTimerChanged` 구독 완료 **후** `fetchWithRetry(getTimer, …)` — 앱 시작 직후 값은 `stopped`·0 → `'00:00:00'`(R-36) ② 표시: `running`이면 `useElapsedText`가 250ms마다 `elapsedMs + (now − receivedAt)`을 계산해 글자가 바뀔 때만(= 초가 바뀔 때) 다시 그린다. `paused`·`restPaused`·`stopped`는 interval 없이 받은 `elapsedMs` 그대로 ③ 변경: 설정 창 조작(시작·일시정지·멈춤·on/off)·쉬는중 전이로 core 상태가 바뀌면 `timer://changed` → 스냅숏 교체·`receivedAt = nowMs()` → 글자 즉시 갱신 ④ 쉬는중 보고: `OverlayApp`이 `machine.layer`가 바뀔 때마다(마운트 포함) `setResting(machine.layer === 'rest')` — core가 `running → restPaused`(쉬는중 진입)·`restPaused → running`(입력으로 `idle` 복귀)을 판정해 ③으로 돌아온다. 사용자 일시정지(`paused`)는 core가 재개하지 않는다(R-35) ⑤ 설정 변경: `settings://changed`의 `timer`(위치·회전·크기·색·on/off)는 P-6 경로로 `settings` 교체 → `PomodoroLayer` 다시 그림(글자 조건 재판정·스타일 교체). 매니페스트의 `pomo_char`·`pomo_bubble` 등록·비우기도 P-6 `assets://changed`로 반영 | 구독 실패 → 조회만 1회 흐름(이후 변경 못 받음). `getTimer` 끝내 실패(재시도 3회) → 초기값 `stopped`·0 유지(`'00:00:00'`). `setResting` 실패 → 무시(`.catch(() => undefined)`, 재시도 없음 — 다음 전이 때 다시 보냄). 모두 문구 없음(R-01) |
-| P-9 | 타이머 모드 (CR-050) | ① 표시: 스냅숏 `mode === 'countdown'`이면 `useElapsedText` → `timerText` = 남은 시간 올림(`stopped`(D) = `00:25:00`, `running` = 초마다 줄어듦 — 쉬는중에도 core가 멈추지 않으므로 계속 줄어듦, `paused` = 멈춘 값) ② 0 도달: core가 `timer://changed`로 `finished`(`elapsedMs = durationMs`) → 글자 `00:00:00` + `.blink`(1s CSS, interval 없음) ③ 알림음: 같은 이벤트로 `useAlarmOnFinish`가 `prev ≠ finished`·`fromEvent`를 확인 → `getAlarmSound()` → `v = gainRef.current`(재생 **시작 시점**의 최신 `alarmGain(timer)`, 기본 0.44 = 44% — CR-058) → `url` 있으면 `stopRef.current = playSound(url, v, playDefault)`, 없거나 조회 실패면 `stopRef.current = playSound(defaultAlarmUrl(), v)` 1회. 실패 시 `playDefault`(`design/functions.md` §5.7 ⑤) ④ 끝: 10초 뒤 core가 `stopped`(D)를 보냄(또는 사용자 멈춤·시작·끄기 → `stopped`·`running`) → `.blink` 제거·`halt()`로 소리 정지 → 글자 `00:25:00`(또는 흐름) ⑤ 앱 시작·새로고침: 첫 `getTimer`가 `finished`면 깜빡임만 보이고 소리는 없음 | `getAlarmSound` 실패 → 기본음. 등록 파일 `new Audio`·`play()` 동기 예외·`play()` 거부·`error` → `onFail`이 **항상 비동기(`queueMicrotask`)**로 불리므로 `stopRef.current = playSound(...)` 대입이 먼저 끝나고, 그 뒤 `playDefault`가 기본음 1회 재시도하며 `stopRef.current`를 기본음 정지 함수로 바꾼다(→ `finished`를 떠나면 `halt()`가 기본음을 pause) → 그것도 실패하면 무시. 정지 뒤에는 `onFail`을 부르지 않는다. `finished`를 떠난 뒤 늦게 온 조회 결과는 회차 번호(`genRef`)로 버림. 자동 재생 차단(`NotAllowedError`)도 같은 경로(무음) — 차단 여부는 수동 확인(§10.15 15.6). 모두 문구 없음(R-01) |
+| P-8 | 타이머 (CR-045) | ① 시작: `TimerText`가 마운트되면(글자 조건 참일 때만, §10.14) `useTimerSnapshot`이 `onTimerChanged` 구독 완료 **후** `fetchWithRetry(getTimer, …)` — 앱 시작 직후 값은 `stopped`·0 → `'00:00:00'`(R-36) ② 표시: `running`이면 `useElapsedText`가 250ms마다 `elapsedMs + (now − receivedAt)`을 계산해 글자가 바뀔 때만(= 초가 바뀔 때) 다시 그린다. `paused`·`restPaused`(CR-069 — 두 모드)·`stopped`는 interval 없이 받은 `elapsedMs` 그대로 ③ 변경: 설정 창 조작(시작·일시정지·멈춤·on/off)·쉬는중 전이로 core 상태가 바뀌면 `timer://changed` → 스냅숏 교체·`receivedAt = nowMs()` → 글자 즉시 갱신 ④ 쉬는중 보고: `OverlayApp`이 `machine.layer`가 바뀔 때마다(마운트 포함) `setResting(machine.layer === 'rest')` — core가 `running → restPaused`(쉬는중 진입)·`restPaused → running`(입력으로 `idle` 복귀)을 판정해(CR-069, contract v1.1 — 두 모드 공통) ③으로 돌아온다. 사용자 일시정지(`paused`)는 core가 재개하지 않는다(R-35) ⑤ 설정 변경: `settings://changed`의 `timer`(위치·회전·크기·색·on/off)는 P-6 경로로 `settings` 교체 → `PomodoroLayer` 다시 그림(글자 조건 재판정·스타일 교체). 매니페스트의 `pomo_char`·`pomo_bubble` 등록·비우기도 P-6 `assets://changed`로 반영 | 구독 실패 → 조회만 1회 흐름(이후 변경 못 받음). `getTimer` 끝내 실패(재시도 3회) → 초기값 `stopped`·0 유지(`'00:00:00'`). `setResting` 실패 → 무시(`.catch(() => undefined)`, 재시도 없음 — 다음 전이 때 다시 보냄). 모두 문구 없음(R-01) |
+| P-9 | 타이머 모드 (CR-050) | ① 표시: 스냅숏 `mode === 'countdown'`이면 `useElapsedText` → `timerText` = 남은 시간 올림(`stopped`(D) = `00:25:00`, `running` = 초마다 줄어듦 — ~~쉬는중에도 core가 멈추지 않으므로 계속 줄어듦~~ (🔒 2026-10-24 대체, CR-069) 쉬는중이면 `restPaused` — 남은 시간 고정(contract v1.1), 복귀 뒤 `running`으로 이어서, `paused` = 멈춘 값) ② 0 도달: core가 `timer://changed`로 `finished`(`elapsedMs = durationMs`) → 글자 `00:00:00` + `.blink`(1s CSS, interval 없음) ③ 알림음: 같은 이벤트로 `useAlarmOnFinish`가 `prev ≠ finished`·`fromEvent`를 확인 → `getAlarmSound()` → `v = gainRef.current`(재생 **시작 시점**의 최신 `alarmGain(timer)`, 기본 0.44 = 44% — CR-058) → `url` 있으면 `stopRef.current = playSound(url, v, playDefault)`, 없거나 조회 실패면 `stopRef.current = playSound(defaultAlarmUrl(), v)` 1회. 실패 시 `playDefault`(`design/functions.md` §5.7 ⑤) ④ 끝: 10초 뒤 core가 `stopped`(D)를 보냄(또는 사용자 멈춤·시작·끄기 → `stopped`·`running`) → `.blink` 제거·`halt()`로 소리 정지 → 글자 `00:25:00`(또는 흐름) ⑤ 앱 시작·새로고침: 첫 `getTimer`가 `finished`면 깜빡임만 보이고 소리는 없음 | `getAlarmSound` 실패 → 기본음. 등록 파일 `new Audio`·`play()` 동기 예외·`play()` 거부·`error` → `onFail`이 **항상 비동기(`queueMicrotask`)**로 불리므로 `stopRef.current = playSound(...)` 대입이 먼저 끝나고, 그 뒤 `playDefault`가 기본음 1회 재시도하며 `stopRef.current`를 기본음 정지 함수로 바꾼다(→ `finished`를 떠나면 `halt()`가 기본음을 pause) → 그것도 실패하면 무시. 정지 뒤에는 `onFail`을 부르지 않는다. `finished`를 떠난 뒤 늦게 온 조회 결과는 회차 번호(`genRef`)로 버림. 자동 재생 차단(`NotAllowedError`)도 같은 경로(무음) — 차단 여부는 수동 확인(§10.15 15.6). 모두 문구 없음(R-01) |
 | P-10 | 오른쪽 클릭 (CR-062) | ① 비잠금·표시 중 오버레이 위 오른쪽 클릭 → WebView가 오른쪽 뗌 뒤 DOM `contextmenu`를 `.root`로 보냄 → `preventContextMenu`가 `preventDefault()` → WebView2 기본 메뉴 없음 ② 같은 클릭을 core 전역 훅이 누름·뗌 좌표로 받아 판정 → 조건이 맞으면 core가 트레이와 같은 네이티브 메뉴를 커서 위치에 1개 띄움(§10.16 — ui 관여 없음) ③ 같은 클릭의 `input://mouse-button`(오른쪽 누름·뗌)은 기존 P-4대로 클릭 파츠 `mouse_right` 교체(R-09)·펜 모드 클릭(R-26) ④ 위치 잠금 중에는 창이 클릭 통과라 ①이 일어나지 않고 ②③만 일어난다(§10.9.1 L-8) | 없음 — `preventContextMenu`는 예외를 던지지 않고, core 쪽 판정·팝업 실패는 ui에 알려지지 않는다(문구 없음, R-01) |
 
 파괴 조작: 없음(confirm 대상 없음). 오버레이 메뉴의 「종료」는 트레이와 같은 core 항목이며 confirm 불필요(ui-design-strategy §11 — 앱 종료).
@@ -193,7 +197,7 @@
 | command | `get_alarm_sound` — **확정**(contract v0.23 §3.10·§5, CR-048 → CR-050) | `getAlarmSound(): Promise<AlarmSound \| null>`(`src/bridge/commands.ts` 반영됨) | 인자 없음 → `AlarmSound = { format: 'wav' \| 'mp3' \| 'ogg'; bytes: number; url: string }` 또는 `null`(미등록). 부수 효과 없음, 에러 `sound.io` | `useAlarmOnFinish` `start()`(`finished` 진입 이벤트 때 1회, `design/functions.md` §5.7 ⑤) | 없음 — 실패·`null` = 내장 기본음(`defaultAlarmUrl()`) |
 | 타입 | `TimerStatus` + `'finished'`, `TimerSnapshot.mode?: TimerMode`·`durationMs?: number` — **확정**(contract v0.23 §3.9, 반영됨) | `getTimer`·`onTimerChanged`(기존 래퍼) | 없으면 `'stopwatch'`·0(`snapshotMode`) | `timerText`·`isTimerBlinking`·`useAlarmOnFinish` | — |
 | 타입 | `TimerSettings.alarmVolume?`(0~100, 없으면 44 — contract v0.27 §3.3, CR-058. v0.23~v0.26: 80)·`mode?`·`countdownSecs?` — **확정**(contract v0.23 §3.3 신설, 반영됨) | `getSettings`·`onSettingsChanged`(기존) | 오버레이는 `alarmVolume`만 읽는다(`alarmGain`). `mode`·`countdownSecs`는 표시에 쓰지 않는다(표시는 스냅숏 `mode`·`durationMs`) | `TimerText` → `alarmGain(timer)` | 없음 |
-| command | `set_resting` 의미 확장 — **확정**(contract v0.23: 카운트다운이면 core no-op) | `setResting`(기존) | 불변 | 쉬는중 보고 효과(불변) | 없음 |
+| command | `set_resting` 의미 확장 — **확정**(~~contract v0.23: 카운트다운이면 core no-op~~ (contract v1.1, CR-069) 두 모드 공통 — 카운트다운도 `running ↔ restPaused`, 래퍼·호출 불변) | `setResting`(기존) | 불변 | 쉬는중 보고 효과(불변) | 없음 |
 | 창 기능 | (계약 없음) | `data-tauri-drag-region` 속성 | — | `.root` | — |
 | 창 기능 (CR-062) | (계약 없음 — 오른쪽 클릭 메뉴는 core 전용(tray·hook), contract v0.27 유지) | 없음 — DOM `contextmenu` 기본 동작 취소(`preventContextMenu`)는 bridge와 무관 | — | `.root` `onContextMenu` | — (메뉴 판정·팝업 실패는 core 로그만, ui 표시 없음) |
 | 타입·창 속성 | `Settings.positionLock: boolean`(기본 `false`) — **확정**(contract v0.14 §3.3·§5.3 4단계, CR-029) | 없음(오버레이는 읽지 않음) | `Settings.positionLock` — `getSettings`·`onSettingsChanged`로 `settings`에 함께 들어오지만 어떤 function도 참조하지 않는다 | 없음 — 적용은 core window `set_ignore_cursor_events`(§10.9.1 L-1) | 없음(적용 실패는 `set_settings` 실패 → 설정 창 오류 줄) |
@@ -231,14 +235,14 @@ R-01 「배경 없음」과 R-17 배경의 관계(해석): R-01의 「배경 없
 | z | 레이어 | 슬롯 | 표시 조건 | 크기·좌표 |
 |---|---|---|---|---|
 | bg (맨 아래, CR-014) | 배경 | `background`(선택, contract v0.6 §3.1 — 캔버스 레이어) | 등록돼 있으면 항상(없으면 그리지 않음 = 투명). 입력·상태기계·모드와 무관, 바운스·교체·회전·커서 추종 없음(R-17) | 캔버스 전체 `left:0 top:0 100%` — 다른 캔버스 레이어와 같은 좌표·맞춤·배율(`.canvas` `scale` 공유) |
-| pomo (배경 위·`.jellyWrap` 아래, CR-045) | 뽀모도 인물 → 말풍선 → 시간 글자(R-33·R-34) | `pomo_char`·`pomo_bubble`(선택, contract v0.21 예정 — 캔버스 레이어) + 글자(React/CSS) | 그림: 등록돼 있으면 항상(타이머 on/off·입력·상태와 무관). 글자: `isTimerTextVisible(timer, manifest)` = `timer.enabled` 또는 두 그림 중 1장 이상 등록(U-1). 젤리·부르르·교체·커서 추종 없음 | 그림 = 캔버스 전체 `left:0 top:0 100%`(`.layer`). 글자 = `timerTextStyle(timer)` — 중심 `textPos`, `translate(-50%,-50%) rotate(rotation)`, `fontSize` 캔버스 px(`.canvas` `scale`을 같이 받음) |
-| hair (`.canvas` 맨 아래 `.hairWrap`, CR-037 → CR-051) | 헤어(뒷머리, R-30) | `hair`(선택, contract v0.17 — 캔버스 레이어, 1장) | 등록돼 있으면 항상(없으면 그리지 않음 = 투명, 안내 없음). 상태·키·클릭·펜 모드·위치 잠금과 무관하게 같은 그림(1장 고정). 교체·회전·커서 추종 없음. 젤리·부르르는 `.jellyWrap`에서 받음 | 캔버스 전체 `left:0 top:0 100%`(위치 조정 없음) |
-| 0 | 마우스 파츠(한 모드, CR-015·R-18) | `mouse_base`/`mouse_left`/`mouse_right` | `settings.mouse && monitors.length > 0`(CR-017. 선택 이미지가 없으면 그리지 않음, R-09) | 좌상단 `left/top = mouse.partPos`, 크기 = 선택 이미지 항목의 `width×height`(자연 크기, 캔버스 좌표 단위 — `.canvas` `scale`을 같이 받음), 어깨축 회전 + 팔 방향 늘어나기(§10.4, CR-017). 캔버스 전체 크기 그림 + `partPos = (0,0)`이면 이전 레이어 이동 모드와 같은 화면 |
-| 1 | 몸통(**선택**, R-19) | `body` | 등록돼 있으면 항상. 없으면 그리지 않음 = 투명(정상, 안내 없음) | 캔버스 전체 `left:0 top:0 100%` |
-| 2 | 일반 상태 | `machine.layer` → `idle`/`rest`(CR-019: `slam` 슬롯 삭제) | 해당 슬롯이 등록돼 있으면(없으면 그리지 않음 = 투명). 바운스 없음(교체만) | 캔버스 전체 |
-| 3 | 키보드 파츠(`kb_up` = 디폴트 상태, R-19) | `kb_up` / 특수 키 그림 `key_*`(선택, CR-021·R-22) / `kb_down[kbFrame]`(없으면 `kb_down[0]`) | `kbDown`에 따라. `kbDown`이고 가장 최근에 눌린(아직 눌려 있는) 특수 키의 슬롯이 등록돼 있으면 그 그림, 아니면 `kb_down` 프레임(`pickKeyboardEntry`, §10.6) | 캔버스 전체(특수 키 그림도 같은 요소·같은 좌표) |
+| pomo (배경 위·`.jellyWrap` 아래, CR-045) | 뽀모도 인물 → 말풍선 → 시간 글자(R-33·R-34) | `pomo_char`·`pomo_bubble`(선택, contract v0.21 예정 — 캔버스 레이어) + 글자(React/CSS) | 그림: 등록돼 있으면 항상(타이머 on/off·입력·상태와 무관). 글자: `isTimerTextVisible(timer, manifest)` = `timer.enabled` 또는 두 그림 중 1장 이상 등록(U-1). 젤리·부르르·교체·커서 추종 없음. 쉬는중 단독 표시 중 숨김(§10.17, CR-069 — `.restOnly .pomodoro`) | 그림 = 캔버스 전체 `left:0 top:0 100%`(`.layer`). 글자 = `timerTextStyle(timer)` — 중심 `textPos`, `translate(-50%,-50%) rotate(rotation)`, `fontSize` 캔버스 px(`.canvas` `scale`을 같이 받음) |
+| hair (`.canvas` 맨 아래 `.hairWrap`, CR-037 → CR-051) | 헤어(뒷머리, R-30) | `hair`(선택, contract v0.17 — 캔버스 레이어, 1장) | 등록돼 있으면 항상(없으면 그리지 않음 = 투명, 안내 없음). 상태·키·클릭·펜 모드·위치 잠금과 무관하게 같은 그림(1장 고정). 교체·회전·커서 추종 없음. 젤리·부르르는 `.jellyWrap`에서 받음. 쉬는중 단독 표시 중 숨김(§10.17, CR-069 — `.restOnly .hairWrap`) | 캔버스 전체 `left:0 top:0 100%`(위치 조정 없음) |
+| 0 | 마우스 파츠(한 모드, CR-015·R-18) | `mouse_base`/`mouse_left`/`mouse_right` | `settings.mouse && monitors.length > 0`(CR-017. 선택 이미지가 없으면 그리지 않음, R-09). 쉬는중 단독 표시 중 숨김(§10.17, CR-069 — `.restOnly .jellyWrap`) | 좌상단 `left/top = mouse.partPos`, 크기 = 선택 이미지 항목의 `width×height`(자연 크기, 캔버스 좌표 단위 — `.canvas` `scale`을 같이 받음), 어깨축 회전 + 팔 방향 늘어나기(§10.4, CR-017). 캔버스 전체 크기 그림 + `partPos = (0,0)`이면 이전 레이어 이동 모드와 같은 화면 |
+| 1 | 몸통(**선택**, R-19) | `body` | 등록돼 있으면 항상. 없으면 그리지 않음 = 투명(정상, 안내 없음). 쉬는중 단독 표시 중 숨김(§10.17, CR-069) | 캔버스 전체 `left:0 top:0 100%` |
+| 2 | 일반 상태 | `machine.layer` → `idle`/`rest`(CR-019: `slam` 슬롯 삭제) | 해당 슬롯이 등록돼 있으면(없으면 그리지 않음 = 투명). 바운스 없음(교체만). (CR-069) `machine.layer === 'rest'`일 때 `<img>`에 `.restLayer` 추가(`class="layer restLayer"`) — 쉬는중 단독 표시 중에도 이 레이어만 보임(§10.17), `idle`이면 `class="layer"` | 캔버스 전체 |
+| 3 | 키보드 파츠(`kb_up` = 디폴트 상태, R-19) | `kb_up` / 특수 키 그림 `key_*`(선택, CR-021·R-22) / `kb_down[kbFrame]`(없으면 `kb_down[0]`) | `kbDown`에 따라. `kbDown`이고 가장 최근에 눌린(아직 눌려 있는) 특수 키의 슬롯이 등록돼 있으면 그 그림, 아니면 `kb_down` 프레임(`pickKeyboardEntry`, §10.6). 쉬는중 단독 표시 중 숨김(§10.17, CR-069) | 캔버스 전체(특수 키 그림도 같은 요소·같은 좌표) |
 | ~~4~~ | ~~마우스 파츠(손바닥 모드)~~ | — | **삭제(CR-015)** | — |
-| pen (맨 위, CR-025) | 펜 쥔 손(R-25) — 옛 z4 손바닥 모드와 무관한 새 레이어 | `pen_up` / `pen_key_*`(선택) / `pen_down_{kbFrame}`(없으면 `pen_down_0`, 그것도 없으면 `pen_up`) | `settings.mouse !== null`이고 `pen_up`이 등록돼 있으면 항상(`pickPenEntry`, §10.7). 누름 판정 = `isPressing`(키 또는 펜 모드 클릭 버튼, CR-027 §10.8). 펜 모드면 z3은 `kb_up` 고정 | 좌상단 `left/top = resolvePenPos(mouse, pen_up 크기)`, 크기 = 선택 그림 자연 크기, `transform-origin` = `pen_up` 중심, `transform = translate(dx, dy) rotate(deg)`(스케일 없음, §10.7) |
+| pen (맨 위, CR-025) | 펜 쥔 손(R-25) — 옛 z4 손바닥 모드와 무관한 새 레이어 | `pen_up` / `pen_key_*`(선택) / `pen_down_{kbFrame}`(없으면 `pen_down_0`, 그것도 없으면 `pen_up`) | `settings.mouse !== null`이고 `pen_up`이 등록돼 있으면 항상(`pickPenEntry`, §10.7). 누름 판정 = `isPressing`(키 또는 펜 모드 클릭 버튼, CR-027 §10.8). 펜 모드면 z3은 `kb_up` 고정. 쉬는중 단독 표시 중 숨김(§10.17, CR-069) | 좌상단 `left/top = resolvePenPos(mouse, pen_up 크기)`, 크기 = 선택 그림 자연 크기, `transform-origin` = `pen_up` 중심, `transform = translate(dx, dy) rotate(deg)`(스케일 없음, §10.7) |
 
 z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 받는 `.hairWrap` 안에 있어(CR-051) 키 누름 젤리(R-23)와 키 꾹 누름 부르르(R-24, CR-023)(§10.3)를 **함께** 받는다(개별 레이어에는 애니메이션 없음). 위 표의 「바운스 없음(교체만)」(z2)은 레이어 자체에 따로 걸리는 애니메이션이 없다는 뜻이며, 래퍼의 젤리는 z1(몸통)·z2(상태)에도 걸린다. bg만 래퍼 밖이라 어떤 움직임도 없다(R-17).
 
@@ -441,6 +445,7 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 
 | 조건 | 상태 레이어 z2 | 키보드 레이어 z3 | 보이는 캐릭터 |
 |---|---|---|---|
+| (CR-069, R-41) `rest` 있음 · 쉬는중 | `rest`(`.restLayer`) | (숨김) | 배경 + `rest`만 — 뒷머리·뽀모도·팔·몸통·키보드·펜 손은 `visibility: hidden`(§10.17) |
 | `idle` 없음 · 대기 · 누름 없음 | 없음(투명) | `kb_up` | `kb_up` |
 | `rest` 없음 · 쉬는중 | 없음(투명) | `kb_up` | `kb_up`(팔은 쉬는 위치 — R-11·R-15 그대로) |
 | `idle`만 있음 · 쉬는중 | 없음(`rest` 미등록 — `idle` 그림이 남지 않음) | `kb_up` | `kb_up` |
@@ -450,7 +455,7 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 - 근거 소스(현행, 변경 없음): `LayerStack` 상태 레이어 = `findEntry(manifest, machine.layer)` → 미등록이면 `Layer`가 `null`(렌더 안 함). 키보드 레이어 = `isPenMode ? findEntry('kb_up') : pickKeyboardEntry`이고 `kbDown`이 `false`면 `kb_up`(`design/functions.md` §5.3).
 - 상태기계는 그림 유무를 모른다 — 대기 ↔ 쉬는중 전이(R-05)·`armAtRest`(R-15)는 그대로 일어난다.
 - 필수 그림(`kb_up`·`kb_down_0`·`mouse_base`)이 비어 있는 경우의 안내는 설정 창 몫이다. 오버레이는 없는 그림을 그리지 않을 뿐 오류·안내를 표시하지 않는다(R-01, R-09).
-- 회귀 TC(예정, ui-test-designer): ① `idle`·`rest` 없는 매니페스트에서 상태 레이어 `<img>` 없음 + `kb_up` `<img>` 보임 ② 같은 매니페스트로 `rest` 진입(tick 유휴 경과)해도 ① 그대로 ③ 누름 중 `kb_down` 표시·`kb_up` 없음(상태 레이어가 겹쳐 그려지지 않음) ④ `idle`만 있는 매니페스트에서 `rest` 진입 시 `idle` `<img>` 사라짐. R-28: vitest 대상 없음(창 속성은 core) — 수동 확인표 ⑤ 잠금 켬 → 오버레이 위 클릭이 뒤 창으로 감 ⑥ 끌기 안 됨 ⑦ Ctrl+휠 배율 불변 ⑧ 잠금 중에도 키·마우스 반응 ⑨ 해제 후 끌기·Ctrl+휠 다시 됨.
+- 회귀 TC(예정, ui-test-designer): ① `idle`·`rest` 없는 매니페스트에서 상태 레이어 `<img>` 없음 + `kb_up` `<img>` 보임 ② 같은 매니페스트로 `rest` 진입(tick 유휴 경과)해도 ① 그대로 ③ 누름 중 `kb_down` 표시·`kb_up` 없음(상태 레이어가 겹쳐 그려지지 않음) ④ `idle`만 있는 매니페스트에서 `rest` 진입 시 `idle` `<img>` 사라짐. (CR-069) ⑩ `rest` 있는 매니페스트에서 `rest` 진입 → `.canvas`에 `restOnly`, rest `<img>` `class="layer restLayer"`(§10.17 — 위 표 둘째·셋째 행은 `rest` 미등록이라 `restOnly` 없음 = D-1 근거, ①②④는 수정 없이 통과해야 한다). R-28: vitest 대상 없음(창 속성은 core) — 수동 확인표 ⑤ 잠금 켬 → 오버레이 위 클릭이 뒤 창으로 감 ⑥ 끌기 안 됨 ⑦ Ctrl+휠 배율 불변 ⑧ 잠금 중에도 키·마우스 반응 ⑨ 해제 후 끌기·Ctrl+휠 다시 됨.
 
 ### 10.10 펜 손 사용 토글 (CR-033, R-29)
 
@@ -517,7 +522,7 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 비유: 장발 캐릭터를 종이 인형으로 만들면 뒷머리는 몸 뒤에 따로 오려 붙인다. 그래야 팔을 앞으로 뻗을 때 팔이 머리카락 **앞**을 지나간다. `hair`는 그 뒷머리 한 장이고, 인형(젤리 판)에 같이 붙어 있어 인형이 출렁이면 함께 출렁인다.
 
 - **자리(CR-051 개정)**: `.canvas` **첫 자식** `.hairWrap` 안의 `HairLayer`(hair 등록 시에만 래퍼 렌더) — 겹침 아래→위 = 헤어 → `BackgroundLayer` → `PomodoroLayer` → `.jellyWrap`(`MouseArm` → `LayerStack` → `PenHand`). 투명 창이라 헤어 뒤에는 아무것도 없다. 아래는 CR-037 원문(헤어 자리 부분은 대체됨): `.jellyWrap`의 첫 자식 `HairLayer`(`design/components.md` §3 규칙 7). 겹침(아래→위, 확정사항 §6 🔒) = `BackgroundLayer`(래퍼 밖) → `HairLayer` → `MouseArm`(팔·클릭 파츠) → `LayerStack`(몸통·상태·키보드 = 본체) → `PenHand`(펜 쥔 손). 확정사항의 「팔·손 → 본체」 중 펜 쥔 손은 R-25(§10.7)로 이미 본체 위에 있으므로 바꾸지 않는다 — 헤어는 팔과 펜 쥔 손 **모두**의 아래라 「팔·손이 헤어에 가려지지 않는다」는 목적을 그대로 만족한다.
-- **그림**: `findEntry(manifest, 'hair')` 한 장. 상태(`idle`/`rest`)·키 누름·특수 키·클릭·펜 모드(R-29)·위치 잠금(R-28)과 무관하게 같은 그림이다. 여러 장·순환 없음.
+- **그림**: `findEntry(manifest, 'hair')` 한 장. 상태(`idle`/`rest`)·키 누름·특수 키·클릭·펜 모드(R-29)·위치 잠금(R-28)과 무관하게 같은 그림이다(그림은 그대로, 쉬는중 단독 표시 때 부모 `.hairWrap`이 가려진다 — §10.17, CR-069). 여러 장·순환 없음.
 - **좌표·배율**: 캔버스 레이어 — `styles.layer`(캔버스 전체 `left:0 top:0 100%`). 위치 조정·좌표 계산 없음. `.canvas` `scale`을 공유해 배경·키보드와 같은 맞춤·배율(§10.5).
 - **모션**: 자체 애니메이션·인라인 `transform` 없음. (CR-051) 부모 `.hairWrap`이 `jellyClass(motion, styles.hairWrap)`로 `.jellyWrap`과 같은 `motion` 값의 클래스를 같은 커밋에 받는다 — 기하·`transform-origin: 50% 100%`가 같아 본체와 같은 모양으로 출렁인다. 젤리 도중 hair가 새로 등록되면 그 1회만 위상이 어긋난다(허용). 이하 CR-037 원문: 젤리(R-23)·부르르(R-24)는 부모 `.jellyWrap`에서 본체와 같은 순간·같은 모양으로 받는다(§10.3). 팔 회전·늘어나기의 영향은 받지 않는다(팔은 형제 요소).
 - **없을 때**: `hair` 항목이 없으면 `HairLayer`가 `null` — 투명, 정상, 오류·안내 없음(선택 슬롯, 내장 기본 그림 없음). 필수 판정은 core·settings 소관이며 `hair`는 필수가 아니다.
@@ -581,7 +586,7 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 | 4 | false | 없음 | 있음 | — | 있음 | 있음(멈춘 값) | `.pomodoro` + 말풍선 + 글자 |
 | 5 | true | 있음 | 있음 | 있음 | 있음 | 있음 | 셋 다(순서 인물 → 말풍선 → 글자) |
 
-타이머 상태(흐름·일시정지·멈춤)·입력·쉬는중·펜 모드·위치 잠금은 표시 여부에 영향이 없다.
+타이머 상태(흐름·일시정지·멈춤)·입력·쉬는중·펜 모드·위치 잠금은 표시 여부에 영향이 없다(CR-069 — 쉬는중 단독 표시 동안은 §10.17로 가려짐, DOM·구독 유지).
 
 **14.3 컴포넌트.**
 
@@ -643,7 +648,7 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 
 - 깜빡임 = `TimerText.module.css` `.blink`: keyframe `timerBlink`, `1s`, `infinite`, 0%~49.9% `opacity: 1` / 50%~100% `opacity: 0`(계단식 — 켜짐 0.5초·꺼짐 0.5초). `transform`을 쓰지 않아 `timerTextStyle`의 `translate·rotate`와 충돌하지 않는다. 트리거 = 클래스 부착(스냅숏 `finished`), 해제 = 클래스 제거. **JS 타이머 없음**, 10초 판정은 core(`finished` → `stopped` 이벤트).
 - 깜빡임 CSS 값은 현재대로 `animation: timerBlink 1s infinite`, keyframes `0%, 49.9% { opacity: 1 }` / `50%, 100% { opacity: 0 }`(패킷 §4 원문)로 유지한다 — 설정 창 미리보기 깜빡임(A-5)도 이 값으로 맞춘다(CSS 위치는 settings 설계 소관, 값은 이 줄이 기준).
-- `restPaused`는 카운트다운에 없다(core). 오버레이의 쉬는중 보고(`setResting`, §10.14 14.4)는 그대로 보내고 core가 무시한다.
+- ~~`restPaused`는 카운트다운에 없다(core). 오버레이의 쉬는중 보고(`setResting`, §10.14 14.4)는 그대로 보내고 core가 무시한다.~~ (🔒 2026-10-24 대체, CR-069 · contract v1.1) 카운트다운도 `restPaused` — 쉬는중 보고(`setResting`, §10.14 14.4)는 그대로 보내고 core가 `running → restPaused`·`restPaused → running`을 판정한다. 표시는 `timerText`가 남은 시간 고정(`restPaused`는 interval 없음, 예: `{elapsedMs 3_000, durationMs 1_500_000}` → 늘 `'00:24:57'`, `elapsedMs 2_500` → `'00:24:58'` 올림 — RD-04). 공용 `timerClock`·`useElapsedText` 코드 변경 없음(테스트만 추가). 끝남(`finished`) 중 쉬는중은 core 변화 없음 — 글자는 R-41로 가려지지만 알림음은 계속(D-3, §10.17).
 
 **15.2 알림음 규칙(R-39).** `useAlarmOnFinish`(§5.7 ⑤) 효과 2의 판정표:
 
@@ -709,7 +714,7 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 | mock 보강 | `OverlayApp.*.test.tsx`·`pomodoro.test.tsx` 등 `bridge/commands` mock | `getAlarmSound: () => Promise.resolve(null)` 추가(기존 스펙의 mock 관례 — 미등록 = 기본음 경로. BRG-006 선례 — `finished`를 흘리지 않는 스펙도 mock 모양을 맞춘다). `Audio`를 쓰는 스펙은 `vi.stubGlobal('Audio', …)`. (CR-058) 기본음이 정적 자산 URL이라 `URL.createObjectURL` stub은 더 필요 없다 | — |
 | 수동 TC-310 | `test/manual-checklist.md` | **자동 재생 스파이크(15.6)**: 트레이 「시작」만으로 00:00:05 → 0 도달 시 오버레이 기본음 울림(어느 창도 클릭 안 함), 결과(울림/`NotAllowedError`) 기록 | R-39 |
 | 수동 TC-311 | 같은 곳 | 트레이로 오버레이를 숨긴 상태에서 0 도달 → 소리 울림 여부(02-design R-5, verify 실측) | R-39 |
-| 수동 TC-312 | 같은 곳 | 1분 넘는 mp3 등록 → 0 도달 → 10초 깜빡임 뒤 소리도 멈춤 → 글자 `00:25:00` 복귀 / 쉬는중(5분 무입력) 동안 카운트다운 계속 줄어듦 / 스크린샷 1장(끝남 깜빡임) | R-37, R-38, R-39 |
+| 수동 TC-312 | 같은 곳 | 1분 넘는 mp3 등록 → 0 도달 → 10초 깜빡임 뒤 소리도 멈춤 → 글자 `00:25:00` 복귀 / ~~쉬는중(5분 무입력) 동안 카운트다운 계속 줄어듦~~ (🔒 2026-10-24 대체, CR-069) 쉬는중 동안 멈춤, 복귀 뒤 이어서(쉬는중 진입 때 값에서 이어 내려감 — 패킷 M-R3) / 스크린샷 1장(끝남 깜빡임) | R-37, R-38, R-39 |
 | TC-313 | `test/OverlayApp.timerMode.test.tsx` | 음량 배선(`TimerSettings.alarmVolume` → `alarmGain` → `Audio.volume`, `design/functions.md` §5.7 ⑤ 효과 1·⑥): 설정 `alarmVolume` 30 → `finished` 이벤트 → `Audio.volume` 0.3 / 마운트 중 `settings://changed`로 50 → 다음 회차 `finished`에 `Audio.volume` 0.5(앞 회차 0.3 불변), `getTimer`·`onTimerChanged` 재조회·재구독 없음 | R-39 |
 
 - TC-FLOW: requirements §2 S-19·S-20 → 신규 TC-FLOW 각 1개(번호는 ui-test-designer가 기존 마지막 다음으로), 기대 = TC-307·TC-308 흐름.
@@ -761,6 +766,111 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 | vitest TC-315 | `OverlayApp` 렌더 후 `.root`에 `fireEvent.contextMenu` → 반환값 `false`(= `defaultPrevented`). 같은 스펙에서 bridge mock 호출 수 증가 없음(`setSettings`·기타 command 0회 추가) | R-40 |
 | vitest(회귀) | 오른쪽 `mouseButton` 입력 처리(클릭 파츠 `mouse_right`, 펜 모드 클릭)·Ctrl+휠 기존 TC 불변 | R-09, R-26, R-04 |
 | 수동 TC-316~TC-330 · TC-FLOW-21 | 횡단 설계 §7 **MC-31~MC-45**를 `test/manual-checklist.md`로 옮김(TC-316 = MC-31 … TC-330 = MC-45, 흐름 TC-FLOW-21 = S-21) — 핵심: MC-31 비잠금 메뉴 1개·브라우저 메뉴 없음, MC-34 잠금 중 메뉴·아래 창 전달, MC-35 숨김, MC-36 누름/뗌 경계, MC-37 중복 없음, MC-40·MC-41·MC-44 전체 화면 생략, MC-42·MC-43 창 모드·바탕 화면 표시, MC-39 포커스 기록 | R-40, R-28 |
+
+### 10.17 쉬는중 단독 표시 (CR-069, R-41)
+
+무대 조명을 끄는 것과 같다. 배우(레이어)는 무대에서 내려가지 않고 그대로 서 있고, 조명만 배경과 쉬는중 그림에 남긴다. 다시 켜면 모두 그 자리에서 이어서 움직인다.
+
+정본: `doc/200_설계/architecture/rest-display-03-packet-ui.md` §A.2·A.3, `rest-display-02-design.md` §2.3·§5a D-1~D-3. 요구 R-41(🔒 2026-10-24), RD-07~RD-09.
+
+#### 17.1 표시표 (02-design §2.3)
+
+| 조건 | 배경 | 뒷머리 | 뽀모도(인물·말풍선·글자) | 팔 | 몸통 | 상태 z2 | 키보드 z3 | 펜 손 |
+|---|---|---|---|---|---|---|---|---|
+| 대기(`idle`) | 보임 | 보임 | 보임 | 보임 | 보임 | `idle`(있으면) | 규칙대로 | 보임 |
+| 쉬는중 · `rest` **있음** | **보임** | 숨김 | 숨김 | 숨김 | 숨김 | **`rest`** | 숨김 | 숨김 |
+| 쉬는중 · `rest` **없음**(D-1) | 보임 | 보임 | 보임 | 보임(쉬는 자세) | 보임 | 없음(투명) | `kb_up` | 보임 |
+
+- 「숨김」 = DOM에 남은 채 `visibility: hidden`. 등록 안 된 그림은 원래대로 그리지 않는다(배경이 없으면 `rest`만 보인다). 전환은 즉시(페이드·전환 애니메이션 없음).
+
+#### 17.2 코드 명세 (이름·클래스 그대로)
+
+`src/overlay/index.tsx` — `hasHair` 바로 아래, 렌더의 `.canvas`:
+
+```tsx
+const hasRest = useMemo(() => findEntry(manifest, 'rest') !== undefined, [manifest])
+/** 쉬는중 단독 표시(R-41, 🔒 2026-10-24) — rest 그림이 있을 때만(D-1). 배경과 rest만 보이고 나머지는
+ *  CSS visibility로 가린다(언마운트 없음 — 구독·알림음·이미지 디코드 유지, design §10.17) */
+const restOnly = machine.layer === 'rest' && hasRest
+// …
+<div
+  className={restOnly ? `${styles.canvas} ${styles.restOnly}` : styles.canvas}
+  style={{ width: canvas.width, height: canvas.height, transform: `scale(${scale})` }}
+>
+```
+
+`src/overlay/components/LayerStack.tsx`:
+
+```tsx
+const Layer = ({ entry, className }: { entry?: AssetEntry; className?: string }) => {
+  if (!entry) return null
+  return (
+    <img
+      className={className ? `${styles.layer} ${className}` : styles.layer}
+      src={entry.url}
+      alt=""
+      draggable={false}
+    />
+  )
+}
+// LayerStack 안 — 상태 레이어만. body·kb는 className 없음(그대로 'layer')
+<Layer entry={state} className={machine.layer === 'rest' ? styles.restLayer : undefined} />
+```
+
+`src/overlay/overlay.module.css`(파일 끝, `.hairWrap` 블록 뒤):
+
+```css
+/* 쉬는중 단독 표시(R-41, 🔒 2026-10-24) — .canvas에 .restOnly가 붙으면 배경과 쉬는중 그림만 보인다.
+   visibility는 자식이 다시 visible로 덮을 수 있는 유일한 숨김 속성이라, .jellyWrap 안의 rest 그림(.restLayer)만
+   되살린다. 언마운트하지 않으므로 이미지 재디코드·타이머 구독 해제·알림음 정지가 없다. 전환 애니메이션 없음(즉시). */
+.restOnly .hairWrap,
+.restOnly .pomodoro,
+.restOnly .jellyWrap {
+  visibility: hidden;
+}
+
+.restOnly .restLayer {
+  visibility: visible;
+}
+```
+
+- `HairLayer.tsx`·`PomodoroLayer.tsx`에는 머리 주석 한 줄만 더한다: 「쉬는중 단독 표시 때는 부모가 CSS로 가린다 — R-41」. 코드 변경 없음.
+- 변경 없음(확인만): `src/state/inputMachine.ts`, `BackgroundLayer.tsx`, `MouseArm.tsx`, `PenHand.tsx`, `TimerText.tsx`, `src/components/utils/timerClock.ts`, `src/components/hooks/useElapsedText.ts`·`useTimerSnapshot.ts`, 쉬는중 보고 효과·`armAtRest` 효과.
+- `index.tsx`가 400줄 한계에 걸리면(golden-principles) 이 변경을 이유로 분리하지 않고 ui-implementer가 보고한다 — 추가는 파생값 2개·className 1곳뿐이다.
+
+#### 17.3 동작 (패킷 A.3)
+
+| 조건 | 화면 | DOM |
+|---|---|---|
+| `layer === 'rest'` && `rest` 등록 | 배경 + rest만 | `.canvas.restOnly`, 모든 레이어 요소 그대로 존재, rest `<img>` `class="layer restLayer"` |
+| `layer === 'rest'` && `rest` 미등록(D-1) | 현행 그대로(§10.9.2 둘째·셋째 행 — `kb_up`·팔 쉬는 자세 등 보임) | `.canvas`에 `restOnly` 없음 |
+| `layer === 'idle'` | 현행 그대로 | `restOnly` 없음, 상태 `<img>` `class="layer"` |
+| 쉬는중 중 `assets://changed`로 rest 삭제·등록 | 다음 렌더부터 위 규칙(`hasRest` 재계산) | — |
+| 깨움(키·마우스 이동·클릭) | 같은 커밋에 전부 다시 보임. 키면 그 누름의 젤리(CR-066), 팔은 다음 마우스 이동까지 쉬는 자세(`armAtRest`), 마우스 이동이면 곧바로 커서 추종(D-2 — 기존 규칙, 코드 변경 없음) | `restOnly` 제거 |
+| 타이머 | 쉬는중 진입 → `setResting(true)`(불변) → core가 두 모드 모두 `restPaused` → 글자는 가려져 있고(interval 없음), 복귀 → `running`으로 이어서 흐름. 끝남(`finished`) 중 쉬는중이면 core 변화 없음 → 글자는 가려지지만 **알림음은 계속**(`TimerText` 언마운트 없음, D-3) | — |
+| 문구·안내 | 없음(R-01) | — |
+
+#### 17.4 숨김 방식 결정
+
+| 결정 | 채택 | 버린 대안과 이유 |
+|---|---|---|
+| 숨김 수단 | CSS `visibility: hidden`(부모 3개) + `visibility: visible`(rest 한 장) | `display: none`·`opacity` — 부모에 걸면 자식이 되살릴 수 없어 `.jellyWrap` 안의 rest까지 사라진다. 조건부 렌더(`null`)·`key` 교체 — 언마운트로 `TimerText` 구독 해제·알림음 정지(D-3 위반)·이미지 재디코드(복귀 깜빡임) |
+| 판정 위치 | `OverlayApp` 파생값 `restOnly` 1개 → `.canvas` 클래스 1개 | 레이어마다 `resting` prop — `BackgroundLayer`·`HairLayer`·`PomodoroLayer` memo 경계가 깨진다(§10.14 14.5 「`machine` 비의존」). `OverlayApp`은 `machine.layer`가 바뀔 때 이미 다시 그리므로 새 상태·효과·리렌더 0 |
+| rest 마커 | `machine.layer === 'rest'`일 때만 상태 `<img>`에 `restLayer` | 늘 붙이기 — 대기 상태 `className === 'layer'` 단언(TC-028·TC-031)이 깨진다. 같은 `<img>` 요소 유지(TC-032)는 className만 바뀌므로 그대로 |
+| 상태기계 | 변경 없음(`layer`·`wake`·`tick` 불변) | 새 상태 `restOnly` 추가 — 표시 문제를 전이표로 끌어들임(확정사항 §5 표 불변 원칙) |
+
+#### 17.5 검증·잔여 위험
+
+| 구분 | 내용 | 요구 |
+|---|---|---|
+| vitest(신규, TC-338~TC-345 · 흐름 TC-FLOW-22(S-22)) | 패킷 §A.5 **O-1~O-8**: `OverlayApp.restOnly.test.tsx` — `restOnly` 부착·DOM 유지·`setResting` `[[false],[true]]`(O-1, TC-338), 키 깨움 젤리(O-2, TC-339), 마우스 이동 깨움 커서 추종(O-3, TC-340), rest 미등록 D-1(O-4, TC-341), `hasRest` 재계산(O-5, TC-342), `getTimer` 재호출 0·구독 해제 0(O-6, TC-343); `layers.test.tsx` className 전이·TC-028·031·032 무수정 통과(O-7, TC-344), `overlayStyles.test.ts` CSS 원문 규칙(O-8, TC-345) | R-41 |
+| vitest(신규, TC-346~TC-347) | O-9 `timerClock.test.ts` 카운트다운 `restPaused` 고정·올림(TC-346), O-10 `useElapsedText.countdown.test.tsx` 카운트다운 `restPaused` interval 0(TC-347) | R-37, R-35 |
+| 수동(TC-348~TC-350 = MC-48~MC-50) | M-R1(rest·배경·뒷머리·뽀모도 등록 → 1분 뒤 배경 + rest만 → 키 1번 전부 복귀·젤리, 스크린샷 2장), M-R2(rest 비우기 → 캐릭터 그대로, D-1), M-R3(카운트다운 쉬는중 멈춤 → 복귀 뒤 이어서 — TC-312 ④·TC-FLOW-19 5단계 기대 교체) | R-41, R-37 |
+| 수동 증거 | MC-48(M-R1, 쉬는중 단독 표시·복귀) 2026-10-25 dev 앱 캡처 확인 — `doc/300_검증/screenshots/20261025-0003-rest-display/overlay-{1-idle,2-rest,4-wake-idle}.png` | R-41 |
+| 회귀 | 기존 `src/overlay` TC 전부(TC-028·031·032, §10.9.2 ①~④, 젤리·부르르·팔·펜·뒷머리·뽀모도·TC-287) | — |
+
+- **잔여 위험 K-2**: jsdom은 CSS 모듈 규칙(`visibility`)을 적용하지 않아 「실제로 가려짐」을 vitest로 증명할 수 없다 → 클래스 부착(O-1·O-7)·CSS 원문(O-8) 단언 + `/run-app` 스크린샷(M-R1, `doc/300_검증/screenshots/{YYYYMMDD-HHMM}/`)으로 증거를 나눈다.
+- 접근성: 오버레이에 문구·aria 추가 없음(R-01, §9 불변).
 
 ## 11. 전략 편차 (요구 편차 아님 — 수용 확정)
 
@@ -819,9 +929,10 @@ z0~z3과 pen은 모두 `.jellyWrap` 안에, hair는 같은 motion 클래스를 �
 | R-30 | §10.11(자리·그림·좌표·모션·없을 때·갱신·성능·회귀 TC ①~⑦), §2 ASCII `[hair]`·아래 문단, §1, §7 `hair` 행, §8, §10.1 hair 행·표 아래 문단, `design/components.md` §3 `HairLayer`·`OverlayApp` 행·렌더 조건·DOM 구조·규칙 7, `design/functions.md` §5.3 `HairLayer` 렌더 | `get_asset_manifest`·`assets://changed`(`AssetSlot` `'hair'` — contract v0.17, 새 command·event 없음) | 미작성(ui-test-designer 인계) — 예정: §10.11 회귀 TC ①~⑦ + 수동 1건(팔이 머리카락 앞·함께 출렁임·배경 정지). 영향 기존 TC: `.jellyWrap` 자식 구성·첫 자식을 `.armWrap`으로 단언하는 TC(R-23 「`.jellyWrap` 위치·자식 구성」, R-25 `PenHand` DOM 위치)는 hair 미등록 픽스처면 그대로, 등록 픽스처면 개정 | ✅ | 설계 완료. 소스 적용됨(CR-037, 자리는 CR-051 `.hairWrap`) |
 | R-33 | §1, §2 ASCII `[pomo]`·`[pomo]` 문단, §7 `pomo_*` 행, §8, §10.1 pomo 행, §10.14 14.1(DOM·`.pomodoro`·격리)·14.2(표시 표)·14.3 `PomodoroLayer`·`OverlayApp` 변경·14.4 `PomodoroLayer` 렌더·14.5 | `get_asset_manifest`·`assets://changed`(`AssetSlot` `pomo_char`·`pomo_bubble` — contract v0.21 확정) | 신규 예정(ui-test-designer): §10.14 14.8 ④⑤⑦ | ✅ | 설계 완료. 소스 적용됨(CR-045 — `PomodoroLayer`) |
 | R-34 | §2 `[pomo]` 문단, §4 `timer`·`{snapshot, receivedAt}`·`text`, P-8 ①②③⑤, §7 `get_timer`·`timer://changed`·`Settings.timer` 행, §8 `TimerText` 행, §10.1 pomo 행, §10.14 14.2(U-1)·14.3 `TimerText`·공용 3파일·14.4 `nowMs`·`elapsedNow`·`formatElapsed`·`timerTextStyle`·`useTimerSnapshot`·`useElapsedText`·`isTimerTextVisible`·14.5·14.7 | `get_timer`, `timer://changed`, `Settings.timer`(contract v0.21 확정) | 신규 예정: §10.14 14.8 ①~④⑦. (CR-050) TC-286 ② 기대 리터럴 개정(`DEFAULT_TIMER_SETTINGS` v0.23 새 필드 3개, §10.15 15.7) | ✅ | 설계 완료. 소스 적용됨(CR-045). 조정 UI(끌기·슬라이더·색)는 settings 요구. (CR-050) U-1 `isTimerTextVisible` 불변 — `enabled` 의미만 「스톱워치 또는 타이머 켜짐」(requirements 용어 주). (CR-058) 글자 기본값 (268,402)·7°는 bridge `DEFAULT_TIMER_SETTINGS`(contract v0.27)에서 오고 오버레이 소스에 리터럴 없음 — TC-286 ② 기대값만 현행 |
-| R-35 | §4 끝 문단(상태 소유 core), P-8 ③④, §7 `set_resting`·`timer://changed` 행, §10.14 14.4 쉬는중 보고 효과·`elapsedNow`(restPaused 멈춤)·14.5 잔여 위험 | `set_resting`, `timer://changed`(contract v0.21 확정) | 신규 예정: §10.14 14.8 ⑤⑦ | ✅ | 설계 완료. 소스 적용됨(CR-045 — `OverlayApp` 쉬는중 보고 효과). 사용자/자동 일시정지 구분·「쉬는중 전 무입력 시간 빼지 않음」은 core |
+| R-35 | §4 끝 문단(상태 소유 core), P-8 ③④, §7 `set_resting`·`timer://changed` 행, §10.14 14.4 쉬는중 보고 효과·`elapsedNow`(restPaused 멈춤)·14.5 잔여 위험 | `set_resting`, `timer://changed`(contract v0.21 확정) | 신규 예정: §10.14 14.8 ⑤⑦ / (CR-069) TC-338(`setResting` `[[false],[true]]`)·TC-343·TC-347(수동 TC-348~TC-350, TC-FLOW-22) | ✅ | 설계 완료. 소스 적용됨(CR-045 — `OverlayApp` 쉬는중 보고 효과). 사용자/자동 일시정지 구분·「쉬는중 전 무입력 시간 빼지 않음」은 core. (CR-069, 🔒 2026-10-24) 두 모드 모두 — contract v1.1 `set_resting` 두 모드 공통, 오버레이 보고 효과 코드 불변(P-8 ④, §7) |
 | R-36 | P-8 ①, §7 `get_timer` 행, §10.14 14.4 `useTimerSnapshot`(구독 먼저 → 조회, 초기값 `stopped`·0)·`formatElapsed` | `get_timer`(contract v0.21 확정) | 신규 예정: §10.14 14.8 ②⑦ | ✅ | 설계 완료. 소스 적용됨(CR-045 — `useTimerSnapshot`). 경과 휘발·자동 시작 없음은 core `Timer::new` |
-| R-37 | §4 `text`(CR-050 개정), P-9 ①, §7 `TimerSnapshot` v0.23·`set_resting` 의미 확장 행, §10.15 15.1(표 1~7)·15.3·15.4, `design/functions.md` §5.7 ①(`snapshotMode`·`timerDisplayMs`·`formatRemaining`·`timerText`)·②(`useElapsedText` 계산식), `design/components.md` §3.y | `get_timer`·`timer://changed`(`TimerSnapshot.mode`·`durationMs` — contract v0.23 §3.9 확정), `set_resting`(카운트다운 no-op) | TC-291~TC-295, TC-307 / 수동 TC-312 / TC-FLOW(S-19, 신규) | ✅ | TM-05·TM-03(스톱워치 표기 불변)·TM-12. 설계 완료, 소스 적용(CR-050 구현 동기화). 시간 입력·버튼은 settings 요구 |
+| R-37 | §4 `text`(CR-050 개정), P-9 ①, §7 `TimerSnapshot` v0.23·`set_resting` 의미 확장 행, §10.15 15.1(표 1~7)·15.3·15.4, `design/functions.md` §5.7 ①(`snapshotMode`·`timerDisplayMs`·`formatRemaining`·`timerText`)·②(`useElapsedText` 계산식), `design/components.md` §3.y | `get_timer`·`timer://changed`(`TimerSnapshot.mode`·`durationMs` — contract v0.23 §3.9 확정), `set_resting`(~~카운트다운 no-op~~ → contract v1.1 두 모드 공통, CR-069) | TC-291~TC-295, TC-307 / 수동 TC-312 / TC-FLOW(S-19, 신규) / (CR-069) TC-346·TC-347·TC-343 / 수동 TC-350 / TC-FLOW-19 개정 | ✅ | TM-05·TM-03(스톱워치 표기 불변)·TM-12. 설계 완료, 소스 적용(CR-050 구현 동기화). 시간 입력·버튼은 settings 요구. (CR-069, 🔒 2026-10-24) 개정 — 쉬는중 자동 일시정지(`restPaused`, 남은 시간 고정): P-9 ①·§10.15 15.1 끝 문단·TC-312 수동 기대 개정·§10.17 17.3 타이머 행. 표시 코드 변경 없음(RD-04 — 테스트만 추가) |
 | R-38 | §4 깜빡임 여부, P-9 ②④, §10.15 15.1(표 8·깜빡임 규칙)·15.3, `design/components.md` §3.y `TimerText`·`TimerText.module.css` 전문·규칙 9, `design/functions.md` §5.7 ①`isTimerBlinking`·⑥ | `timer://changed`(`'finished'` — contract v0.23 §3.9 확정) | TC-292, TC-294~TC-296, TC-307~TC-309 / 수동 TC-312 / TC-FLOW(S-20, 신규) | ✅ | TM-06. 10초 판정·대기 복귀는 core. JS 타이머 없음. 설계 완료, 소스 적용(CR-050 구현 동기화) |
 | R-39 | §4 `fromEvent`·알림음 ref, P-9 ③④⑤·오류, §7 `get_alarm_sound`·`TimerSettings.alarmVolume` 행, §10.15 15.2(판정표 1~7)·15.3(배치 결정)·15.5·15.6(스파이크 → 수동), `design/functions.md` §5.7 ③④⑤⑥, `design/components.md` §3.y `useAlarmOnFinish`·`alarmSound` | `get_alarm_sound`(contract v0.23 §3.10·§5 확정), `timer://changed`, `Settings.timer.alarmVolume` | TC-297~TC-306, TC-307, TC-308, TC-313(음량 배선) / 수동 TC-310(자동 재생 스파이크), TC-311, TC-312 / TC-FLOW(S-20, 신규) | ✅ | TM-07·TM-09·TM-10(오버레이 몫). 재생은 오버레이 한 곳뿐(설정 창은 미리 듣기 — settings 요구). 자동 재생 허용은 수동 TC-310으로만 증명(jsdom 불가). 설계 완료, 소스 적용(CR-050 구현 동기화). (CR-058·CR-061) 내장 기본음 = 번들 mp3 `src/assets/sounds/default-alarm.mp3`, 기본 음량 44(`DEFAULT_ALARM_VOLUME` = `DEFAULT_TIMER_SETTINGS.alarmVolume`) — §10.15 15.2·15.3·15.4, `design/functions.md` §5.7 ④ 반영, TC-297·TC-298·TC-299 ⑤ 개정 |
 | R-40 | §10.16(책임 나눔·상태별 동작·불변·검증), §2 ASCII `.root` `onContextMenu` 줄, P-10, §7 창 기능(CR-062) 행, §10.9.1 L-7·L-8, `design/functions.md` §5.1 `preventContextMenu`, `design/components.md` §3 `OverlayApp` 행, `design/a11y.md` 오른쪽 클릭 | 없음 — 메뉴는 core 전용(tray·hook), 새 command·event·래퍼·타입 없음(contract v0.27 유지). DOM `contextmenu`는 bridge와 무관 | TC-315(자동 — `.root` `fireEvent.contextMenu` → `false`·bridge 추가 호출 0) + 회귀(오른쪽 클릭 파츠·펜 모드 클릭·Ctrl+휠 기존 TC) / 수동 TC-316~TC-330(= MC-31~MC-45) / TC-FLOW-21(S-21) | ✅ | 설계 완료. 소스 적용(CR-062 — `index.tsx` 상수 1줄·JSX 속성 1개·react `type MouseEvent` import). 판정·팝업·전체 화면 생략·중복 가드는 core 선행(횡단 설계 §4). 사용자 결정 U-1·U-3·U-5 🔒, U-2·U-4 수용 |
+| R-41 | §10.17(17.1 표시표·17.2 코드 명세·17.3 동작·17.4 숨김 방식 결정·17.5 검증·잔여 위험 K-2), §2 `.canvas.restOnly` bullet, §4 `hasRest`·`restOnly`, P-3, §10.1 표(hair·pomo·0·1·2·3·pen 행), §10.9.2 첫 행·회귀 ⑩, §10.11 그림 줄, §10.14 표시 조건 문장, `design/functions.md` §5.1 `.canvas` className·§5.3 `Layer` `className`·상태 레이어 마커, `design/components.md` 렌더 조건 `.canvas.restOnly` 행 | 없음 — `get_asset_manifest`·`assets://changed`(불변, `rest` 등록 여부만 읽음), `set_resting` 호출 불변 | TC-338~TC-347 / 수동 TC-348~TC-350 / TC-FLOW-22(S-22) / 회귀 TC-028·TC-031·TC-032 | ✅ | CR-069, 🔒 2026-10-24(RD-07~RD-09, D-1·D-2·D-3). 설계 완료, **소스 적용 2026-10-24**. 상태기계·`BackgroundLayer`/`HairLayer`/`PomodoroLayer`/`MouseArm`/`PenHand` props 불변. 화면 증거는 스크린샷(K-2) |

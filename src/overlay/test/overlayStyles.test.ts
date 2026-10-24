@@ -205,4 +205,38 @@ describe('overlay.module.css', () => {
       expect(hd[k]).toBeUndefined()
     }
   })
+
+  // CR-069(R-41, 🔒 2026-10-24): 쉬는중 단독 표시 — design.md §10.17 17.2 CSS 전문·17.4 숨김 방식 결정(visibility만 자식이
+  //   되살릴 수 있음, display·opacity·애니메이션 금지). jsdom은 이 규칙을 적용하지 않으므로(K-2) 원문으로 단언한다.
+  //   시나리오: scenarios.md TC-345 (패킷 rest-display-03-packet-ui.md §A.5 O-8)
+  it('TC-345: .restOnly 규칙 = .restOnly .hairWrap·.pomodoro·.jellyWrap 각각 { visibility: hidden } 하나, .restOnly .restLayer = { visibility: visible } 하나, display·opacity·animation·transition·transform 없음, 기본 블록(.canvas·.hairWrap·.jellyWrap·.layer)에 visibility 없음 (CR-069)', () => {
+    // 최상위·keyframe 구간 규칙을 모두 [선택자 목록, 선언] 으로 펼친다(중괄호 없는 본문만 — keyframe 바깥 블록은 건너뜀)
+    const rules = Array.from(norm.matchAll(/([^{}]+)\{([^{}]*)\}/g)).map(m => ({
+      selectors: m[1]
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
+      body: decl(m[2]),
+    }))
+    const restRules = rules.filter(r => r.selectors.some(s => /restOnly|restLayer/.test(s)))
+    expect(restRules.flatMap(r => r.selectors).sort()).toEqual([
+      '.restOnly .hairWrap',
+      '.restOnly .jellyWrap',
+      '.restOnly .pomodoro',
+      '.restOnly .restLayer',
+    ])
+    const merged = (sel: string): Record<string, string> =>
+      Object.assign({}, ...restRules.filter(r => r.selectors.includes(sel)).map(r => r.body))
+    for (const sel of ['.restOnly .hairWrap', '.restOnly .pomodoro', '.restOnly .jellyWrap']) {
+      expect(merged(sel), sel).toEqual({ visibility: 'hidden' })
+    }
+    expect(merged('.restOnly .restLayer')).toEqual({ visibility: 'visible' })
+    for (const r of restRules) {
+      expect(Object.keys(r.body).filter(k => /^(display|opacity|animation|transition|transform)/.test(k)), r.selectors.join(', ')).toEqual([])
+    }
+    // 대기 상태(.restOnly 없음)에는 아무것도 가리지 않는다
+    for (const sel of ['.canvas', '.hairWrap', '.jellyWrap', '.layer', '.pomodoro']) {
+      expect(decl(block(sel)).visibility, sel).toBeUndefined()
+    }
+  })
 })

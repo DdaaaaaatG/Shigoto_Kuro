@@ -2,6 +2,7 @@
  * 뽀모도 레이어 (CR-045, R-33·R-34) — `.canvas`의 BackgroundLayer 다음·`.jellyWrap` 앞에 그린다. 배경처럼
  * 고정(젤리·부르르 밖, 애니메이션 없음). 순서(아래→위) = 인물(pomo_char) → 말풍선(pomo_bubble) → 시간 글자.
  * 글자 표시 조건(U-1) = timer.enabled 또는 뽀모도 그림이 1장 이상 등록. 셋 다 없으면 null(DOM 없음).
+ * 쉬는중 단독 표시 때는 부모가 CSS로 가린다 — R-41 (.restOnly .pomodoro, design.md §10.17. 이 컴포넌트는 prop·코드 그대로)
  */
 import { memo } from 'react'
 import type { AssetManifest, TimerSettings } from 'bridge'

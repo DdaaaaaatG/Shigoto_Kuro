@@ -1,5 +1,6 @@
 # overlay 테스트 시나리오
 
+- **현행 판: v2.9 (2026-10-24, CR-069 — 쉬는중 단독 표시 R-41·카운트다운 쉬는중 자동 일시정지 표시 R-37·R-35 개정)** · 작성: ui-test-designer · 모드: 증분, 작업 모드 보강(maintain). 현행 기준·상태·수는 문서 끝 「CR-069 쉬는중 단독 표시」 절과 변경이력 최신 행이 정한다. 아래 머리 줄들은 각 판의 기록이다
 - 기준: `src/overlay/design.md`(요구 v1.7 기준, CR-017·CR-019 갱신, 분할 `design/components.md`·`design/functions.md`·`design/a11y.md`) / `src/overlay/requirements.md` v1.7 / `doc/200_설계/bridge/contract.md` v0.8(+ CR-019 미확정 계약: `Settings.slam`·`AssetSlot` 값 `'slam'` 삭제 — bridge 인계 필요)(+ CR-017 미확정 계약: `MouseSettings.area: [Point, Point, Point, Point]` 추가·`pad` 삭제, command `get_monitors`·래퍼 `getMonitors(): Promise<ScreenBounds[]>` 신규, 이 화면의 `getScreenBounds` 호출 중단) / `doc/200_설계/core/window.md` §2.2(표시 크기 예시 표, §9.2 UI-5) / `doc/000_프로젝트_확정사항.md` §5(상태 전이표)
 - **기준 추가(v0.8 — CR-021)**: `src/overlay/requirements.md` **v1.9** R-22(+추가 결정 ①~③ 🔒 2026-09-24)·§2 S-7 / `src/overlay/design.md` §6 P-2·§10.1 z3 행·§10.3(`bounceAlt`)·**§10.6 규칙표 1~13행**·입력 내용 비보관 / `design/functions.md` §5.1 키보드 핸들러·§5.2(`SpecialKey`·`SPECIAL_KEYS`·`isSpecialKey`·`currentSpecial`·`MachineState.specialHeld`·`bounceSeq`·`BouncePhase`·`bouncePhase`·`MachineInput` key의 `special`)·§5.3(`SPECIAL_KEY_SLOT`·`pickKeyboardEntry`·`Layer` `bounce?: BouncePhase`)·§5.4 바운스 래퍼 5·6(`MouseArm` `bounce: BouncePhase`) / 미확정 계약(bridge 인계 필요): `KeyboardInputEvent.special`, `AssetSlot` `key_space`·`key_z`·`key_question`·`key_exclamation`·`key_enter`·`key_backspace`·`key_undo` / 분류 규칙 참조 `doc/200_설계/core/hook.md` J2·J3·J7·J9(수동 TC-151 기대값 근거)
 - **기준 추가(v0.9 — CR-022)**: `src/overlay/requirements.md` **v2.0** R-23(젤리 바운스 🔒 2026-09-24)·§1 용어 주·§2 S-1·S-7 / `src/overlay/design.md` §1·§2 `.jellyWrap`·§6 P-2·§10.3 젤리 행·폐기 행·CSS 블록 / `design/components.md` 컴포넌트 표·렌더 조건 `.jellyWrap`·배경 DOM 구조 1~5 / `design/functions.md` §5.1 `jellyClass`·§5.3 `LayerStack` 렌더·§5.4 `.armWrap` 컨테이너 / CR-022(새 계약 없음)
@@ -3397,22 +3398,27 @@ CR ↔ TC(추가)
 - Then ⓐ 소리: 숨긴 채로 0 도달 시각(「시작」 뒤 약 10초)에 내장 기본음(번들 mp3 — CR-058 사용자 지정 음)이 **한 번** 들리고 되풀이되지 않으면 PASS(CR-055 — 1회 재생. 파일이 끝남 10초보다 길면 끝남 종료 때 멈추는 것도 PASS. 늦게 들리면 지연 초를 비고에, 같은 음이 처음부터 다시 시작되면 FAIL). (선택 분기) 끝남 중에 다시 표시해도 소리가 다시 울리지 않는다(새 `finished` 진입이 아님) ⓑ 화면: **0 도달 뒤 10초가 지난 뒤 표시**하면 `00:00:10`(지정 시간)·깜빡임 없음. (선택 분기) 끝남 10초 안에 표시하면 `00:00:00` 깜빡임 ⓒ 오류·안내 문구 없음, `.dev-tauri.log` 오류 없음
 - 스펙: 수동 — `src/overlay/test/manual-checklist.md` MC-29
 
-### TC-312 · 실제 소리·음량·깜빡임 10초 뒤 정지·쉬는중 계속 흐름 · 종류: 수동(MC-30) · 요구: R-37, R-38, R-39(「알림음 1회」·「깜빡임 10초 종료 또는 멈춤·시작·끄기 때 함께 멈춤」), R-35 · 설계: design.md §10.15 15.1·15.2(1회 재생 — CR-055, CR-052 반복 재생 폐기·판정표 6·7행 재생 중 떠나면 정지)·15.7 수동 TC-312, requirements §1 용어 주(카운트다운은 쉬는중 무시) · **신규(CR-050)** · **개정(CR-052 — ⑥~⑧ 정지 절차)** · **개정(CR-055 — 1회 재생 기대, ⑥~⑧은 등록 mp3로)** · **개정(CR-058 — ③ 기본음 = 번들 mp3, ⑥ 근거를 기본음 길이와 무관하게)**
+### TC-312 · 실제 소리·음량·깜빡임 10초 뒤 정지·~~쉬는중 계속 흐름~~ 쉬는중 멈춤·복귀 뒤 이어서(CR-069) · 종류: 수동(MC-30) · 요구: R-37, R-38, R-39(「알림음 1회」·「깜빡임 10초 종료 또는 멈춤·시작·끄기 때 함께 멈춤」), R-35, R-41(④ 글자 가림) · 설계: design.md §10.15 15.1·15.2(1회 재생 — CR-055, CR-052 반복 재생 폐기·판정표 6·7행 재생 중 떠나면 정지)·15.7 수동 TC-312, requirements §1 용어 주(~~카운트다운은 쉬는중 무시~~ → (🔒 2026-10-24 대체, CR-069) 두 모드 모두 쉬는중 자동 일시정지, contract v1.1), design.md §10.17 17.3 타이머 행 · **개정(CR-069 — 제목·④ 기대 「쉬는중 동안 멈춤, 복귀 뒤 이어서」, 상세 절차는 TC-350)** · **신규(CR-050)** · **개정(CR-052 — ⑥~⑧ 정지 절차)** · **개정(CR-055 — 1회 재생 기대, ⑥~⑧은 등록 mp3로)** · **개정(CR-058 — ③ 기본음 = 번들 mp3, ⑥ 근거를 기본음 길이와 무관하게)**
 - Given MC-28 PASS 빌드, 1분 넘는 mp3 등록, 유휴 시간 5분(기본)
 - When ① 시작 시간 00:00:10 → 「시작」 → 0 도달 → 10초 관찰 ② 음량 80%·0%·100%로 바꿔 ①을 반복 ③ 기본값(등록 해제) 후 ① 반복 ④ 시작 시간 00:08:00 → 「시작」 → 입력 없이 5분 넘게 기다려 쉬는중 → 1분 더 관찰 → 입력 ⑤ 끝남 깜빡임 중 스크린샷 1장(`/run-app`) ⑥ **(CR-052, CR-055, CR-058 개정)** 1분 넘는 mp3를 다시 등록하고(③에서 해제했으므로 — 정지 확인은 재생 길이가 깜빡임 10초보다 확실히 긴 파일로 한다. 내장 기본음(번들 mp3, 34 061바이트)은 재생 길이가 설계 문서에 없어 정지 판정에 쓰지 않는다) 시작 시간 00:00:10 → 「시작」 → 0 도달 → 깜빡이는 중(0 도달 뒤 3초 안) 설정 창 타이머 탭 「멈춤」 ⑦ 같은 조작 뒤 깜빡이는 중 「시작」 → 새 회차가 다시 0에 닿으면 「멈춤」으로 정리 ⑧ 같은 조작 뒤 깜빡이는 중 「타이머 사용」 스위치 끔
-- Then ⓐ 화면: ① 글자가 1초마다 줄다 `00:00:00`에서 1초 주기로 깜빡이고 10초 뒤 깜빡임이 멈추며 `00:00:10`으로 돌아가 대기 ④ 쉬는중 이미지로 바뀐 뒤에도 글자가 계속 줄어듦(멈추지 않음), 입력해도 튀지 않음 ⑤ 스크린샷 경로 기록 ⑥ 누른 순간 깜빡임이 멈추고 `00:00:10`으로 대기 ⑦ 누른 순간 깜빡임이 멈추고 `00:00:10`부터 다시 줄어듦 ⑧ 끈 순간 깜빡임이 멈춤(글자 값은 비고) ⓑ 소리: ① 0 도달 순간 등록 mp3가 **1회** 재생을 시작해(CR-055 — 1분 넘는 파일이라 깜빡이는 10초 동안 이어짐) **10초 깜빡임이 끝나는 순간 함께 멈춤**(R-39 — `finished`를 떠나면 재생 중인 소리 정지) ② 80%·0%(무음)·100% 크기 차이가 들림 ③ 내장 기본음(번들 mp3 — CR-058 사용자 지정 음)이 **한 번만** 울림(파일이 10초보다 길면 깜빡임 종료 때 함께 멈춤) — 같은 음이 처음부터 다시 시작되면 FAIL(CR-055, CR-052 반복 재생 폐기) ⑥ ⑦ ⑧ 누른·끈 순간 재생 중이던 mp3가 **바로** 멈춤(10초를 기다리지 않음), ⑦의 새 회차는 0 도달 때 다시 1회 재생 ⓒ core·bridge: 오류·안내 문구 없음, `settings.json` `timer.alarmVolume`은 마지막 값
+- Then ⓐ 화면: ① 글자가 1초마다 줄다 `00:00:00`에서 1초 주기로 깜빡이고 10초 뒤 깜빡임이 멈추며 `00:00:10`으로 돌아가 대기 ④ ~~쉬는중 이미지로 바뀐 뒤에도 글자가 계속 줄어듦(멈추지 않음), 입력해도 튀지 않음~~ **(CR-069 개정)** 쉬는중이 되는 순간 남은 시간이 멈추고 쉬는중 동안(1분 더 관찰) 그 값 그대로다. 쉬는중 그림(`rest`)이 등록돼 있으면 글자는 R-41로 가려지므로 멈춘 값은 설정 창 타이머 탭 미리보기로 확인한다. 입력하면 글자가 다시 보이고 멈춘 값에서 이어서 줄어든다(튀지 않음 — 쉬는중으로 보낸 시간만큼 남은 시간이 줄지 않는다) ⑤ 스크린샷 경로 기록 ⑥ 누른 순간 깜빡임이 멈추고 `00:00:10`으로 대기 ⑦ 누른 순간 깜빡임이 멈추고 `00:00:10`부터 다시 줄어듦 ⑧ 끈 순간 깜빡임이 멈춤(글자 값은 비고) ⓑ 소리: ① 0 도달 순간 등록 mp3가 **1회** 재생을 시작해(CR-055 — 1분 넘는 파일이라 깜빡이는 10초 동안 이어짐) **10초 깜빡임이 끝나는 순간 함께 멈춤**(R-39 — `finished`를 떠나면 재생 중인 소리 정지) ② 80%·0%(무음)·100% 크기 차이가 들림 ③ 내장 기본음(번들 mp3 — CR-058 사용자 지정 음)이 **한 번만** 울림(파일이 10초보다 길면 깜빡임 종료 때 함께 멈춤) — 같은 음이 처음부터 다시 시작되면 FAIL(CR-055, CR-052 반복 재생 폐기) ⑥ ⑦ ⑧ 누른·끈 순간 재생 중이던 mp3가 **바로** 멈춤(10초를 기다리지 않음), ⑦의 새 회차는 0 도달 때 다시 1회 재생 ⓒ core·bridge: 오류·안내 문구 없음, `settings.json` `timer.alarmVolume`은 마지막 값
 - 스펙: 수동 — `src/overlay/test/manual-checklist.md` MC-30
 
-### TC-FLOW-19 · S-19 25분 집중 시간을 방송하며 남은 시간을 보여 주고, 자리를 비워도 계속 줄어듦(TC-FLOW 목록에 더한다)
-Steps: TC-293 → TC-295 ① → TC-307 → TC-284(재확인) → (환경 전환) TC-312 (v1.9 신규, CR-050)
+### TC-FLOW-19 · S-19 25분 집중 시간을 방송하며 남은 시간을 보여 주고, ~~자리를 비워도 계속 줄어듦~~ 자리를 비우면(쉬는중) 멈추고 돌아오면 이어서 줄어듦(CR-069 개정)(TC-FLOW 목록에 더한다)
+~~Steps: TC-293 → TC-295 ① → TC-307 → TC-284(재확인) → (환경 전환) TC-312 (v1.9 신규, CR-050)~~
+Steps: TC-293 → TC-295 ① → TC-307 → TC-284(재확인) → TC-346 → TC-347 → TC-343 → (환경 전환) TC-312 ④ → TC-350 (v1.9 신규, CR-050 · **v2.9 개정, CR-069** — Step 4 문구·Step 4a~4c 신설·Step 5 기대 교체·Step 6 신설)
 
 | Step | TC | Given(= 앞 Step 종료) | 종료 상태 |
 |---|---|---|---|
 | 1 | TC-293 | 표기 규칙: 남은 1 500 000ms | `00:25:00`, 1초 줄면 `00:24:59`(올림) |
 | 2 | TC-295 ① | 같은 규칙을 훅이 씀: `cd(running, 0)` 받은 직후 | `00:25:00` → 1초 `00:24:59`, 초당 렌더 1회(훅 단위 — 다음 Step은 앱 마운트) |
 | 3 | TC-307 | 연결: 카운트다운 켬(`CD_ON`) 새 마운트, 조회 `cd(stopped, 0)` | 대기 `00:25:00` → 흐름 → 끝남 → core 복귀 `00:25:00` |
-| 4 | TC-284(재확인) | 연결: 새 마운트, 입력 없음 | 쉬는중 진입·해제 때 `setResting` 보고는 그대로(카운트다운이면 core가 무시 — 오버레이는 받은 스냅숏만 표시) |
-| 5 | TC-312(수동) ④ | 환경 전환: 실제 앱, 유휴 5분 | 쉬는중 동안에도 글자가 계속 줄어듦 |
+| 4 | TC-284(재확인) | 연결: 새 마운트, 입력 없음 | 쉬는중 진입·해제 때 `setResting` 보고는 그대로(~~카운트다운이면 core가 무시~~ (CR-069) contract v1.1 — 두 모드 모두 core가 `restPaused`로 멈춤 — 오버레이는 받은 스냅숏만 표시) |
+| 4a | TC-346 | 연결: 순수 함수 — 카운트다운 `restPaused` `{elapsedMs 3000, durationMs 1500000}` | `now`와 무관하게 `00:24:57` 고정, 올림 규칙 그대로(CR-069) |
+| 4b | TC-347 | 연결: 같은 스냅숏을 훅이 씀 | interval 0·5초 지나도 `00:24:57`·렌더 불변 → `running`(같은 경과)에서 `00:24:56`으로 이어서(CR-069) |
+| 4c | TC-343 | 연결: 카운트다운 켬 새 마운트(rest·뽀모도 등록), 흐르는 중 유휴 | 쉬는중 단독 표시(글자 가림·언마운트 없음) 동안 `restPaused` 값 `00:23:59` 고정 → 키 입력·`running` 수신 뒤 `00:23:58`로 이어서(CR-069) |
+| 5 | TC-312(수동) ④ | 환경 전환: 실제 앱, 유휴 5분 | ~~쉬는중 동안에도 글자가 계속 줄어듦~~ (CR-069 개정) 쉬는중 동안 멈춤(rest 등록 시 글자는 가려져 설정 창 미리보기로 확인), 복귀 뒤 멈춘 값에서 이어서 줄어듦 |
+| 6 | TC-350(수동) | 앞 Step의 실제 앱 이어서, 유휴 1분·rest 등록 | 쉬는중 진입 때 값에서 멈춤 → 2분 뒤 입력 → 그 값에서 이어 내려감(CR-069, MC-50) |
 
 ### TC-FLOW-20 · S-20 다른 창 작업 중 0이 되면 소리로 알고, 끝남 표시가 잠깐 보이고, 멈추거나 끝나면 소리도 멈춤, 파일이 깨져도 기본음, 재시작 직후엔 울리지 않음(TC-FLOW 목록에 더한다)
 Steps: TC-300 ① → TC-303 ③ → TC-302 ① → TC-296 ① → TC-307 → TC-308 ② → (환경 전환) TC-310 → TC-311 → TC-312 (v1.9 신규, CR-050)
@@ -4213,11 +4219,215 @@ R-25 행은 v2.6 통합 행 그대로다(RTM R-25 칸과 같고 CR-066으로 늘
 
 사용자행 ↔ TC-FLOW: 새 사용자행 없음(requirements v3.4 §2 변경 없음). TC-337은 환경 확인 수동 TC라 FLOW Step이 아니다. CR ↔ TC: 새 overlay CR 없음(R-01 보강은 core 몫 — window.md §3.2, ui 소스 변경 없음).
 
+## CR-069 쉬는중 단독 표시·카운트다운 쉬는중 자동 일시정지 표시 — 신규·개정 TC (v2.9, 2026-10-24, 증분 · 보강)
+
+- **기준(v2.9)**: `src/overlay/requirements.md` 2026-10-24 개정(CR-069 — **R-41 신설** 🔒, R-37 「쉬는중에도 계속 줄어듦」 취소 → 쉬는중 자동 일시정지·`restPaused` 표시, R-35 끝 「두 모드 모두」, R-30·R-33 끝 「단, 쉬는중 단독 표시(R-41) 동안 숨김」, §1 용어 주(CR-050) 개정, **S-19 개정**, **S-22 신설**) / `src/overlay/design.md` 변경이력 2026-10-24 CR-069 행 · §2 `.canvas.restOnly` bullet · §4 `hasRest`·`restOnly` · §6 P-3·P-8 ②④·P-9 ① · §7 `set_resting` 행(contract v1.1 두 모드 공통 — 래퍼·호출 불변) · §10.1 표 · §10.9.2 첫 행·회귀 ⑩ · §10.11 그림 줄 · §10.14 표시 조건 문장 · §10.15 v1.1 문장 · **§10.17**(17.1 표시표·17.2 코드 명세·17.3 동작표·17.4 숨김 방식 결정·17.5 검증·K-2) · §13 RTM R-41·R-37·R-35 / `design/functions.md` §5.1·§5.3, `design/components.md` 렌더 조건 `.canvas.restOnly` / 정본 패킷 `doc/200_설계/architecture/rest-display-03-packet-ui.md` §A.5(O-1~O-10, M-R1~M-R3) / `doc/200_설계/bridge/contract.md` v1.1(새 command·event 없음).
+- **v2.9 상태·수**: 신규 자동 TC-338~TC-347(10), 신규 수동 TC-348~TC-350(3 — MC-48~MC-50), 신규 TC-FLOW-22(S-22). 개정 TC-312(수동 — 제목·설계 칸·Then ⓐ ④, 옛 문장 취소선), TC-FLOW-19(제목·Steps·Step 4 문구·Step 4a~4c·Step 5 기대·Step 6). 범위에 R-41 추가. 350번까지 = 유효 330건(자동 281 + 수동 49) + 폐기 20건. TC-FLOW 유효 21건 + 폐기 1건.
+- **로케이터·환경**: 오버레이 img는 `alt=""`라 role 조회 불가 → `img[src="u:…"]`·클래스·부모 관계(기존 layers·pomodoro 스펙 방식). 이름은 design.md §10.17 17.2 그대로 단언한다 — `.canvas` className `'canvas'` ↔ `'canvas restOnly'`, 상태 img `'layer'` ↔ `'layer restLayer'`, 몸통·키보드 img 늘 `'layer'`. 스펙 CSS mock에 `restOnly`·`restLayer` 키를 둔다. **잔여 위험 K-2**: jsdom은 CSS 모듈 규칙(`visibility`)을 적용하지 않는다 → 「가려짐」은 클래스·부모 관계(TC-338)·CSS 원문(TC-345)·스크린샷(TC-348)으로 나눠 증명한다. 시간은 가짜 시계(`performance` 포함), 상태 반영은 `act` 안 tick, 실제 sleep 없음.
+- **§0.3 보충 — 구현 전 예상(Red가 정상)**: TC-338·TC-339·TC-340·TC-342·TC-343·TC-344·TC-345 = red(`restOnly`·`restLayer` 클래스·CSS 규칙 없음). TC-341 = green 가능(rest 미등록 = 현행 표시와 같음 — D-1). TC-346·TC-347 = green(소스 변경 없음 — 17.2 「변경 없음(확인만)」, red면 회귀).
+- 실행(보강 모드 — 이 절에 걸리는 자동 TC): `yarn test --run src/overlay/test/OverlayApp.restOnly.test.tsx src/overlay/test/layers.test.tsx src/overlay/test/overlayStyles.test.ts src/overlay/test/timerClock.test.ts src/overlay/test/useElapsedText.countdown.test.tsx`, 회귀 `yarn test --run src/overlay`(특히 TC-028·TC-030·TC-031·TC-032·§10.9.2 ①~④·TC-238~TC-246·TC-282~TC-288·TC-287). 수동: MC-48~MC-50, MC-30 ④(개정).
+
+### 1. 정식 번호 매핑 (패킷 §A.5)
+
+| 패킷 | TC | 종류 | 스펙 / 수동 |
+|---|---|---|---|
+| O-1 | TC-338 | 자동 | `OverlayApp.restOnly.test.tsx` |
+| O-2 | TC-339 | 자동 | `OverlayApp.restOnly.test.tsx` |
+| O-3 | TC-340 | 자동 | `OverlayApp.restOnly.test.tsx` |
+| O-4 | TC-341 | 자동 | `OverlayApp.restOnly.test.tsx` |
+| O-5 (+ 17.3 깨움 — 클릭) | TC-342 | 자동 | `OverlayApp.restOnly.test.tsx` |
+| O-6 | TC-343 | 자동 | `OverlayApp.restOnly.test.tsx` |
+| O-7 | TC-344 | 자동 | `layers.test.tsx`(기존 TC-028·030·031·032 it 무수정, CSS mock에 `restLayer` 키만 추가) |
+| O-8 | TC-345 | 자동 | `overlayStyles.test.ts` |
+| O-9 | TC-346 | 자동 | `timerClock.test.ts` |
+| O-10 | TC-347 | 자동 | `useElapsedText.countdown.test.tsx` |
+| M-R1 | TC-348 | 수동(MC-48) | `manual-checklist.md` |
+| M-R2 | TC-349 | 수동(MC-49) | `manual-checklist.md` |
+| M-R3 | TC-350 | 수동(MC-50) | `manual-checklist.md` |
+| (S-22) | TC-FLOW-22 | 흐름 | 아래 3 |
+
+공통 픽스처(`OverlayApp.restOnly.test.tsx`): `M_REST` = background·hair·pomo_char·pomo_bubble·body·idle·rest·kb_up·mouse_base(900×700) + pen_up(202×154). `M_NO_REST` = 같은 매니페스트에서 rest만 뺌. 설정 `idleSeconds` 60·`mouse` 비펜 모드(어깨 (620,530)·영역 중심 (520,530)·`partPos` (0,0) — §0.2와 같은 기하)·타이머 기본값(꺼짐 — 뽀모도 그림이 있어 글자 보임, U-1), 모니터 [1920×1080], `getHandAnchor` → `null`, `getTimer`·`setResting` → `stopped 0`. 쉬는중 진입 = 가짜 시계 61초. 팔 변형 상수 `REST` = `rotate(0deg) scaleX(1) rotate(0deg)`, `DOWN`(커서 (960,1080)) = `rotate(135deg) scaleX(1.414) rotate(-180deg)`.
+
+### 2. 신규 TC
+
+### TC-338 · rest 등록 + 유휴 → `.canvas.restOnly`, rest만 마커, 모든 레이어 DOM 유지, 쉬는중 보고 그대로 · 종류: 자동 · 요구: R-41, R-30, R-33, R-35, R-01 · 설계: design.md §10.17 17.1 2행·17.2(`hasRest`·`restOnly`·`.canvas` className·`Layer` className)·17.3 1행·17.4 숨김 수단·판정 위치 행, §2 `.canvas.restOnly` bullet, §4 `hasRest`·`restOnly`, §6 P-3, §10.1 표(hair·pomo·0·1·2·3·pen 행), §10.9.2 첫 행·회귀 ⑩, §10.11 그림 줄, design/functions.md §5.1·§5.3, design/components.md 렌더 조건 `.canvas.restOnly` · **신규(CR-069, 패킷 O-1)**
+- Given 공통 픽스처 `M_REST`, 마운트 직후 대기(`idle`), `.canvas` className `'canvas'`, 상태 img src `u:idle`·class `'layer'`, `setResting` 기록 `[[false]]`
+- When 입력 없이 가짜 시계 61초 진행
+- Then ⓐ 화면(DOM): 같은 `.canvas` 노드의 className `'canvas restOnly'`. 같은 상태 `<img>`가 src `u:rest`·class `'layer restLayer'`이고 `.restLayer`는 문서에 1개. 몸통·`kb_up` img class `'layer'`. 배경 img는 `.hairWrap`·`.pomodoro`·`.jellyWrap` 어느 것의 자손도 아니다. hair img는 `.hairWrap` 안, 인물·말풍선·글자는 `.pomodoro` 안, 팔·몸통·상태·`kb_up`·펜 손은 `.jellyWrap` 안(= TC-345 규칙이 가릴 부모 관계). 문구·안내 없음 — `textContent`는 시간 글자 `00:00:00`뿐 ⓑ 상태: `.hairWrap`·hair·`.pomodoro`·인물·말풍선·글자 div·`.jellyWrap`·팔·몸통·상태·`kb_up`·펜 손이 진입 전과 **같은 노드**로 연결돼 있다(언마운트 없음). `machine.layer` = `rest` ⓒ bridge: `setResting` 호출 기록 `[[false], [true]]`, `setSettings` 0회
+- 스펙: `src/overlay/test/OverlayApp.restOnly.test.tsx`
+
+### TC-339 · 쉬는중 단독 표시 중 키 누름 → 같은 커밋에 전부 복귀 + 젤리, 팔은 쉬는 자세 유지 · 종류: 자동 · 요구: R-41, R-23, R-15, R-11, R-35 · 설계: design.md §10.17 17.3 「깨움」 행(키면 그 누름의 젤리 CR-066, 팔은 다음 마우스 이동까지 `armAtRest` — D-2)·17.1 1행, §6 P-3 끝 문장, design/functions.md §5.3 상태 레이어 마커, CR-051 `.hairWrap` motion · **신규(CR-069, 패킷 O-2)**
+- Given TC-338 종료 상태(쉬는중 단독 표시, 팔 img transform `REST`)
+- When `input://keyboard` 누름 1건(`pressed true`·`heldCount 1`)을 한 `act`로 보낸 뒤 단언, 이어서 뗌 1건
+- Then ⓐ 화면: `.canvas` className `'canvas'`, 같은 상태 img src `u:idle`·class `'layer'`, `.restLayer` 0개, `.jellyWrap` className `'jellyWrap jelly'` 또는 `'jellyWrap jellyAlt'`, `.hairWrap`은 같은 motion 클래스(`'hairWrap jelly'`/`'hairWrap jellyAlt'`) ⓑ 상태: 팔 img transform `REST` 그대로(armAtRest), 뗀 뒤에도 `.canvas` `'canvas'` ⓒ bridge: `setResting` 기록 `[[false], [true], [false]]`(마지막 `[false]`), 뗌으로 추가 호출 없음(3회), `setSettings` 0회
+- 스펙: `src/overlay/test/OverlayApp.restOnly.test.tsx`
+
+### TC-340 · 쉬는중 단독 표시 중 마우스 이동 → 복귀, 팔이 곧바로 커서 추종 · 종류: 자동 · 요구: R-41, R-18, R-15, R-35 · 설계: design.md §10.17 17.3 「깨움」 행(마우스 이동이면 곧바로 커서 추종 — D-2, 기존 규칙), design/functions.md §5.1 마우스 이동 핸들러(TC-060·TC-061 규칙) · **신규(CR-069, 패킷 O-3)**
+- Given 공통 픽스처, 마운트 후 커서 (960,1080) 이동 → 팔 transform `DOWN` → 61초 → `.canvas` `'canvas restOnly'`·팔 `REST`
+- When `input://mouse-move` (960,1080) 1건
+- Then ⓐ 화면: `.canvas` className `'canvas'`, 상태 img src `u:idle`·class `'layer'`, `.jellyWrap` className `'jellyWrap'`(이동은 젤리 없음) ⓑ 상태: 같은 팔 img의 transform이 `REST`가 아니고 `DOWN`(armAtRest false) ⓒ bridge: `setResting` 기록 `[[false], [true], [false]]`, `setSettings` 0회
+- 스펙: `src/overlay/test/OverlayApp.restOnly.test.tsx`
+
+### TC-341 · rest 미등록(D-1) — 쉬는중에도 숨기지 않음 · 종류: 자동 · 요구: R-41(「`rest`가 없으면 지금처럼 전부 보인다」), R-27, R-15, R-35 · 설계: design.md §10.17 17.1 3행·17.3 2행, §10.9.2 둘째·셋째 행(D-1 근거), 17.2 `hasRest` · **신규(CR-069, 패킷 O-4)**
+- Given `M_NO_REST`(rest만 뺌), 나머지 공통 픽스처
+- When 61초 진행 → 키 누름 1건
+- Then ⓐ 화면: 쉬는중 동안 `.canvas` className === `'canvas'`(restOnly 없음), 상태 img 없음(`u:rest`·`u:idle` 모두 없음 = 투명), `.restLayer` 0개, `kb_up` img class `'layer'`, `.hairWrap`·`.pomodoro`·몸통·펜 손 존재. 키 누름 뒤 상태 img src `u:idle`, `.canvas` `'canvas'` ⓑ 상태: 쉬는중 동안 팔 transform `REST`(쉬는 자세 — §10.9.2 셋째 행) ⓒ bridge: 쉬는중 진입에 `setResting(true)`는 그대로 — 기록 `[[false], [true]]` → 키 뒤 `[[false], [true], [false]]`, `setSettings` 0회
+- 스펙: `src/overlay/test/OverlayApp.restOnly.test.tsx`
+
+### TC-342 · 쉬는중 중 그림 교체 → `hasRest` 재계산, 클릭으로 깨움 · 종류: 자동 · 요구: R-41, R-19, R-09, R-15, R-35 · 설계: design.md §10.17 17.3 4행(`assets://changed`로 rest 삭제·등록 → 다음 렌더부터)·5행(깨움 — 클릭), §4 `hasRest`(`useMemo` `[manifest]`), §7 `assets://changed` 행 · **신규(CR-069, 패킷 O-5 + 17.3 깨움 클릭)**
+- Given TC-338 종료 상태(쉬는중 단독 표시)
+- When ① `assets://changed` `M_NO_REST` ② `assets://changed` `M_REST` ③ `input://mouse-button` 왼쪽 누름 1건 → 뗌
+- Then ⓐ 화면: ① `.canvas` `'canvas'`, rest img 없음, `.restLayer` 0개, `kb_up` 있음 ② `.canvas` `'canvas restOnly'`, rest img class `'layer restLayer'`, `.restLayer` 1개 ③ `.canvas` `'canvas'`, 상태 img class `'layer'` ⓑ 상태: ①② 동안 `machine.layer` `rest` 유지(그림 교체는 전이 아님), ③ 팔 transform `REST` 유지(비펜 모드 클릭은 추종 재개·젤리 없음 — TC-061) ⓒ bridge: ①② 뒤 `setResting` 기록 `[[false], [true]]`(추가 없음), `getAssetManifest` 1회·`onAssetsChanged` 1회(재조회·재구독 없음), ③ 뒤 `[[false], [true], [false]]`, `setSettings` 0회
+- 스펙: `src/overlay/test/OverlayApp.restOnly.test.tsx`
+
+### TC-343 · 카운트다운 흐르는 중 쉬는중 한 바퀴 — TimerText 언마운트 없음, `restPaused` 동안 남은 시간 고정, 복귀 뒤 이어서 · 종류: 자동 · 요구: R-41, R-37, R-35, R-33, R-39(D-3 — 언마운트 없음) · 설계: design.md §10.17 17.3 타이머 행(D-3)·17.4 숨김 수단 행(조건부 렌더·언마운트 금지), §10.14 표시 조건 문장(DOM·구독 유지), §10.15 v1.1 문장, §6 P-8 ②④·P-9 ①, §7 `set_resting` 행(contract v1.1 두 모드 공통) · **신규(CR-069, 패킷 O-6)**
+- Given 설정 `timer` = `DEFAULT_TIMER_SETTINGS` + `enabled true`·`mode 'countdown'`·`countdownSecs 1500`, `getTimer` → `cd(stopped, 0)`(durationMs 1 500 000), `M_REST`, 유휴 60초. core 판정은 흉내 내지 않고 core가 보냈을 `timer://changed`를 직접 넣는다
+- When ① `cd(running, 0)` 수신 → 1.5초 ② 60초 더(누계 61.5초 → 쉬는중) ③ `cd(restPaused, 61500)` 수신 → 120초 ④ 키 누름·뗌 → `cd(running, 61500)` 수신 → 1.2초
+- Then ⓐ 화면: 글자 `00:25:00` → ① `00:24:59` → ② `.canvas` `'canvas restOnly'` → ③ 수신 즉시·120초 뒤 모두 `00:23:59`(남은 1 438 500ms 올림) → ④ `.canvas` `'canvas'`, `00:23:58`(멈춘 값에서 이어서, 튀지 않음) ⓑ 상태: `.pomodoro`와 글자 div가 처음부터 끝까지 같은 노드(TimerText 언마운트 없음 — 알림음 효과도 유지되는 근거, D-3) ⓒ bridge: `getTimer` 1회·`onTimerChanged` 1회·timer 구독 해제 0회, `setResting` 기록 `[[false], [true], [false]]`, `setSettings` 0회
+- 스펙: `src/overlay/test/OverlayApp.restOnly.test.tsx`
+
+### TC-344 · `LayerStack` 상태 레이어 마커 — `layer` ↔ `layer restLayer`, 같은 `<img>` · 종류: 자동 · 요구: R-41, R-19, R-27 · 설계: design.md §10.17 17.2 `Layer` `className` prop·상태 레이어만 마커·17.4 「rest 마커」 행, §10.1 2행, design/functions.md §5.3, §11 D-1(src 교체) · **신규(CR-069, 패킷 O-7)**
+- Given `LayerStack` `penMode false`, 매니페스트 `FULL`(body·idle·rest·kb_up·kb_down 0·1), `machine` 초기(`idle`), CSS mock `restLayer: 'restLayer'`
+- When `machine.layer` `'idle'` → `'rest'` → `'idle'` rerender, 마지막에 `without('rest')` + `'rest'` rerender
+- Then ⓐ 화면: img 순서 body·상태·kb, 같은 상태 img의 class `'layer'` → `'layer restLayer'` → `'layer'`, src `u:idle` → `u:rest` → `u:idle`. rest 미등록이면 img 2개(`u:body`·`u:kb_up`)만, 모두 `'layer'` ⓑ 상태: body·kb img는 같은 노드·class 늘 `'layer'`, `.restLayer` 개수 0 → 1 → 0 → 0 ⓒ bridge: 호출 없음(컴포넌트 단위 — 빈 mock). 기존 TC-028·TC-030·TC-031·TC-032 it 본문 무수정 통과(CSS mock 키 추가는 픽스처 보강)
+- 스펙: `src/overlay/test/layers.test.tsx`
+
+### TC-345 · CSS 원문 — `.restOnly` 규칙 4개만, `visibility`만 · 종류: 자동 · 요구: R-41, R-30, R-33 · 설계: design.md §10.17 17.2 CSS 전문·17.4 숨김 수단 행(`visibility`만 자식이 되살림, `display`·`opacity` 금지)·17.1 「전환은 즉시(페이드·전환 애니메이션 없음)」·17.5 K-2 · **신규(CR-069, 패킷 O-8)**
+- Given `src/overlay/overlay.module.css` 원문(기존 `norm`·`decl`·`block` — 주석 제거·공백 정규화)
+- When `restOnly`·`restLayer`가 든 규칙을 모두 [선택자 목록, 선언]으로 모음
+- Then ⓐ 화면(규칙): 선택자 집합 = `.restOnly .hairWrap`·`.restOnly .jellyWrap`·`.restOnly .pomodoro`·`.restOnly .restLayer` 정확히 4개 ⓑ 값: 앞 셋은 각각 `{ visibility: hidden }` 하나, `.restOnly .restLayer` = `{ visibility: visible }` 하나. 이 규칙들에 `display`·`opacity`·`animation*`·`transition*`·`transform*` 없음. `.canvas`·`.hairWrap`·`.jellyWrap`·`.layer`·`.pomodoro` 기본 블록에 `visibility` 없음(대기 상태는 아무것도 가리지 않음) ⓒ bridge: 해당 없음(정적 CSS) — 기존 TC-078~TC-082·TC-112·TC-143·TC-158·TC-174·TC-314 그대로 통과
+- 스펙: `src/overlay/test/overlayStyles.test.ts`
+
+### TC-346 · `timerDisplayMs`·`timerText` — 카운트다운 `restPaused`는 남은 시간 고정·올림 · 종류: 자동 · 요구: R-37, R-35 · 설계: design.md §10.15 「(v1.1) 카운트다운도 `restPaused` — 표시는 `timerText`가 남은 시간 고정」, §10.17 17.3 타이머 행·17.2 「변경 없음(확인만)」 `timerClock.ts`, design/functions.md §5.7 ①, RD-04 · **신규(CR-069, 패킷 O-9)**
+- Given 동결한 `cd('restPaused', 3000)`(durationMs 1 500 000)
+- When `now` 0·10 000·3 600 000에서 `timerDisplayMs(s, 0, now)`·`timerText(s, 0, now)`, `cd('restPaused', 2500)`, 대비 `cd('running', 3000)` `now` 10 000
+- Then ⓐ 화면(텍스트): 늘 `00:24:57`, 2500 → `00:24:58`(올림), running 대비 `00:24:47` ⓑ 값: 늘 1 497 000, 2500 → 1 497 500, `snapshotMode` `'countdown'`, `isTimerBlinking` false, 입력 불변 ⓒ bridge: 호출 없음(순수 함수 — 타입만 import). 소스 변경 없음 → 처음부터 green
+- 스펙: `src/overlay/test/timerClock.test.ts`
+
+### TC-347 · `useElapsedText` — 카운트다운 `restPaused` interval 0·값 고정, 복귀 뒤 이어서 · 종류: 자동 · 요구: R-37, R-35 · 설계: design.md §10.17 17.3 타이머 행(「글자는 가려져 있고(interval 없음), 복귀 → `running`으로 이어서 흐름」), §10.15 v1.1 문장, design/functions.md §5.7 ② · **신규(CR-069, 패킷 O-10)**
+- Given 가짜 시계, `useElapsedText(cd('restPaused', 3000), 0)`(렌더 횟수 계수)
+- When 5초 진행 → `cd('running', 3000)`·`at = performance.now()`로 rerender → 1.2초
+- Then ⓐ 화면(텍스트): `00:24:57` 고정(5초 뒤도) → running 직후 `00:24:57` → 1.2초 뒤 `00:24:56` ⓑ 상태: restPaused 동안 렌더 횟수 불변·`vi.getTimerCount()` 0, running에서 1 ⓒ bridge: 호출 없음(빈 mock). 소스 변경 없음 → green
+- 스펙: `src/overlay/test/useElapsedText.countdown.test.tsx`
+
+### TC-348 · 실제 화면 — 쉬는중이면 배경 + 쉬는중 그림만, 키 1번에 전부 복귀·젤리 · 종류: 수동(MC-48) · 요구: R-41, R-23, R-30, R-33 · 설계: design.md §10.17 17.1 표·17.5 수동 M-R1·잔여 위험 K-2 · **신규(CR-069, 패킷 M-R1)**
+- Given 실제 앱(CR-069 적용 빌드, `/dev-start`), 배경·뒷머리·뽀모도 인물·말풍선·몸통·대기·쉬는중·`kb_up`·마우스 파츠·펜 손 등록, 유휴 시간 1분, 「타이머 사용」 켬(글자 보임)
+- When MC-48 절차(1분 넘게 무입력 → 스크린샷 ① → 키 1번 → 스크린샷 ②)
+- Then ⓐ 화면: ① 배경과 쉬는중 그림만 보인다(뒷머리·인물·말풍선·시간 글자·팔·몸통·키보드·펜 손 안 보임, 페이드 없이 즉시) ② 누르는 순간 전부 다시 보이고 배경 뺀 캐릭터가 젤리로 출렁인다 ⓑ 상태: 오버레이 문구·안내 없음, `settings.json` 변화 없음 ⓒ 증거: 스크린샷 2장 경로 `doc/300_검증/screenshots/{YYYYMMDD-HHMM}/` 기록, `.dev-tauri.log` 오류 없음
+- 자동화 불가: 실제 CSS `visibility` 적용(jsdom 미적용 — K-2)·실제 전역 입력·투명 창
+
+### TC-349 · 실제 화면 — 쉬는중 그림을 비우면 쉬는중에도 캐릭터 그대로(D-1) · 종류: 수동(MC-49) · 요구: R-41, R-27 · 설계: design.md §10.17 17.1 3행·17.5 수동 M-R2, §10.9.2 둘째·셋째 행 · **신규(CR-069, 패킷 M-R2)**
+- Given TC-348의 실제 앱 이어서
+- When MC-49 절차(설정 창에서 쉬는중 그림 비우기 → 1분 넘게 무입력)
+- Then ⓐ 화면: 쉬는중이 돼도 캐릭터(뒷머리·뽀모도·팔 쉬는 자세·몸통·`kb_up`·펜 손)가 그대로 보이고 사라지지 않는다 ⓑ 상태: 오버레이 문구·안내 없음 ⓒ 증거: (선택) 스크린샷 경로, 로그 오류 없음
+- 자동화 불가: TC-348과 같음
+
+### TC-350 · 실제 앱 — 카운트다운 쉬는중 멈춤 → 복귀 뒤 이어서 내려감 · 종류: 수동(MC-50) · 요구: R-37, R-35, R-41 · 설계: design.md §10.17 17.3 타이머 행·17.5 수동 M-R3, §10.15 v1.1 문장 · **신규(CR-069, 패킷 M-R3 — TC-312 ④·TC-FLOW-19 Step 5 기대의 상세 절차)**
+- Given 실제 앱, 쉬는중 그림 등록, 유휴 시간 1분, 「타이머 사용」 켬·모드 타이머(카운트다운), 시작 시간 **00:05:00**(잠정 — 아래 「설계 확인 필요」 1), 설정 창 타이머 탭 미리보기가 보이게 둔다
+- When MC-50 절차(「시작」 → 무입력 1분 → 쉬는중 진입 순간 미리보기 값 기록 → 2분 더 대기 → 키 입력 → 10초 관찰)
+- Then ⓐ 화면: 쉬는중 동안 오버레이 글자는 가려지고(R-41) 미리보기 값은 진입 때 값(약 `00:04:00`)에서 2분 내내 그대로. 입력하면 오버레이 글자가 다시 보이고 그 값에서 1초씩 이어 내려간다(2분이 빠지지 않음, 튀지 않음) ⓑ 상태: 0에 닿지 않으므로 깜빡임·알림음 없음, 오버레이 문구 없음 ⓒ core·bridge: `.dev-tauri.log` 오류 없음
+- 자동화 불가: 실제 core 타이머·전역 입력·두 창 동시 관찰
+
+### 3. TC-FLOW
+
+### TC-FLOW-22 · S-22 자리를 비우면 방송 화면에 배경 + 쉬는중 그림만 보이고, 돌아와 키·마우스를 쓰면 곧바로 캐릭터가 돌아오며, 쉬는중 그림을 안 넣었으면 캐릭터가 사라지지 않음(TC-FLOW 목록에 더한다)
+Steps: TC-338 → TC-339 → TC-340 → TC-342 → TC-341 → TC-343 → (환경 전환) TC-348 → TC-349 (v2.9 신규, CR-069)
+
+- 표 규약: TC-FLOW-20과 같다(「연결:」·「환경 전환:」 Step은 그 TC의 Given으로 새로 준비, 호출 횟수는 Step 시작 기준).
+
+| Step | TC | Given(= 앞 Step 종료) | 종료 상태 |
+|---|---|---|---|
+| 1 | TC-338 | 흐름 시작: rest·배경·뒷머리·뽀모도·몸통·대기·`kb_up`·팔·펜 손 등록, 유휴 60초 | 쉬는중 — `.canvas` `'canvas restOnly'`, rest img `'layer restLayer'`, 나머지 레이어 DOM 유지, `setResting` `[false, true]` |
+| 2 | TC-339 | Step 1 종료(쉬는중 단독 표시) | 키 1번 → 같은 커밋에 `'canvas'`·`u:idle` `'layer'`·젤리, `setResting` 끝 `false` |
+| 3 | TC-340 | 연결: 새 마운트, 팔이 커서 추종 중 쉬는중 진입 | 마우스 이동 → `'canvas'`·팔 곧바로 추종(`DOWN`) |
+| 4 | TC-342 | 연결: 새 마운트, 쉬는중 단독 표시 중 설정 창에서 그림 교체 | rest 삭제 → 전부 보임, 재등록 → 다시 단독 표시, 클릭 → 복귀 |
+| 5 | TC-341 | 연결: rest를 넣지 않은 사용자 | 쉬는중에도 `'canvas'`·캐릭터(`kb_up`·뒷머리·뽀모도·펜 손) 그대로 |
+| 6 | TC-343 | 연결: 카운트다운 켬, 흐르는 중 자리 비움 | 글자 가림 동안 구독 유지·남은 시간 고정 → 복귀 뒤 이어서 |
+| 7 | TC-348(수동) | 환경 전환: 실제 앱, 유휴 1분 | 화면에 배경 + rest만 → 키 1번 전부 복귀·젤리(스크린샷 2장) |
+| 8 | TC-349(수동) | Step 7 앱 이어서 rest 비움 | 쉬는중에도 캐릭터 그대로 |
+
+### 4. 개정표 (본문 직접 개정 — 옛 문장은 취소선으로 보존)
+
+| TC | 개정 전 | 개정 후 | 근거 |
+|---|---|---|---|
+| TC-312(수동, MC-30) | 제목 「쉬는중 계속 흐름」, 설계 칸 「카운트다운은 쉬는중 무시」, Then ⓐ ④ 「쉬는중 이미지로 바뀐 뒤에도 글자가 계속 줄어듦(멈추지 않음)」 | 제목 「쉬는중 멈춤·복귀 뒤 이어서」, 요구에 R-41 추가, Then ⓐ ④ 「쉬는중 동안 멈춤(rest 등록 시 글자 가림 — 미리보기로 확인), 복귀 뒤 멈춘 값에서 이어서」, 상세 절차는 TC-350 | requirements R-37 개정·§1 용어 주(CR-050) 개정, contract v1.1, design.md §10.15 v1.1 문장·§10.17 17.3 |
+| TC-FLOW-19 | 제목 「자리를 비워도 계속 줄어듦」, Step 4 「카운트다운이면 core가 무시」, Step 5 「쉬는중 동안에도 글자가 계속 줄어듦」 | 제목 「쉬는중이면 멈추고 돌아오면 이어서」, Step 4 「두 모드 모두 core가 `restPaused`」, Step 4a TC-346·4b TC-347·4c TC-343 신설, Step 5 「쉬는중 동안 멈춤, 복귀 뒤 이어서」, Step 6 TC-350 신설 | requirements S-19 개정, 위와 같음 |
+
+`manual-checklist.md` MC-30 ④ 기대를 같은 패스에 같은 문장으로 개정했다(옛 문장 취소선).
+
+### 5. 설계 확인 필요 (v2.9 — 관리자 전달, TC로 우회하지 않음)
+
+1. **패킷 M-R3 「카운트다운 1분 시작 → 무입력 1분 → 쉬는중」**: 시작 시간 1분과 유휴 시간 1분이 같으면 0 도달(`finished`, D-3 경로 — 쉬는중이어도 core 변화 없음)과 쉬는중 진입이 거의 같은 순간이라 「쉬는중 동안 멈춘 값 → 복귀 뒤 이어서」를 관찰할 수 없다. TC-350·MC-50은 **잠정 시작 시간 00:05:00**(유휴 1분 + 대기 2분보다 김)으로 썼다. 「1분」이 유휴 시간을 뜻한 것인지, 시작 시간 값을 확정해 달라.
+2. **design.md §13 RTM R-41·R-37·R-35 예정 TC 칸·§10.17 17.5**는 「O-1~O-10(ui-test-designer 부여 예정)」으로 적혀 있다 — 정식 번호 TC-338~TC-350·TC-FLOW-22(위 1 매핑표) 기입은 ui-designer 동기화 몫.
+3. (정보) 패킷 O-1 매니페스트 목록(rest·hair·pomo_char·kb_up·mouse_base·pen_up)에는 idle·background·body·pomo_bubble이 없다. O-2의 「상태 `<img>` class `layer`」는 idle 등록이 전제이고 17.1 표가 배경·몸통·말풍선 열을 가지므로 스펙 픽스처 `M_REST`에 넷을 더했다. 패킷 의도와 다르면 알려 달라.
+4. (정보) design.md §10.17 17.3 타이머 행의 「끝남 중 쉬는중이면 알림음은 계속(D-3)」은 직접 자동 TC를 두지 않고 TC-343 ⓑ(TimerText 언마운트 없음) + 기존 TC-302(정지는 `finished` 이탈·언마운트 때만)의 결합으로 추적한다.
+
+### 6. 변경 대기열 점검
+
+새 대기열 행 없음 — CR-069는 TC가 구현보다 먼저다(TDD). 기존 행 상태 변경 없음.
+
+### 추적표 v2.9 추가분 — 「## 추적표」와 각 절 추가분 표에 더한다
+
+요구 ↔ TC(추가)
+
+| 요구ID | 자동 TC | 수동 TC |
+|---|---|---|
+| R-41(신설 🔒 2026-10-24) | TC-338, TC-339, TC-340, TC-341, TC-342, TC-343, TC-344, TC-345 | TC-348, TC-349, TC-350, TC-312(개정 ④ — 글자 가림) |
+| R-37(개정 — 쉬는중 자동 일시정지 표시) | TC-343, TC-346, TC-347 | TC-312(개정 ④), TC-350 |
+| R-35(더함 — 두 모드 모두·보고 불변) | TC-338, TC-339, TC-340, TC-341, TC-342, TC-343, TC-346, TC-347 | TC-350 |
+| R-30(더함 — 쉬는중 단독 표시 동안 숨김) | TC-338, TC-345 | TC-348 |
+| R-33(더함 — 쉬는중 단독 표시 동안 숨김) | TC-338, TC-343, TC-345 | TC-348 |
+| R-27·R-15·R-18·R-23·R-09·R-19·R-01·R-39(겸 추적) | R-27 TC-341·TC-344 / R-15 TC-339·TC-340·TC-341·TC-342 / R-18 TC-340 / R-23 TC-339 / R-09 TC-342 / R-19 TC-342·TC-344 / R-01 TC-338(문구 없음) / R-39 TC-343(D-3) | R-27 TC-349 / R-23 TC-348 |
+
+설계 항목 ↔ TC(추가)
+
+| 설계 항목 | TC |
+|---|---|
+| design.md §10.17 17.1 1행(대기) | TC-339, TC-340, TC-344 |
+| §10.17 17.1 2행(쉬는중 · rest 있음 — 배경 + rest만) | TC-338, TC-345, TC-348 |
+| §10.17 17.1 3행(쉬는중 · rest 없음 — D-1) | TC-341, TC-344, TC-349 |
+| §10.17 17.1 아래 줄(DOM에 남은 채 `visibility: hidden`·전환 즉시) | TC-338(DOM 유지), TC-345(전환·애니메이션 없음), TC-348 |
+| §10.17 17.2 `index.tsx` `hasRest`·`restOnly`·`.canvas` className | TC-338, TC-341, TC-342 |
+| §10.17 17.2 `LayerStack` `Layer` `className` prop·상태 레이어만 `restLayer` | TC-344, TC-338 |
+| §10.17 17.2 `overlay.module.css` `.restOnly` 규칙 2개 | TC-345 |
+| §10.17 17.2 `HairLayer`·`PomodoroLayer` 머리 주석(코드 변경 없음) | 회귀 TC-238~TC-246·TC-282~TC-288(동작 불변) |
+| §10.17 17.2 「변경 없음(확인만)」 `timerClock.ts`·`useElapsedText.ts` | TC-346, TC-347 |
+| §10.17 17.3 1~3행 | TC-338, TC-341, TC-339 |
+| §10.17 17.3 4행(`assets://changed` → `hasRest` 재계산) | TC-342 |
+| §10.17 17.3 5행(깨움 — 키·마우스 이동·클릭, D-2) | TC-339(키), TC-340(이동), TC-342 ③(클릭) |
+| §10.17 17.3 타이머 행(`restPaused` 두 모드·interval 없음·복귀 이어서·D-3) | TC-343, TC-346, TC-347, TC-350 / D-3: TC-343 ⓑ + 기존 TC-302 |
+| §10.17 17.3 문구·안내 없음(R-01) | TC-338 ⓐ |
+| §10.17 17.4 숨김 수단·판정 위치·rest 마커·상태기계 불변 | TC-345 / TC-338(OverlayApp 파생값 1개) / TC-344 / 회귀 TC-001~TC-014(전이표 불변) |
+| §10.17 17.5 K-2 | TC-338(클래스) + TC-345(원문) + TC-348(스크린샷) |
+| §2 `.canvas.restOnly` bullet, §4 `hasRest`·`restOnly` 행 | TC-338, TC-341, TC-342 |
+| §6 P-3 (CR-069 문장) | TC-338, TC-339 |
+| §6 P-8 ②④·P-9 ①(`restPaused` 두 모드 — 남은 시간 고정) | TC-343, TC-346, TC-347 |
+| §7 `set_resting` 행(contract v1.1 두 모드 공통 — 래퍼·호출 불변) | TC-338 ⓒ, TC-341 ⓒ, TC-343 ⓒ |
+| §10.1 표 hair·pomo·0·1·3·pen 행 「쉬는중 단독 표시 중 숨김」, 2행 `.restLayer` | TC-338, TC-344 |
+| §10.9.2 첫 행·회귀 ⑩ / 둘째·셋째 행 | TC-338 / TC-341 |
+| §10.11 그림 줄(부모 `.hairWrap`이 가려짐) | TC-338, TC-345 |
+| §10.14 표시 조건 문장(DOM·구독 유지) | TC-343 |
+| §10.15 v1.1 문장·TC-312 수동 기대 | TC-346, TC-347, TC-343, TC-312(개정) |
+| design/functions.md §5.1 `.canvas` className·§5.3 `Layer` className | TC-338, TC-344 |
+| design/components.md 렌더 조건 `.canvas.restOnly` 행 | TC-338, TC-341 |
+| §9 접근성 불변(문구·aria 추가 없음) | TC-338 ⓐ |
+| §13 RTM R-41 행·R-37·R-35 비고 | 위 요구 ↔ TC 표 |
+
+사용자행 ↔ TC-FLOW(추가·개정)
+
+| 사용자행 | TC-FLOW |
+|---|---|
+| S-22(신설) | TC-FLOW-22 |
+| S-19(개정 — 쉬는중이면 멈추고 돌아오면 이어서) | TC-FLOW-19(개정 — Step 4·4a~4c·5·6) |
+
+CR ↔ TC(추가): CR-069 → 신규 TC-338~TC-350·TC-FLOW-22 / 개정 TC-312·TC-FLOW-19 / 스펙 `OverlayApp.restOnly.test.tsx`(신규)·`layers.test.tsx`·`overlayStyles.test.ts`·`timerClock.test.ts`·`useElapsedText.countdown.test.tsx`(it 추가) / 수동 MC-48~MC-50·MC-30 ④ 개정.
+
 ## 변경이력
 
 | 일자 | 버전 | 내용 | 근거 |
 |---|---|---|---|
-| 2026-10-15 | v2.8 | (최신 행) **doc-sync(v2.8) — 요구 v3.4·design.md 2026-10-15 doc-sync 행 대조 · 보강.** ① §0.2 변형 참조표 「기본 영역」 행: 기본 어깨 (558,500) → **(582,484)**(CR-044 🔒, 확정사항 §4), θh 141.71 → 143.43, θt 148.63 / 172.22 → 148.24 / 168.8, 배율 2.976 / 3.815 → 2.239 / 2.733(상한 1.6 유지) — TC-123 스펙 기대와 같은 값(스펙 변경 없음) ② 통합 추적표 R-23·R-24 행을 design.md RTM 칸과 같은 목록으로(CR-066 TC-331~TC-334·TC-333·수동 TC-336 합침, v2.7 R-23 개정 TC 중 RTM R-23 칸에 없는 12건은 「겸 추적」 칸) ③ 신규 수동 **TC-337**(MC-47 — 항상 위 복구, R-01 v3.4 비고, core window.md §3.2 WT·MC-51~MC-62 참조), 자동 TC 없음 ④ 변경 대기열 점검 — Q-01 대기 유지, Q-02 「대기(ui-tester 검증 전)」 보고만, 행 상태 변경 없음 ⑤ 계약 v0.31·요구 v3.4 판 표기 확인(기대 영향 없음), v2.7 「설계 확인 필요」 1·2 해소 표기, CR-066 본문 규칙표 행 번호(§10.6 3·13, §10.8 4·7·9·11·12·13, §10.12 바운스 줄·10)로 설계↔TC 대체 행. 「설계 확인 필요」 v2.8 1~3(RTM R-26·R-09 칸에 TC-332·334·335·336 없음 — TC-335는 RTM 전체에 없음, RTM R-01에 TC-337 없음). `manual-checklist.md` 같은 패스(MC-47 · 공통 준비 기본 `partPos` (389,492) → (411,464) 문구 정정). 자동 271 불변, 수동 45 → 46, 폐기 20·TC-FLOW 20 불변 | requirements v3.4 R-01 비고 · design.md 변경이력 2026-10-15 doc-sync 행·§7·§13 RTM · 확정사항 §4 · core window.md §3.2 · `src/state/mouseMapping.ts` `armTransform` · `OverlayApp.test.tsx` TC-123 |
+| 2026-10-24 | v2.9 | (최신 행) **CR-069 증분(쉬는중 단독 표시 R-41 · 카운트다운 쉬는중 자동 일시정지 표시 R-37·R-35 개정 · 보강).** 「CR-069 쉬는중 단독 표시」 절 신설(기준·§0.3 보충·정식 번호 매핑·신규 TC·TC-FLOW-22·개정표·설계 확인 필요·추적 추가분). 신규 자동 TC-338~TC-343(`OverlayApp.restOnly.test.tsx` 신규 — 패킷 O-1~O-6, TC-342에 17.3 깨움 클릭 포함), TC-344(`layers.test.tsx` it 추가 — CSS mock `restLayer` 키, 기존 TC-028·030·031·032 무수정), TC-345(`overlayStyles.test.ts`), TC-346(`timerClock.test.ts`), TC-347(`useElapsedText.countdown.test.tsx`). 신규 수동 TC-348~TC-350(MC-48~MC-50 — 패킷 M-R1~M-R3, MC-50 시작 시간 잠정 00:05:00). TC-FLOW-22(S-22) 신설. 개정 TC-312(제목·설계 칸·Then ⓐ ④ 「계속 줄어듦」 → 「쉬는중 동안 멈춤, 복귀 뒤 이어서」, 취소선 보존), TC-FLOW-19(제목·Steps·Step 4·5, Step 4a~4c·6 신설). 머리 「현행 판」 줄 추가. 「설계 확인 필요」 1~4(M-R3 시간 겹침, RTM 번호 기입, O-1 픽스처 보충, D-3 결합 추적). `manual-checklist.md` 같은 패스(MC-48~MC-50 절·MC-30 ④ 개정). 자동 271 → 281, 수동 46 → 49, 폐기 20 불변, TC-FLOW 20 → 21 | CR-069 · requirements.md 2026-10-24(R-41·R-37·R-35·R-30·R-33·S-19·S-22) · design.md §10.17·§10.9.2·§13 RTM · 패킷 rest-display-03-packet-ui.md §A.5 · contract v1.1 |
+| 2026-10-15 | v2.8 | **doc-sync(v2.8) — 요구 v3.4·design.md 2026-10-15 doc-sync 행 대조 · 보강.** ① §0.2 변형 참조표 「기본 영역」 행: 기본 어깨 (558,500) → **(582,484)**(CR-044 🔒, 확정사항 §4), θh 141.71 → 143.43, θt 148.63 / 172.22 → 148.24 / 168.8, 배율 2.976 / 3.815 → 2.239 / 2.733(상한 1.6 유지) — TC-123 스펙 기대와 같은 값(스펙 변경 없음) ② 통합 추적표 R-23·R-24 행을 design.md RTM 칸과 같은 목록으로(CR-066 TC-331~TC-334·TC-333·수동 TC-336 합침, v2.7 R-23 개정 TC 중 RTM R-23 칸에 없는 12건은 「겸 추적」 칸) ③ 신규 수동 **TC-337**(MC-47 — 항상 위 복구, R-01 v3.4 비고, core window.md §3.2 WT·MC-51~MC-62 참조), 자동 TC 없음 ④ 변경 대기열 점검 — Q-01 대기 유지, Q-02 「대기(ui-tester 검증 전)」 보고만, 행 상태 변경 없음 ⑤ 계약 v0.31·요구 v3.4 판 표기 확인(기대 영향 없음), v2.7 「설계 확인 필요」 1·2 해소 표기, CR-066 본문 규칙표 행 번호(§10.6 3·13, §10.8 4·7·9·11·12·13, §10.12 바운스 줄·10)로 설계↔TC 대체 행. 「설계 확인 필요」 v2.8 1~3(RTM R-26·R-09 칸에 TC-332·334·335·336 없음 — TC-335는 RTM 전체에 없음, RTM R-01에 TC-337 없음). `manual-checklist.md` 같은 패스(MC-47 · 공통 준비 기본 `partPos` (389,492) → (411,464) 문구 정정). 자동 271 불변, 수동 45 → 46, 폐기 20·TC-FLOW 20 불변 | requirements v3.4 R-01 비고 · design.md 변경이력 2026-10-15 doc-sync 행·§7·§13 RTM · 확정사항 §4 · core window.md §3.2 · `src/state/mouseMapping.ts` `armTransform` · `OverlayApp.test.tsx` TC-123 |
 | 2026-09-30 | v2.7 | **CR-066 증분(대기열 소진 Q-08 · 보강)** — 바운스 시작 규칙: 새 키 누름·펜 모드 새 클릭 누름은 무엇을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체), 자동 반복·부르르·뗌·중복 누름·비펜 모드 클릭은 불변. 「CR-066 바운스 시작 규칙」 절 신설(기준·규칙·정식 번호 매핑·신규 TC·개정표 2종·설계 확인 필요·추적 추가분). 신규 자동 TC-331~TC-335(임시 `TC-FIX66-1`~`5` → 정식, `src/state/inputMachine.test.ts` it 이름 교체 — 로직 불변), 신규 수동 TC-336(MC-46 게임 상황 실측). 개정 자동 25건(TC-100·TC-129~TC-133·TC-136·TC-145~TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208~TC-211·TC-215~TC-218·TC-257 — Then 값을 개정·통과된 스펙에 맞춤), 개정 수동 TC-151·TC-159·TC-222·TC-258, TC-FLOW-01·07(연결 2a 신설)·08·10(연결 3a·4a 변경) 종료 값. `inputMachine.special.test.ts` TC-133 주석의 `TC-FIX66-3` → `TC-333`(주석만). `manual-checklist.md` 같은 패스(MC-46·CR-066 개정 주). 대기열 Q-08 → 전환됨. 자동 266 → 271, 수동 44 → 45, 폐기 20·TC-FLOW 20 불변 | 확정사항 §5 바운스 시작 규칙 🔒 · CR 대장 CR-066 · Q-08 · design/functions.md §5.2 · design.md 변경이력 CR-066 · `src/state/inputMachine.ts` |
 | 2026-09-30 | v2.6 | (최신 행) **doc-sync 배치(보강) — design.md 2026-09-30 doc-sync 행·현행 소스 대조.** 「doc-sync 2026-09-30」 절 신설(기준·개정표·픽스처 표현 정정·설계 확인 필요 해소·스펙 변경·추적 추가분). 개정표: TC-043·TC-044·TC-046·TC-054·TC-080·TC-105·TC-143(옛 `bounce` prop·`armWrap bounce`·`.bounce` 기대 → CR-022 현재 동작), TC-045·TC-142 **폐기(CR-022)** 재표기, 설계 참조 「§5.4 바운스 래퍼」·「§3 `bounce` prop」 → 「§5.4 `.armWrap` 컨테이너」(TC-081·TC-100·TC-144·TC-145·TC-147 포함), TC-198·TC-213 설계 칸 `PenHand` Props 8개·`machine` = `isPressing`만, TC-322 `POPUP_OPEN` → `PopupGate`. v1.6 절 「설계 확인 필요」 2건 → 해소 표기. 픽스처 「기본」 표현 = 스펙 픽스처(제품 기본은 CR-044 값). 추적: R-09·R-23~R-25 통합 행(TC-204 이후 포함), `.armWrap` 컨테이너·`PenHand` Props·`PopupGate` 설계 행 대체. 스펙: `OverlayApp.timerMode.test.tsx`·`TimerText.blink.test.tsx` 옛 `URL.createObjectURL` stub 삭제(기대 불변), `timerClock.test.ts` 머리 주석 R-34 현행값. `manual-checklist.md` 같은 패스(머리글 현행 버전·MC-37 선행 조건 `PopupGate`·변경이력). 신규 TC 없음, 수 불변(자동 266 · 수동 44 · 폐기 20 · TC-FLOW 20). CR 「적용·미검증」·대기열 상태 불변 | design.md 변경이력 2026-09-30 doc-sync · design/functions.md §5.4·§5.5 · design.md §10.12·§10.16·RTM · CR-022·CR-042·CR-044·CR-058·CR-062 · `src/components/utils/alarmSound.ts` |
 | 2026-09-29 | v2.5 | **CR-062 증분(R-40 오버레이 오른쪽 클릭 메뉴의 ui 몫 = WebView2 기본 메뉴 억제, 증분 모드·보강)**. 「CR-062 오버레이 오른쪽 클릭 메뉴」 절 신설(기준·범위 규칙·§0.3 red 보충·잔여 위험·회귀 지정 표·추적 3종·CR). 신규 자동 TC-315(`OverlayApp.contextMenu.test.tsx` — ① `.root`·키보드 img·팔 img의 `contextmenu` 반환 `false`, `document` 도달 `defaultPrevented` true(전파 유지), DOM·상태·포커스·모든 bridge 래퍼 호출 수 불변, `[role="menu"]` 없음, `preventContextMenu` export 없음 ② 오른쪽 누름·뗌 → contextmenu → 오른쪽 누름·뗌에서 클릭 파츠 `mouse_right` ↔ `mouse_base` 그대로). 신규 수동 TC-316~TC-330(MC-31~MC-45 — 횡단 설계 §7 원문, MC-36 「한쪽만 창 안」의 ui 핸들러·기본 메뉴는 관찰 항목, 시작 직후 로딩 전 기본 메뉴는 수용된 잔여 위험이라 판정 제외). TC-FLOW-21(S-21: TC-319 → TC-318 → TC-325). 회귀는 기존 TC 번호 참조만(R-09 TC-013·TC-039·TC-062, R-26 TC-214·TC-218·TC-219, R-04 TC-071·TC-073·TC-077·TC-088, R-12·R-28 TC-077·TC-227). 기존 TC 개정 없음. `manual-checklist.md` 같은 패스(CR-062 절·RV-02). 자동 265 → 266, 수동 29 → 44, TC-FLOW 19 → 20 | CR-062(사용자 결정 🔒 2026-09-29 U-1·U-3·U-5, U-2·U-4 수용) · requirements.md v3.2 R-40·R-28 용어 주·S-21 · design.md §2·§6 P-10·§7·§9·§10.9.1 L-7·L-8·§10.16·RTM · design/functions.md §5.1 · design/components.md §3 · design/a11y.md · 횡단 설계 overlay-context-menu.md v2 §7 |

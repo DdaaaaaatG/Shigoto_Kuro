@@ -142,4 +142,31 @@ describe('useElapsedText — 카운트다운 (design/functions.md §5.7 ②, des
     const { result } = renderHook(() => useElapsedText({ status: 'paused', elapsedMs: 12_000, mode: 'stopwatch', durationMs: 0 }, 0))
     expect(result.current).toBe('00:00:12')
   })
+
+  // CR-069(R-37 개정·R-35, contract v1.1): 카운트다운도 쉬는중이면 core가 restPaused를 보낸다 — 훅은 남은 시간을 고정 표시.
+  // 근거: design.md §10.17 17.3 타이머 행(「글자는 가려져 있고(interval 없음), 복귀 → running으로 이어서 흐름」), §10.15 v1.1 문장.
+  // 소스 변경 없음(useElapsedText.ts 「변경 없음(확인만)」) — 처음부터 green이 정상. 시나리오: scenarios.md TC-347 (패킷 §A.5 O-10)
+  it('TC-347: 카운트다운 restPaused(경과 3초) → 00:24:57 고정, 5초 진행해도 텍스트·렌더 횟수 불변·interval 0, 복귀 running(같은 경과)에서 이어서 00:24:56 (CR-069)', async () => {
+    let renders = 0
+    const { result, rerender } = renderHook(
+      ({ s, at }) => {
+        renders++
+        return useElapsedText(s, at)
+      },
+      { initialProps: { s: cd('restPaused', 3_000), at: 0 } },
+    )
+    expect(result.current).toBe('00:24:57')
+    expect(vi.getTimerCount()).toBe(0)
+    const r0 = renders
+    await advance(5_000)
+    expect(result.current).toBe('00:24:57')
+    expect(renders).toBe(r0)
+    expect(vi.getTimerCount()).toBe(0)
+
+    rerender({ s: cd('running', 3_000), at: performance.now() })
+    expect(result.current).toBe('00:24:57')
+    expect(vi.getTimerCount()).toBe(1)
+    await advance(1_200)
+    expect(result.current).toBe('00:24:56')
+  })
 })

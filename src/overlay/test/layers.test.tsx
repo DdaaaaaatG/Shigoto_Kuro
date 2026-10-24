@@ -26,6 +26,9 @@ vi.mock('../overlay.module.css', () => ({
     // 잔존 감시용(CR-022 — 소스가 옛 클래스를 쓰면 className에 드러난다)
     bounce: 'bounce',
     bounceAlt: 'bounceAlt',
+    // CR-069(R-41, scenarios.md TC-344): 상태 레이어 마커 — design.md §10.17 17.2 `styles.restLayer`.
+    //   TC-028·TC-030·TC-031·TC-032는 대기 상태 className·src·같은 노드만 보므로 이 키를 더해도 기대가 바뀌지 않는다(it 무수정)
+    restLayer: 'restLayer',
   },
 }))
 
@@ -104,5 +107,38 @@ describe('LayerStack 렌더', () => {
     rerender(<LayerStack penMode={false} manifest={FULL} machine={machine({ layer: 'rest' })} />)
     expect(imgs(container)[1]).toBe(stateImg)
     expect(stateImg.getAttribute('src')).toBe('u:rest')
+  })
+
+  // CR-069(R-41, 🔒 2026-10-24) — design.md §10.17 17.2 `Layer` className prop·상태 레이어 마커, 17.4 「rest 마커」 행.
+  // 시나리오: scenarios.md TC-344 (패킷 rest-display-03-packet-ui.md §A.5 O-7)
+  it('TC-344: machine.layer idle → rest → idle — 같은 상태 <img>의 class "layer" → "layer restLayer" → "layer", 몸통·키보드 img는 늘 "layer", rest 미등록이면 마커 없음 (CR-069)', () => {
+    const { container, rerender } = render(<LayerStack penMode={false} manifest={FULL} machine={machine()} />)
+    const [body, stateImg, kb] = imgs(container)
+    expect(srcs(container)).toEqual(['u:body', 'u:idle', 'u:kb_up'])
+    expect(stateImg.className).toBe('layer')
+    expect(container.querySelectorAll('.restLayer')).toHaveLength(0)
+
+    rerender(<LayerStack penMode={false} manifest={FULL} machine={machine({ layer: 'rest' })} />)
+    expect(imgs(container)).toHaveLength(3)
+    expect(imgs(container)[0]).toBe(body)
+    expect(imgs(container)[1]).toBe(stateImg)
+    expect(imgs(container)[2]).toBe(kb)
+    expect(stateImg.getAttribute('src')).toBe('u:rest')
+    expect(stateImg.className).toBe('layer restLayer')
+    expect(body.className).toBe('layer')
+    expect(kb.className).toBe('layer')
+    expect(container.querySelectorAll('.restLayer')).toHaveLength(1)
+
+    rerender(<LayerStack penMode={false} manifest={FULL} machine={machine()} />)
+    expect(imgs(container)[1]).toBe(stateImg)
+    expect(stateImg.getAttribute('src')).toBe('u:idle')
+    expect(stateImg.className).toBe('layer')
+    expect(container.querySelectorAll('.restLayer')).toHaveLength(0)
+
+    // D-1: rest 미등록이면 rest 상태여도 상태 img가 없고 마커도 없다(몸통·키보드는 그대로 "layer")
+    rerender(<LayerStack penMode={false} manifest={without('rest')} machine={machine({ layer: 'rest' })} />)
+    expect(srcs(container)).toEqual(['u:body', 'u:kb_up'])
+    for (const img of imgs(container)) expect(img.className).toBe('layer')
+    expect(container.querySelectorAll('.restLayer')).toHaveLength(0)
   })
 })

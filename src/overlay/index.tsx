@@ -15,6 +15,7 @@
  *   상태기계에 알려 마우스 클릭도 키 누름처럼 센다(CR-027, R-26)
  */
 //! CR-051: .hairWrap(뒷머리, 젤리 동기) → BackgroundLayer → PomodoroLayer(고정, CR-045) → .jellyWrap 순으로 그린다
+//! CR-069(R-41): 쉬는중 && rest 등록이면 .canvas에 .restOnly — 배경 + rest만 보이고 나머지는 CSS visibility로 가린다(DOM 유지, §10.17)
 import {
   useCallback,
   useEffect,
@@ -223,6 +224,10 @@ const OverlayApp = () => {
   /** 본체 래퍼와 뒷머리 래퍼가 같은 커밋에서 같은 클래스를 받도록 한 번만 계산(CR-051) */
   const motion = wrapMotion(machine)
   const hasHair = useMemo(() => findEntry(manifest, 'hair') !== undefined, [manifest])
+  const hasRest = useMemo(() => findEntry(manifest, 'rest') !== undefined, [manifest])
+  /** 쉬는중 단독 표시(R-41, 🔒 2026-10-24) — rest 그림이 있을 때만(D-1). 배경과 rest만 보이고 나머지는
+   *  CSS visibility로 가린다(언마운트 없음 — 구독·알림음·이미지 디코드 유지, design §10.17) */
+  const restOnly = machine.layer === 'rest' && hasRest
 
   return (
     <div
@@ -233,7 +238,7 @@ const OverlayApp = () => {
     >
       {canvas && (
         <div
-          className={styles.canvas}
+          className={restOnly ? `${styles.canvas} ${styles.restOnly}` : styles.canvas}
           style={{
             width: canvas.width,
             height: canvas.height,

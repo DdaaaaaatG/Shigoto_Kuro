@@ -88,9 +88,16 @@ export const pickPenKeyboardEntry = (manifest: AssetManifest, machine: MachineSt
   return specialEntry ?? findEntry(manifest, 'kb_up')
 }
 
-const Layer = ({ entry }: { entry?: AssetEntry }) => {
+const Layer = ({ entry, className }: { entry?: AssetEntry; className?: string }) => {
   if (!entry) return null
-  return <img className={styles.layer} src={entry.url} alt="" draggable={false} />
+  return (
+    <img
+      className={className ? `${styles.layer} ${className}` : styles.layer}
+      src={entry.url}
+      alt=""
+      draggable={false}
+    />
+  )
 }
 
 const LayerStack = ({ manifest, machine, penMode }: Props) => {
@@ -101,10 +108,12 @@ const LayerStack = ({ manifest, machine, penMode }: Props) => {
   // 않는다(판정은 OverlayApp이 한 번만 한다 — design.md §10.10)
   const kb = penMode ? pickPenKeyboardEntry(manifest, machine) : pickKeyboardEntry(manifest, machine)
 
+  // 쉬는중 단독 표시(R-41, §10.17): 상태 레이어만 rest일 때 .restLayer 마커를 단다 — .restOnly가 가리는 .jellyWrap 안에서
+  // 이 그림만 CSS로 되살린다. 몸통·키보드는 마커 없음(그대로 'layer'), 대기 상태도 'layer' 그대로(TC-028·031·032)
   return (
     <>
       <Layer entry={body} />
-      <Layer entry={state} />
+      <Layer entry={state} className={machine.layer === 'rest' ? styles.restLayer : undefined} />
       <Layer entry={kb} />
     </>
   )

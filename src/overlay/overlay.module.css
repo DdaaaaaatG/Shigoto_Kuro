@@ -162,3 +162,16 @@
     transform: scale(1, 1);
   }
 }
+
+/* 쉬는중 단독 표시(R-41, 🔒 2026-10-24) — .canvas에 .restOnly가 붙으면 배경과 쉬는중 그림만 보인다.
+   visibility는 자식이 다시 visible로 덮을 수 있는 유일한 숨김 속성이라, .jellyWrap 안의 rest 그림(.restLayer)만
+   되살린다. 언마운트하지 않으므로 이미지 재디코드·타이머 구독 해제·알림음 정지가 없다. 전환 애니메이션 없음(즉시). */
+.restOnly .hairWrap,
+.restOnly .pomodoro,
+.restOnly .jellyWrap {
+  visibility: hidden;
+}
+
+.restOnly .restLayer {
+  visibility: visible;
+}

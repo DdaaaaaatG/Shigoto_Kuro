@@ -3,6 +3,7 @@
  * 상태(idle/rest)·키 입력·특수 키·클릭·펜 모드·위치 잠금과 무관하게 항상 같은 그림 1장(교체·회전·커서 추종 없음).
  * 젤리·부르르는 부모 `.hairWrap`이 `.jellyWrap`과 같은 motion 클래스로 준다(이 레이어에는 애니메이션 클래스·
  * 인라인 transform을 붙이지 않는다). `BackgroundLayer`와 같은 순수 렌더 모양이지만 슬롯('hair')·자리가 달라 파일을 따로 둔다.
+ * 쉬는중 단독 표시 때는 부모가 CSS로 가린다 — R-41 (.restOnly .hairWrap, design.md §10.17. 이 컴포넌트는 prop·코드 그대로)
  */
 import { memo } from 'react'
 import type { AssetManifest } from 'bridge'
