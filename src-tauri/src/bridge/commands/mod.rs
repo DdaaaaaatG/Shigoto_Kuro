@@ -540,9 +540,9 @@ pub(crate) fn do_control_timer(
     Ok((timer.snapshot(now), changed))
 }
 
-/// [계약] contract.md §5·§5.8 set_resting(resting) [요구] PT-06, TM-05
-/// 판정 주체는 오버레이 상태기계(core는 판정하지 않는다). 설정 잠금은 쓰지 않는다. (v0.23) 카운트
-/// 다운이면 core가 항상 변화 없음을 돌려준다 — 오버레이는 모드를 보지 않고 그대로 부른다.
+/// [계약] contract.md §5·§5.8 set_resting(resting) [요구] PT-06, RD-01·RD-02(v1.1 — TM-05 개정)
+/// 판정 주체는 오버레이 상태기계(core는 판정하지 않는다). 설정 잠금은 쓰지 않는다. (v1.1) 두 모드
+/// 공통 — core가 `running`↔`restPaused`를 정한다. 오버레이는 모드를 보지 않고 그대로 부른다.
 /// [에러] state.poisoned [부수효과] (조건부) timer://changed emit·트레이 메뉴 동기화
 #[tauri::command]
 pub fn set_resting(

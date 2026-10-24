@@ -247,7 +247,7 @@ export interface BridgeError {
 
 // ─── 뽀모도 타이머 (contract.md §3.9, v0.21 · CR-045 / v0.23 · CR-048) ─────
 /**
- * restPaused = 쉬는중이라 자동 일시정지(입력 시 자동 재개 — 스톱워치 전용), paused = 사용자
+ * restPaused = 쉬는중이라 자동 일시정지(입력 시 자동 재개 — (v1.1) 스톱워치·카운트다운 공통), paused = 사용자
  * 일시정지·타이머 끔(자동 재개 없음), (v0.23) finished = 카운트다운 0 도달 뒤 10초(깜빡임) —
  * core가 10초 뒤 stopped로 되돌린다(카운트다운 전용)
  */

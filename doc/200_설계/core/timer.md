@@ -1,7 +1,8 @@
 # timer 모듈 설계
 
-- 상태: 확정(사용자) — CR-048 증분(§2.3·§3.5~§3.9·§4)은 인계 패킷 기준 확정(사용자 결정 D-1~D-11 권고안) · 최종 갱신: 2026-09-30(doc-sync)
+- 상태: 확정(사용자) — CR-048 증분(§2.3·§3.5~§3.9·§4)은 인계 패킷 기준 확정(사용자 결정 D-1~D-11 권고안) · rest-display 증분(TM-05 개정)은 🔒 사용자 결정 ① + 02-design §5a D-3 권고안 기준(패킷 `rest-display-03-packet-core.md`) · 최종 갱신: 2026-10-24(rest-display)
 - 변경이력:
+  - 2026-10-24 (3차, rest-display — **카운트다운 쉬는중 자동 일시정지(TM-05 개정, 🔒 2026-10-24)**, 사용자 결정 ① 「카운트다운도 쉬는중 자동 일시정지·입력 시 자동 재개」가 CR-048 「쉬는중에도 계속 줄어듦」을 대체. 요구 RD-01~04, 정본 패킷 `doc/200_설계/architecture/rest-display-03-packet-core.md` §2~§5, 전이표 정본 `rest-display-02-design.md` §2.2) `Timer::set_resting`의 카운트다운 조기 반환을 지워 두 모드가 같은 규칙 「`Running`만 자동 일시정지, `RestPaused`만 자동 재개」를 쓴다. `set_resting` 시그니처·`TimerStatus` 멤버·`TimerSnapshot` 모양·직렬화 불변, 새 공개 API 없음. `apply`·`disable`·`tick`·`next_wake`·`configure`·드라이버·트레이 보기는 이미 모드 무관이라 코드 불변(테스트로 고정만). 갱신 절: §1 TM-05·RD 표, §2.3(`RestPaused` 주석·`set_resting` 행), §3.5.1(전이표 두 열·`RestPaused` 행), §3.5.2(`set_resting` 본문), §3.5.3-3, §3.5.5(`//!`), §3.8(C4 개정·C19~C23), §3.9(`set_resting` 행), §10, §11. 옛 문장은 취소선으로 남긴다. 과도 실패 1건(A-5, bridge 테스트 `set_resting_countdown_noop`)은 §3.8·§11. **소스 미적용**(core-implementer 진행).
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 1·2차의 「소스 미적용」은 모두 소스에 반영됨을 확인했다: `timer/mod.rs`(`FINISHED_HOLD`:79·`with_config`:130·`disable`:224·`configure`:241·`tick`:259·`next_wake`:281·`status`:290), `timer/driver.rs`(`TimerWaker`:18·`spawn`:32), `lib.rs`(`AppState.timer_waker`, 깔때기 `publish_timer_change`:424), bridge 깔때기 경유(`bridge/commands/mod.rs:511-591`). §10 표의 TM-01·05·06·12 상태를 「소스 반영」으로, 「CR-048 과도 상태」 행을 해소로 바꿨다. 아래 1·2차 행의 「소스 미적용」은 당시 기록이라 그대로 둔다.
   - 2026-09-26 (2차, CR-048 타이머 모드 — 🔒 사용자 결정 D-1~D-11 권고안 확정(확정사항 CR-048 결정 줄), 정본 패킷 `doc/200_설계/architecture/timer-mode-03-packet-core.md`, 근거 `timer-mode-02-design.md` §3.1~§3.4·§10) **카운트다운 모드와 끝남(`Finished`) 상태 추가.** `TimerConfig`(모드·시작 시간)·`FINISHED_HOLD`(10초)·`with_config`·`configure`·`tick`·`next_wake`·`status` 신규, 스냅숏에 `mode`·`durationMs`. `apply`·`set_resting`·`disable`·`snapshot` 시그니처 불변(`bridge/commands.rs` 무수정 컴파일). 신규 `timer/driver.rs` — 마감 시각 스레드 `timer-deadline`(`TimerWaker`·`spawn`, 주기 깨움 없음, `std::sync::mpsc`만). `lib.rs` 조립: `AppState.timer_waker`, 깔때기 `publish_timer_change`, 시작 순서(§3.7). `TimerError::Disabled` 문구 변경(code 불변). 의존 추가 `timer → settings`(`TimerMode`·`TimerSettings`). **§2.3이 §2.1의 `TimerStatus`·`TimerSnapshot`·`TimerError` 문구·`Timer` 필드를, §3.5.2가 §3.3 `reset`·경과 규칙을, §4 머리말이 옛 「스레드 없음」을 대체한다**(옛 절은 스톱워치 기록으로 유지). 테스트는 §3.8(§8 증분), bridge 요구는 §3.9(§9 증분). **소스 미적용.**
   - 2026-09-26 (1차, CR-045 뽀모도 타이머, 🔒 사용자 결정 U-1~U-8 권고안 채택 — 확정사항 §6 CR-045 「결정」 줄, 패킷 `doc/200_설계/architecture/pomodoro-03-packet-core.md`, 근거 `pomodoro-02-design.md` §3.1) **신규 모듈 `src-tauri/src/timer/`** — 휘발 스톱워치 상태기계(`Timer`·`TimerStatus`·`TimerAction`·`TimerSnapshot`·`TimerError`), `AppState.timer: Mutex<Timer>`. 스레드·unsafe·새 의존성 없음. **소스 미적용.**
@@ -34,11 +35,20 @@ CR-048 요구(아키텍처 ID `TM-xx`, 02-design §9 RTM — 화면 요구ID는 
 | TM-01 | 「스톱워치 사용」·「타이머 사용」 상호배타, 둘 다 꺼짐 허용(D-1 A: `enabled` 유지 + `mode`) | `TimerConfig.mode`·`configure` — 모드가 바뀌면 새 모드의 `Stopped`(§3.5.3, D-4). 토글 조합 계산은 ui |
 | TM-03 | 스톱워치 동작 불변 | 전이표 §3.2 그대로. `tick`·`next_wake`는 스톱워치에 아무 일도 안 함 |
 | TM-04 | 시작 시간 지정(최대 99:59:59) — 흐르는 중 변경은 안전망 | `configure` — 대기일 때만 즉시, 그 밖은 다음 대기부터(§3.5.3, D-5). 범위는 [settings.md](settings.md) §3.10 |
-| TM-05 | 카운트다운: 0까지 내려감, 일시정지·멈춤(멈춤 = 지정 시간), 쉬는중에도 계속 | 전이표 §3.5.1, `set_resting` no-op, 스냅숏 `durationMs` |
+| TM-05 | 카운트다운: 0까지 내려감, 일시정지·멈춤(멈춤 = 지정 시간), ~~쉬는중에도 계속~~ **(🔒 2026-10-24) 쉬는중 자동 일시정지·입력 시 재개(스톱워치와 같음)** | 전이표 §3.5.1, ~~`set_resting` no-op~~ **(🔒 2026-10-24) `set_resting` 두 모드 공통**, 스냅숏 `durationMs` |
 | TM-06 | 0 도달 → 끝남 10초(깜빡임) → 자동으로 지정 시간 대기 | `Finished`·`FINISHED_HOLD`·`tick`·`next_wake`(§3.5), 마감 스레드 `driver.rs`(§3.6), 깔때기 `publish_timer_change`(§3.7) |
 | TM-11 | 트레이 시작·일시정지·멈춤(켜져 있을 때만) | `status()`(트레이 보기용). 메뉴·핸들러는 [tray.md](tray.md) §3.6 |
 | TM-12 | CR-045 102행 결정의 모드별 적용(끄면 일시정지, 끝남 중 끄면 대기, 재시작 시 지정 시간 대기) | `disable`(`Finished → Stopped`), `with_config`(시작 = `Stopped`·`active = D`) |
 | TM-13 | 문구(core 원문 ko) | `TimerError::Disabled` 새 문구(§6) |
+
+rest-display 요구(아키텍처 ID `RD-xx`, `rest-display-02-design.md` §6 RTM — core 몫만. RD-05~09는 ui·bridge 몫):
+
+| 요구ID | 내용(🔒 2026-10-24 사용자 결정 ①) | 이 모듈의 몫 |
+|---|---|---|
+| RD-01 | 쉬는중 진입 → 카운트다운 자동 일시정지 | `set_resting(true)`: `Running → RestPaused`(두 모드 공통, §3.5.1·§3.5.2) |
+| RD-02 | 입력으로 쉬는중 해제 → 자동 재개, 남은 시간 이어서 | `set_resting(false)`: `RestPaused → Running`. 마감 재계산은 깔때기 ③(§3.7, 불변) |
+| RD-03 | 사용자 일시정지는 자동 재개 없음, 멈춤·끝남·대기 중 쉬는중은 영향 없음(D-3) | `set_resting`의 `_ => false`, `RestPaused`의 `apply`·`disable`(불변 — 테스트로 고정) |
+| RD-04 | 쉬는중 동안 남은 시간 고정 | `freeze`(카운트다운 상한 `active`), 스냅숏 `{ restPaused, elapsedMs 고정 }` |
 
 ## 2. 공개 API
 
@@ -126,7 +136,7 @@ pub enum TimerStatus {
     Stopped,
     Running,
     Paused,
-    /// 스톱워치 전용. 카운트다운에서는 생기지 않는다.
+    /// 쉬는중이라 자동 일시정지(스톱워치·카운트다운 공통, 🔒 2026-10-24). 쉬는중이 풀리면 자동 재개.
     RestPaused,
     /// 카운트다운 전용(신규). 0 도달 뒤 FINISHED_HOLD 동안. 경과 = durationMs.
     Finished,
@@ -178,13 +188,15 @@ pub struct Timer {
 }
 ```
 
+- (🔒 2026-10-24, rest-display) `RestPaused` 문서주석 교체(패킷 §2 주석 교체표): ~~스톱워치 전용. 카운트다운에서는 생기지 않는다.~~ → 위 코드의 문장. 멤버·직렬화(`"restPaused"`) 불변.
+
 | 이름 (`impl Timer`) | 인자 | 반환 | 실패 조건 | 요구ID |
 |---|---|---|---|---|
 | `pub fn new() -> Self` | — | **의미 불변**: `with_config(TimerConfig { mode: Stopwatch, countdown: 1500초 })`와 같다 — `Stopped`·0·스톱워치 | 없음 | PT-09 |
 | **`pub fn with_config(cfg: TimerConfig) -> Self`** | 구성 | `Stopped`, 경과 0, `mode = cfg.mode`, `active = configured = cfg.countdown` | 없음 | TM-12 |
 | `pub fn snapshot(&self, now: Instant) -> TimerSnapshot` | 시각 | 필드 추가(§3.5.2) | 없음 | PT-03, TM-05 |
 | `pub fn apply(&mut self, action: TimerAction, enabled: bool, now: Instant) -> Result<bool, TimerError>` | **시그니처 불변** | 카운트다운 칸 추가(§3.5.1) | `enabled == false` → `Disabled`(불변) | PT-05, TM-05·06 |
-| `pub fn set_resting(&mut self, resting: bool, now: Instant) -> bool` | 불변 | `mode == Countdown`이면 항상 `false`(상태 불변) | 없음 | PT-06, TM-05 |
+| `pub fn set_resting(&mut self, resting: bool, now: Instant) -> bool` | 불변 | ~~`mode == Countdown`이면 항상 `false`(상태 불변)~~ **(🔒 2026-10-24) 두 모드 공통(§3.5.1)** — `Running → RestPaused`·`RestPaused → Running`만 `true`, 그 밖 `false` | 없음 | PT-06, TM-05, RD-01~03 |
 | `pub fn disable(&mut self, now: Instant) -> bool` | 불변 | 기존 + **`Finished → Stopped`(true)** | 없음 | PT-04, TM-12 |
 | **`pub fn configure(&mut self, cfg: TimerConfig, now: Instant) -> bool`** | 구성, 시각 | 같은 `now`의 스냅숏 전후가 다르면 `true`(§3.5.3) | 없음 | TM-01, TM-04 |
 | **`pub fn tick(&mut self, now: Instant) -> bool`** | 시각 | 마감 도달 → `Finished`, 끝남 만료 → `Stopped`. 바뀌면 `true` | 없음 | TM-06 |
@@ -269,15 +281,23 @@ pub struct AppState {
 
 #### 3.5.1 카운트다운 전이표 (`mode == Countdown`)
 
-| 현재 \ 입력 | `apply(Start)` | `apply(Pause)` | `apply(Stop)` | `set_resting(±)` | `disable()` | `tick` 마감 도달 | `tick` 끝남 만료 |
-|---|---|---|---|---|---|---|---|
-| Stopped | **Running**(남은 = `active`) | — | — | — | — | — | — |
-| Running | — | **Paused** | **Stopped** | — | **Paused**(남은 유지) | **Finished** | — |
-| Paused | **Running**(이어서) | — | **Stopped** | — | — | — | — |
-| Finished | **Running**(대기로 초기화한 뒤 새 회차, `active = configured`, D-7) | — | **Stopped** | — | **Stopped** | — | **Stopped** |
+(🔒 2026-10-24 rest-display 개정 — 정본 `rest-display-02-design.md` §2.2. 옛 표의 `set_resting(±)` 한 열(전 행 `—`)을 `set_resting(true)`·`set_resting(false)` 두 열로 나누고 `RestPaused` 행을 더했다. 🆕 = 이번에 바뀐 칸. 옛 표는 git 이력과 `timer-mode-02-design.md` §3.2에 남아 있다.)
+
+| 현재 \ 입력 | `apply(Start)` | `apply(Pause)` | `apply(Stop)` | `set_resting(true)` | `set_resting(false)` | `disable()` | `tick` 마감 도달 | `tick` 끝남 만료 |
+|---|---|---|---|---|---|---|---|---|
+| Stopped | **Running**(남은 = `active`) | — | — | — | — | — | — | — |
+| Running | — | **Paused** | **Stopped** | **RestPaused**(남은 고정) 🆕 | — | **Paused**(남은 유지) | **Finished** | — |
+| Paused | **Running**(이어서) | — | **Stopped** | — | — | — | — | — |
+| RestPaused 🆕 | **Running**(이어서) | **Paused**(사용자 일시정지로 바뀜) | **Stopped** | — | **Running**(이어서) | **Paused**(남은 유지) | — | — |
+| Finished | **Running**(대기로 초기화한 뒤 새 회차, `active = configured`, D-7) | — | **Stopped** | — (D-3) | — | **Stopped** | — | **Stopped** |
 
 - `—` = 불변·`false`(`apply`는 `Ok(false)`). `enabled == false`면 기존처럼 전이표보다 먼저 `Err(Disabled)`.
-- `RestPaused`는 카운트다운에서 생기지 않는다(`set_resting` no-op, 모드 전환은 `Stopped`로 초기화).
+- ~~`RestPaused`는 카운트다운에서 생기지 않는다(`set_resting` no-op, 모드 전환은 `Stopped`로 초기화).~~ **(🔒 2026-10-24) 생긴다 — 진입·해제는 스톱워치와 같다**(§3.2의 `set_resting` 두 열과 같은 칸, 두 모드 공통 규칙 「`Running`만 자동 일시정지, `RestPaused`만 자동 재개」). 모드 전환은 여전히 새 모드의 `Stopped`로 초기화한다(§3.5.3).
+- (2026-10-24) `RestPaused` 행의 `apply`·`disable` 칸은 **이미 구현돼 있다**(모드 무관 `match`) — 새 코드가 아니라 테스트로 고정만 한다(§3.8 C21). `RestPaused`에서 `apply(Pause)` → `Paused`가 되면 이후 `set_resting(false)`로 재개되지 않는다.
+- (2026-10-24) `RestPaused`에서 `next_wake() = None`, `tick(_) = false` — 마감 스레드는 무기한 잔다(§3.6). 재개 순간 깔때기 ③(§3.7)이 마감을 다시 계산한다: `deadline = since + (active − accumulated)`(§3.8 C19).
+- (2026-10-24, D-3) `Stopped`·`Paused`·`Finished`에서 `set_resting(±)` = `false` — 상태·`finished_until`·`next_wake` 불변. 끝남(깜빡임 10초) 중 쉬는중은 영향 없음(§3.8 C20, §11 T-D15).
+- (2026-10-24) 쉬는중 진입 전 무입력 시간(기본 5분)은 카운트다운에서도 **빼지 않는다**(스톱워치 U-4와 같음 — 그동안은 정상적으로 줄어든 것).
+- (2026-10-24, A-3) 경계: 마감 시각을 지나고 `tick` 전(수 ms)에 `set_resting(true)`가 오면 `freeze`가 경과를 `active`로 상한해 `RestPaused`(남은 0)가 된다. 재개하면 `next_wake == Some(재개 시각)` → `tick(재개 시각)` → `Finished`(감지 시각부터 10초, A-2). 일시정지 T-D9와 같은 처리, 새 분기 없음(§3.8 C22, §11 T-D16).
 - **`Stopped`로 들어갈 때마다**: `accumulated = 0`, `since = None`, `finished_until = None`, `active = configured`.
 - `tick(now)`:
   - 카운트다운 `Running`이고 `now ≥ deadline` → `Finished`: `accumulated = active`, `since = None`, `finished_until = now + FINISHED_HOLD`, `true`. 끝남 10초는 **감지 시각부터** 잰다(A-2) — 스레드가 늦게 깨거나 절전 복귀 뒤 한참 지나 감지해도 `Finished`를 거치고 온전히 10초다.
@@ -298,7 +318,28 @@ pub struct AppState {
 - `snapshot(now)` = `{ status, elapsed_ms: ms(elapsed_at(now)), mode, duration_ms: 카운트다운 ? ms(active) : 0 }`. ms 변환은 기존 `u64::try_from(d.as_millis()).unwrap_or(u64::MAX)`.
 - `deadline`은 `since.checked_add(active.saturating_sub(accumulated))`(넘치면 `None` → `next_wake = None`. 시작 시간 상한 99:59:59라 실제로 생기지 않는다). `Instant + Duration`의 `+` 연산자는 쓰지 않는다(패닉 경로 0, T-D6·T-D11).
 - `apply`는 `match (self.status, action)` 한 번 유지. 새 칸: `(Finished, Start)` → `reset()` 후 `run(now)`, `(Finished, Stop)` → `reset()`. `(Stopped|Paused, Start)`의 `run`은 두 모드 공통. 50줄을 넘으면 action별 비공개 메서드로 나눈다(§3.3 규칙).
-- `set_resting`: 첫 줄 `if self.mode == TimerMode::Countdown { return false; }`.
+- ~~`set_resting`: 첫 줄 `if self.mode == TimerMode::Countdown { return false; }`.~~ **(🔒 2026-10-24) `set_resting`: 모드 분기 없음 — §3.2와 같은 `match`**(패킷 §2 정본 본문, 구현자가 그대로 옮긴다):
+
+  ```rust
+  /// 쉬는중 진입(true)·해제(false). 두 모드 공통(🔒 2026-10-24, rest-display RD-01·02 — TM-05 개정):
+  /// `Running`만 자동 일시정지(`RestPaused`, 남은·경과 고정), `RestPaused`만 자동 재개. 그 밖
+  /// (`Stopped`·`Paused`·`Finished`)은 `false`(사용자 일시정지 보존, 끝남 중 쉬는중 = 영향 없음 D-3).
+  pub fn set_resting(&mut self, resting: bool, now: Instant) -> bool {
+      match (self.status, resting) {
+          (TimerStatus::Running, true) => {
+              self.freeze(TimerStatus::RestPaused, now);
+              true
+          }
+          (TimerStatus::RestPaused, false) => {
+              self.run(now);
+              true
+          }
+          _ => false,
+      }
+  }
+  ```
+
+  카운트다운 `freeze`는 `accumulated = min(경과, active)`·`since = None`, `run`은 `since = Some(now)`(둘 다 불변 도우미 — 위 표).
 - `disable`: `Running | RestPaused` → `freeze(Paused, now)`(불변), **`Finished` → `reset()`·`true`**, 그 밖 `false`.
 - `next_wake`: `(Countdown, Running)` → `deadline`, `Finished` → `finished_until`, 그 밖 `None`.
 
@@ -306,7 +347,7 @@ pub struct AppState {
 
 1. `let before = self.snapshot(now);`
 2. **모드가 바뀜**(`cfg.mode != self.mode`) → `mode = cfg.mode`, `configured = cfg.countdown`, `reset()` — 새 모드의 `Stopped`(D-4, 이전 모드 값 버림). `Running`·`Paused`·`RestPaused`·`Finished` 어디서든.
-3. 모드가 같고 **시작 시간만 바뀜** → `configured = cfg.countdown`. `status == Stopped`이면 `active = configured`. `Running`·`Paused`·`Finished`는 다음 대기부터(ui가 입력을 잠근다 — D-5, core 규칙은 안전망).
+3. 모드가 같고 **시작 시간만 바뀜** → `configured = cfg.countdown`. `status == Stopped`이면 `active = configured`. `Running`·`Paused`·`Finished`·**`RestPaused`(2026-10-24 — 카운트다운에서도 생기므로 명시, 코드 불변)** 는 다음 대기부터(`active`·상태 불변, 반환 `false` — §3.8 C21. ui가 입력을 잠근다 — D-5·rest-display A-1, core 규칙은 안전망).
 4. `self.snapshot(now) != before`를 돌려준다. 스톱워치 `Stopped`에서 시작 시간만 바뀌면 `durationMs`가 0 그대로라 `false`.
 - `enabled` 변화는 다루지 않는다. 끔은 `disable`이 먼저다(bridge 순서 `disable` → `configure`, 02-design §3.4-3).
 
@@ -323,8 +364,9 @@ pub struct AppState {
 ```rust
 //! 스톱워치·카운트다운 타이머 상태 — 휘발(저장 안 함), 앱 전체에서 하나(`AppState.timer`).
 //!
-//! [목적] CR-045 PT-03·05·06·09 + CR-048 TM-01·05·06·12 — 모드(스톱워치·카운트다운), 멈춤/흐름/
-//!        일시정지/쉬는중 일시정지(스톱워치)/끝남(카운트다운, 10초)과 경과. 쉬는중 판정·표시는 ui.
+//! [목적] CR-045 PT-03·05·06·09 + CR-048 TM-01·05·06·12 + rest-display RD-01~04 — 모드(스톱워치·
+//!        카운트다운), 멈춤/흐름/일시정지/쉬는중 일시정지(두 모드)/끝남(카운트다운, 10초)과 경과.
+//!        쉬는중 판정·표시는 ui.
 //! [공개 API] `Timer`(`new`·`with_config`·`snapshot`·`apply`·`set_resting`·`disable`·`configure`·
 //!        `tick`·`next_wake`·`status`), `TimerConfig`, `FINISHED_HOLD`, `TimerStatus`, `TimerAction`,
 //!        `TimerSnapshot`, `TimerError`(`code`), `driver`(마감 시각 스레드).
@@ -334,6 +376,8 @@ pub struct AppState {
 //! [설정] `TimerConfig::from_settings`로 `timer.mode`·`countdownSecs`를 받는다. `enabled`는 인자.
 //! [테스트] timer/tests.rs(전이표·경과·직렬화), driver.rs(실제 스레드) — doc/200_설계/core/timer.md §8·§3.8.
 ```
+
+- (🔒 2026-10-24, rest-display — 패킷 §2 주석 교체표) [목적] 줄: ~~쉬는중 일시정지(스톱워치)~~ → 「쉬는중 일시정지(두 모드)」, 출처에 「rest-display RD-01~04」 추가. 줄바꿈 위치는 구현 재량. 나머지 항목 불변. 테스트를 `timer/rest_tests.rs`로 나누면(§3.8) [테스트] 줄에 그 파일을 덧붙인다.
 
 ### 3.6 CR-048 — 마감 시각 스레드 `timer/driver.rs` (🔒 패킷 §2.3)
 
@@ -432,7 +476,7 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | C1 | `countdown_start_counts_down` | `cd(60)`, t0 Start, t0+3s 스냅숏 | `Ok(true)`, `{ Running, 3000, Countdown, 60000 }` |
 | C2 | `countdown_pause_keeps_remaining` | t0 Start, +10s Pause, +100s 스냅숏 / 별도: +61s(마감 뒤·`tick` 전) Pause | `{ Paused, 10000 }` / `{ Paused, 60000 }`(상한 — T-D9) |
 | C3 | `countdown_stop_returns_to_duration` | Running·Paused 각각 Stop | `Ok(true)`, `{ Stopped, 0, Countdown, 60000 }` |
-| C4 | `countdown_ignores_resting` | Running에서 `set_resting(true)`·`(false)` | 둘 다 `false`, `Running`, 경과 계속 흐름 |
+| C4 (🔒 2026-10-24 개정) | ~~`countdown_ignores_resting`~~(삭제) → **`countdown_resting_pauses_and_resumes`** | ~~Running에서 `set_resting(true)`·`(false)`~~ → `cd(60)`, t0 Start → `set_resting(true, t0+3s)` → 스냅숏 `t0+100s` → `set_resting(false, t0+300s)` → 스냅숏 `t0+305s` | ~~둘 다 `false`, `Running`, 경과 계속 흐름~~ → `true` / `{ RestPaused, 3000, Countdown, 60000 }` / `true` / `{ Running, 8000 }`, `next_wake == Some(t0+300s+57s)` |
 | C5 | `tick_before_deadline_is_noop` | `cd(60)` t0 Start, `tick(t0+59_999ms)` | `false`, `Running` |
 | C6 | `tick_at_deadline_finishes` | `tick(t0+60s)` | `true`, `Finished`, elapsed 60000(= D), `next_wake == Some(t0+70s)` |
 | C7 | `finished_holds_ten_seconds_then_stops` | 감지 시각 T에서 Finished → `tick(T+9_999ms)` → `tick(T+10s)` | `false`·Finished → `true`·`{ Stopped, 0, 60000 }` |
@@ -447,6 +491,11 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | C16 | `with_config_starts_stopped_with_duration` | `with_config(Countdown, 1500s)` / `Timer::new()` | `{ Stopped, 0, Countdown, 1500000 }`·`next_wake None` / `{ Stopped, 0, Stopwatch, 0 }` |
 | C17 | `snapshot_serializes_new_fields` | Finished 스냅숏 직렬화 | `{"status":"finished","elapsedMs":60000,"mode":"countdown","durationMs":60000}`(필드 순서 그대로) |
 | C18 | `stopwatch_behavior_unchanged` | 기존 T1~T17이 그대로 통과 | 충족(별도 테스트 없음) |
+| C19 (2026-10-24 신규) | `countdown_rest_paused_has_no_deadline` | C4처럼 `t0+3s`에 쉬는중 → `next_wake()` → `tick(t0+61s)`·`tick(t0+1000s)` | `None` / 둘 다 `false`, `RestPaused`, 경과 3000 |
+| C20 (2026-10-24 신규) | `countdown_resting_ignored_when_not_running` | `Stopped`·`Paused`(t0 Start, +10s Pause)·`Finished`(마감 `tick`) 각각 `set_resting(true)`·`set_resting(false)` | 모두 `false`, 상태·스냅숏 불변. `Finished`는 `next_wake`(= `finished_until`) 불변(D-3) |
+| C21 (2026-10-24 신규) | `countdown_rest_paused_user_actions` | `RestPaused`(경과 3000)에서 각각: Pause → `set_resting(false)` / Start / Stop / `disable` / `configure(Countdown, 30s)` / `configure(Stopwatch, …)` | `Ok(true)`·`Paused` → `false`·`Paused` 유지 / `Ok(true)`·`Running`·이어서 흐름 / `Ok(true)`·`{ Stopped, 0, 60000 }` / `true`·`{ Paused, 3000 }` / `false`·`RestPaused`·`durationMs 60000`(다음 대기부터) / `true`·`{ Stopped, 0, Stopwatch, 0 }` |
+| C22 (2026-10-24 신규) | `countdown_rest_after_deadline_finishes_on_resume` | `cd(60)` t0 Start, `tick` 없이 `set_resting(true, t0+61s)` → `set_resting(false, t0+100s)` → `tick(t0+100s)` | `true`·`{ RestPaused, 60000 }`·`next_wake None` / `true`·`next_wake == Some(t0+100s)` / `true`·`Finished`·`next_wake == Some(t0+110s)` (A-3) |
+| C23 (2026-10-24 신규) | `countdown_rest_paused_serializes` | C4의 `RestPaused` 스냅숏 직렬화 | `{"status":"restPaused","elapsedMs":3000,"mode":"countdown","durationMs":60000}` |
 | D1 | `driver_calls_on_due_at_deadline` | 실제 스레드. `next_wake` = 아직 안 불렸으면 `Some(t0+100ms)` 아니면 `None`, `on_due` = 도착 시각 기록·채널 알림 | 1회, 도착 − t0 ∈ [100ms, 150ms)(허용 오차 < 50ms, 02-design §10) |
 | D2 | `driver_wake_recomputes` | 처음 `None` → 공유 값에 `now+50ms` 설정 → `wake()` | `on_due` 호출(1초 제한 안) |
 | D3 | `driver_idle_never_calls_on_due` | `next_wake` 항상 `None`, 300ms 관찰 | 콜백 0회 |
@@ -455,6 +504,8 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 - 드라이버 공유 상태는 `Arc<Mutex<…>>`/`Arc<AtomicBool>` + 결과 채널. 대기는 `recv_timeout`으로 하고 `sleep`은 D3 관찰에만 쓴다.
 - lib.rs 조립·깔때기는 Tauri 런타임이 필요해 자동 테스트하지 않는다 — 트레이 수동 확인([tray.md](tray.md) §8.3)과 verify에서 확인.
 - 완료 기준(패킷 §4·§6): `cargo fmt --check` exit 0, `cargo clippy -- -D warnings` 경고 0, `cargo test` 전부 PASS, `bridge/commands.rs` 무수정 컴파일, 완료 보고에 「실물 시그니처 차이 목록」·과도 상태(§3.7).
+- (2026-10-24 rest-display, 패킷 §1·§5) C4 개정·C19~C23은 `t0 + Duration` 주입·`sleep` 금지, 도우미 `cd(secs)` 재사용. 위치는 `timer/tests.rs` — 추가가 115줄을 넘으면(800줄 한계) C19~C23을 `timer/rest_tests.rs`로 두고 `mod.rs` 끝에 `#[cfg(test)] mod rest_tests;`. 회귀: T1~T17·C1~C3·C5~C18·D1~D4, `tray::timer_menu` TV1·TV2 전부 PASS.
+- (2026-10-24, A-5) **알려진 과도 실패 1건**: bridge 테스트 `bridge::commands::tests::set_resting_countdown_noop`(`src-tauri/src/bridge/commands/tests.rs`, `assert!(!changed)`)는 RD-01 의도된 의미 변경으로 실패한다. bridge 소유 파일이라 core가 고치지 않는다 — bridge 패킷(`rest-display-03-packet-bridge.md` §3)에서 `set_resting_countdown_pauses_and_resumes`·`set_resting_countdown_finished_noop`으로 교체. core 완료 보고의 실패는 이 1건뿐이어야 하고, 배포 전 두 패킷이 모두 끝나야 한다(§11 T-D17).
 
 ### 3.9 CR-048 bridge 요구 명세 (§9 증분 — 계약 확정은 bridge-designer, bridge 패킷)
 
@@ -464,7 +515,7 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | 타입 | `TimerSnapshot` | + `mode: TimerMode`(`'stopwatch' \| 'countdown'`), `durationMs: number`. Rust는 항상 보낸다(TS 선택 필드는 bridge 판단, 02-design §4) | — | — |
 | event | `timer://changed` | 발신 지점 추가: 마감 스레드(`finished` 진입·10초 뒤 대기 복귀), 트레이 메뉴, `configure`. **모두 `crate::publish_timer_change` 경유** | 상태가 바뀔 때만. 카운트다운 1회당 조작 수 + 2 | — |
 | command | `control_timer` | 시그니처 불변. 카운트다운 전이. 바뀌면 직접 emit 대신 `crate::publish_timer_change`(`pub(crate)`) | 클릭 | `timer.disabled`(문구 변경), `state.poisoned` |
-| command | `set_resting` | 불변. 카운트다운이면 항상 변화 없음. 바뀌면 `publish_timer_change` | 분당 수 회 이하 | `state.poisoned` |
+| command | `set_resting` | 불변. ~~카운트다운이면 항상 변화 없음.~~ **(🔒 2026-10-24 rest-display) 두 모드 공통 — 카운트다운도 `running → restPaused`·`restPaused → running`. 시그니처·반환·에러·래퍼 불변(계약 판·호환성 분류는 bridge 패킷, 02-design D-5 권고 v1.1 비파괴). `TimerStatus` `'restPaused'` 주석 「스톱워치 전용」 삭제 요구.** 바뀌면 `publish_timer_change` | 분당 수 회 이하(쉬는중 진입·해제 각 1회) | `state.poisoned` |
 | 부수 효과 | `set_settings` 7단계 | 저장 성공 뒤: 끔이면 `disable(now)` → `configure(TimerConfig::from_settings(&new.timer), now)` → 둘 중 하나라도 `true`면 `publish_timer_change`(emit·트레이·깨움), 아니면 `tray::sync_timer_menu`만(켜고 끄기는 스냅숏이 그대로여도 메뉴를 바꾼다). `settings://changed`·손 기준점 이벤트 **뒤**. 설정·타이머 잠금 동시 보유 금지 | 설정 저장당 | — |
 | 규칙 | 계약 §5.8-1 | 「타이머 스레드를 만들지 않는다」 → 「core 마감 시각 스레드 1개, 다음 마감까지 잔다, 주기 emit 금지」 | — | — |
 | 에러 문구 | `timer.disabled` | code 불변, 문구만 §6 | — | — |
@@ -591,7 +642,8 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | **TM-01 모드 전환 시 새 모드 대기(D-4)** | §2.3 `configure`, §3.5.3, §3.8 C13 | ✅ 설계 · 소스 반영 |
 | **TM-03 스톱워치 동작 불변** | §3.2(불변), §3.8 C18 | ✅ 설계 |
 | **TM-04(안전망) 흐르는 중 시작 시간 변경은 다음 대기부터** | §3.5.3-3, §3.8 C9·C14 | ✅ 설계 (입력 잠금 D-5는 ui, 범위는 settings) |
-| **TM-05 카운트다운 전이·멈춤 = 지정 시간·쉬는중에도 계속** | §3.5.1·§3.5.2, §3.8 C1~C4 | ✅ 설계 · 소스 반영 |
+| **TM-05 카운트다운 전이·멈춤 = 지정 시간·~~쉬는중에도 계속~~ (🔒 2026-10-24 개정) 쉬는중 자동 일시정지·입력 시 재개** | §1, §2.3 `set_resting`, §3.5.1·§3.5.2, §3.8 C1~C4·C19~C23 | ✅ 설계 (2026-10-24 개정) · 개정분 소스 미적용(core-implementer 진행) — 개정 전 부분(전이·멈춤 = 지정 시간)은 소스 반영 |
+| **RD-01~04 (rest-display, 2026-10-24)** — RD-01 쉬는중 진입 → 카운트다운 자동 일시정지 · RD-02 해제 → 자동 재개(남은 시간 이어서) · RD-03 사용자 일시정지·멈춤·끝남·대기는 영향 없음(D-3) · RD-04 쉬는중 동안 남은 시간 고정 | §1 RD 표, §2.3, §3.5.1·§3.5.2·§3.5.3-3, §3.8 — RD-01 C4·C21 / RD-02 C4·C19·C22 / RD-03 C20·C21 / RD-04 C23, §3.9 `set_resting` | ✅ 설계 · 소스 미적용(core-implementer 진행). bridge 의미 변경은 bridge 패킷 |
 | **TM-06 0 도달 → 끝남 10초(감지 시각부터) → 대기, 마감 스레드·깔때기** | §3.5.1 `tick`, §3.6, §3.7, §4, §3.8 C5~C8·C15·D1~D4 | ✅ 설계 · 소스 반영 |
 | **TM-11 트레이 보기용 `status`** | §2.3, [tray.md](tray.md) §3.6 | ✅ 설계 |
 | **TM-12 끝남 중 끔 → 대기, 흐르는 중 끔 → 일시정지, 재시작 = 지정 시간 대기** | §2.3 `disable`·`with_config`, §3.7 1-b, §3.8 C11·C12·C16 | ✅ 설계 · 소스 반영 |
@@ -599,6 +651,33 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | CR-048 과도 상태 — bridge 패킷 전 설정 창·오버레이 경로는 깔때기 미경유 | §3.7 | ✅ 해소 — bridge가 깔때기 `crate::publish_timer_change`를 경유한다(`bridge/commands/mod.rs:511-591`, 안 바뀌면 `tray::sync_timer_menu`만) |
 
 ## 11. 설계 결정 노트
+
+### rest-display 결정 (2026-10-24)
+
+정본: `doc/200_설계/architecture/rest-display-02-design.md` §2.2·§5, 패킷 `rest-display-03-packet-core.md`.
+
+| # | 결정 | 대안 | 근거 |
+|---|---|---|---|
+| T-D14 | (🔒 사용자 결정 ①) 카운트다운도 쉬는중 자동 일시정지·입력 시 자동 재개 — `set_resting`의 모드 분기를 지워 스톱워치와 **같은 `match` 하나**로 합친다 | 카운트다운 전용 분기 유지(새 상태·새 command) | 사용자 결정. 두 모드가 같은 규칙 「`Running`만 자동 일시정지, `RestPaused`만 자동 재개」를 쓰면 분기 1개가 줄고, `apply`·`disable`·`tick`·`next_wake`·`configure`·드라이버·트레이 보기는 이미 모드 무관이라 코드가 바뀌지 않는다. 시그니처·`TimerStatus`·`TimerSnapshot`·직렬화 불변 → bridge 래퍼·overlay 호출부 무수정. 무입력 시간 미차감(U-4)도 두 모드 같음. CR-048 「쉬는중에도 계속」(§1 TM-05 옛 문장)을 대체 |
+| T-D15 | (D-3, 02-design §5a 권고안) `Finished`·`Paused`·`Stopped` 중 쉬는중 = no-op — 깜빡임 10초·`finished_until`·`next_wake` 그대로 | `Finished`를 즉시 `Stopped`로 / 깜빡임을 멈췄다 재개 | `Finished`는 이미 0에 닿은 「알림」 상태라 멈출 시간이 없다. 현행 `_ => false` 그대로라 코드 0줄. 0 도달 뒤 10초 안에 무입력 기준(최소 60초)을 넘길 때만 생긴다 |
+| T-D16 | (A-3) 마감 지난 뒤·`tick` 전 쉬는중 진입 = `RestPaused`(남은 0) → 재개 시 마감 = 재개 시각 → 마감 스레드가 곧바로 `Finished`(감지 시각부터 10초) | `set_resting`에서 마감이 지났으면 `Finished`로 직행 | 일시정지 T-D9와 같은 성질 — `freeze`의 상한(`active`)이 이미 처리한다. 새 분기 없음 |
+| T-D17 | (A-5) core 완료~bridge 완료 사이 bridge 테스트 `set_resting_countdown_noop` 1건 과도 실패 허용(§3.8) | core 패킷에서 bridge 테스트도 고침 | 계층 경계 — bridge 소유 파일. timer-mode §3.7 「알려진 과도 상태」 선례. 배포 전 두 패킷 모두 완료 필수 |
+
+확인 필요 — rest-display:
+
+- **T-C8** D-3(T-D15)은 02-design §5a **권고안** 기준이다(이 문서 작성 시점에 `doc/000_프로젝트_확정사항.md`에는 rest-display 반영 전 — 메인 세션 몫, 02-design §8 문안). 사용자 결정이 권고안과 다르면 아키텍트 세션이 패킷을 먼저 고친 뒤 §3.5.1 `Finished` 행·§3.8 C20을 다시 맞춘다.
+- **T-C9** §3.9 `set_resting` 행의 계약 판(v1.1)·호환성 분류(비파괴)는 bridge-designer가 확정한다(02-design D-5 — `bridge-design-strategy` §5 문구를 글자대로 읽으면 파괴라는 차이를 계약 §8에 남긴다).
+
+파급 — rest-display (Grep 2026-10-24):
+
+| 파일 | 변경 | 담당 | 깨짐 여부 |
+|---|---|---|---|
+| `src-tauri/src/timer/mod.rs` | `set_resting` 본문(모드 분기 삭제, 현재 `:330` `if self.mode == TimerMode::Countdown`)·문서주석, `TimerStatus::RestPaused` 문서주석, `//!` [목적] | core-implementer | — |
+| `src-tauri/src/timer/tests.rs`(넘치면 `timer/rest_tests.rs`) | C4 개정, C19~C23 신규 | core-implementer | — |
+| `src-tauri/src/bridge/commands/tests.rs:240` `set_resting_countdown_noop` | 교체(bridge 패킷 §3) | bridge-implementer | **깨짐(의도된 과도 실패, T-D17)** |
+| `src-tauri/src/timer/driver.rs`·`tray/timer_menu.rs`·`tray/mod.rs`·`lib.rs` | 없음(모드 무관, TV1·TV2 그대로) | — | 안 깨짐 |
+| `doc/200_설계/core/tray.md` | 없음 — `RestPaused` 서술(364·413·435행)이 모드 무관, 「스톱워치 전용」·「카운트다운에서는 생기지」 0건 | — | — |
+| `contract.md`·`src/bridge/types.ts` 주석·§5.8 | §3.9 요구 | bridge-designer·bridge-implementer | 비파괴(타입·시그니처 불변) |
 
 ### CR-048 결정 (2026-09-26)
 

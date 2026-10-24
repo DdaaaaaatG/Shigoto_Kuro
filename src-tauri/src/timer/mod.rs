@@ -1,7 +1,7 @@
 //! 스톱워치·카운트다운 타이머 상태 — 휘발(저장 안 함), 앱 전체에서 하나(`AppState.timer`).
 //!
-//! [목적] CR-045 PT-03·05·06·09 + CR-048 TM-01·05·06·12 — 모드(스톱워치·카운트다운), 멈춤/흐름/
-//!        일시정지/쉬는중 일시정지(스톱워치)/끝남(카운트다운, 10초)과 경과. 쉬는중 판정·표시는 ui.
+//! [목적] CR-045 PT-03·05·06·09 + CR-048 TM-01·05·06·12 + rest-display RD-01~04 — 모드(스톱워치·
+//!        카운트다운), 멈춤/흐름/일시정지/쉬는중 일시정지(두 모드)/끝남(카운트다운, 10초)과 경과. 쉬는중 판정·표시는 ui.
 //! [공개 API] `Timer`(`new`·`with_config`·`snapshot`·`apply`·`set_resting`·`disable`·`configure`·
 //!        `tick`·`next_wake`·`status`), `TimerConfig`, `FINISHED_HOLD`, `TimerStatus`, `TimerAction`,
 //!        `TimerSnapshot`, `TimerError`(`code`), `driver`(마감 시각 스레드).
@@ -29,8 +29,7 @@ pub enum TimerStatus {
     Running,
     /// 사용자 일시정지 또는 타이머 끔. 자동 재개 없음.
     Paused,
-    /// 스톱워치 전용. 쉬는중이라 자동 일시정지. 쉬는중이 풀리면 자동 재개. 카운트다운에서는
-    /// 생기지 않는다(`set_resting`이 no-op).
+    /// 쉬는중이라 자동 일시정지(스톱워치·카운트다운 공통, 🔒 2026-10-24). 쉬는중이 풀리면 자동 재개.
     RestPaused,
     /// 카운트다운 전용. 0 도달 뒤 `FINISHED_HOLD` 동안. 경과 = `durationMs`.
     Finished,
@@ -200,12 +199,10 @@ impl Timer {
         Ok(changed)
     }
 
-    /// 쉬는중 진입(true)·해제(false). 카운트다운이면 항상 `false`(no-op, TM-05 — 쉬는중에도
-    /// 계속 줄어듦). 스톱워치는 `Running`만 자동 일시정지, `RestPaused`만 자동 재개.
+    /// 쉬는중 진입(true)·해제(false). 두 모드 공통(🔒 2026-10-24, rest-display RD-01·02 — TM-05 개정):
+    /// `Running`만 자동 일시정지(`RestPaused`, 남은·경과 고정), `RestPaused`만 자동 재개. 그 밖
+    /// (`Stopped`·`Paused`·`Finished`)은 `false`(사용자 일시정지 보존, 끝남 중 쉬는중 = 영향 없음 D-3).
     pub fn set_resting(&mut self, resting: bool, now: Instant) -> bool {
-        if self.mode == TimerMode::Countdown {
-            return false;
-        }
         match (self.status, resting) {
             (TimerStatus::Running, true) => {
                 self.freeze(TimerStatus::RestPaused, now);
@@ -354,3 +351,6 @@ fn to_ms(d: Duration) -> u64 {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod rest_tests;

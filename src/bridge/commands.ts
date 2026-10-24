@@ -107,8 +107,7 @@ export const getTimer = () => call<TimerSnapshot>('get_timer')
 /** 사용자 조작(시작·일시정지·멈춤). 타이머가 꺼져 있으면 timer.disabled로 거부 */
 export const controlTimer = (action: TimerAction) => call<TimerSnapshot>('control_timer', { action })
 /** 오버레이가 쉬는중 진입(true)·해제(false)를 알린다. 판정 주체는 오버레이 상태기계.
- * (v0.23) 카운트다운이면 core가 항상 변화 없음을 돌려준다(쉬는중에도 계속 줄어든다) — 오버레이는
- * 모드를 보지 않고 그대로 부른다 */
+ * (v1.1) 두 모드 공통 — core가 running↔restPaused를 정한다. 오버레이는 모드를 보지 않고 그대로 부른다 */
 export const setResting = (resting: boolean) => call<TimerSnapshot>('set_resting', { resting })
 
 // ─── 알림음 (contract.md §3.10·§5·§5.9, v0.23 신규 · CR-048) ────────────────

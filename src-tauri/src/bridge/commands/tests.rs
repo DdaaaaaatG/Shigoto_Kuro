@@ -235,9 +235,9 @@ fn control_timer_countdown_start_changes() {
     assert_eq!(snapshot.mode, crate::settings::timer::TimerMode::Countdown);
 }
 
-/// TM-05 — 카운트다운이면 `set_resting`은 항상 변화 없음(쉬는중에도 계속 줄어든다, 🔒 103행).
+/// RD-01·RD-02(v1.1) — 카운트다운도 쉬는중 자동 일시정지·재개(🔒 2026-10-24).
 #[test]
-fn set_resting_countdown_noop() {
+fn set_resting_countdown_pauses_and_resumes() {
     let mut timer = Timer::with_config(TimerConfig {
         mode: crate::settings::timer::TimerMode::Countdown,
         countdown: std::time::Duration::from_secs(60),
@@ -245,8 +245,29 @@ fn set_resting_countdown_noop() {
     let now = Instant::now();
     do_control_timer(&mut timer, true, TimerAction::Start, now).expect("start");
     let (snapshot, changed) = do_set_resting(&mut timer, true, now);
-    assert!(!changed);
+    assert!(changed);
+    assert_eq!(snapshot.status, crate::timer::TimerStatus::RestPaused);
+    assert_eq!(snapshot.mode, crate::settings::timer::TimerMode::Countdown);
+    let (snapshot, changed) =
+        do_set_resting(&mut timer, false, now + std::time::Duration::from_secs(1));
+    assert!(changed);
     assert_eq!(snapshot.status, crate::timer::TimerStatus::Running);
+}
+
+/// RD-03·D-3 — 끝남 중 쉬는중은 변화 없음.
+#[test]
+fn set_resting_countdown_finished_noop() {
+    let mut timer = Timer::with_config(TimerConfig {
+        mode: crate::settings::timer::TimerMode::Countdown,
+        countdown: std::time::Duration::from_secs(60),
+    });
+    let now = Instant::now();
+    do_control_timer(&mut timer, true, TimerAction::Start, now).expect("start");
+    timer.tick(now + std::time::Duration::from_secs(60));
+    let (snapshot, changed) =
+        do_set_resting(&mut timer, true, now + std::time::Duration::from_secs(61));
+    assert!(!changed);
+    assert_eq!(snapshot.status, crate::timer::TimerStatus::Finished);
 }
 
 /// TM-01 — 모드가 바뀌면 새 모드의 `stopped`로 초기화한다(어느 상태에서든, D-4).

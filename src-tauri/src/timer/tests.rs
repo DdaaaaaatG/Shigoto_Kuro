@@ -8,6 +8,10 @@ fn snap(t: &Timer, now: Instant) -> (TimerStatus, u64) {
     (s.status, s.elapsed_ms)
 }
 
+fn secs(n: u64) -> Duration {
+    Duration::from_secs(n)
+}
+
 /// `with_config(Countdown, secs)`.
 fn cd(secs: u64) -> Timer {
     Timer::with_config(TimerConfig {
@@ -383,17 +387,22 @@ fn countdown_stop_returns_to_duration() {
     }
 }
 
-/// C4
+/// C4 (rest-display 개정)
 #[test]
-fn countdown_ignores_resting() {
+fn countdown_resting_pauses_and_resumes() {
     let t0 = Instant::now();
     let mut t = cd(60);
     t.apply(TimerAction::Start, true, t0).unwrap();
-    assert!(!t.set_resting(true, t0 + Duration::from_secs(3)));
-    assert!(!t.set_resting(false, t0 + Duration::from_secs(4)));
-    let s = t.snapshot(t0 + Duration::from_secs(5));
-    assert_eq!(s.status, TimerStatus::Running);
-    assert_eq!(s.elapsed_ms, 5000);
+    assert!(t.set_resting(true, t0 + secs(3)));
+    let s = t.snapshot(t0 + secs(100));
+    assert_eq!(
+        (s.status, s.elapsed_ms, s.mode, s.duration_ms),
+        (TimerStatus::RestPaused, 3000, TimerMode::Countdown, 60000)
+    );
+    assert!(t.set_resting(false, t0 + secs(300)));
+    let s = t.snapshot(t0 + secs(305));
+    assert_eq!((s.status, s.elapsed_ms), (TimerStatus::Running, 8000));
+    assert_eq!(t.next_wake(), Some(t0 + secs(300 + 57)));
 }
 
 /// C5
