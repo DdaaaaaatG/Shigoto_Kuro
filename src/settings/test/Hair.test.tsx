@@ -389,9 +389,9 @@ describe('뒷머리 「기본값」 = 비우기 · 셋째 버튼 없음 (R-34 ·
     // 뽀모도 인물 카드는 두 줄 양식 유지(CR-053) — HAIR 에는 pomo_char 가 없어 「비우기」 비활성
     const pomo = within(card('pomo_char')).getAllByRole('button')
     expect(pomo.map(b => b.getAttribute('aria-label'))).toEqual([
-      '뽀모도 인물 이미지 변경',
-      '뽀모도 인물 기본 그림으로 되돌리기',
-      '뽀모도 인물 그림 비우기',
+      '뽀모도로 인물 이미지 변경',
+      '뽀모도로 인물 기본 그림으로 되돌리기',
+      '뽀모도로 인물 그림 비우기',
     ])
     expect(pomo[2]).toBeDisabled()
     expect(card('pomo_char').className).toMatch(/cardEmptyable/)

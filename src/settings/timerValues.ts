@@ -79,11 +79,12 @@ export const timerToggles = (
 export const togglePatch = (mode: TimerMode, on: boolean): Partial<TimerSettings> =>
   on ? { enabled: true, mode } : { enabled: false }
 
-/** 시작 시간 입력 잠금 — 타이머(카운트다운)가 켜져 있고 흐르는 중·일시정지·끝남일 때만 */
+/** 시작 시간 입력 잠금 — 타이머(카운트다운)가 켜져 있고 대기(stopped)가 아닐 때: 흐르는 중·일시정지·
+ *  쉬는중 일시정지(🔒 2026-10-24 — 카운트다운도 restPaused가 생긴다, A-1)·끝남 */
 export const isDurationLocked = (t: FullTimerSettings, status: TimerStatus): boolean =>
   t.enabled &&
   t.mode === 'countdown' &&
-  (status === 'running' || status === 'paused' || status === 'finished')
+  (status === 'running' || status === 'paused' || status === 'restPaused' || status === 'finished')
 
 /** 초 → 시·분·초. 비유한수는 0, 0 ~ TIMER_COUNTDOWN_SECS_MAX(359999)로 자른다 */
 export const splitHms = (secs: number): { h: number; m: number; s: number } => {

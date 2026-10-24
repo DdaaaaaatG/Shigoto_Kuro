@@ -134,14 +134,16 @@ describe('timerValues CR-050 (timer-tab §14.5)', () => {
     expect(togglePatch('stopwatch', true)).toStrictEqual({ enabled: true, mode: 'stopwatch' })
     expect(togglePatch('stopwatch', false)).toStrictEqual({ enabled: false })
     expect(togglePatch('countdown', false)).toStrictEqual({ enabled: false })
-    // isDurationLocked — 타이머 켜짐 && running·paused·finished
+    // isDurationLocked — 타이머 켜짐 && running·paused·restPaused·finished (CR-070: restPaused 추가, A-1)
     expect(isDurationLocked(CD_ON, 'paused')).toBe(true)
     expect(isDurationLocked(CD_ON, 'running')).toBe(true)
     expect(isDurationLocked(CD_ON, 'finished')).toBe(true)
     expect(isDurationLocked(CD_ON, 'stopped')).toBe(false)
-    expect(isDurationLocked(CD_ON, 'restPaused')).toBe(false) // 식의 세 상태 밖
+    expect(isDurationLocked(CD_ON, 'restPaused')).toBe(true) // CR-070
     expect(isDurationLocked(SW_ON, 'running')).toBe(false)
+    expect(isDurationLocked(SW_ON, 'restPaused')).toBe(false) // CR-070: 스톱워치 켜짐은 잠금 대상 아님
     expect(isDurationLocked(CD_OFF, 'paused')).toBe(false)
+    expect(isDurationLocked(CD_OFF, 'restPaused')).toBe(false) // CR-070: 꺼진 타이머 모드는 잠기지 않음
     // splitHms — 비유한수 0, floor, 0 ~ 359999 로 자름
     expect(splitHms(1500)).toStrictEqual({ h: 0, m: 25, s: 0 })
     expect(splitHms(3723)).toStrictEqual({ h: 1, m: 2, s: 3 })

@@ -1,6 +1,7 @@
 # settings 테스트 시나리오
 
-- **v33 기준(2026-10-15 CR-067 — 이 줄이 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-067 🔒 · `design/i18n.md` `alarmCardDesc` CR-067 변경 행 · `src/settings/design.md` 변경이력 CR-067 행 · 현행 사전 `src/settings/i18n/{ko,ja,en}.ts`. requirements v1.29 불변. 상태: **개정 v33**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v33 개정 — CR-067」 절. 수 불변: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
+- **v34 기준(2026-10-24 CR-068 · CR-070 — 이 줄이 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-068(🔒 「뽀모도로」 표기 정정) · CR-070(🔒 rest-display 결정 ① — 카운트다운 쉬는중 자동 일시정지 문구 · `restPaused` 잠금 A-1) · `doc/200_설계/architecture/rest-display-03-packet-ui.md` §B.4 S-5 행 · `design/timer-tab.md` §14.5 · `design/i18n.md` `timerCountdownDesc` CR-070 행 · 현행 사전 `src/settings/i18n/ko.ts` · 현행 스펙(ui-implementer 선개정). 상태: **개정 v34**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v34 개정 — CR-068 · CR-070」 절. 수: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) 불변 · 수동 63 → **64**(M-68 추가)
+- **v33 기준(2026-10-15 CR-067 — v34 줄 다음으로 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-067 🔒 · `design/i18n.md` `alarmCardDesc` CR-067 변경 행 · `src/settings/design.md` 변경이력 CR-067 행 · 현행 사전 `src/settings/i18n/{ko,ja,en}.ts`. requirements v1.29 불변. 상태: **개정 v33**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v33 개정 — CR-067」 절. 수 불변: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
 - **v32 기준(2026-10-15 doc-sync — v33 줄 다음으로 아래 모든 기준 줄·절보다 우선)**: `src/settings/requirements.md` **v1.29**(요구 증감 없음) · `src/settings/design.md` 변경이력 2026-10-15 doc-sync 행 · `design/presets-tab.md`(§1.2 내장 프리셋 · §2 실측 · §5.1 구현 형태 표 · §11.8 ≤ 9장) · `design/i18n.md`(§4.3 11키 · §4.12 키 위치) · `design/images-tab.md` 머리(계약 v0.31) · 현행 소스. 상태: **개정 v32**(증분 모드 — 추가·수정만, 번호 보존). 개정 내용은 끝 「v32 doc-sync」 절. 수: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
 - **v28 기준(2026-09-30 doc-sync — v32 이전 기준 줄)**: `src/settings/requirements.md` **v1.26** · `src/settings/design.md` 변경이력 2026-09-30 doc-sync 행 · contract v0.27 · 현행 소스. 상태: **개정 v28**(증분 모드, 대기열 Q-02 전환). 개정 내용·수·제외 범위는 TC 목록 끝 「doc-sync 개정(v28)」 절. 수: 자동 TC 번호 310개(TC-001 ~ TC-310) 중 유효 301 · 폐기 8 · 결번 1(TC-307) · TC-FLOW 32 · 수동 54
 - 기준: `src/settings/design.md`(2026-09-24, 변경이력 마지막 행 CR-026) / `src/settings/requirements.md` v1.6 / `doc/200_설계/bridge/contract.md` v0.8 + CR-018 미확정 계약(`MouseSettings.area: [Point, Point, Point, Point]` 추가·`pad` 삭제. 기본 `area` = `DEFAULT_AREA` [(375,525), (495,525), (495,625), (375,625)] — 관리자 전달 core 기본값, 손 기준점 435,575 중심) + CR-020 미확정 계약(`Settings.slam`·`AssetSlot` `'slam'` 삭제) + **CR-026 미확정 계약**(`MouseSettings.penPos: Point | null` 기본 `null` = `DEFAULT_MOUSE_SETTINGS.penPos`, `AssetSlot` 펜 슬롯 — 이 화면은 `slotKey` `'pen_up'`만) + overlay CR-025 `resolvePenPos`(`src/state/mouseMapping.ts` import — overlay `design/functions.md` `defaultPenPos`: `penPos` null이면 손 그림 중심을 `mouse.hand ?? 이동 영역 중심`에 두고 정수 반올림) / CR 대장 `test/change-requests.md`(CR-003~006, CR-016, CR-018, CR-020, CR-026)
@@ -1404,7 +1405,7 @@ CR-037 추적 — 설계 항목 ↔ TC
 | images-tab §3.1 펜·첫 등록 규칙과 무관 / 새 컴포넌트·상태·function 없음 | TC-194(확인창 없음·`setSettings` 0회) / TC-193(기존 `ImageSlotCard` testid·양식) |
 | design §4 `hairUrl`(파생) / §5.2 `findUrl` key `'hair'` | TC-198 / TC-198 |
 | design §5.2 렌더 3 헤어 행(맨 아래·`.layer`·`alt`·`draggable`·위치 없음·없으면 없음) / 판정 대상 아님 | TC-198 / TC-199 |
-| design §10 미리보기 합성 순서(헤어 → 팔 → 바탕 → 펜 손 → 영역 선 → 축 마커, 배경 없음) — CR-051(확정사항 🔒 2026-09-26): 오버레이 새 겹침 **헤어 → 배경 → 뽀모도(인물·말풍선·시간 글자) → 팔 → 본체 → 펜 손**에서 미리보기가 그리는 헤어·팔·바탕·펜 손만 뽑은 부분 순서라 모순 없음(배경·뽀모도는 이 미리보기가 그리지 않는다, 타이머 미리보기 TC-260은 헤어를 그리지 않는다) | TC-198(재확인 — 기대·스펙 불변) |
+| design §10 미리보기 합성 순서(헤어 → 팔 → 바탕 → 펜 손 → 영역 선 → 축 마커, 배경 없음) — CR-051(확정사항 🔒 2026-09-26): 오버레이 새 겹침 **헤어 → 배경 → 뽀모도로(인물·말풍선·시간 글자) → 팔 → 본체 → 펜 손**에서 미리보기가 그리는 헤어·팔·바탕·펜 손만 뽑은 부분 순서라 모순 없음(배경·뽀모도로는 이 미리보기가 그리지 않는다, 타이머 미리보기 TC-260은 헤어를 그리지 않는다) | TC-198(재확인 — 기대·스펙 불변) |
 | i18n §4.3 `imagesNote`(CR-037) / §4.4 `hair` 3개 국어 / §4.6 `asset.canvas_mismatch`(CR-037) | TC-094, TC-096, TC-136, TC-197 / TC-093, TC-094, TC-193, TC-195, TC-197 / TC-094, TC-195, TC-197 |
 | contract v0.17 `AssetSlot` `'hair'`·`hasBuiltinDefault('hair')` false·`isRequiredSlot('hair')` false / `import_asset`·`remove_asset`·`get_asset_manifest`·`assets://changed` 재사용 | TC-192 / TC-194, TC-196, TC-193·TC-198(props 재렌더로 수신 흉내) |
 | 실물 겹침·오버레이와 같은 순서·ja·en 문구 검수 | M-32 |
@@ -2015,7 +2016,7 @@ CR ↔ TC: CR-043 → 신규 TC-229 ~ TC-237·TC-FLOW-22·TC-FLOW-23 / 개정 TC
 
 - **V-1. 영향 TC 목록 정정(CR 대장 CR-043 · `design.md` RTM R-40·R-41 「영향 예상」).** 실제로 기대가 바뀐 TC는 TC-133·TC-134·TC-135·TC-192·TC-136·TC-094·TC-200·TC-201뿐이다. 「TC-132·TC-177·TC-178」·「TC-137 ~ TC-152」·「TC-093·TC-095 ~ TC-098」은 필수 수·`kb_down` 설명을 단언하지 않아 불변(회귀 감시만). R-41 「CR-038 뒷머리 비우기 TC 회귀」는 TC-200(`EMPTYABLE_SLOT_KEYS` 값·`kb_down_0` 기대)·TC-201(카드 수 17 → 16·「비우기」 버튼 1 → 2)이 실제로 바뀐다. ui-designer·CR 대장 동기화 권고. **v28 대조**: 이 목록은 CR-043 시점 기록이다. 이후 CR-044(v18)·CR-053(v23)으로 실제 개정 TC가 TC-133·TC-135·TC-177·TC-192·TC-200·TC-201·TC-229·TC-232 ~ TC-237·TC-FLOW-22·TC-FLOW-23으로 바뀌었다(「CR-053 개정」 표·추적 R-41 행). R-41 해석은 사용자 결정 대기(requirements v1.26 ①)라 추적 재편은 보류 — 판정 불변.
 - **V-2. 스펙이 고정한 해석.** ① 실패 뒤 포커스도 「이미지 변경」(TC-237 — 뒷머리 N-1과 같은 `onConfirmClear` 경로) ② TC-231은 ja·en 초안을 정확 비교하지 않되 토글 이름 표기(`「ペンの手を使う」`·`"Use pen hand"`) 포함을 단언한다(i18n §4.4 CR-043 머리 문단 규칙) — 검수에서 표기를 바꾸면 그 두 줄만 고친다 ③ TC-233은 ja·en aria 결과 리터럴(`押下 1の画像を削除`·`Clear image: Press 1`)을 i18n §4.4 R-41 줄에서 옮겼다 ④ `kb_down_1`만 있는 매니페스트(0 비어 있음)의 `kb_down_0`은 `emptyable` true·`canEmpty` false(§12.2 표 4행).
-- **V-3. TC-201 스펙 제목 미개정.** `Hair.test.tsx` TC-201의 it 이름 「뒷머리 카드만 버튼 3개 …, 다른 슬롯 카드는 2개」가 개정된 본문(타자 입력 1 카드도 3개)과 어긋난다. 단언은 반영했고 제목만 예산으로 남았다 — 다음 위임에서 「뒷머리·타자 입력 1 카드 버튼 3개」로 고친다. **v28 해소**: 현행 `Hair.test.tsx` TC-201 it 이름은 「(CR-044·CR-053 개정): 뒷머리 카드 버튼 3개(이미지 변경 → 기본값 → 비우기)·두 줄 배치(cardEmptyable·actions2), 셋째 버튼은 뒷머리·뽀모도 인물 카드뿐」으로 현행 본문(「CR-053 개정」 표 TC-201 — 「타자 입력 1」은 버튼 2개)과 일치한다. 옛 권고 「뒷머리·타자 입력 1 카드 버튼 3개」는 CR-053으로 무효.
+- **V-3. TC-201 스펙 제목 미개정.** `Hair.test.tsx` TC-201의 it 이름 「뒷머리 카드만 버튼 3개 …, 다른 슬롯 카드는 2개」가 개정된 본문(타자 입력 1 카드도 3개)과 어긋난다. 단언은 반영했고 제목만 예산으로 남았다 — 다음 위임에서 「뒷머리·타자 입력 1 카드 버튼 3개」로 고친다. **v28 해소**: 현행 `Hair.test.tsx` TC-201 it 이름은 「(CR-044·CR-053 개정): 뒷머리 카드 버튼 3개(이미지 변경 → 기본값 → 비우기)·두 줄 배치(cardEmptyable·actions2), 셋째 버튼은 뒷머리·뽀모도로 인물 카드뿐」으로 현행 본문(「CR-053 개정」 표 TC-201 — 「타자 입력 1」은 버튼 2개)과 일치한다. 옛 권고 「뒷머리·타자 입력 1 카드 버튼 3개」는 CR-053으로 무효.
 - **V-4. ko 설명 길이 경계.** i18n §4.4 CR-043의 ko 55자는 카드 설명 2줄 한도(약 28자 × 2)에 거의 닿는다. 넘치면 말줄임 + `title` 툴팁이 정해져 있어 결함은 아니고, 실물은 M-43 1)에서 본다.
 
 ### CR-044 개정 (v18 — 배포용 기본 세트 2차 교체 🔒 · 뒷머리 「비우기」 버튼 삭제, 증분 모드)
@@ -2119,7 +2120,7 @@ CR ↔ TC: CR-044 → 개정 TC-133 · TC-177 · TC-178 · TC-192 · TC-232(`ima
 - **W-8. 픽스처 이름.** `imageSlots.test.ts` `DEFAULT7`(hair 포함 7장 — 필수·emptyable 판정용으로 유지)·`ImagesTab.test.tsx` `d7()`(실물 6장)은 이름만 옛 개수다. 동작과 무관, 주석으로 표기했다.
 - **V-3 닫음**(TC-201 스펙 제목 개정).
 
-### CR-045 개정 (v19 — 뽀모도 타이머: 「타이머」 탭 R-43 ~ R-48 · 배경 그룹 뽀모도 카드 R-42 🔒, 증분 모드)
+### CR-045 개정 (v19 — 뽀모도로 타이머: 「타이머」 탭 R-43 ~ R-48 · 배경 그룹 뽀모도로 카드 R-42 🔒, 증분 모드)
 
 비유: 설정 창에 벽시계의 리모컨과 거울이 생겼다. 리모컨(카드 1)이 켜고·시작하고·멈추는지, 거울(카드 2 미리보기)이 오버레이와 같은 모습을 비추고 그 위에서 글자를 옮길 수 있는지, 이미지 탭 배경 판 묶음에 판 두 장이 더 끼워졌는지를 본다. 시계 자체(흐름·경과)는 core가 가지므로 화면 테스트는 「받은 사진을 그대로 보이는가」와 「어떤 인자로 부르는가」만 본다.
 
@@ -2144,27 +2145,27 @@ CR ↔ TC: CR-044 → 개정 TC-133 · TC-177 · TC-178 · TC-192 · TC-232(`ima
 - Given 없음 / When `#ABCDEF`·`#33AAFF`·`#AbC012`·`#333333`과 형식 밖 7종(`red`·`#abc`·`#abcdeg`·`abcdef`·`#abcdef0`·앞 공백·빈 문자열)
 - Then ⓐ 해당 없음 ⓑ 앞 4개 → 소문자 `#rrggbb`, 형식 밖 → `null` ⓒ 해당 없음
 
-### TC-241 · buildSlotGroups 배경 그룹 4장·뽀모도 카드 스펙 · 종류: 자동 · 요구: R-42 · 설계: timer-tab §13 `buildSlotGroups` ①·판정·검증 예, images-tab §14, contract v0.21 `AssetSlot` pomo·`hasBuiltinDefault` · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
+### TC-241 · buildSlotGroups 배경 그룹 4장·뽀모도로 카드 스펙 · 종류: 자동 · 요구: R-42 · 설계: timer-tab §13 `buildSlotGroups` ①·판정·검증 예, images-tab §14, contract v0.21 `AssetSlot` pomo·`hasBuiltinDefault` · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
 - Given `EMPTY` · `CHAR`(kb_up·mouse_base·pomo_char)
 - When `buildSlotGroups`·`slotCard(EMPTY, slot, slot, null)`
 - Then ⓐ 해당 없음(순수) ⓑ 배경 그룹 키 `[background, hair, pomo_char, pomo_bubble]`, 두 칸 = `{type:'slot', slot, key, msg:slot, n:null, entry:undefined, required:false, resetKind:'clear', canReset:false, lastOnlyBlocked:false, emptyable:false, canEmpty:false}`(toStrictEqual), `slotCard` 결과와 같음, 뒤 그룹 16장 불변, 슬롯 카드 20장·필수 `[kb_up, mouse_base]`, `EMPTYABLE_SLOT_KEYS` = `['kb_down_0']`, `CHAR`에서 pomo_char `canReset` true·pomo_bubble false, `hasBuiltinDefault`·`isRequiredSlot` 두 칸 모두 false ⓒ 해당 없음
 
-### TC-242 · 뽀모도 카드 렌더(빈·등록)·안내 문구 · 종류: 자동 · 요구: R-42, R-20, R-25 · 설계: timer-tab §13 카드 순서·판정(필수 배지 없음·「기본값」 = 비우기·셋째 버튼 없음), images-tab §14 §1 ASCII·`imagesNote`, i18n §4.9 `slots.pomo_*`·§4.3 `imagesNote`(CR-045) · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
+### TC-242 · 뽀모도로 카드 렌더(빈·등록)·안내 문구 · 종류: 자동 · 요구: R-42, R-20, R-25 · 설계: timer-tab §13 카드 순서·판정(필수 배지 없음·「기본값」 = 비우기·셋째 버튼 없음), images-tab §14 §1 ASCII·`imagesNote`, i18n §4.9 `slots.pomo_*`·§4.3 `imagesNote`(CR-045) · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
 - Given `EMPTY` → 재렌더 `BOTH`(두 칸 등록)
 - When 렌더 → props 교체
-- Then ⓐ 안내 `PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.`, 카드 id 앞 5개 `[background, hair, pomo_char, pomo_bubble, kb_up]`·카드 20장, 두 카드 h3 `뽀모도 인물`·`뽀모도 말풍선`·설명(i18n §4.9 ko)·`선택` 배지·`필수` 없음·`등록된 그림 없음`·img 없음·버튼 `[이미지 변경, 기본값]`·「기본값」(aria `… 그림 지우기`) 비활성·`title` 없음·복원/비우기 이름 버튼 없음 → 등록 뒤 img `asset://pomo_*.png`·「기본값」·「이미지 변경」 활성 ⓑ 카드 오류(`alert`) 없음 ⓒ `pickPngFile`·`importAsset`·`removeAsset`·`restoreDefaultAsset`·`setSettings`·`onError` 0회
+- Then ⓐ 안내 `PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기로 만드세요.`(CR-068 정정 문구), 카드 id 앞 5개 `[background, hair, pomo_char, pomo_bubble, kb_up]`·카드 20장, 두 카드 h3 `뽀모도로 인물`·`뽀모도로 말풍선`·설명(i18n §4.9 ko)·`선택` 배지·`필수` 없음·`등록된 그림 없음`·img 없음·버튼 `[이미지 변경, 기본값]`·「기본값」(aria `… 그림 지우기`) 비활성·`title` 없음·복원/비우기 이름 버튼 없음 → 등록 뒤 img `asset://pomo_*.png`·「기본값」·「이미지 변경」 활성 ⓑ 카드 오류(`alert`) 없음 ⓒ `pickPngFile`·`importAsset`·`removeAsset`·`restoreDefaultAsset`·`setSettings`·`onError` 0회
 
-### TC-243 · 뽀모도 카드 이미지 변경 성공·캔버스 불일치 오류 · 종류: 자동 · 요구: R-42, R-20 · 설계: timer-tab §13 흐름(I-2 `pickPngFile(t.pickTitle)` → `importAsset('pomo_char' \| 'pomo_bubble', path)`, 크기 다름 → `asset.canvas_mismatch` → 카드 오류 띠), i18n §4.6 CR-045 · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
+### TC-243 · 뽀모도로 카드 이미지 변경 성공·캔버스 불일치 오류 · 종류: 자동 · 요구: R-42, R-20 · 설계: timer-tab §13 흐름(I-2 `pickPngFile(t.pickTitle)` → `importAsset('pomo_char' \| 'pomo_bubble', path)`, 크기 다름 → `asset.canvas_mismatch` → 카드 오류 띠), i18n §4.6 CR-045 · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
 - Given `NO_POMO`, `pickPngFile` → `PATH`, `importAsset` 1회차 resolve `CHAR` · 2회차 reject `MISMATCH`(ko message) / en 재렌더 뒤 reject
-- When 「뽀모도 인물 이미지 변경」 → 「뽀모도 말풍선 이미지 변경」 → (en) 말풍선 이미지 변경
+- When 「뽀모도로 인물 이미지 변경」 → 「뽀모도로 말풍선 이미지 변경」 → (en) 말풍선 이미지 변경
 - Then ⓐ 말풍선 카드만 `alert` = `MISMATCH.message`(ko) / `en.errors['asset.canvas_mismatch']`(en, `pomodoro` 포함), 말풍선 img 없음, 버튼 다시 활성 ⓑ 오류는 카드 오류(`cardError`) — `onError` 0회 ⓒ `pickPngFile('PNG 이미지 선택')` · (en) `pickPngFile(en.pickTitle)`, `importAsset` 인자 `['pomo_char', PATH]` → `['pomo_bubble', PATH]`, `restoreDefaultAsset`·`setSettings` 0회
 
-### TC-244 · 뽀모도 「기본값」 → 비우기 확인창 → removeAsset · 종류: 자동 · 요구: R-42 · 설계: timer-tab §13 흐름(I-3 비우기 확인창 `{name}` = `slots.pomo_*.title`, 포커스 「취소」, danger, `removeAsset(slot)` 1회·`restoreDefaultAsset` 0회), images-tab §14 §7 · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
+### TC-244 · 뽀모도로 「기본값」 → 비우기 확인창 → removeAsset · 종류: 자동 · 요구: R-42 · 설계: timer-tab §13 흐름(I-3 비우기 확인창 `{name}` = `slots.pomo_*.title`, 포커스 「취소」, danger, `removeAsset(slot)` 1회·`restoreDefaultAsset` 0회), images-tab §14 §7 · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
 - Given `BOTH`, `removeAsset` deferred → `CHAR`
 - When 말풍선 「기본값」 → 「취소」 / 다시 → Esc / 다시 → 「지우기」 → 응답 → props `CHAR`
-- Then ⓐ `alertdialog`(`aria-modal`, 이름 `그림 지우기`, 설명 `‘뽀모도 말풍선’ 그림을 지울까요? 되돌릴 수 없습니다.`, 버튼 `[지우기, 취소]`, 포커스 「취소」), 취소·Esc 뒤 닫힘·포커스 「기본값」, 수신 뒤 말풍선 img 없음·`등록된 그림 없음`·「기본값」 비활성, 인물 img 그대로 ⓑ `alert` 없음·`onError` 0회 ⓒ 취소·Esc 동안 0회 → 확정 뒤 `removeAsset('pomo_bubble')` 정확히 1회, `restoreDefaultAsset`·`importAsset`·`setSettings` 0회
+- Then ⓐ `alertdialog`(`aria-modal`, 이름 `그림 지우기`, 설명 `‘뽀모도로 말풍선’ 그림을 지울까요? 되돌릴 수 없습니다.`, 버튼 `[지우기, 취소]`, 포커스 「취소」), 취소·Esc 뒤 닫힘·포커스 「기본값」, 수신 뒤 말풍선 img 없음·`등록된 그림 없음`·「기본값」 비활성, 인물 img 그대로 ⓑ `alert` 없음·`onError` 0회 ⓒ 취소·Esc 동안 0회 → 확정 뒤 `removeAsset('pomo_bubble')` 정확히 1회, `restoreDefaultAsset`·`importAsset`·`setSettings` 0회
 
-### TC-245 · 뽀모도 카드 ja·en 문구 · 종류: 자동 · 요구: R-42, R-20 · 설계: i18n §4.9 `slots.pomo_*` ja·en·§4.3 `imagesNote` CR-045 ja·en, images-tab §6(문구 `useMessages`) · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
+### TC-245 · 뽀모도로 카드 ja·en 문구 · 종류: 자동 · 요구: R-42, R-20 · 설계: i18n §4.9 `slots.pomo_*` ja·en·§4.3 `imagesNote` CR-045 ja·en, images-tab §6(문구 `useMessages`) · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
 - Given `BUBBLE_ONLY`, 언어 ja / en
 - When 렌더 → 말풍선 「기본값」 → 「취소」(`confirmCancel`)
 - Then ⓐ `format(imagesNote,{w:900,h:700})` 표시·`ポモドーロ`/`pomodoro` 포함, 두 카드 h3·설명 = 사전 `slots.pomo_*`, 「기본값」 이름 `format(clearImageAria,{name})`, 확인창 설명 `format(confirmClearMessage,{name})` ⓑ 확인창 닫힘 ⓒ `removeAsset`·`importAsset` 0회
@@ -2177,12 +2178,12 @@ CR ↔ TC: CR-044 → 개정 TC-133 · TC-177 · TC-178 · TC-192 · TC-232(`ima
 ### TC-247 · 타이머 탭 열기 — 메뉴 4번째·아이콘·h1·구독 먼저 → getTimer → 00:00:00 · 종류: 자동 · 요구: R-44, R-27, R-48, R-43, R-20 · 설계: timer-tab §1.1 메뉴 4항목, §2 `SettingsApp`·`Shell` 개정(`TAB_IDS`·`TAB_KEY.timer`·패널 분기)·`TabIcon` 'timer', §7 T-1, §8 `get_timer`·`timer://changed`, contract v0.21 §5.8-3 · 스펙: `test/SettingsApp.timer.test.tsx`(ko·ja 두 `it`) · **신규(CR-045)**
 - Given `SETTINGS`(timer 끔), `onTimerChanged` 구독 기록(`'sub'`), `getTimer` → `{stopped, 0}`(기록 `'get'`) · 공용 훅 실물 / ja 사례는 `language:'ja'`
 - When 마운트 → 「타이머」 클릭 → 「기본 설정」 → End 키
-- Then ⓐ 메뉴 `[기본 설정, 이미지 설정, 어깨축·손 위치, 타이머]`, 4번째 id `settings-tab-timer`·`aria-controls` `settings-panel-timer`·svg `aria-hidden`·`focusable=false`·이름 `타이머`, 열면 h1 `[타이머]`·패널 id·`aria-labelledby`·`aria-selected` true·카드 h2 `[뽀모도 타이머, 시간 글자]`·글자 `00:00:00`, End 뒤 h1 타이머·4번째 포커스 / ja: 4번째 = `ja.tabTimer`·h1·카드 제목 ja ⓑ 열기 전 조회·구독 0회, 순서 `['sub','get']`, 다른 탭으로 가면 해제 1회, End로 다시 열면 `getTimer` 2회 ⓒ `getTimer()` 인자 없음, `setSettings`·`controlTimer` 0회
+- Then ⓐ 메뉴 `[기본 설정, 이미지 설정, 어깨축·손 위치, 타이머]`, 4번째 id `settings-tab-timer`·`aria-controls` `settings-panel-timer`·svg `aria-hidden`·`focusable=false`·이름 `타이머`, 열면 h1 `[타이머]`·패널 id·`aria-labelledby`·`aria-selected` true·카드 h2 `[뽀모도로 타이머, 시간 글자]`·글자 `00:00:00`, End 뒤 h1 타이머·4번째 포커스 / ja: 4번째 = `ja.tabTimer`·h1·카드 제목 ja ⓑ 열기 전 조회·구독 0회, 순서 `['sub','get']`, 다른 탭으로 가면 해제 1회, End로 다시 열면 `getTimer` 2회 ⓒ `getTimer()` 인자 없음, `setSettings`·`controlTimer` 0회
 
 ### TC-248 · TimerTab 레이아웃·초기 표시·포커스 순서 · 종류: 자동 · 요구: R-43 ~ R-47 · 설계: timer-tab §1.2, §2 `TimerTab`·`ToggleSwitch`·`SettingsCard`, §4 `timer`(파생)·`previewTimer`, §6 렌더 1 ~ 3, §9 포커스 순서·`aria-valuetext`·`<output>`, i18n §4.9 ko · 스펙: `test/TimerTab.test.tsx` · **신규(CR-045)**
 - Given `SETTINGS.timer` = (268,403)·5°·36·`#333333`·끔, `POMO`(800×700), 공용 훅 mock(stopped)
 - When 렌더
-- Then ⓐ h2 `[뽀모도 타이머, 시간 글자]`·카드 설명 2개(i18n ko), 스위치 `aria-checked` false·설명 `끄면 시간이 멈춘 채로 보입니다`, 묶음 `타이머 조작` 버튼 `[시작, 일시정지, 멈춤]`·`type=button`·모두 disabled, 안내 `멈춤을 누르면 00:00:00으로 돌아갑니다`, 미리보기 group, 회전 slider min −180·max 180·step 1·값 5·valuetext `5°`·output `5°`, 크기 12 ~ 200·값 36·`36px`, 색 `type=color`·`#333333`·output ⓑ 미리보기 `rotate(5deg)`·`36px`, 활성 조작 DOM 순서 `[스위치, 회전, 크기, 글자 색]`(끔 — 버튼 건너뜀, 글자 포커스 대상 아님) ⓒ `setSettings`·`controlTimer`·`getTimer`·`onError` 0회
+- Then ⓐ h2 `[뽀모도로 타이머, 시간 글자]`·카드 설명 2개(i18n ko), 스위치 `aria-checked` false·설명 `끄면 시간이 멈춘 채로 보입니다`, 묶음 `타이머 조작` 버튼 `[시작, 일시정지, 멈춤]`·`type=button`·모두 disabled, 안내 `멈춤을 누르면 00:00:00으로 돌아갑니다`, 미리보기 group, 회전 slider min −180·max 180·step 1·값 5·valuetext `5°`·output `5°`, 크기 12 ~ 200·값 36·`36px`, 색 `type=color`·`#333333`·output ⓑ 미리보기 `rotate(5deg)`·`36px`, 활성 조작 DOM 순서 `[스위치, 회전, 크기, 글자 색]`(끔 — 버튼 건너뜀, 글자 포커스 대상 아님) ⓒ `setSettings`·`controlTimer`·`getTimer`·`onError` 0회
 
 ### TC-249 · settings.timer 없음 → DEFAULT_TIMER_SETTINGS · 종류: 자동 · 요구: R-44, R-46, R-47 · 설계: timer-tab §4 `timer` 초기값(`settings.timer ?? DEFAULT_TIMER_SETTINGS`), §5.1 `saveTimer`, contract v0.21 호환 · 스펙: `test/TimerTab.test.tsx` · **신규(CR-045)**
 - Given `timer` 키가 없는 옛 `Settings`
@@ -2293,7 +2294,7 @@ CR ↔ TC: CR-044 → 개정 TC-133 · TC-177 · TC-178 · TC-192 · TC-232(`ima
 
 ### TC-FLOW-25 · S-24: 두 번째 캐릭터와 말풍선 PNG 두 장을 넣고, 필요 없어진 인물은 비운다 · 종류: 자동 · 요구: R-42 · Steps: TC-243(성공 부분 — 인물) → TC-243(성공 부분 — 말풍선) → TC-242(등록 뒤 부분) → TC-244(확정 부분 — 대상 pomo_char) → M-45f · 스펙: `test/PomoCards.test.tsx` · **신규(CR-045)**
 - 상태 전달: 각 응답 매니페스트(`CHAR` → `BOTH` → `BUBBLE_ONLY`)를 props로 되돌려 다음 Step Given
-- Then ⓐ 인물·말풍선 img 표시 → 인물 확인창 설명 `‘뽀모도 인물’ 그림을 지울까요? 되돌릴 수 없습니다.` → 인물 빈 칸·말풍선 그대로 ⓑ 카드 오류 없음 ⓒ `importAsset` `[['pomo_char',PATH],['pomo_bubble',PATH]]`, `removeAsset` `[['pomo_char']]`, `restoreDefaultAsset`·`setSettings` 0회
+- Then ⓐ 인물·말풍선 img 표시 → 인물 확인창 설명 `‘뽀모도로 인물’ 그림을 지울까요? 되돌릴 수 없습니다.` → 인물 빈 칸·말풍선 그대로 ⓑ 카드 오류 없음 ⓒ `importAsset` `[['pomo_char',PATH],['pomo_bubble',PATH]]`, `removeAsset` `[['pomo_char']]`, `restoreDefaultAsset`·`setSettings` 0회
 
 ### TC-FLOW-26 · S-25: 말풍선 모양에 맞게 글자를 끌어 놓고 기울기·크기·색을 맞춘다 · 종류: 자동 · 요구: R-46, R-47, R-43 · Steps: TC-262(끌기 부분) → TC-255(회전 부분) → TC-255(크기 부분) → TC-258(색 부분) → M-45e · 스펙: `test/TimerTab.test.tsx` · **신규(CR-045)**
 - 상태 전달: 매 저장 인자(S1 → S4)를 props로 되돌려 다음 Step Given(누적)
@@ -2318,21 +2319,21 @@ CR ↔ TC: CR-044 → 개정 TC-133 · TC-177 · TC-178 · TC-192 · TC-232(`ima
 | (mock) | 같음 | `bridge/commands`에 `getTimer`·`controlTimer`, `bridge/events`에 `EVENTS.timerChanged`·`onTimerChanged`(일반 함수) | — | 반영 |
 | TC-093 | `i18n.test.ts` | 불변 | ⓑ `ERROR_CODES` 23(`timer.disabled` — `autostart.cancelled` 뒤·`unknown` 앞, X-4), slots 20(pomo 2) | 반영 |
 | TC-094 | 같음 | 불변 | ⓑ slots·errors 기대 + pomo 2·`timer.disabled` ko, 단순 키 **110**(93 + 17) | 반영 |
-| TC-096 · TC-197 | 같음 | 불변 | ⓑ `imagesNote`·`canvas_mismatch` ko 기대 = CR-045 문구(뽀모도 포함). TC-197의 ja `後ろ髪`·en `back hair` 단언 불변 | 반영 |
+| TC-096 · TC-197 | 같음 | 불변 | ⓑ `imagesNote`·`canvas_mismatch` ko 기대 = CR-045 문구(CR-068 정정 — 「뽀모도로」 포함: `배경·뒷머리·뽀모도로·키보드 …`). TC-197의 ja `後ろ髪`·en `back hair` 단언 불변 | 반영 |
 | TC-228 | 같음 | 불변 | ⓑ slots 20키 | 반영 |
 | TC-134 · TC-192 | `imageSlots.test.ts` | 불변 | ⓑ 배경 그룹 `[background, hair, pomo_char, pomo_bubble]`(hair 카드 index 1 스펙 불변), 슬롯 카드 20 | 반영 |
 | TC-177 · TC-226 · TC-229 | 같음 | 불변 | ⓑ 슬롯 카드 총수 20(TC-226 옛 파일 21), 20장 모두 `resetKind` = `hasBuiltinDefault`(pomo 둘 clear) | 반영 |
-| TC-136 | `ImagesTab.test.tsx` | 불변 | ⓐ 안내 CR-045 문구, `ORDER`·`TITLES` 20장(셋째·넷째 뽀모도 인물·말풍선, `선택`·빈 미리보기) | 반영 |
+| TC-136 | `ImagesTab.test.tsx` | 불변 | ⓐ 안내 CR-045 문구, `ORDER`·`TITLES` 20장(셋째·넷째 뽀모도로 인물·말풍선, `선택`·빈 미리보기) | 반영 |
 | TC-227 | 같음 | 불변 | ⓐ 카드 id 22(배경 4) | 반영 |
 | TC-FLOW-15 | 같음 | 불변 | ⓐ 슬롯 카드 20·빈 칸 **14**(pomo 2 추가) | 반영 |
-| TC-193 | `Hair.test.tsx` | 불변 | ⓐ 카드 **21**(19 + 뽀모도 2) | 반영(v19 후속) |
-| TC-201 | 같음 | 불변 | ⓐ 셋째 버튼 없는 슬롯 카드 **19**(17 + 뽀모도 2) | 반영(v19 후속) |
+| TC-193 | `Hair.test.tsx` | 불변 | ⓐ 카드 **21**(19 + 뽀모도로 2) | 반영(v19 후속) |
+| TC-201 | 같음 | 불변 | ⓐ 셋째 버튼 없는 슬롯 카드 **19**(17 + 뽀모도로 2) | 반영(v19 후속) |
 
 v19 추적 — 요구 ↔ TC (앞 표와 겹치면 이 표 우선)
 
 | 요구ID | 자동 TC | TC-FLOW | 수동 |
 |---|---|---|---|
-| R-42(뽀모도 카드 2) | TC-241, TC-242, TC-243, TC-244, TC-245, TC-246, TC-260, TC-266, TC-134, TC-136, TC-192 | TC-FLOW-25 | M-45f |
+| R-42(뽀모도로 카드 2) | TC-241, TC-242, TC-243, TC-244, TC-245, TC-246, TC-260, TC-266, TC-134, TC-136, TC-192 | TC-FLOW-25 | M-45f |
 | R-43(00:00:00 스톱워치 글자·꺼져도 보임) | TC-247, TC-248, TC-261, TC-266 | TC-FLOW-24, TC-FLOW-26 | M-45b |
 | R-44(타이머 탭·on/off) | TC-247, TC-248, TC-249, TC-250, TC-251, TC-252, TC-266, TC-268, TC-031, TC-153, TC-154 | TC-FLOW-24 | M-45a, M-45b |
 | R-45(시작·일시정지·멈춤) | TC-252, TC-253, TC-254, TC-267 | TC-FLOW-24 | M-45b |
@@ -2510,7 +2511,7 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 ### TC-269 · timerValues §14.5 검증 예 전부 · 종류: 자동 · 요구: R-49, R-50, R-53, R-54 · 설계: timer-tab §14.5 표 11행·검증 예, §14.4 `timerValues` 행 · 스펙: `test/timerValues.test.ts` · **신규(CR-050)**
 - Given 순수 함수 `fullTimer`·`timerToggles`·`togglePatch`·`isDurationLocked`·`splitHms`·`joinHms`·`pad2`·`parseHmsField`·`parseHmsDraft`·`clampVolume`·`soundSizeKb`, 기대는 리터럴(DEFAULT 독립 대조)
 - When §14.5 검증 예 + 식에서 나오는 경계 호출
-- Then ⓐ 해당 없음(순수 모듈) ⓑ 반환: `fullTimer(undefined)` = DEFAULT 리터럴 · 옛 설정(`enabled:true`) → `mode 'stopwatch'`·1500·80·`enabled true` · 명시 `undefined` 필드도 기본값 · 새 필드 있으면 그대로 · 입력 불변 / `timerToggles` 옛 설정 → `{true,false}`, `{enabled:false, mode:'countdown'}` → `{false,false}`, 켜진 타이머 → `{false,true}` / `togglePatch('countdown',true)` → `{enabled:true, mode:'countdown'}`, `('stopwatch',false)`·`('countdown',false)` → `{enabled:false}`(mode 키 없음) / `isDurationLocked` 켜진 타이머 × `paused`·`running`·`finished` → true, `stopped`·`restPaused` → false, 스톱워치 `running`·꺼진 타이머 `paused` → false / `splitHms` 1500 → {0,25,0}·3723 → {1,2,3}·359999 → {99,59,59}·NaN·Infinity·−5 → {0,0,0}·400000 → {99,59,59}·61.9 → {0,1,1} / `joinHms(1,2,3)` 3723 / `pad2(5)` `'05'` / `parseHmsField` `''` → 0·`' 7 '` → 7·`'60'`(59) → null·`'100'`·`'1a'`·`'-1'`·`'1.5'` → null / `parseHmsDraft` 01:02:03 → 3723(정수)·`{'','0','5'}` → 5·0:0:0·빈칸 셋 → null·분 60·`'1a'`·`'100'` → null·99:59:59 → 359999·0:0:1 → 1 / `clampVolume` 80.4 → 80·79.5 → 80·101 → 100·−3 → 0·NaN·Infinity → 80 / `soundSizeKb` 312004 → 305·1024 → 1·1025 → 2·0 → 0 ⓒ 해당 없음(bridge 호출 없음 — 상수만 import)
+- Then ⓐ 해당 없음(순수 모듈) ⓑ 반환: `fullTimer(undefined)` = DEFAULT 리터럴 · 옛 설정(`enabled:true`) → `mode 'stopwatch'`·1500·80·`enabled true` · 명시 `undefined` 필드도 기본값 · 새 필드 있으면 그대로 · 입력 불변 / `timerToggles` 옛 설정 → `{true,false}`, `{enabled:false, mode:'countdown'}` → `{false,false}`, 켜진 타이머 → `{false,true}` / `togglePatch('countdown',true)` → `{enabled:true, mode:'countdown'}`, `('stopwatch',false)`·`('countdown',false)` → `{enabled:false}`(mode 키 없음) / `isDurationLocked` 켜진 타이머 × `paused`·`running`·`restPaused`·`finished` → true(**CR-070 개정 — `restPaused` false → true, A-1**), `stopped` → false, 스톱워치 `running`·스톱워치 `restPaused`(CR-070 추가)·꺼진 타이머 `paused`·꺼진 타이머 `restPaused`(CR-070 추가) → false / `splitHms` 1500 → {0,25,0}·3723 → {1,2,3}·359999 → {99,59,59}·NaN·Infinity·−5 → {0,0,0}·400000 → {99,59,59}·61.9 → {0,1,1} / `joinHms(1,2,3)` 3723 / `pad2(5)` `'05'` / `parseHmsField` `''` → 0·`' 7 '` → 7·`'60'`(59) → null·`'100'`·`'1a'`·`'-1'`·`'1.5'` → null / `parseHmsDraft` 01:02:03 → 3723(정수)·`{'','0','5'}` → 5·0:0:0·빈칸 셋 → null·분 60·`'1a'`·`'100'` → null·99:59:59 → 359999·0:0:1 → 1 / `clampVolume` 80.4 → 80·79.5 → 80·101 → 100·−3 → 0·NaN·Infinity → 80 / `soundSizeKb` 312004 → 305·1024 → 1·1025 → 2·0 → 0 ⓒ 해당 없음(bridge 호출 없음 — 상수만 import)
 
 ### TC-270 · 토글 표시 4가지(+ 꺼진 타이머 모드) · 종류: 자동 · 요구: R-49 · 설계: timer-tab §14.6 `timer`(= `fullTimer`)·`stopwatchOn`·`countdownOn`, §14.4 `ToggleSwitch` ×2 `checked` · 스펙: `test/TimerTab.test.tsx` · **신규(CR-050)**
 - Given `SETTINGS`(둘 다 꺼짐) → `S_SW` → `S_CD` → `S_ON`(옛 설정 `mode` 없음·`enabled:true`) → `S_CD_OFF`
@@ -2545,7 +2546,7 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 ### TC-276 · 시작 시간 잠금(+ 잠금 뒤 blur 가드) · 종류: 자동 · 요구: R-50 · 설계: §14.5 `isDurationLocked`, §14.6 `durationLocked`(`TimerTab` 파생 → `locked`)·잠금 중 draft 버림, §14.7.2 잠금 정리 효과·**`commit` 첫 줄 `locked` 가드**·검증 예 끝 행(focusOut 후 `locked` 재렌더 → 0회), §14.8 안내(`locked` 우선, `msgError` 아님), §14.9 T-11 · 스펙: `test/CountdownTimeInput.test.tsx`(컴포넌트 `TC-276(컴포넌트)` · `TC-276(컴포넌트 가드)`) · `test/TimerTab.test.tsx`(상태 7사례 + 잠긴 뒤 blur) · **신규(CR-050)** · 가드 하위 항목 추가(v21 후속)
 - Given 컴포넌트 `locked` false ↔ true / 탭 공용 훅 mock 사진: 타이머 켜짐 × `running`·`paused`·`finished`·`stopped`, 스톱워치 `running`, 둘 다 꺼짐 `running`, 꺼진 타이머 모드 `paused` / **가드**: 컴포넌트 `secs` 1500·`locked` false에서 시작, ② 사례는 잠긴 칸에 합성 `change`로 draft를 남긴다(실제 사용자는 disabled 칸에 입력할 수 없다 — 가드만 격리하는 컴포넌트 계약 테스트)
 - When 입력 중(`01`) 잠금 → 풀림 / 되돌림 안내 뒤 잠금 → 풀림 / 탭 사례별 재렌더, `07` 입력 중 `running` 수신 → **묶음 blur(`focusOut`, relatedTarget null)** → `stopped` / **가드** ① 시 `01` 입력 → `locked` true 재렌더 → 묶음 blur ② 잠긴 채 시 `01` → blur → Enter → 분 `60` → blur
-- Then ⓐ 잠김 = 세 칸 disabled·안내 `멈춤 상태에서 바꿀 수 있습니다`(`msgError` 아님), 풀림 = 활성·빈 안내 / 탭: 타이머 `running`·`paused`·`finished`만 잠김(잠김 안내), **CR-052 개정: 타이머 켜짐 `stopped`만 입력 가능 — 타이머 모드 아님 4사례(스톱워치 `running`·`stopped`(사례 추가, 모두 8사례), 둘 다 꺼짐 `running`, 꺼진 타이머 모드 `paused`)는 회색 비활성(세 칸 disabled·`aria-disabled="true"`·안내 줄 빈 값, 옛 「나머지 4사례 입력 가능」 대체 — 컴포넌트 수준은 TC-288)**, 잠긴 뒤 blur 뒤에도 칸 `00:25:00`·잠김 안내 / 가드 ① 칸 `00`·`25`·`00`·잠김 안내 ② 세 칸 `aria-invalid` 없음·안내 = 잠김 문구·`msgError` 아님(invalid 불변) ⓑ 잠기면 draft·invalid 버림(칸 = 저장값 `00:25:00`, 풀린 뒤에도 저장값·`aria-invalid` 없음), 잠긴 동안 `commit`은 저장·되돌림 판정을 하지 않는다 ⓒ `onCommit`·`setSettings`·`controlTimer` 0회(잠금은 화면 판정 — core 호출 없음), 가드 ①·② blur·Enter 모두 `onCommit` 0회(가드가 없으면 ②에서 `onCommit(5100)`), 탭 잠긴 뒤 blur `setSettings` 0회
+- Then ⓐ 잠김 = 세 칸 disabled·안내 `멈춤 상태에서 바꿀 수 있습니다`(`msgError` 아님), 풀림 = 활성·빈 안내 / 탭: 타이머 `running`·`paused`·`restPaused`·`finished`만 잠김(세 칸 disabled·잠김 안내 `timerDurationLocked`) — **CR-070 개정: Given 탭 사진에 「타이머 켜짐 × `restPaused`」 사례 추가(탭 9사례), 기대 = 잠김(옛 Z-3 ③ 「`restPaused`는 잠기지 않음」 폐기, A-1)**, **CR-052 개정: 타이머 켜짐 `stopped`만 입력 가능 — 타이머 모드 아님 4사례(스톱워치 `running`·`stopped`(사례 추가, CR-052 당시 8사례 → CR-070 `restPaused` 추가로 9사례), 둘 다 꺼짐 `running`, 꺼진 타이머 모드 `paused`)는 회색 비활성(세 칸 disabled·`aria-disabled="true"`·안내 줄 빈 값, 옛 「나머지 4사례 입력 가능」 대체 — 컴포넌트 수준은 TC-288)**, 잠긴 뒤 blur 뒤에도 칸 `00:25:00`·잠김 안내 / 가드 ① 칸 `00`·`25`·`00`·잠김 안내 ② 세 칸 `aria-invalid` 없음·안내 = 잠김 문구·`msgError` 아님(invalid 불변) ⓑ 잠기면 draft·invalid 버림(칸 = 저장값 `00:25:00`, 풀린 뒤에도 저장값·`aria-invalid` 없음), 잠긴 동안 `commit`은 저장·되돌림 판정을 하지 않는다 ⓒ `onCommit`·`setSettings`·`controlTimer` 0회(잠금은 화면 판정 — core 호출 없음), 가드 ①·② blur·Enter 모두 `onCommit` 0회(가드가 없으면 ②에서 `onCommit(5100)`), 탭 잠긴 뒤 blur `setSettings` 0회
 
 ### TC-277 · 알림음 카드 마운트·상태 문구 · 종류: 자동 · 요구: R-53 · 설계: §14.7.3 마운트 조회 효과(`alive`)·`statusText`, §14.6 `sound`(초기 `null` = 기본), 버튼 비활성 규칙, §14.8 렌더, §14.10 `get_alarm_sound`, §14.11 `aria-live` · 스펙: `test/AlarmSoundCard.test.tsx` · **신규(CR-050)** · **개정(CR-067 — 설명 문구 1회 재생, 「v33 개정 — CR-067」 절)**
 - Given `getAlarmSound` deferred → `MP3` / `null` / `WAV`(1024B) / reject `sound.io` / 언마운트 뒤 reject
@@ -2590,12 +2591,12 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 ### TC-285 · 탭 레이아웃·포커스 순서 · 종류: 자동 · 요구: R-49, R-50, R-53 · 설계: §14.2 카드 순서, §14.8 렌더 1 ~ 4, §14.11 포커스 순서 · 스펙: `test/TimerTab.test.tsx` · **신규(CR-050)**
 - Given ① `SETTINGS`·`getAlarmSound` null·`stopped` ② `S_CD`·`MP3`·`cd('running')`
 - When 렌더
-- Then ⓐ h2 `[뽀모도 타이머, 알림음, 시간 글자]` ⓑ 활성 조작 DOM 순서 ① `[스톱워치 사용, 타이머 사용, 시, 분, 초, 파일 등록, 미리 듣기, 음량, 회전, 크기, 글자 색]`(세 버튼·「기본값」 건너뜀) ② `[스톱워치 사용, 타이머 사용, 시작, 일시정지, 멈춤, 파일 등록, 미리 듣기, 기본값, 음량, 회전, 크기, 글자 색]`(잠긴 세 칸 건너뜀) ⓒ `getAlarmSound` 2회(마운트마다), `setSettings`·`controlTimer` 0회
+- Then ⓐ h2 `[뽀모도로 타이머, 알림음, 시간 글자]` ⓑ 활성 조작 DOM 순서 ① `[스톱워치 사용, 타이머 사용, 시, 분, 초, 파일 등록, 미리 듣기, 음량, 회전, 크기, 글자 색]`(세 버튼·「기본값」 건너뜀) ② `[스톱워치 사용, 타이머 사용, 시작, 일시정지, 멈춤, 파일 등록, 미리 듣기, 기본값, 음량, 회전, 크기, 글자 색]`(잠긴 세 칸 건너뜀) ⓒ `getAlarmSound` 2회(마운트마다), `setSettings`·`controlTimer` 0회
 
 ### TC-286 · i18n 사전(CR-050) · 종류: 자동 · 요구: R-55 · 설계: i18n §4.10 표·주(`ERROR_CODES` 배치 확정)·§4.9 삭제·변경 표기, timer-tab §14.12 · 스펙: `test/i18n.test.ts` · **신규(CR-050)** · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)** · **개정(CR-067 — ko `alarmCardDesc` 기대값, 「v33 개정 — CR-067」 절)**
 - Given ko·ja·en 사전, `ERROR_CODES`
 - When 키·값 비교
-- Then ⓐ 해당 없음(사전) ⓑ ko 새 22키 = §4.10 ko 열 정확(`timerStopwatchEnabled` 스톱워치 사용 ~ `alarmPreviewFailed`. 그중 `alarmCardDesc` = `타이머가 0이 되면 깜빡이는 동안 한 번 울립니다` — i18n `alarmCardDesc` CR-067 변경 행, CR-052 반복 문구 대체), `timerStopHint` = `멈춤을 누르면 처음 시간으로 돌아갑니다`, `errors['timer.disabled']` = `스톱워치나 타이머가 꺼져 있습니다. 먼저 둘 중 하나를 켜 주세요.`(옛 CR-045 문구 아님), `format(alarmCurrentCustom,{format:'MP3',size:305})` = `지금: 등록한 알림음 (MP3 · 305 KB)`, 세 사전 `timerEnabled`·`timerEnabledDesc` 없음·단순 키 집합 동일, `ERROR_CODES` 25·`timer.disabled` 뒤 `[sound.not_audio, sound.too_many_bytes, sound.io, unknown]`, ja·en 22키 비어 있지 않음·ko와 다름·`{format}`·`{size}`·`99:59:59`·`00:00:01` 유지, ja·en `timerStopHint`·`errors['timer.disabled'|'sound.*']` 비어 있지 않음·ko와 다름·옛 ja·en `timer.disabled` 문구 아님, `%`·`:` 키 없음 ⓒ 해당 없음
+- Then ⓐ 해당 없음(사전) ⓑ ko 새 22키 = §4.10 ko 열 정확(`timerStopwatchEnabled` 스톱워치 사용 ~ `alarmPreviewFailed`. 그중 `alarmCardDesc` = `타이머가 0이 되면 깜빡이는 동안 한 번 울립니다` — i18n `alarmCardDesc` CR-067 변경 행, CR-052 반복 문구 대체. **`timerCountdownDesc` = `정한 시간부터 0까지 내려갑니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 내려갑니다`** — CR-070(D-4) 개정, 옛 「쉬는중에도 계속 줄어듭니다」 문구 대체, 끝 마침표 없음), `timerStopHint` = `멈춤을 누르면 처음 시간으로 돌아갑니다`, `errors['timer.disabled']` = `스톱워치나 타이머가 꺼져 있습니다. 먼저 둘 중 하나를 켜 주세요.`(옛 CR-045 문구 아님), `format(alarmCurrentCustom,{format:'MP3',size:305})` = `지금: 등록한 알림음 (MP3 · 305 KB)`, 세 사전 `timerEnabled`·`timerEnabledDesc` 없음·단순 키 집합 동일, `ERROR_CODES` 25·`timer.disabled` 뒤 `[sound.not_audio, sound.too_many_bytes, sound.io, unknown]`, ja·en 22키 비어 있지 않음·ko와 다름·`{format}`·`{size}`·`99:59:59`·`00:00:01` 유지, ja·en `timerStopHint`·`errors['timer.disabled'|'sound.*']` 비어 있지 않음·ko와 다름·옛 ja·en `timer.disabled` 문구 아님, `%`·`:` 키 없음 ⓒ 해당 없음
 
 ### TC-287 · ja·en 렌더(두 토글 외 새 문구) · 종류: 자동 · 요구: R-55 · 설계: §14.8 렌더(`useMessages`), §14.12, i18n §4.10 ja·en 열 · 스펙: `test/TimerTab.test.tsx` · **신규(CR-050)**
 - Given 언어 ja / en × ① `SETTINGS`·파일 없음 ② `S_CD`·`cd('running')`·`MP3`
@@ -2622,7 +2623,7 @@ CR ↔ TC: CR-049 → 개정 TC-093 · TC-094 · TC-246(`i18n.test.ts`) / TC-104
 |---|---|---|---|
 | TC-246 | `i18n.test.ts` | 불변 | ⓑ `EXPECTED_KO_TIMER` 17 → **15**(`timerEnabled`·`timerEnabledDesc` 삭제), `timerStopHint` 새 ko, `ERROR_CODES` 22 → **25**(나머지 단언 불변 — 새 문구 값은 TC-286) |
 | TC-093 · TC-094 | 같음 | 불변 | ⓑ `EXPECTED_ERROR_CODES`에 `sound.*` 3개(`timer.disabled` 뒤), ko `errors` = 옛 + `timer.disabled` 새 문구 + `sound.*` 3개, 단순 키 109 → **129**(+22 −2) |
-| TC-248 | `TimerTab.test.tsx` | `await flush()`(카드 조회) | ⓐ h2 3장 `[뽀모도 타이머, 알림음, 시간 글자]`, 두 스위치·설명(i18n §4.10), 시작 시간 `00:25:00`·힌트, 새 `timerStopHint`(옛 문구 없음), 알림음 카드 기본 문구·「기본값」 disabled·음량 44%(CR-059 — `T`에 `alarmVolume` 없음 → 라이브 DEFAULT, 옛 80%) ⓒ `getAlarmSound` 1회, 그 밖 0회. 포커스 순서 단언은 TC-285로 옮김 |
+| TC-248 | `TimerTab.test.tsx` | `await flush()`(카드 조회) | ⓐ h2 3장 `[뽀모도로 타이머, 알림음, 시간 글자]`, 두 스위치·설명(i18n §4.10), 시작 시간 `00:25:00`·힌트, 새 `timerStopHint`(옛 문구 없음), 알림음 카드 기본 문구·「기본값」 disabled·음량 44%(CR-059 — `T`에 `alarmVolume` 없음 → 라이브 DEFAULT, 옛 80%) ⓒ `getAlarmSound` 1회, 그 밖 0회. 포커스 순서 단언은 TC-285로 옮김 |
 | TC-249 | 같음 | 스위치 → 「스톱워치 사용」 | ⓐ 두 스위치 false·`00:25:00`·44%(CR-059, 옛 80%) ⓒ `{ ...DEFAULT_TIMER_SETTINGS, enabled:true, mode:'stopwatch' }` 전체 8필드 — 정확한 리터럴(`textPos` (268,402)·`rotation` 7·`alarmVolume` 44)은 「CR-053 개정 TC」 표 TC-249 행(CR-059 정정) — 216행 깨짐 해소 |
 | TC-250 | 같음 | 「스톱워치 사용」 | ⓐ 대기 중 **두** 스위치 `aria-busy` ⓒ `{...SETTINGS, timer:{...TF, enabled:true, mode:'stopwatch'}}`, props `S_SW` 뒤 `[true,false]` |
 | TC-251 | 같음 | 「스톱워치 사용」(끄기) | ⓒ `{...S_ON, timer:{...TF, enabled:false, mode:'stopwatch'}}`(mode 유지), 실패 뒤 `[true,false]` |
@@ -2689,7 +2690,7 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 
 - **Z-1. mock 경로 표기.** timer-tab §14.10 끝 「`vi.mock('bridge')`에 추가」와 달리 스펙은 기존 관례 `vi.mock('bridge/commands')`를 따랐다(X-3과 같은 결정, 래퍼 4개가 실제로 `commands.ts`에 있음 확인). 설계 문구만 맞추면 된다.
 - **Z-2. `timerCardDesc` 불일치 유지.** §14.15 「현행 유지」대로 TC-248이 옛 문구(「0부터 올라가는 시간」)를 그대로 단언한다. 문구를 바꾸면 TC-248·TC-246(`EXPECTED_KO_TIMER`) 두 곳만 고친다.
-- **Z-3. 스펙이 고정한 해석.** ① TC-274: 저장 성공(`true`) 뒤 props가 아직 옛 값이어도 입력값을 유지한다(§14.7.2 「draft를 건드리지 않는다」) ② TC-275: 저장 실패(`false`) 뒤에는 되돌림 안내(`timerDurationInvalid`)를 띄우지 않는다(설계는 `setDraft(null)`만 — 오류 줄은 `saveTimer`) ③ TC-276: `isDurationLocked`에서 `restPaused`는 잠기지 않는다(식의 세 상태 밖 — 카운트다운은 쉬는중에도 흐르므로 실제로 오지 않는 값) ④ TC-281: 등록 **성공** 때만 재생 정지·실패 문구 지움(취소·실패 때는 재생 유지 — §14.7.3 `onImport` 순서 그대로) ⑤ TC-279(통합): 대화상자 제목은 누른 순간의 언어 사전 값. 다르게 의도했다면 알려 달라.
+- **Z-3. 스펙이 고정한 해석.** ① TC-274: 저장 성공(`true`) 뒤 props가 아직 옛 값이어도 입력값을 유지한다(§14.7.2 「draft를 건드리지 않는다」) ② TC-275: 저장 실패(`false`) 뒤에는 되돌림 안내(`timerDurationInvalid`)를 띄우지 않는다(설계는 `setDraft(null)`만 — 오류 줄은 `saveTimer`) ③ ~~TC-276: `isDurationLocked`에서 `restPaused`는 잠기지 않는다(식의 세 상태 밖 — 카운트다운은 쉬는중에도 흐르므로 실제로 오지 않는 값)~~ → **(CR-070) 카운트다운 `restPaused`는 잠긴다(A-1)** — 2026-10-24 사용자 결정 ①로 카운트다운도 쉬는중이면 `restPaused`가 오므로 식 = 타이머 켜짐 && `running`·`paused`·`restPaused`·`finished`(TC-269 · TC-276 개정, 「v34 개정」 절) ④ TC-281: 등록 **성공** 때만 재생 정지·실패 문구 지움(취소·실패 때는 재생 유지 — §14.7.3 `onImport` 순서 그대로) ⑤ TC-279(통합): 대화상자 제목은 누른 순간의 언어 사전 값. 다르게 의도했다면 알려 달라.
 - **Z-4. 수동 M-17·M-18(Y-1)·CR-044 W-4 미처리.** 이번 위임 범위 밖 — 그대로 남는다.
 
 ### CR-052 개정 (v22 — 카드 1 설명문 삭제·스톱워치 설명 새 문장·시작 시간 회색 비활성·미리 듣기 1회 유지, 대기열 Q-04 정식 TC 전환)
@@ -2754,7 +2755,7 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 - 수: 자동 287 → **290**(유효 282 · 폐기 8) · TC-FLOW 30(유효 29 · 폐기 1) · 수동 48.
 - 실행(보강 모드): `yarn test --run src/settings/test/CountdownTimeInput.test.tsx src/settings/test/TimerTab.cr052.test.tsx` · 회귀(개정 스펙): `src/settings/test/{i18n.test.ts,TimerTab.test.tsx,AlarmSoundCard.test.tsx,SettingsApp.timer.test.tsx}`.
 
-### CR-053 개정 (v23 — 배포용 기본 세트 3차: 뒷머리·뽀모도 인물 = 복원 칸 + 「비우기」, 「타자 입력 1」 = 비우기 칸·셋째 버튼 제거, 기본 7장, 타이머 기본 글자 위치 (142,458)·회전 9°(→ CR-059로 (268,402)·7°·음량 44 — 「CR-059 · CR-060 개정」 절), 대기열 Q-05 정식 TC 전환)
+### CR-053 개정 (v23 — 배포용 기본 세트 3차: 뒷머리·뽀모도로 인물 = 복원 칸 + 「비우기」, 「타자 입력 1」 = 비우기 칸·셋째 버튼 제거, 기본 7장, 타이머 기본 글자 위치 (142,458)·회전 9°(→ CR-059로 (268,402)·7°·음량 44 — 「CR-059 · CR-060 개정」 절), 대기열 Q-05 정식 TC 전환)
 
 - **기준**: 확정사항 CR-053 줄 🔒 · `design/images-tab.md` §15(§15.1 값 표·검증 예, §15.2 렌더·파이프라인·접근성 — §12 전체·§13.1·§13.2·§14 해당 문장을 대체) · `design/timer-tab.md` §3 상수 행 · contract v0.24 `DEFAULT_ASSET_SLOTS` **7개**(순서 `kb_up`·`background`·`hair`·`pomo_char`·`mouse_base`·`pen_up`·`pen_down_0` — `kb_down_0` 제외)·`DEFAULT_TIMER_SETTINGS`(`textPos` (142,458)·`rotation` 9, 나머지 `enabled` false·`fontSize` 36·`color` `#333333`·`mode` stopwatch·`countdownSecs` 1500·`alarmVolume` 80 불변 — **CR-059 뒤 현재값은 `textPos` (268,402)·`rotation` 7·`alarmVolume` 44**(contract v0.27). 아래 표 TC-239·TC-269·TC-249 행과 설계↔TC 상수 행은 현재값으로 정정됨) · CR 대장 CR-053 · Q-05. 새 command·event·에러 코드·문구 키 없음.
 - mock·픽스처: 각 스펙의 기존 규약 그대로(bridge mock `importOriginal` — `hasBuiltinDefault`·`isRequiredSlot`·`DEFAULT_ASSET_SLOTS`·`toBridgeError`는 실물). 기대값은 리터럴(bridge 상수와 독립 대조). `TimerTab.test.tsx` 공용 픽스처 `T`·`TF`는 옛 값 그대로 두고 TC-249만 기본값 리터럴로 덮어쓴다(CR-059: `T`는 그대로, `TF.alarmVolume`만 80 → 44 — 「CR-059 · CR-060 개정」 절 공용 픽스처 줄). 시간 의존 없음(deferred promise + `act`·`waitFor` 조건).
@@ -2762,15 +2763,15 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 
 #### CR-053 신규 TC
 
-### TC-291 · 뽀모도 인물 「비우기」(I-11) · 종류: 자동 · 요구: R-42, R-35 · 설계: images-tab §15.2 뒷머리·뽀모도 인물 카드 행(「비우기」 = 비우기 확인창 `{name}` = 카드 제목 → `removeAsset(slot)` 1회·`restoreDefaultAsset` 0회, 등록돼 있을 때만 활성, 응답 뒤 포커스 = 같은 카드 「이미지 변경」 `focusAfter`)·접근성(`emptyImageAria`), §15.1 `EMPTYABLE_SLOT_KEYS` `['hair','pomo_char']`, §11.2 셋째 버튼 양식 · 스펙: `test/PomoCards.test.tsx` · **신규(CR-053)**
-- Given 매니페스트 `BOTH`(`kb_up`·`mouse_base`·`pomo_char`·`pomo_bubble` 등록, 캔버스 900×700), ko. `removeAsset` 1회차 = 지연(deferred, 해소값 `BUBBLE_ONLY`), 2회차 = 거부 `CHAR_IO`(`asset.io`, message 「뽀모도 인물 파일을 지우지 못했습니다. (테스트)」)
-- When ① 「뽀모도 인물 그림 비우기」 → 「취소」 ② 다시 → Esc ③ 다시 → 「지우기」 → 응답 해소 → `BUBBLE_ONLY`로 재렌더(`assets://changed` 흉내) ④ 언마운트 뒤 `BOTH` 새로 렌더 → 「비우기」 → 「지우기」(거부)
-- Then ⓐ ①② 확인창 `alertdialog`·`aria-modal="true"`·이름 「그림 지우기」·설명 「‘뽀모도 인물’ 그림을 지울까요? 되돌릴 수 없습니다.」·단추 글자 `['지우기','취소']`(「지우기」 className `danger`)·처음 포커스 「취소」, 닫히면 확인창 없음·포커스 = 누른 「비우기」 ③ 확인창 닫힘, 진행 중 카드 버튼 전부 disabled, 응답 뒤 포커스 = 「뽀모도 인물 이미지 변경」, 수신 전 인물 `img` src `asset://pomo_char.png` 그대로 → 수신 뒤 인물 `img` 없음·「등록된 그림 없음」·「비우기」 disabled·「기본값」(「뽀모도 인물 기본 그림으로 되돌리기」) enabled·포커스 「이미지 변경」 유지·말풍선 `img` `asset://pomo_bubble.png` 그대로·`role=alert` 없음 ④ 인물 카드 안 `role=alert` 텍스트 = `CHAR_IO.message`, 인물 `img` 그대로, 「비우기」 다시 enabled, 포커스 「이미지 변경」, 말풍선 카드 alert 없음 ⓑ 상위 `onError` 0회(오류는 카드 오류 띠만), 성공 뒤 인물 카드 = 빈 복원 칸(`canEmpty` false·`canReset` true) ⓒ `removeAsset` ①② 0회 → ③ `[['pomo_char']]` → ④ 누적 `[['pomo_char'],['pomo_char']]`; `restoreDefaultAsset`·`importAsset`·`setSettings` 0회
+### TC-291 · 뽀모도로 인물 「비우기」(I-11) · 종류: 자동 · 요구: R-42, R-35 · 설계: images-tab §15.2 뒷머리·뽀모도로 인물 카드 행(「비우기」 = 비우기 확인창 `{name}` = 카드 제목 → `removeAsset(slot)` 1회·`restoreDefaultAsset` 0회, 등록돼 있을 때만 활성, 응답 뒤 포커스 = 같은 카드 「이미지 변경」 `focusAfter`)·접근성(`emptyImageAria`), §15.1 `EMPTYABLE_SLOT_KEYS` `['hair','pomo_char']`, §11.2 셋째 버튼 양식 · 스펙: `test/PomoCards.test.tsx` · **신규(CR-053)**
+- Given 매니페스트 `BOTH`(`kb_up`·`mouse_base`·`pomo_char`·`pomo_bubble` 등록, 캔버스 900×700), ko. `removeAsset` 1회차 = 지연(deferred, 해소값 `BUBBLE_ONLY`), 2회차 = 거부 `CHAR_IO`(`asset.io`, message 「뽀모도로 인물 파일을 지우지 못했습니다. (테스트)」)
+- When ① 「뽀모도로 인물 그림 비우기」 → 「취소」 ② 다시 → Esc ③ 다시 → 「지우기」 → 응답 해소 → `BUBBLE_ONLY`로 재렌더(`assets://changed` 흉내) ④ 언마운트 뒤 `BOTH` 새로 렌더 → 「비우기」 → 「지우기」(거부)
+- Then ⓐ ①② 확인창 `alertdialog`·`aria-modal="true"`·이름 「그림 지우기」·설명 「‘뽀모도로 인물’ 그림을 지울까요? 되돌릴 수 없습니다.」·단추 글자 `['지우기','취소']`(「지우기」 className `danger`)·처음 포커스 「취소」, 닫히면 확인창 없음·포커스 = 누른 「비우기」 ③ 확인창 닫힘, 진행 중 카드 버튼 전부 disabled, 응답 뒤 포커스 = 「뽀모도로 인물 이미지 변경」, 수신 전 인물 `img` src `asset://pomo_char.png` 그대로 → 수신 뒤 인물 `img` 없음·「등록된 그림 없음」·「비우기」 disabled·「기본값」(「뽀모도로 인물 기본 그림으로 되돌리기」) enabled·포커스 「이미지 변경」 유지·말풍선 `img` `asset://pomo_bubble.png` 그대로·`role=alert` 없음 ④ 인물 카드 안 `role=alert` 텍스트 = `CHAR_IO.message`, 인물 `img` 그대로, 「비우기」 다시 enabled, 포커스 「이미지 변경」, 말풍선 카드 alert 없음 ⓑ 상위 `onError` 0회(오류는 카드 오류 띠만), 성공 뒤 인물 카드 = 빈 복원 칸(`canEmpty` false·`canReset` true) ⓒ `removeAsset` ①② 0회 → ③ `[['pomo_char']]` → ④ 누적 `[['pomo_char'],['pomo_char']]`; `restoreDefaultAsset`·`importAsset`·`setSettings` 0회
 
-### TC-292 · 뽀모도 인물 「기본값」 = 내장 기본 복원(I-3R) · 종류: 자동 · 요구: R-42, R-32 · 설계: images-tab §15.2 「기본값」 행(복원 확인창 → `restoreDefaultAsset(slot)` 1회, 빈 칸이어도 활성), §15.1 `resetKind`(`pomo_char`) `restore`(`hasBuiltinDefault` 판정), i18n `restoreImageAria`·`confirmRestoreOk`·`errors['asset.no_default']` · 스펙: `test/PomoCards.test.tsx` · **신규(CR-053)**
+### TC-292 · 뽀모도로 인물 「기본값」 = 내장 기본 복원(I-3R) · 종류: 자동 · 요구: R-42, R-32 · 설계: images-tab §15.2 「기본값」 행(복원 확인창 → `restoreDefaultAsset(slot)` 1회, 빈 칸이어도 활성), §15.1 `resetKind`(`pomo_char`) `restore`(`hasBuiltinDefault` 판정), i18n `restoreImageAria`·`confirmRestoreOk`·`errors['asset.no_default']` · 스펙: `test/PomoCards.test.tsx` · **신규(CR-053)**
 - Given 매니페스트 `NO_POMO`(인물·말풍선 미등록), `restoreDefaultAsset` 1회차 = 지연(해소값 `CHAR_DEF` — `pomo_char` url `asset://pomo_char.png?v=d`), 2·3회차 = 거부 `NO_DEFAULT`(`asset.no_default`), ①~③ ko · ④ en
-- When ① 「뽀모도 인물 기본 그림으로 되돌리기」 → 「취소」 ② 다시 → 「기본 그림으로」 → 응답 해소 → `CHAR_DEF`로 재렌더 ③ 언마운트 뒤 `NO_POMO`(ko) → 「기본값」 → 「기본 그림으로」(거부) ④ 언마운트 뒤 `NO_POMO`(en) → en `restoreImageAria`(`{name}` = en `slots.pomo_char.title`) 버튼 → en `confirmRestoreOk`(거부)
-- Then ⓐ 빈 칸에서도 「기본값」 enabled·글자 「기본값」; 확인창 이름 「기본 그림으로 되돌리기」·설명 「‘뽀모도 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.」·단추 `['기본 그림으로','취소']`(「기본 그림으로」 `danger`)·처음 포커스 「취소」, 취소 뒤 포커스 = 누른 「기본값」 ② 확인창 닫힘, 진행 중 카드 버튼 전부 disabled, 응답 뒤 포커스 = 누른 「기본값」, 수신 전 인물 `img` 없음 → 수신 뒤 `img` src `asset://pomo_char.png?v=d`·「비우기」 enabled·「기본값」 enabled, 확인창(펜 첫 등록 확인창 포함)·`role=alert` 없음 ③ 인물 카드 `role=alert` = `NO_DEFAULT.message`, 인물 `img` 없음 그대로, 포커스 「기본값」 ④ 인물 카드 `role=alert` = en `errors['asset.no_default']`(code 문구) ⓑ 상위 `onError` 0회(카드 오류 띠만), 성공 뒤 인물 카드 = 등록된 복원 칸(「비우기」 활성) ⓒ `restoreDefaultAsset` ① 0회 → 누적 `[['pomo_char'],['pomo_char'],['pomo_char']]`; `removeAsset`·`importAsset`·`setSettings`(`ensurePenPos` 저장 포함) 0회
+- When ① 「뽀모도로 인물 기본 그림으로 되돌리기」 → 「취소」 ② 다시 → 「기본 그림으로」 → 응답 해소 → `CHAR_DEF`로 재렌더 ③ 언마운트 뒤 `NO_POMO`(ko) → 「기본값」 → 「기본 그림으로」(거부) ④ 언마운트 뒤 `NO_POMO`(en) → en `restoreImageAria`(`{name}` = en `slots.pomo_char.title`) 버튼 → en `confirmRestoreOk`(거부)
+- Then ⓐ 빈 칸에서도 「기본값」 enabled·글자 「기본값」; 확인창 이름 「기본 그림으로 되돌리기」·설명 「‘뽀모도로 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.」·단추 `['기본 그림으로','취소']`(「기본 그림으로」 `danger`)·처음 포커스 「취소」, 취소 뒤 포커스 = 누른 「기본값」 ② 확인창 닫힘, 진행 중 카드 버튼 전부 disabled, 응답 뒤 포커스 = 누른 「기본값」, 수신 전 인물 `img` 없음 → 수신 뒤 `img` src `asset://pomo_char.png?v=d`·「비우기」 enabled·「기본값」 enabled, 확인창(펜 첫 등록 확인창 포함)·`role=alert` 없음 ③ 인물 카드 `role=alert` = `NO_DEFAULT.message`, 인물 `img` 없음 그대로, 포커스 「기본값」 ④ 인물 카드 `role=alert` = en `errors['asset.no_default']`(code 문구) ⓑ 상위 `onError` 0회(카드 오류 띠만), 성공 뒤 인물 카드 = 등록된 복원 칸(「비우기」 활성) ⓒ `restoreDefaultAsset` ① 0회 → 누적 `[['pomo_char'],['pomo_char'],['pomo_char']]`; `removeAsset`·`importAsset`·`setSettings`(`ensurePenPos` 저장 포함) 0회
 
 #### CR-053 개정 TC (앞 본문을 대체 — 번호 유지, 스펙 개정 완료)
 
@@ -2779,7 +2780,7 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 | TC-193 | `Hair.test.tsx` | 뒷머리 카드 버튼 3개(이미지 변경·기본값·비우기), 「기본값」 = 복원 칸이라 빈 칸도 활성, 「비우기」는 빈 칸이면 비활성, 등록되면 미리보기·「비우기」 활성 |
 | TC-196 | `Hair.test.tsx` | 「비우기」 → 비우기 확인창(`{name}` = 뒷머리)·취소·Esc 호출 없음 → 「지우기」 → `removeAsset('hair')` 1회·`restoreDefaultAsset` 0회, 응답 뒤 포커스 「이미지 변경」, 수신 뒤 빈 칸·「비우기」 비활성·「기본값」(복원) 활성(옛 「기본값」 → 비우기 대체) |
 | TC-200 | `Hair.test.tsx` | slotCard — `EMPTYABLE_SLOT_KEYS` = `[hair, pomo_char]`, hair `resetKind` restore·`canReset` 늘 true·`emptyable` true·`canEmpty` = 등록, `kb_down_0` 대상 아님 |
-| TC-201 | `Hair.test.tsx` | 뒷머리 카드 버튼 3개(이미지 변경 → 기본값 → 비우기)·두 줄(`cardEmptyable`·`actions2`), 셋째 버튼은 뒷머리·뽀모도 인물 카드뿐 |
+| TC-201 | `Hair.test.tsx` | 뒷머리 카드 버튼 3개(이미지 변경 → 기본값 → 비우기)·두 줄(`cardEmptyable`·`actions2`), 셋째 버튼은 뒷머리·뽀모도로 인물 카드뿐 |
 | TC-202 | `Hair.test.tsx` | 미등록 → 「기본값」(복원) 활성·「비우기」 비활성(눌러도 확인창 없음), 등록 → 둘 다 활성, 다른 카드 `slotBusy` → 둘 다 비활성·확인창 없음 |
 | TC-206 | `Hair.test.tsx` | 「비우기」 실패 → 뒷머리 카드 오류 띠(ko = core message, en = 사전 code 문구), 그림 그대로·「비우기」 다시 활성·포커스 「이미지 변경」 |
 | TC-207 | `Hair.test.tsx` | ja·en 버튼 3개 글자·`restoreImageAria`·`emptyImageAria`·복원/비우기 확인창 문구, 취소 뒤 누른 버튼으로 포커스 |
@@ -2796,12 +2797,12 @@ CR ↔ TC: CR-050 → 신규 TC-269(`timerValues.test.ts`) · TC-273 ~ TC-276(`C
 | TC-179 | `ImagesTab.test.tsx` | 빈 복원 칸 대상 = background·hair(옛 「가운데 장 `kb_down_0`」 대체) — 각 `restoreDefaultAsset` 1회·`removeAsset` 0회 |
 | TC-182 | `ImagesTab.test.tsx` | 다운로드 설명 **7장**(`n` = `DEFAULT_ASSET_SLOTS.length`) |
 | TC-189 | `ImagesTab.test.tsx` | ja·en 다운로드 설명 7장 |
-| TC-233 | `ImagesTab.test.tsx` | 「타자 입력 1」 버튼 2개(셋째 없음), 「기본값」 aria 「타자 입력 1 그림 지우기」, 뒤 장 없으면 활성·`kb_down_1` 등록이면 비활성·툴팁·빈 칸 비활성, 화면의 「그림 비우기」 = 뒷머리·뽀모도 인물 |
-| TC-234 | `ImagesTab.test.tsx` | 두 줄 양식 = 뒷머리·뽀모도 인물 카드(등록·빈 칸), 「타자 입력 1」·다른 키보드 카드 한 줄 |
+| TC-233 | `ImagesTab.test.tsx` | 「타자 입력 1」 버튼 2개(셋째 없음), 「기본값」 aria 「타자 입력 1 그림 지우기」, 뒤 장 없으면 활성·`kb_down_1` 등록이면 비활성·툴팁·빈 칸 비활성, 화면의 「그림 비우기」 = 뒷머리·뽀모도로 인물 |
+| TC-234 | `ImagesTab.test.tsx` | 두 줄 양식 = 뒷머리·뽀모도로 인물 카드(등록·빈 칸), 「타자 입력 1」·다른 키보드 카드 한 줄 |
 | TC-235 | `ImagesTab.test.tsx` | 「타자 입력 1」 「기본값」 → 비우기 확인창(`{name}` = 타자 입력 1)·취소·Esc 호출 없음·포커스 누른 「기본값」 |
 | TC-236 | `ImagesTab.test.tsx` | 「기본값」 → 「지우기」 → `removeAsset({kind:'kb_down',index:0})` 1회·`restoreDefaultAsset` 0회, 응답 뒤 포커스 누른 「기본값」, 수신 뒤 빈 칸·「기본값」 비활성 |
 | TC-237 | `ImagesTab.test.tsx` | 「기본값」 비우기 실패 → 카드 오류 띠, 「기본값」 다시 활성·포커스 누른 「기본값」 |
-| TC-FLOW-15 | `ImagesTab.test.tsx` | S-14: 첫 실행 7장(hair·pomo_char 포함, `kb_down_0` 없음), 7칸 「기본값」 복원 활성·빈 칸 13개 비활성, 뒷머리·뽀모도 인물 「비우기」 활성 |
+| TC-FLOW-15 | `ImagesTab.test.tsx` | S-14: 첫 실행 7장(hair·pomo_char 포함, `kb_down_0` 없음), 7칸 「기본값」 복원 활성·빈 칸 13개 비활성, 뒷머리·뽀모도로 인물 「비우기」 활성 |
 | TC-FLOW-17 | `ImagesTab.test.tsx` | S-16: 같은 이름 파일 7개 → 덮어쓰기 확인 → 완료 |
 | TC-FLOW-22 | `ImagesTab.test.tsx` | S-21: 첫 실행(타자 그림 없음) 필수 배지 2장·「타자 입력 1」 선택 배지·빈 칸 |
 | TC-FLOW-23 | `ImagesTab.test.tsx` | S-22: 「타자 입력 1」 「기본값」(비우기) 잠김 → 타자 입력 2 비움 → 「기본값」으로 비움 → 「이미지 변경」으로 다시 |
@@ -2832,13 +2833,13 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 | §15.1 `resetKind` hair·pomo_char = `restore` | TC-133, TC-177, TC-192, TC-241, TC-142, TC-179 |
 | §15.1 `resetKind` kb_down_0 = `clear`(마지막 장 규칙·`lastOnlyBlocked`) | TC-133, TC-135, TC-177, TC-229, TC-232, TC-142, TC-147 |
 | §15.1 `canEmpty` 식·`buildSlotGroups` 순서 불변 | TC-232, TC-200, TC-241 |
-| §15.2 뒷머리·뽀모도 인물 카드 버튼 3개·두 줄 양식 | TC-193, TC-201, TC-234, TC-242 |
+| §15.2 뒷머리·뽀모도로 인물 카드 버튼 3개·두 줄 양식 | TC-193, TC-201, TC-234, TC-242 |
 | §15.2 「기본값」 = 복원(I-3R, 빈 칸 활성) | TC-202, TC-179, TC-292 |
 | §15.2 「비우기」(I-11, 등록 시만 활성, `focusAfter`) | TC-196, TC-202, TC-206, TC-291 |
 | §15.2 「타자 입력 1」 버튼 2개·「기본값」 = 비우기(I-3) | TC-233, TC-235, TC-236, TC-237 |
 | §15.2 첫 실행 7칸·`kb_down_0` 빈 칸 | TC-FLOW-15, TC-FLOW-22 |
 | §15.2 다운로드 설명 n = 7 | TC-182, TC-189, TC-FLOW-17 |
-| §15.2 접근성 `emptyImageAria` 사용처 = 뒷머리·뽀모도 인물 | TC-207, TC-233, TC-291 |
+| §15.2 접근성 `emptyImageAria` 사용처 = 뒷머리·뽀모도로 인물 | TC-207, TC-233, TC-291 |
 | timer-tab §3 상수 `DEFAULT_TIMER_SETTINGS` (268,402)·7·음량 44(CR-059, contract v0.27 — 옛 CR-053 (142,458)·9) | TC-239, TC-249, TC-269 |
 
 사용자행 ↔ TC-FLOW(CR-053): S-14 → TC-FLOW-15 · S-16 → TC-FLOW-17 · S-17 → TC-FLOW-18 · S-21 → TC-FLOW-22 · S-22 → TC-FLOW-23 · S-24 → TC-FLOW-25(모두 개정). 새 사용자행·새 TC-FLOW 없음. CR ↔ TC: CR-053 → 신규 TC-291·TC-292 · 개정 위 표 · 대기열 Q-05(상태 불변). 수동: `manual-checklist.md` v16 — M-29·M-30·M-33·M-43·M-45f 개정.
@@ -3267,7 +3268,7 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 - **AA-1. `design/i18n.md` §4.3 주 「위 10키」·「`Messages` 단순 키 수 +10」**(과 design 변경이력 CR-033 「문구 10키」)이 소스·표의 11키와 어긋난다(J-1 잔여). ui-designer 몫. → **해소(2026-10-15, v32)**: `design/i18n.md` §4.3이 11키 · +11로 정정됐다. 스펙(TC-094 키 집합)은 이미 11키라 변경 없음
 - **AA-2. design RTM R-01 「예정 TC」**에 TC-306 · TC-308 ~ TC-310(CR-039 재시도)이 없다. ui-designer 몫. → **해소(2026-10-15, v32)**: design RTM R-01 행에 TC-306 · TC-308 · TC-309 · TC-310(TC-307 결번) 추가 확인
 - **AA-3. CR 대장 번호 잔재.** CR-052 검증 칸 「TC-307」, 한 CR 검증 칸의 「TC-314 신규」는 이 문서·settings 스펙 어디에도 없는 번호다(다른 화면 번호 혼입 추정). TC-307은 이 문서에서 결번 처리했다. CR-039 행 「신규 TC 스펙 2건」에 TC-306 · TC-308 병기 권고. 대장 수정은 이 에이전트 범위 밖.
-- **AA-4. `kb_down_0` 비우기 뒤 포커스(G-1 재확인).** 「기본값」(비우기) 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. 뒷머리·뽀모도 인물처럼 `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-236 · TC-FLOW-23은 응답 직후 포커스만 단언한다. → **해소(2026-10-15, v32 — 현 동작 유지 결정, CR-063 기록 「kb_down_0과 같은 현재 동작 유지(새 focusAfter 없음)」)**. 확정 기대: ⓐ `remove_asset` 응답 직후(수신 전) 포커스 = 누른 「기본값」(`onConfirmClear` `c.focusAfter ?? c.trigger`, 비우기 칸에는 `focusAfter` 없음) ⓑ `assets://changed` 수신 뒤 그 「기본값」은 비활성 · 「이미지 변경」 활성, 수신 뒤 포커스 위치는 **판정 대상이 아니다**(실물에서 body로 빠질 수 있음 — M-32 · M-43 관찰 기록) ⓒ `removeAsset` 1회 · `restoreDefaultAsset` 0회. 현행 스펙 TC-236(`ImagesTab.test.tsx`) · TC-196(`Hair.test.tsx`)이 이 기대 그대로라 스펙 변경 없음
+- **AA-4. `kb_down_0` 비우기 뒤 포커스(G-1 재확인).** 「기본값」(비우기) 확정 뒤 그 버튼이 비활성이 되어 수신 뒤 포커스가 body로 빠질 수 있다. 뒷머리·뽀모도로 인물처럼 `focusAfter`(「이미지 변경」)를 줄지 결정 필요 — 결정 전까지 TC-236 · TC-FLOW-23은 응답 직후 포커스만 단언한다. → **해소(2026-10-15, v32 — 현 동작 유지 결정, CR-063 기록 「kb_down_0과 같은 현재 동작 유지(새 focusAfter 없음)」)**. 확정 기대: ⓐ `remove_asset` 응답 직후(수신 전) 포커스 = 누른 「기본값」(`onConfirmClear` `c.focusAfter ?? c.trigger`, 비우기 칸에는 `focusAfter` 없음) ⓑ `assets://changed` 수신 뒤 그 「기본값」은 비활성 · 「이미지 변경」 활성, 수신 뒤 포커스 위치는 **판정 대상이 아니다**(실물에서 body로 빠질 수 있음 — M-32 · M-43 관찰 기록) ⓒ `removeAsset` 1회 · `restoreDefaultAsset` 0회. 현행 스펙 TC-236(`ImagesTab.test.tsx`) · TC-196(`Hair.test.tsx`)이 이 기대 그대로라 스펙 변경 없음
 - **AA-5. TC-309 해석.** 매니페스트 실패 오류 줄 문구는 ja 사전 code 문구라 개수만 단언했다. 한 조회의 오류가 다른 조회의 성공으로 지워지지 않는다(「오류 줄 건드리지 않음」)는 설계 문장은 TC-309에서 「설정 성공이 먼저 와도 1.7초 뒤 오류 줄이 뜬다」로 확인된다. → **해소(2026-10-15, v32)**: 현행 `SettingsApp.retry.test.tsx` TC-309가 오류 줄을 `getAllByRole('alert')` **개수 1**로만 단언해 이 해석과 같다. design §6 P-1 서술도 소스와 같아(변경 없음 확인) 닫는다
 
 ## 추적표
@@ -3655,10 +3656,12 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | Q-07 | 2026-09-27 | CR-054 | 「기본 설정」 탭 맨 아래 「초기화」 카드(`ResetAllCard` — 위험 버튼·확인창·`resetAppData()`·상태 줄 `role=status`), 화면 값은 기존 `settings://changed`·`assets://changed` 구독으로만(낙관적 갱신 없음), i18n 단순 키 +8(128 → 136)·errors +2(`ERROR_CODES` 25 → 27) | `src/settings/components/ResetAllCard.tsx`(신규) · `GeneralTab.tsx` · `GeneralTab.module.css` · `src/settings/i18n/{types,ko,ja,en}.ts` | 개정 TC-093 · TC-094 · TC-246 · TC-286(`i18n.test.ts`), TC-104 · TC-130(`GeneralTab.test.tsx`), TC-099 · TC-101(`SettingsApp.test.tsx`) — 스펙 개정 완료. mock 목록 정합 11개 스펙 — **불필요 확정(v25)**: 11개 모두 `...actual` 전개라 실물 `resetAppData` export 포함·「전체 초기화」 미조작으로 결과 불변(「CR-054 개정 TC」 표 사유) | 예 — 신규 TC-293 ~ TC-304, TC-FLOW-31 · TC-FLOW-32(TDD 선행 — 구현 전 Red) | 전환됨(TC-293 ~ TC-304, TC-FLOW-31, TC-FLOW-32) · 잔여 없음(v25 닫힘) |
 | Q-08 | 2026-09-27 | CR-057 | 이동 영역 문구 개선 — 새 키 `areaDesc`(idle에서 안내 줄 아래 `.guide` 줄로 표시, 다른 단계에서는 없음), `areaStart`·`areaPick1~4`·`areaReview` 문구 교체(ko 🔒·ja·en) | `src/settings/i18n/{types,ko,ja,en}.ts` · `src/settings/components/MousePartsTab.tsx` | TC-009(labels 이관 문구)·TC-094(ko 새 키 개수·문구)·i18n 키 수(simpleKeys)·TC-016·TC-024·TC-064~TC-074·TC-077·TC-049·TC-082·TC-086·TC-222·TC-225·TC-FLOW-02·04·06 및 ja·en 문구 단언 | 예 — areaDesc 표시(idle만·3개 국어) 1건 | 검증됨(2026-09-27) — 신규 TC-305, 개정 TC-009 · TC-094 · `IDLE_BUTTONS` 단언 전부 · TC-024 · TC-063 ~ TC-074 · TC-086 · TC-222 · TC-225 · TC-077 · TC-FLOW-02 · TC-FLOW-04 · TC-FLOW-06(「CR-057 개정」 절) |
 | Q-09 | 2026-10-15 | CR-067 | `alarmCardDesc` 1회 재생 문구로 정정(ko 「타이머가 0이 되면 깜빡이는 동안 한 번 울립니다」·ja·en) — CR-052 반복 문구 대체 | `src/settings/i18n/{ko,ja,en}.ts` | TC-277(AlarmSoundCard 문구 — ui-fixer가 새 문구로 개정)·TC-286(i18n KO_NEW — 개정)·TC-289(REPEAT_ALARM 부재 단언 추가)·TimerTab.test.tsx ko 문구 단언(개정) — 시나리오 본문 「반복 재생 문구」 서술 개정 필요 | 아니오 | 전환됨(개정 TC-277·TC-286·TC-289) · TC-248은 스펙만 개정(본문 불변) · 「v33 개정 — CR-067」 절(2026-10-15). 「검증됨」 마킹은 실행 근거 확인 뒤 메인 세션 · 검증됨(2026-10-15 — 메인 세션 vitest 전체 883/883·tsc 0) |
+| Q-10 | 2026-10-24 | CR-068 | ko 화면 문구 ~~뽀모도~~ → 「뽀모도로」 정정(값 6개 — `imagesNote` · `errors['asset.canvas_mismatch']` · `timerCardTitle` · `timerTextDesc` · `slots.pomo_char.title` · `slots.pomo_bubble.title`). 키 · 동작 · ja · en 불변 | `src/settings/i18n/ko.ts` | TC-094 · TC-096 · TC-197 · TC-246(i18n) · TC-136 · TC-142 · TC-179 · TC-234 · TC-FLOW-15(ImagesTab) · TC-242 · TC-243 · TC-244 · TC-291 · TC-292 · TC-FLOW-25(PomoCards) · TC-201(Hair) · TC-248 · TC-285(TimerTab) · TC-247(SettingsApp.timer) — 스펙 기대값 개정 완료(ui-implementer) | 아니오(수동 M-68 추가) | 전환됨(개정 — 「v34 개정」 절 CR-068 표, 2026-10-24). 「검증됨」은 실행 근거 확인 뒤 메인 세션 |
+| Q-11 | 2026-10-24 | CR-070 | 「타이머 사용」 설명 `timerCountdownDesc` = 쉬는중 자동 일시정지 문구(D-4), `isDurationLocked`에 `restPaused` 추가(A-1 — 카운트다운 쉬는중에도 시작 시간 잠김) | `src/settings/i18n/{ko,ja,en}.ts` · `src/settings/timerValues.ts` | TC-269(timerValues) · TC-276(탭)(TimerTab) · TC-248(225행 스위치 설명) · TC-286(i18n `KO_NEW`) · 회귀 TC-268 · TC-252 · TC-284 — 스펙 개정 완료(ui-implementer) | 아니오(기존 TC 개정 + 수동 M-45b ⑦) | 전환됨(개정 TC-269 · TC-276 · TC-286 · TC-248, Z-3 ③ 대체 — 「v34 개정」 절, 2026-10-24). 「검증됨」은 실행 근거 확인 뒤 메인 세션 |
 
 ## v29 개정 — 뒷머리 내장 기본 없음 (🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29, 증분 모드 — 개정만)
 
-비유: 견본 상자에서 뒷머리 견본을 다시 뺐다(7개 → 6개). 견본이 없는 칸의 「기본값」 손잡이는 「치우기」가 되므로, 뒷머리 칸에 따로 달았던 지우개 단추도 뗀다. 지우개 단추는 이제 뽀모도 인물 칸에만 있다. CR-044 때의 뒷머리 기대로 돌아가되, CR-053에서 생긴 뽀모도 인물 · 「타자 입력 1」 규칙은 그대로다.
+비유: 견본 상자에서 뒷머리 견본을 다시 뺐다(7개 → 6개). 견본이 없는 칸의 「기본값」 손잡이는 「치우기」가 되므로, 뒷머리 칸에 따로 달았던 지우개 단추도 뗀다. 지우개 단추는 이제 뽀모도로 인물 칸에만 있다. CR-044 때의 뒷머리 기대로 돌아가되, CR-053에서 생긴 뽀모도로 인물 · 「타자 입력 1」 규칙은 그대로다.
 
 - **v29 기준(이 절이 앞 모든 기준 줄·CR 절보다 우선 — 특히 「CR-053 개정」 절의 hair 행과 「doc-sync 개정(v28)」 절 「제외」 줄을 대체)**: 🔒 사용자 결정(2026-09-30) 뒷머리(hair) 기본 그림 없음 · contract **v0.29** · 현행 `src/bridge/types.ts` `DEFAULT_ASSET_SLOTS` **6개**(`kb_up` · `background` · `pomo_char` · `mouse_base` · `pen_up` · `pen_down_0`), `hasBuiltinDefault('hair')` = **false** · 위임 확정 화면 동작(아래 규칙 1 ~ 5). 화면 문서(requirements · design · images-tab · i18n)는 다른 에이전트가 동시에 개정 중 → AB-1
 - **CR-ID**: 미부여(CR 대장에 이 결정의 CR 행 없음 — 관리자가 기록할 때 이 절 이름 「v29」와 병기) → AB-4. 대기열 행도 만들지 않았다(소스 변경 `EMPTYABLE_SLOT_KEYS`는 다음 단계 ui-fixer 몫 — 적용 때 CR 기록)
@@ -3666,7 +3669,7 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
   1. `hair` = **단일 비우기 칸**: `resetKind` `'clear'`, `canReset` = 등록 여부, `lastOnlyBlocked` false, `emptyable` · `canEmpty` **늘 false**. `EMPTYABLE_SLOT_KEYS` = **`['pomo_char']`**
   2. 뒷머리 카드 버튼 = `[이미지 변경, 기본값]` 2개 · 한 줄(`cardEmptyable` · `actions2` 없음). 「기본값」 aria = `clearImageAria`(ko `뒷머리 그림 지우기`, ja · en `format(clearImageAria,{name})`) — `kb_down_0` 「기본값」(= 비우기)과 같은 키. `restoreImageAria` · `emptyImageAria` 이름 버튼 없음
   3. 「기본값」: 미등록 비활성(`title` 없음) · 등록 활성 → 기존 비우기 확인창(`confirmClear*`, `{name}` = 뒷머리) → 「지우기」 → `removeAsset('hair')` 1회 · `restoreDefaultAsset` 0회. 경로는 `onRequestReset` → `onConfirmClear`라 `focusAfter`가 없다 → 응답 뒤 포커스 = 누른 「기본값」(수신 뒤 그 버튼이 비활성이 되므로 수신 뒤 포커스는 판정하지 않는다 — AB-3)
-  4. 뽀모도 인물 카드 불변(「기본값」 = 복원 · 셋째 「비우기」). 화면 전체 `/그림 비우기$/` 버튼 = `[slot-card-pomo_char]` 1개. 셋째 버튼 없는 슬롯 카드 19장
+  4. 뽀모도로 인물 카드 불변(「기본값」 = 복원 · 셋째 「비우기」). 화면 전체 `/그림 비우기$/` 버튼 = `[slot-card-pomo_char]` 1개. 셋째 버튼 없는 슬롯 카드 19장
   5. 기본 세트 6장: 다운로드 설명 · 완료 `{n}` = 6, 같은 이름 충돌 6개, 부분 실패 ok = 6 − 실패 수. 첫 실행 매니페스트 = 6장(hair · kb_down_0 없음) → 복원 활성 6칸, 빈 비우기 칸 **14**(kb_down_0 · hair · idle · rest · key_* 7 · mouse_left · mouse_right · pomo_bubble)
 - **번호 판정(TC-196 · TC-206 — 폐기 아님)**: 두 TC는 CR-037/CR-044 원 본문이 「「기본값」 → 비우기」 경로였고, CR-053에서만 「비우기」 버튼 경로로 옮겨졌다. 뒷머리를 비우는 기능(R-34 · R-35)은 v29에서도 「기본값」으로 남으므로 **정상(TC-196)·오류(TC-206) 분기를 같은 비중으로 유지**하려면 번호를 살려 「기본값」 경로로 개정하는 것이 맞다. 셋째 버튼 전용이던 TC-204 · TC-205(취소·확정)는 이미 폐기(CR-044)이고 되살리지 않는다 — 같은 확인창 · 취소 · Esc · 확정은 TC-196이 덮는다. TC-FLOW-19(S-18)도 폐기 유지
 - **수(v29)**: 새 TC · 새 폐기 없음. 자동 번호 310(유효 301 · 폐기 8 · 결번 1) · TC-FLOW 32(유효 31 · 폐기 1) · 수동 54(`manual-checklist.md` v21 — 「v21 읽는 법」 블록, 행 수 불변)
@@ -3680,25 +3683,25 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | TC-193 | `Hair.test.tsx` | 불변(`NO_HAIR` → `HAIR`) | ⓐ 위치 · 제목 · 설명 · 선택 배지 · 빈 미리보기 불변, 버튼 `[이미지 변경, 기본값]`, 「기본값」(aria `뒷머리 그림 지우기`) 빈 칸 **비활성** · `title` 없음 → 등록 뒤 활성 · `title` 없음 · 버튼 2개, `뒷머리 기본 그림으로 되돌리기` · `뒷머리 그림 비우기` 없음, 카드 21 ⓑ `hasBuiltinDefault('hair')` false ⓒ `pickPngFile` · `importAsset` · `removeAsset` · `restoreDefaultAsset` · `setSettings` 0회 | Red(예정) |
 | TC-196 | 같음 | Given `HAIR`, `removeAsset` deferred(`NO_HAIR`) · When **「기본값」**(옛 CR-053 「비우기」) → 취소 / Esc / 「지우기」 → 응답 → props `NO_HAIR` | ⓐ `alertdialog`(`aria-modal`, 이름 `그림 지우기`, 설명 `‘뒷머리’ 그림을 지울까요? 되돌릴 수 없습니다.`, 버튼 `[지우기, 취소]`, 「지우기」 `danger`, 처음 포커스 「취소」), 취소 · Esc 뒤 닫힘 · 포커스 누른 「기본값」, 확정 뒤 카드 버튼 전부 비활성, 응답 뒤(수신 전) 포커스 누른 「기본값」 · `img` 그대로, 수신 뒤 `img` 없음 · 「등록된 그림 없음」 · 「기본값」 비활성 · 「이미지 변경」 활성 · 복원/비우기 이름 버튼 없음 · 카드 `alert` 없음 ⓑ `confirm`(clear, `focusAfter` 없음) → null, `slotBusy` hair → null ⓒ 취소 · Esc 동안 0회, 확정 뒤 `removeAsset('hair')` 정확히 1회, `restoreDefaultAsset` · `importAsset` · `pickPngFile` · `setSettings` · `onError` · `window.confirm` 0회 | Red(예정 — 셋째 버튼 부재 단언) |
 | TC-200 | 같음 | 불변 | ⓑ `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`, 예 1 hair 등록 = `{emptyable:false, canEmpty:false, resetKind:'clear', canReset:true, lastOnlyBlocked:false}`, 예 2 미등록 = `{false, false, 'clear', canReset:false}`, 예 3 다른 칸 false, `kb_down_0` false · false · clear · `canReset` true, `buildSlotGroups` `emptyable` 카드 = `[pomo_char]`(HAIR · NO_HAIR), `canEmpty` 카드 `[]`, add 카드 필드 없음 ⓐ · ⓒ 해당 없음(순수) | Red(예정) |
-| TC-201 | 같음 | 불변(`HAIR`) | ⓐ 뒷머리 버튼 `[이미지 변경, 기본값]` · aria `[뒷머리 이미지 변경, 뒷머리 그림 지우기]` · 활성 · `type=button`, 카드 `cardEmptyable` 없음 · 버튼 줄 `actions2` 아님 · `kb_up` 카드 클래스 전부 포함, 뽀모도 인물 버튼 3개(aria `… 이미지 변경` · `… 기본 그림으로 되돌리기` · `… 그림 비우기`) · 「비우기」 비활성 · `cardEmptyable`, 나머지 슬롯 카드 **19장** 버튼 2개 · 한 줄, `/그림 비우기$/` = `[slot-card-pomo_char]` ⓑ hair `emptyable` · `canEmpty` false ⓒ 0회 | Red(예정) |
+| TC-201 | 같음 | 불변(`HAIR`) | ⓐ 뒷머리 버튼 `[이미지 변경, 기본값]` · aria `[뒷머리 이미지 변경, 뒷머리 그림 지우기]` · 활성 · `type=button`, 카드 `cardEmptyable` 없음 · 버튼 줄 `actions2` 아님 · `kb_up` 카드 클래스 전부 포함, 뽀모도로 인물 버튼 3개(aria `… 이미지 변경` · `… 기본 그림으로 되돌리기` · `… 그림 비우기`) · 「비우기」 비활성 · `cardEmptyable`, 나머지 슬롯 카드 **19장** 버튼 2개 · 한 줄, `/그림 비우기$/` = `[slot-card-pomo_char]` ⓑ hair `emptyable` · `canEmpty` false ⓒ 0회 | Red(예정) |
 | TC-202 | 같음 | 대상 버튼 「비우기」 → **「기본값」** | ⓐ `NO_HAIR` 「기본값」 비활성 · 글자 `기본값` · `title` 없음 · 눌러도 `alertdialog` 없음 / `HAIR` 재렌더 뒤 활성 · 복원/비우기 이름 버튼 없음 / kb_up 가져오기 진행 중 비활성 · 눌러도 확인창 없음 / 응답 뒤 활성 ⓑ hair `canReset` false → true, `slotBusy` kb_up → null ⓒ `importAsset('kb_up', PATH)` 1회, `removeAsset` · `restoreDefaultAsset` · `setSettings` 0회 | Red(예정 — 부재 단언) |
 | TC-206 | 같음 | 대상 버튼 「비우기」 → **「기본값」**(ko `뒷머리 그림 지우기`, en `format(en.clearImageAria,{name})`) | ⓐ ko 카드 `alert` = `IO_FAIL.message`, `img` 그대로, 「기본값」 · 「이미지 변경」 다시 활성, 포커스 누른 「기본값」(trigger — 호출 전에 넣음; CR-053 「이미지 변경」 대체), kb_up `alert` 없음 / en 카드 `alert` = `en.errors['asset.not_found']` ⓑ `cardError` = hair, `slotBusy` null ⓒ `removeAsset` 2회 모두 `'hair'`, `restoreDefaultAsset` · `setSettings` · `onError` 0회 | Green 예상 |
 | TC-207 | 같음 | 불변(`HAIR`, ja · en) · 복원 확인창 단계 삭제 | ⓐ 버튼 글자 `[changeImage, clearImage]`, 둘째 이름 `format(clearImageAria,{name})`, `restoreImageAria` · `emptyImageAria` 이름 버튼 없음, 「기본값」 → 확인창 `confirmClearTitle` · `format(confirmClearMessage,{name})` · `[confirmClearOk, confirmCancel]` · 포커스 취소, 취소 뒤 포커스 「기본값」 ⓑ 불변 ⓒ `removeAsset` · `restoreDefaultAsset` · `setSettings` 0회 | Red(예정) |
 | TC-207 정정(v29 · 2026-09-30, 스펙 결함) | 같음 | 불변 | **셋째 버튼 부재 판정 방식만 바꿈 — 기대 불변.** ja 사전은 `clearImageAria` = `emptyImageAria`(`'{name}の画像を削除'`)라 「`emptyImageAria` 이름 버튼 없음」이 정상 「기본값」에 걸려 실패했다. ⓐ 셋째 버튼 부재 = 카드 버튼 **정확히 2개**(`toHaveLength(2)` + 글자 `[changeImage, clearImage]`), `emptyImageAria` 이름 버튼 = 「기본값」(btns[1]) 외 **0개**(en 0개 · ja 「기본값」 자신만 → 제외 후 0개). 제품 문구 · 소스 불변. 확인창 · 포커스 · en 반복 · ⓑ · ⓒ 기대 그대로 | (정정 반영 — 실행은 메인 세션) |
-| TC-203 | 같음 | 불변 | 사전 값 불변 — 주석만(`emptyImage*` 사용 카드 = 뽀모도 인물) | Green |
+| TC-203 | 같음 | 불변 | 사전 값 불변 — 주석만(`emptyImage*` 사용 카드 = 뽀모도로 인물) | Green |
 | TC-133 | `imageSlots.test.ts` | hair 등록 예 추가 | ⓑ 미등록 `pomo_char` restore · `canReset` true(불변), 미등록 `hair` = `{required:false, resetKind:'clear', canReset:false, lastOnlyBlocked:false, n:null}`, 등록 hair `clear` · `canReset` true(CR-053 restore · true 대체) ⓐ · ⓒ 해당 없음 | Green 예상 |
 | TC-177 | 같음 | 예 4 대상 칸 교체 | ⓑ 복원 칸 `[pen_up, pen_down_0, mouse_base, kb_up, background, pomo_char]`, 비우기 칸 `[mouse_right, key_space, idle, kb_down_0, pomo_bubble, hair]` `canReset` false, 20장 모두 `resetKind` = `hasBuiltinDefault`, 복원 칸 파일명 = 6장 `DEFAULT_FILES` | Green 예상 |
 | TC-178 | 같음 | 픽스처 `DEFAULT_FILES` 6장(연동) | ⓑ `exportResult(done)` = `{kind:'done', count:6}`(CR-053 7) | Green 예상 |
 | TC-192 | 같음 | 불변 | ⓑ `hasBuiltinDefault('hair')` **false**, 빈 hair `toStrictEqual` = `resetKind:'clear'` · `canReset:false` · `emptyable:false` · `canEmpty:false`, 등록 hair = clear · `canReset:true` · `emptyable:false` · `canEmpty:false`, background · 그룹 · 필수 2장 · 1장 고정 불변 | Red(예정) |
 | TC-232 | 같음 | hair 행을 pomo_char 와 분리 | ⓑ `EMPTYABLE_SLOT_KEYS` = `['pomo_char']`; 3 매니페스트(빈 · 두 칸 · hair 만)에서 pomo_char `emptyable` true · `canEmpty` = 등록 · restore · `canReset` true, hair `emptyable` · `canEmpty` false · clear · `canReset` = 등록; `emptyable` 카드 `[pomo_char]`, `canEmpty` 카드 두 칸 → `[pomo_char]` · hair 만 → `[]` · 빈 → `[]`; 첫 실행(`FIRST7` = 6장) pomo_char 외 전부 false · `canEmpty` `[pomo_char]`; `kb_down_0` 4행 · `kb_down_1+` · 추가 카드 불변 | Red(예정) |
 | TC-229 | 같음 | 픽스처 `FIRST7` 내용만 6장(hair 제거 — 이름은 옛 개수, W-8 관례) | 판정 불변(필수 2장 · kb_down_0 빈 비우기 칸) | Green |
-| TC-142 | `ImagesTab.test.tsx` | 빈 복원 칸 예 hair → **pomo_char** | ⓐ `뽀모도 인물 기본 그림으로 되돌리기` 활성 · `title` 없음, `뒷머리 그림 지우기` 비활성 · `title` 없음 · 눌러도 확인창 없음, `뒷머리 기본 그림으로 되돌리기` 없음, 나머지 불변 ⓒ `removeAsset` · `restoreDefaultAsset` 0회 | Green 예상 |
-| TC-179(둘째 `it`) | 같음 | 빈 복원 칸 둘째 대상 hair → **pomo_char** | ⓐ 복원 확인창 설명 `‘뽀모도 인물’ 칸을 내장 기본 그림으로 되돌릴까요? …`, 응답 뒤 포커스 누른 버튼, 뒷머리 · 타자 입력 1 복원 이름 버튼 없음 ⓒ `restoreDefaultAsset` `'background'` → `'pomo_char'`(2회), `removeAsset` · `setSettings` 0회 | Green 예상 |
+| TC-142 | `ImagesTab.test.tsx` | 빈 복원 칸 예 hair → **pomo_char** | ⓐ `뽀모도로 인물 기본 그림으로 되돌리기` 활성 · `title` 없음, `뒷머리 그림 지우기` 비활성 · `title` 없음 · 눌러도 확인창 없음, `뒷머리 기본 그림으로 되돌리기` 없음, 나머지 불변 ⓒ `removeAsset` · `restoreDefaultAsset` 0회 | Green 예상 |
+| TC-179(둘째 `it`) | 같음 | 빈 복원 칸 둘째 대상 hair → **pomo_char** | ⓐ 복원 확인창 설명 `‘뽀모도로 인물’ 칸을 내장 기본 그림으로 되돌릴까요? …`, 응답 뒤 포커스 누른 버튼, 뒷머리 · 타자 입력 1 복원 이름 버튼 없음 ⓒ `restoreDefaultAsset` `'background'` → `'pomo_char'`(2회), `removeAsset` · `setSettings` 0회 | Green 예상 |
 | TC-182 | 같음 | 픽스처 `BUILTIN_KEYS` 6칸(옛 `DEFAULT_KEYS7`) | ⓐ 설명 `내장 기본 그림 6장을 원본 크기 그대로 폴더에 저장합니다. 따라 그리거나 고쳐 쓸 때 쓰세요.` ⓑ `DEFAULT_ASSET_SLOTS` 길이 6 · `map(slotKey)` = 위 6칸 ⓒ `pickFolder` · `exportDefaultAssets` 0회 | Green 예상 |
 | TC-189 | 같음 | 부분 실패 픽스처 = 6장 중 `kb_up.png` 실패 | ⓐ ja · en 설명 `format(downloadDefaultsDesc,{n:6})`, 부분 실패 `format(exportPartial,{ok:5, fail:1, files:'kb_up.png'})`, 완료 `format(exportDone,{n:6})` ⓒ 호출 인자 불변 | Green 예상 |
 | TC-233 | 같음 | 불변(`KB1`) | ⓐ 버튼 2개 확인 목록에 `hair` 추가, 화면 `/그림 비우기$/` = `[slot-card-pomo_char]`(CR-053 `[hair, pomo_char]` 대체), 나머지 불변 ⓒ 0회 | Red(예정) |
-| TC-234 | 같음 | 불변(`KB1` · `BASIC` · `EMPTY` · `HP`) | ⓐ 두 줄 양식 = 뽀모도 인물 카드뿐; 뒷머리 카드(빈 칸 · 등록 모두) 버튼 2개 · `cardEmptyable` 없음 · `actions2` 아님; `BASIC`에서 `뽀모도 인물 그림 비우기` 비활성 · `뒷머리 그림 비우기` 없음 ⓒ 0회 | Red(예정) |
-| TC-FLOW-15 | 같음 | 매니페스트 = `DEFAULT_ASSET_SLOTS` 6장 | ⓐ `img` 있는 카드 = 6칸(hair 없음), 빈 칸 **14**, 뽀모도 인물 버튼 3개 · 「비우기」 활성, 뒷머리 버튼 `[이미지 변경, 기본값]` · `뒷머리 그림 지우기` 비활성, `/그림 비우기$/` = `[slot-card-pomo_char]`, 6칸 「기본값」 복원 aria · 활성 / 빈 칸 `… 그림 지우기` · 비활성, 추가 카드 0 ⓒ `importAsset` · `restoreDefaultAsset` · `removeAsset` · `setSettings` 0회 | Red(예정) |
+| TC-234 | 같음 | 불변(`KB1` · `BASIC` · `EMPTY` · `HP`) | ⓐ 두 줄 양식 = 뽀모도로 인물 카드뿐; 뒷머리 카드(빈 칸 · 등록 모두) 버튼 2개 · `cardEmptyable` 없음 · `actions2` 아님; `BASIC`에서 `뽀모도로 인물 그림 비우기` 비활성 · `뒷머리 그림 비우기` 없음 ⓒ 0회 | Red(예정) |
+| TC-FLOW-15 | 같음 | 매니페스트 = `DEFAULT_ASSET_SLOTS` 6장 | ⓐ `img` 있는 카드 = 6칸(hair 없음), 빈 칸 **14**, 뽀모도로 인물 버튼 3개 · 「비우기」 활성, 뒷머리 버튼 `[이미지 변경, 기본값]` · `뒷머리 그림 지우기` 비활성, `/그림 비우기$/` = `[slot-card-pomo_char]`, 6칸 「기본값」 복원 aria · 활성 / 빈 칸 `… 그림 지우기` · 비활성, 추가 카드 0 ⓒ `importAsset` · `restoreDefaultAsset` · `removeAsset` · `setSettings` 0회 | Red(예정) |
 | TC-FLOW-17 | 같음 | 충돌 = 기본 파일 6개 | ⓐ 확인창 `이 폴더에 같은 이름의 파일이 6개 있습니다. …`, 완료 줄 `기본 이미지 6장을 저장했습니다.` ⓒ `exportDefaultAssets(DIR,false)` → `(DIR,true)` 2회 | Green 예상 |
 | TC-FLOW-22 | 같음 | 이름 · 주석만(기본 7장 → 6장) | 판정 불변 | Green |
 | TC-FLOW-18 | `Hair.test.tsx` | Step 3 「비우기」 → **「기본값」** | 아래 본문 | Red(예정) |
@@ -3720,7 +3723,7 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | R-32(「기본값」 = 복원/비우기) | TC-133, TC-177, TC-192, TC-142, TC-179, TC-193, TC-196 | TC-FLOW-15, TC-FLOW-18 | M-29 |
 | R-36(기본 세트 — 6장) | TC-177, TC-178, TC-182 | TC-FLOW-15 | M-29 |
 | R-33(다운로드) | TC-178, TC-182, TC-189 | TC-FLOW-17 | M-30 |
-| R-41(타자 입력 1) · R-42(뽀모도 인물 셋째 버튼) | TC-232, TC-233, TC-234, TC-201 | TC-FLOW-15 | M-43 · M-45f |
+| R-41(타자 입력 1) · R-42(뽀모도로 인물 셋째 버튼) | TC-232, TC-233, TC-234, TC-201 | TC-FLOW-15 | M-43 · M-45f |
 | R-40 · R-25 | TC-229(픽스처) | TC-FLOW-22(표기) | — |
 
 | 설계 항목(위임 확정 동작 · contract v0.29 — 화면 설계 문서 개정 뒤 절 번호로 바꿔 읽는다, AB-1) | TC |
@@ -3728,7 +3731,7 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | contract v0.29 `DEFAULT_ASSET_SLOTS` 6개(hair 없음) | TC-177, TC-178, TC-182, TC-189, TC-FLOW-15, TC-FLOW-17 |
 | `hasBuiltinDefault('hair')` false → `slotCard` hair = clear 단일 규칙(`canReset` = 등록) | TC-133, TC-177, TC-192, TC-193, TC-200, TC-202 |
 | `EMPTYABLE_SLOT_KEYS` = `['pomo_char']` · hair `emptyable` · `canEmpty` 늘 false | TC-192, TC-200, TC-201, TC-232, TC-233, TC-234, TC-241, TC-FLOW-15 |
-| 뒷머리 카드 버튼 2개 · 한 줄 양식 / 셋째 버튼은 뽀모도 인물뿐 | TC-193, TC-201, TC-233, TC-234, TC-FLOW-15 |
+| 뒷머리 카드 버튼 2개 · 한 줄 양식 / 셋째 버튼은 뽀모도로 인물뿐 | TC-193, TC-201, TC-233, TC-234, TC-FLOW-15 |
 | `onRequestReset` → `onConfirmClear`(`focusAfter ?? trigger` — hair는 trigger) 정상 · 오류 | TC-196, TC-206, TC-FLOW-18 |
 | 「기본값」 활성 규칙(미등록 비활성 · 등록 활성 · `slotBusy` 비활성) | TC-193, TC-202 |
 | i18n `clearImageAria` · `confirmClear*` 3개 국어(뒷머리) | TC-196, TC-206, TC-207 |
@@ -4289,10 +4292,74 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 - **AE-1. `design/timer-tab.md` §14.16 「알림음 카드 설명」 행 미갱신.** 아직 `alarmCardDesc` = 「반복 재생 기준 문구(overlay CR-052와 일치)」로 남아 i18n CR-067 변경 행 · design.md CR-067 행과 어긋난다(design.md 변경이력이 「ui-designer 후속」으로 기록). 이 문서는 i18n CR-067 행 · CR 대장을 기준으로 삼았다. ui-designer 정정 필요.
 - **AE-2. 스펙 머리 주석의 옛 인용.** `TimerTab.cr052.test.tsx` 머리 주석이 「`alarmCardDesc` CR-052 변경 행」을 인용한다. 단언 · 결과 영향 없음. 다음에 이 스펙을 손볼 때 「CR-067 변경 행」으로 정정 권고(이 에이전트는 스펙 읽기만).
 
+## v34 개정 — CR-068 「뽀모도로」 표기 정정 · CR-070 카운트다운 쉬는중 자동 일시정지 (대기열 Q-10 · Q-11 정식 TC 전환 · 증분 모드 — 개정만, 번호 보존)
+
+비유: 간판에서 빠졌던 글자 한 자(「뽀모도로」)를 바로 써 붙였고, 모래시계는 이제 사람이 자리를 비우면 저절로 멈춘다. 검사표도 새 간판 글씨를 읽고, 모래시계가 멈춰 있는 동안에도 시작 시간 손잡이가 잠겨 있는지 본다.
+
+- **기준**: CR 대장 CR-068(🔒 사용자 2026-10-24 「뽀모도로인데 설정창에 … 수정해야 한다」) · CR-070(🔒 2026-10-24 rest-display 결정 ① — D-4 · A-1) · `doc/200_설계/architecture/rest-display-03-packet-ui.md` §B.4 S-5 행 · `design/timer-tab.md` §14.5 `isDurationLocked` · TC-269 · TC-276 행 · `design/i18n.md` `timerCountdownDesc` CR-070 행 · 현행 사전 `src/settings/i18n/ko.ts`(「뽀모도로」 값 6개 · `timerCountdownDesc`) · 대기열 Q-10 · Q-11
+- **CR-ID**: CR-068 — CR-045가 도입한 ko 표기만 정정(키 · 식별자 `pomo_char` · `pomo_bubble` · 동작 · ja · en 불변). CR-070 — R-50 옛 문장(「쉬는중에도 계속 줄어듦」, CR-050 유래)과 Z-3 ③(「`restPaused`는 잠기지 않는다」)을 대체. CR-050 나머지 · CR-052(`timerStopwatchDesc` 불변) · CR-067은 유효, 두 CR끼리 겹치는 키 없음
+- **번호**: 신규 자동 TC · TC-FLOW 없음. 수동 M-68 신규 · M-45b ⑦ 개정(`manual-checklist.md` v25). 수: 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63 → 64
+- **스펙**: ui-implementer가 먼저 개정했다(2026-10-24 — CR 대장 근거: `yarn test --run src/settings` 29 files / 458 PASS · `tsc` 0 · `lint` 0, 이 에이전트는 실행하지 않음). 이 패스는 본문을 스펙에 맞췄고 스펙은 고치지 않았다. 시간 의존 없음
+- **표기 통일 규칙(CR-068)**: 이 문서 본문(TC 제목 · Given/When/Then · 개정 표 · 추적표 · 옛 개정 절 제목)의 화면 문구 인용과 설명어는 「뽀모도로」로 통일했다. 예외는 변경이력 행(기록 보존)과 취소선뿐. 스펙 it 이름 · 주석에는 옛 표기(~~뽀모도~~)가 남아 있다(CR 대장 CR-068 「it 제목·주석 미변경」) — TC-ID로 짝을 맞추며, it 이름을 그대로 인용한 자리(예: V-3)의 이 한 글자 차이는 결함이 아니다
+
+#### CR-068 개정 TC (기대 문자열만 — 번호 유지, 스펙 개정 완료)
+
+| TC | 스펙 | 처리(CR-068) | 본문 |
+|---|---|---|---|
+| TC-094 · TC-096 | `i18n.test.ts` | ⓑ 상수 `KO_IMAGES_NOTE` · `KO_CANVAS_MISMATCH` · `EXPECTED_KO_TIMER` = 「뽀모도로」 문구(`imagesNote` · `errors['asset.canvas_mismatch']` · `timerCardTitle` · `timerTextDesc`) | 「CR-045」 영향 표 TC-096 행 기대 갱신. TC-094 본문은 상수 · 키 이름만 인용 — 불변 |
+| TC-197 · TC-246 | 같음 | 상수 경유 자동 추종 | 불변 |
+| TC-136 | `ImagesTab.test.tsx` | `ORDER` 셋째 · 넷째 제목 `뽀모도로 인물` · `뽀모도로 말풍선` | 「CR-045」 영향 표 행 갱신 |
+| TC-142 · TC-179 · TC-234 · TC-FLOW-15 | 같음 | aria `뽀모도로 인물 기본 그림으로 되돌리기` · `뽀모도로 인물 그림 비우기`, 확인창 설명 `‘뽀모도로 인물’ 칸을 …` | v29 · CR-053 개정 표 행 갱신 |
+| TC-242 · TC-243 · TC-244 · TC-291 · TC-292 · TC-FLOW-25 | `PomoCards.test.tsx` | 안내 `NOTE_KO` · 제목 `CHAR_KO` · `BUBBLE_KO` · 불일치 `MISMATCH` · `CHAR_IO` message · aria · 확인창 설명 = 「뽀모도로」(TC-242는 상수 경유) | 제목 · Given · When · Then의 문구 인용 갱신(TC-242 안내 문구 = `배경·뒷머리·뽀모도로·키보드 …`) |
+| TC-201 | `Hair.test.tsx` | 뽀모도로 인물 카드 aria 3개 | v29 · CR-053 표 행 갱신 |
+| TC-248 · TC-285 | `TimerTab.test.tsx` | h2 `[뽀모도로 타이머, 알림음, 시간 글자]` | Then ⓐ · 「CR-050」 영향 표 갱신 |
+| TC-247 | `SettingsApp.timer.test.tsx` | 카드 h2 `[뽀모도로 타이머, 시간 글자]` | Then ⓐ 갱신 |
+
+회귀만(CR-068): TC-245(ja · en 사전 값 그대로 읽음 — ja 「ポモドーロ」 · en 「Pomodoro」 불변), `presetValues.preview.test.ts` · `SettingsApp.test.tsx` · `TimerPreview.test.tsx`(주석 · 제목뿐).
+
+#### CR-070 개정 TC (번호 유지, 스펙 개정 완료)
+
+| TC | 스펙 | 처리(CR-070) | 본문 |
+|---|---|---|---|
+| TC-269 | `timerValues.test.ts` 137 ~ 146행 | ⓑ `isDurationLocked(CD_ON, 'restPaused')` false → **true**, 추가 `(SW_ON, 'restPaused')` → false · `(CD_OFF, 'restPaused')` → false | Then ⓑ 개정 |
+| TC-276(탭) | `TimerTab.test.tsx` 558 ~ 574행 | 사례 「타이머 restPaused」(`cd('restPaused', 1000)`) 추가 → 세 칸 disabled · `aria-disabled="true"` · 안내 `timerDurationLocked`(`멈춤 상태에서 바꿀 수 있습니다`) — 탭 9사례 | Then ⓐ 개정(사례 수 8 → 9). 컴포넌트 TC-276 · 가드 · 잠긴 뒤 blur 불변 |
+| TC-248 | `TimerTab.test.tsx` 225행 | 「타이머 사용」 스위치 접근 설명 = `정한 시간부터 0까지 내려갑니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 내려갑니다` | 본문 Then은 「두 스위치·설명(i18n §4.10)」 사전 인용이라 불변 — 문구 정본은 TC-286 ⓑ |
+| TC-286 | `i18n.test.ts` 558 ~ 559행 | ⓑ `KO_NEW.timerCountdownDesc` = 위 새 ko 문구(끝 마침표 없음) | Then ⓑ 개정 |
+| Z-3 ③ | — | ~~`restPaused`는 잠기지 않는다(실제로 오지 않는 값)~~ → (CR-070) 카운트다운 `restPaused`는 잠긴다(A-1) | 「CR-050 개정」 절 Z-3 ③ 개정 |
+
+회귀만(CR-070): TC-268(ja · en `timerCountdownDesc`는 사전 값 비교 — 자동 추종), TC-252(세 버튼은 `restPaused` 포함 다섯 상태 모두 활성 — 불변), TC-284(미리보기 `restPaused` 사진 표시 — 불변), 컴포넌트 TC-276 · TC-288(`locked` · `inactive` props 계약 불변).
+
+추적(CR-068 · CR-070)
+
+| 요구ID | TC |
+|---|---|
+| R-41 | 개정 TC-094 · TC-096(안내 · 불일치 문구) · TC-136 · TC-142 · TC-179 · TC-234 · TC-FLOW-15 · 수동 M-68 |
+| R-42 | 개정 TC-242 · TC-243 · TC-244 · TC-291 · TC-292 · TC-201 · TC-FLOW-25 · 회귀 TC-245 · 수동 M-68 |
+| R-44 | 개정 TC-248 · TC-285 · TC-247 · TC-094(`timerCardTitle` · `timerTextDesc`) · 수동 M-68 |
+| R-49 | 개정 TC-248(스위치 설명 화면) · TC-286 · 회귀 TC-268 |
+| R-50 | 개정 TC-269 · TC-276 · TC-286, Z-3 ③ · 수동 M-45b ⑦ |
+| R-51 | 개정 TC-276(쉬는중 `restPaused` 잠금) · TC-286(자동 일시정지 문구) · 회귀 TC-252 · TC-284 · 수동 M-45b ⑦ |
+
+| 설계 항목 | TC |
+|---|---|
+| timer-tab §14.5 `isDurationLocked` 식 = 타이머 켜짐 && `running` · `paused` · `restPaused` · `finished`(A-1) | TC-269, TC-276 |
+| timer-tab §14.6 `durationLocked`(`restPaused` 포함) → `locked` | TC-276(탭) |
+| i18n `timerCountdownDesc` CR-070 행 — ko | TC-286(사전), TC-248(화면) |
+| i18n `timerCountdownDesc` CR-070 행 — ja · en | 회귀 TC-268 |
+| ko 사전 「뽀모도로」 값 6개(CR-068 — `imagesNote` · `errors['asset.canvas_mismatch']` · `timerCardTitle` · `timerTextDesc` · `slots.pomo_char.title` · `slots.pomo_bubble.title`) | TC-094 · TC-096(사전), TC-136 · TC-242 · TC-243 · TC-247 · TC-248(화면) |
+
+사용자행 ↔ TC-FLOW(CR-068 · CR-070): 새 사용자행 없음. TC-FLOW-15 · TC-FLOW-25는 기대 문자열만 갱신(Step 불변). TC-FLOW-24(타이머 흐름)는 설정 창 쪽 쉬는중을 흉내 내지 않아(미리보기 A-6) 불변 — 실물 쉬는중 흐름은 수동 M-45b ⑦. CR ↔ TC: CR-068 → Q-10 전환(개정 표), CR-070 → Q-11 전환(개정 TC-269 · TC-276 · TC-286 · TC-248, Z-3 ③).
+
+### v34 설계 확인 필요
+
+- **AF-1. `design/i18n.md` 옛 표기 잔존.** 「로」가 빠진 표기가 9줄 남아 있다(CR 대장 CR-068이 §4.9 307 · 317 · 323 · 324행 · 103 · 237행 문구 표 미갱신을 기록 — 일부는 정정 기록 문구일 수 있음). 이 문서는 현행 `ko.ts` · CR 대장을 기준으로 삼았다. ui-designer 확인 필요.
+- **AF-2. `manual.md` 옛 문구.** CR 대장 CR-070이 `manual.md` 203행(카운트다운 쉬는중 계속) 미갱신을 기록한다. ui-manual-writer 위임 필요(이 문서 판정에는 영향 없음).
+
 ## 변경이력
 
 | 일자 | 내용 |
 |---|---|
+| 2026-10-24 | v34 — **CR-068(「뽀모도로」 표기 정정) · CR-070(카운트다운 쉬는중 자동 일시정지 문구 · `restPaused` 잠금 A-1) 반영, 대기열 Q-10 · Q-11 정식 TC 전환, 증분 모드 — 개정만.** 머리 「v34 기준」 줄 · 끝 「v34 개정」 절 신설(개정 표 2 · 추적 3종 · 설계 확인 AF-1 · AF-2). CR-068: 본문 전체의 화면 문구 인용 · 설명어를 「뽀모도로」로 통일(TC-094 · 096 · 136 · 142 · 179 · 201 · 234 · 241 ~ 245 · 247 · 248 · 285 · 291 · 292 · FLOW-15 · FLOW-25 계열 제목 · 기대, CR-051 인용 행, 옛 개정 절 제목 · 추적표), 변경이력 행은 기록 보존. CR-070: TC-269 Then ⓑ(`restPaused` 잠김 true · 스톱워치 · 꺼진 타이머 `restPaused` false), TC-276 Then ⓐ(타이머 `restPaused` 잠김 · 9사례), TC-286 Then ⓑ(`timerCountdownDesc` 새 ko 문구), 「CR-050 개정」 절 Z-3 ③ 취소선 + 「(CR-070) 카운트다운 `restPaused`는 잠긴다(A-1)」. `manual-checklist.md` v25(M-45b ⑦ 「타이머 모드도 같음」 · M-68 신규). 스펙 변경 없음(ui-implementer 선개정과 일치). 수: 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 64 |
 | 2026-10-15 | v33 — **CR-067 반영(알림음 카드 문구 1회 재생, 대기열 Q-09 정식 TC 전환, 증분 모드 — 개정만)**. 기준 CR 대장 CR-067 🔒 · i18n `alarmCardDesc` CR-067 변경 행 · 현행 사전. 끝에 「v33 개정 — CR-067」 절 신설(개정 표 · 추적 · 설계 확인 필요 AE-1 · AE-2). 개정 TC-277(Then ⓐ 새 ko 문구 + 반복 · 옛 문구 부재) · TC-286(Then ⓑ `alarmCardDesc` 새 ko 값) · TC-289(Given 반복 문구 표 · Then ⓐ ⓑ 반복 문구 부재) · TC-248(스펙만, 본문 불변). 「CR-052 개정 TC」 표 TC-286 · TC-248 · TC-277 행, CR-052 추적 R-44 · R-53 · R-55 행과 설계 항목 행, CR-050 요구 표 R-44 · R-53 · R-55 행에 CR-067 표기. Q-09 → 전환됨. 스펙 변경 없음(ui-fixer 선개정과 일치). 수 불변: 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63 |
 | 2026-10-15 | v32 — **doc-sync 배치(requirements v1.29 · design 2026-10-15 행 · presets-tab · i18n · images-tab 머리)**, 증분 모드. 문서 머리 「v32 기준」 줄 신설. 닫음: AA-1 · AA-2 · AA-5(설계 · 스펙 일치), AA-4 · AB-3(CR-063 「현 동작 유지」 — 응답 직후 포커스 = 누른 「기본값」, 수신 뒤 판정 없음), AD-1(`PREVIEW_ORDER` 9키 · ≤ 9장). TC-207 결과 기록(v29 스펙 정정으로 해소). 대기열 Q-01 · Q-02 「검증됨(2026-10-15, vitest 881/881)」(메인 세션 근거 · 위임 지시). 신규 **TC-363**(`PresetsTab.test.tsx` — 이름 바꾸기 저장 대기 중 Esc 무시 · 편집 · problems 유지, reject · resolve) + presets-tab §1.2 · §2 · §2.3 · §5.1 구현 형태 표 · §11.8 설계↔TC 덧붙임. v30 · v31 절 번호 어긋남 없음. 수: 자동 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34 · 수동 63 |
 | 2026-09-30 | (최신 행) v31 — **CR-065 세로형 카드 격자 · 그림 미리보기(R-66 개정 · R-68 🔒, requirements v1.29 · presets-tab §11 · i18n §4.12 CR-065 · contract v0.31, 증분 모드 · TDD 선행).** 「v31 개정」 절 신설(기준 · 픽스처 규약 · 신규 TC · TC-FLOW · 개정 표 · 추적 3종 · 설계 확인 AD-1 ~ AD-4). 신규 TC-354 ~ TC-356(`presetValues.preview.test.ts` 신규 — `previewLayout` 검증 예 · 순서 · 표시 불가), TC-357 ~ TC-359(`PresetPreviewBox.test.tsx` 신규 — 합성 렌더 · 안내 · 로드 실패), TC-360(`PresetCard.test.tsx` — 세로형 구조 · title), TC-361(`PresetsTab.test.tsx` — 카드별 미리보기 · 실패 격리), TC-362(`i18n.test.ts` — `presetPreviewUnavailable`), TC-FLOW-34(S-35). 개정: TC-347(요약 두 줄) · TC-319 · TC-346 · TC-FLOW-33(`expectMeta`) · TC-094 · TC-352(단순 키 174), 픽스처 `preview` 추가(tsc 오류 7건 해소). `manual-checklist.md` v23(M-65a ~ M-65c). 수: 자동 번호 362(유효 349 · 폐기 8 · 결번 5) · TC-FLOW 34 · 수동 63 |

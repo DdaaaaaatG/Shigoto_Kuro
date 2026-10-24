@@ -111,7 +111,8 @@ export const en: Messages = {
   timerStopwatchDesc:
     'Shows a time counting up from 0 inside the speech bubble. It stops by itself while resting and continues when you use the keyboard or mouse again.', // CR-052
   timerCountdownEnabled: 'Use timer',
-  timerCountdownDesc: 'Counts down to zero. Keeps running while resting',
+  timerCountdownDesc:
+    'Counts down to zero. It stops by itself while resting and continues when you use the keyboard or mouse again', // CR-070
   timerDuration: 'Start time',
   timerDurationHint: 'Up to 99:59:59',
   timerDurationInvalid: 'Enter a time between 00:00:01 and 99:59:59',

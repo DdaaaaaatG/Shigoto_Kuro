@@ -153,8 +153,8 @@ const ORDER = [
 const TITLES = [
   '배경',
   '뒷머리', // CR-037
-  '뽀모도 인물', // CR-045(i18n §4.9)
-  '뽀모도 말풍선',
+  '뽀모도로 인물', // CR-045(i18n §4.9)
+  '뽀모도로 말풍선',
   '기본',
   '타자 입력 1',
   '대기',
@@ -279,7 +279,7 @@ describe('ImagesTab — 레이아웃·카드 (R-25·R-19, U-6)', () => {
     renderImages(EMPTY)
     expect(
       within(region()).getByText(
-        'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.', // CR-045
+        'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기로 만드세요.', // CR-045
       ),
     ).toBeInTheDocument()
     expect(ORDER).toHaveLength(20) // CR-045: + 뽀모도 2(CR-042: 옛 25 → 18)
@@ -508,8 +508,8 @@ describe('ImagesTab — 기본값 = 비우기(내장 기본 없는 칸) (R-25·R
     expect(restoreBtn('background', '배경')).toBeEnabled() // CR-038: 빈 복원 칸 예(옛 idle)
     expect(restoreBtn('background', '배경')).not.toHaveAttribute('title')
     // v29(사용자 결정 2026-09-30 🔒 — 뒷머리 내장 기본 없음, contract v0.29): 빈 복원 칸 예 = pomo_char(CR-053 hair 대체)
-    expect(restoreBtn('pomo_char', '뽀모도 인물')).toBeEnabled()
-    expect(restoreBtn('pomo_char', '뽀모도 인물')).not.toHaveAttribute('title')
+    expect(restoreBtn('pomo_char', '뽀모도로 인물')).toBeEnabled()
+    expect(restoreBtn('pomo_char', '뽀모도로 인물')).not.toHaveAttribute('title')
     // v29: 빈 hair = 단일 비우기 칸 — 「기본값」(aria 「뒷머리 그림 지우기」) 비활성·툴팁 없음, 복원 이름 버튼 없음
     expect(clearBtn('hair', '뒷머리')).toBeDisabled()
     expect(clearBtn('hair', '뒷머리')).not.toHaveAttribute('title')
@@ -695,10 +695,10 @@ describe('ImagesTab — 기본값 = 내장 기본 그림으로 복원 (R-32·R-3
     )
     confirmRestore()
     await waitFor(() => expect(restoreDefaultAsset).toHaveBeenCalledWith('background'))
-    await waitFor(() => expect(restoreBtn('pomo_char', '뽀모도 인물')).toBeEnabled())
-    const trigger = openRestore('pomo_char', '뽀모도 인물')
+    await waitFor(() => expect(restoreBtn('pomo_char', '뽀모도로 인물')).toBeEnabled())
+    const trigger = openRestore('pomo_char', '뽀모도로 인물')
     expect(dialog()).toHaveAccessibleDescription(
-      '‘뽀모도 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
+      '‘뽀모도로 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
     )
     confirmRestore()
     await waitFor(() => expect(restoreDefaultAsset).toHaveBeenCalledTimes(2))
@@ -1328,7 +1328,7 @@ describe('ImagesTab — TC-FLOW (S-14 · S-15 · S-16, CR-035)', () => {
     expect(arts.filter(a => a.querySelector('img') === null)).toHaveLength(14)
     // CR-053: 뽀모도 인물 = 버튼 3개, 「기본값」 복원 활성·「비우기」 활성(등록됨)
     expect(within(card('pomo_char')).getAllByRole('button').map(b => b.textContent)).toEqual(['이미지 변경', '기본값', '비우기'])
-    expect(within(card('pomo_char')).getByRole('button', { name: '뽀모도 인물 그림 비우기' })).toBeEnabled()
+    expect(within(card('pomo_char')).getByRole('button', { name: '뽀모도로 인물 그림 비우기' })).toBeEnabled()
     // v29: 뒷머리 = 빈 비우기 칸 — 버튼 2개(셋째 「비우기」 없음), 「기본값」(뒷머리 그림 지우기) 비활성
     expect(within(card('hair')).getAllByRole('button').map(b => b.textContent)).toEqual(['이미지 변경', '기본값'])
     expect(clearBtn('hair', '뒷머리')).toBeDisabled()
@@ -1593,7 +1593,7 @@ describe('ImagesTab — 「타자 입력 1」 「기본값」 = 비우기 (R-41,
     update(BASIC)
     expect(card('kb_down_1').className).not.toMatch(/cardEmptyable/)
     expect(within(card('kb_down_1')).getAllByRole('button')[0].parentElement?.className ?? '').not.toMatch(/actions2/)
-    expect(emptyBtn('pomo_char', '뽀모도 인물')).toBeDisabled() // BASIC 에는 pomo_char 가 없다(v29: 옛 hair 대상)
+    expect(emptyBtn('pomo_char', '뽀모도로 인물')).toBeDisabled() // BASIC 에는 pomo_char 가 없다(v29: 옛 hair 대상)
     expect(within(card('hair')).queryByRole('button', { name: '뒷머리 그림 비우기' })).toBeNull() // v29: 셋째 버튼 없음
     expect(pickPngFile).not.toHaveBeenCalled()
     expect(removeAsset).not.toHaveBeenCalled()

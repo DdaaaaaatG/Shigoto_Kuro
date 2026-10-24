@@ -80,14 +80,14 @@ const CHAR_DEF: AssetManifest = { canvas: CANVAS, entries: [...BASE, entry('pomo
 const PATH = 'C:\\img\\pomo.png'
 const MISMATCH: BridgeError = {
   code: 'asset.canvas_mismatch',
-  message: '배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기여야 합니다. (현재 800×600, 캔버스 900×700)',
+  message: '배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기여야 합니다. (현재 800×600, 캔버스 900×700)',
 }
-const CHAR_IO: BridgeError = { code: 'asset.io', message: '뽀모도 인물 파일을 지우지 못했습니다. (테스트)' }
+const CHAR_IO: BridgeError = { code: 'asset.io', message: '뽀모도로 인물 파일을 지우지 못했습니다. (테스트)' }
 const NO_DEFAULT: BridgeError = { code: 'asset.no_default', message: '내장 기본 그림이 없습니다: pomo_char (테스트)' }
 /** i18n §4.3 imagesNote(CR-045 개정) ko 확정 — {w}×{h} = 900×700 */
-const NOTE_KO = 'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.'
-const CHAR_KO = { title: '뽀모도 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' }
-const BUBBLE_KO = { title: '뽀모도 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' }
+const NOTE_KO = 'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기로 만드세요.'
+const CHAR_KO = { title: '뽀모도로 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' }
+const BUBBLE_KO = { title: '뽀모도로 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' }
 /** 배경 그룹 뒤 그룹들(불변 — CR-042·CR-043 기준 16장) */
 const REST_KEYS = [
   'kb_up',
@@ -285,14 +285,14 @@ describe('ImagesTab — 뽀모도 카드 화면 (R-42·R-20)', () => {
     vi.mocked(importAsset).mockResolvedValueOnce(CHAR).mockRejectedValueOnce(MISMATCH)
     const { unmount } = renderImages(NO_POMO)
     await act(async () => {
-      fireEvent.click(changeBtn('pomo_char', '뽀모도 인물'))
+      fireEvent.click(changeBtn('pomo_char', '뽀모도로 인물'))
     })
     // ⓒ 대화상자 제목·인자
     expect(pickPngFile).toHaveBeenCalledWith('PNG 이미지 선택')
     expect(vi.mocked(importAsset).mock.calls).toEqual([['pomo_char', PATH]])
     expect(within(card('pomo_char')).queryByRole('alert')).toBeNull()
     await act(async () => {
-      fireEvent.click(changeBtn('pomo_bubble', '뽀모도 말풍선'))
+      fireEvent.click(changeBtn('pomo_bubble', '뽀모도로 말풍선'))
     })
     // ⓐ 그 카드만 오류 띠, 그림 그대로(없음)
     expect(vi.mocked(importAsset).mock.calls[1]).toEqual(['pomo_bubble', PATH])
@@ -301,7 +301,7 @@ describe('ImagesTab — 뽀모도 카드 화면 (R-42·R-20)', () => {
     expect(card('pomo_bubble').querySelector('img')).toBeNull()
     // ⓑ 오류 줄(onError)은 쓰지 않는다(카드 오류) · 버튼 다시 활성
     expect(onError).not.toHaveBeenCalled()
-    expect(changeBtn('pomo_bubble', '뽀모도 말풍선')).toBeEnabled()
+    expect(changeBtn('pomo_bubble', '뽀모도로 말풍선')).toBeEnabled()
     unmount()
     // en — code 문구(i18n §4.6 CR-045: pomodoro 포함)
     vi.mocked(importAsset).mockRejectedValueOnce(MISMATCH)
@@ -324,12 +324,12 @@ describe('ImagesTab — 뽀모도 카드 화면 (R-42·R-20)', () => {
     const del = deferred<AssetManifest>()
     vi.mocked(removeAsset).mockReturnValue(del.promise)
     const { update } = renderImages(BOTH)
-    const trigger = clearBtn('pomo_bubble', '뽀모도 말풍선')
+    const trigger = clearBtn('pomo_bubble', '뽀모도로 말풍선')
     // 취소
     fireEvent.click(trigger)
     expect(dialog()).toHaveAttribute('aria-modal', 'true')
     expect(dialog()).toHaveAccessibleName('그림 지우기')
-    expect(dialog()).toHaveAccessibleDescription('‘뽀모도 말풍선’ 그림을 지울까요? 되돌릴 수 없습니다.')
+    expect(dialog()).toHaveAccessibleDescription('‘뽀모도로 말풍선’ 그림을 지울까요? 되돌릴 수 없습니다.')
     expect(within(dialog()).getAllByRole('button').map(b => b.textContent)).toEqual(['지우기', '취소'])
     expect(within(dialog()).getByRole('button', { name: '취소' })).toHaveFocus()
     fireEvent.click(within(dialog()).getByRole('button', { name: '취소' }))
@@ -351,7 +351,7 @@ describe('ImagesTab — 뽀모도 카드 화면 (R-42·R-20)', () => {
     // ⓐ 빈 칸·「기본값」 비활성 · 다른 뽀모도 카드 그대로
     expect(card('pomo_bubble').querySelector('img')).toBeNull()
     expect(within(card('pomo_bubble')).getByText('등록된 그림 없음')).toBeInTheDocument()
-    expect(clearBtn('pomo_bubble', '뽀모도 말풍선')).toBeDisabled()
+    expect(clearBtn('pomo_bubble', '뽀모도로 말풍선')).toBeDisabled()
     expect(card('pomo_char').querySelector('img')).toHaveAttribute('src', 'asset://pomo_char.png')
     // ⓑ 오류 없음
     expect(screen.queryByRole('alert')).toBeNull()
@@ -397,7 +397,7 @@ describe('ImagesTab — 뽀모도 인물 「비우기」·「기본값」 복원
     fireEvent.click(trigger)
     expect(dialog()).toHaveAttribute('aria-modal', 'true')
     expect(dialog()).toHaveAccessibleName('그림 지우기')
-    expect(dialog()).toHaveAccessibleDescription('‘뽀모도 인물’ 그림을 지울까요? 되돌릴 수 없습니다.')
+    expect(dialog()).toHaveAccessibleDescription('‘뽀모도로 인물’ 그림을 지울까요? 되돌릴 수 없습니다.')
     expect(within(dialog()).getAllByRole('button').map(b => b.textContent)).toEqual(['지우기', '취소'])
     expect(within(dialog()).getByRole('button', { name: '지우기' }).className).toMatch(/danger/)
     expect(within(dialog()).getByRole('button', { name: '취소' })).toHaveFocus()
@@ -461,7 +461,7 @@ describe('ImagesTab — 뽀모도 인물 「비우기」·「기본값」 복원
     fireEvent.click(trigger)
     expect(dialog()).toHaveAccessibleName('기본 그림으로 되돌리기')
     expect(dialog()).toHaveAccessibleDescription(
-      '‘뽀모도 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
+      '‘뽀모도로 인물’ 칸을 내장 기본 그림으로 되돌릴까요? 지금 그림은 지워지며 되돌릴 수 없습니다.',
     )
     expect(within(dialog()).getAllByRole('button').map(b => b.textContent)).toEqual(['기본 그림으로', '취소'])
     expect(within(dialog()).getByRole('button', { name: '기본 그림으로' }).className).toMatch(/danger/)
@@ -522,13 +522,13 @@ describe('TC-FLOW (S-24)', () => {
     const { update } = renderImages(NO_POMO)
     // Step 1 TC-243(성공 부분) — 인물
     await act(async () => {
-      fireEvent.click(changeBtn('pomo_char', '뽀모도 인물'))
+      fireEvent.click(changeBtn('pomo_char', '뽀모도로 인물'))
     })
     update(CHAR) // 상태 전달: Step 1 응답 CHAR 가 Step 2 의 Given
     expect(card('pomo_char').querySelector('img')).toHaveAttribute('src', 'asset://pomo_char.png')
     // Step 2 TC-243(성공 부분) — 말풍선
     await act(async () => {
-      fireEvent.click(changeBtn('pomo_bubble', '뽀모도 말풍선'))
+      fireEvent.click(changeBtn('pomo_bubble', '뽀모도로 말풍선'))
     })
     update(BOTH)
     // Step 3 TC-242(등록 뒤 부분) — 두 카드 미리보기·인물 「비우기」 활성
@@ -536,7 +536,7 @@ describe('TC-FLOW (S-24)', () => {
     expect(emptyBtn('pomo_char', CHAR_NAME)).toBeEnabled()
     // Step 4 TC-291(확정 부분) — 인물 「비우기」
     fireEvent.click(emptyBtn('pomo_char', CHAR_NAME))
-    expect(dialog()).toHaveAccessibleDescription('‘뽀모도 인물’ 그림을 지울까요? 되돌릴 수 없습니다.')
+    expect(dialog()).toHaveAccessibleDescription('‘뽀모도로 인물’ 그림을 지울까요? 되돌릴 수 없습니다.')
     // act 로 감싸면 slotBusy 'pomo_char' → null 이 한 커밋으로 합쳐져 포커스 복귀 효과가 돌지 않는다(TC-291 과 같은 방식)
     fireEvent.click(within(dialog()).getByRole('button', { name: '지우기' }))
     await waitFor(() => expect(changeBtn('pomo_char', CHAR_NAME)).toHaveFocus())

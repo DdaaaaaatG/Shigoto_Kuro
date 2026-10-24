@@ -217,12 +217,12 @@ describe('TimerTab — 레이아웃·초기 표시 (R-43 ~ R-47 · R-49 ~ R-54, 
     await flush()
     // ⓐ 화면(ko — i18n §4.9·§4.10). 본문 region(X-1)
     expect(screen.getByRole('region', { name: '타이머' })).toBeInTheDocument()
-    expect(h2s()).toEqual(['뽀모도 타이머', '알림음', '시간 글자'])
+    expect(h2s()).toEqual(['뽀모도로 타이머', '알림음', '시간 글자'])
     // CR-052: 카드 1 머리 설명문 삭제 — 같은 문장은 스톱워치 스위치 설명 한 곳뿐(TC-289)
     expect(screen.getAllByText(KO_CARD_DESC)).toHaveLength(1)
     expect(checked()).toEqual(['false', 'false'])
     expect(swSw()).toHaveAccessibleDescription(KO_CARD_DESC)
-    expect(swCd()).toHaveAccessibleDescription('정한 시간부터 0까지 내려갑니다. 쉬는중에도 계속 줄어듭니다')
+    expect(swCd()).toHaveAccessibleDescription('정한 시간부터 0까지 내려갑니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 내려갑니다') // CR-070(D-4): 쉬는중 자동 일시정지 문구
     expect(screen.getByRole('group', { name: '시작 시간' })).toBeInTheDocument()
     expect(hmsValues()).toEqual(['00', '25', '00'])
     // CR-052: 둘 다 꺼짐 = 타이머 모드 아님 → 세 칸 회색 비활성(disabled·aria-disabled), 안내 줄 빈 값
@@ -249,7 +249,7 @@ describe('TimerTab — 레이아웃·초기 표시 (R-43 ~ R-47 · R-49 ~ R-54, 
     expect(out('alarm-volume')).toBe('44%')
     expect(
       screen.getByText(
-        '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
+        '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도로 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
       ),
     ).toBeInTheDocument()
     expect(screen.getByRole('group', { name: '시간 글자 위치 미리보기' })).toBeInTheDocument()
@@ -278,7 +278,7 @@ describe('TimerTab — 레이아웃·초기 표시 (R-43 ~ R-47 · R-49 ~ R-54, 
   it('TC-285: 카드 순서 뽀모도 타이머 → 알림음 → 시간 글자, Tab 순서(§14.11) — 끔·파일 없음 / 타이머 흐르는 중(잠김)·파일 있음', async () => {
     const r1 = renderTab(SETTINGS)
     await flush()
-    expect(h2s()).toEqual(['뽀모도 타이머', '알림음', '시간 글자'])
+    expect(h2s()).toEqual(['뽀모도로 타이머', '알림음', '시간 글자'])
     // 끔: 세 버튼·「기본값」 건너뜀, 시·분·초도 건너뜀(CR-052 — 타이머 모드가 아니면 disabled)
     expect(focusables(r1.container)).toEqual([
       swSw(),
@@ -555,13 +555,15 @@ describe('TimerTab — 시작 시간 (R-50, §14.7.1 commitCountdownSecs · §14
     expect(durationMsg()).toBe('')
   })
 
-  it('TC-276(탭) (CR-052 개정): 잠김 = 타이머 켜짐 && running·paused·finished → 세 칸 disabled·timerDurationLocked / 타이머 모드 아님(스톱워치 running·stopped·둘 다 꺼짐·꺼진 타이머 모드) → disabled·aria-disabled·안내 빈 값 / 타이머 켜짐·stopped 만 입력 가능, 흐르기 시작하면 입력 중 값 버림', async () => {
+  it('TC-276(탭) (CR-052·CR-070 개정): 잠김 = 타이머 켜짐 && running·paused·restPaused·finished → 세 칸 disabled·timerDurationLocked / 타이머 모드 아님(스톱워치 running·stopped·둘 다 꺼짐·꺼진 타이머 모드) → disabled·aria-disabled·안내 빈 값 / 타이머 켜짐·stopped 만 입력 가능, 흐르기 시작하면 입력 중 값 버림', async () => {
     const { update } = renderTab(S_CD)
     await flush()
     // [이름, 설정, 사진, 세 칸 disabled, 안내 줄]
     const cases: [string, Settings, ReturnType<typeof snap>, boolean, string][] = [
       ['타이머 running', S_CD, cd('running', 1000), true, LOCKED],
       ['타이머 paused', S_CD, cd('paused', 1000), true, LOCKED],
+      // CR-070: 카운트다운도 쉬는중이면 restPaused(A-1) — 잠김(옛 「잠기지 않음」 기대 폐기)
+      ['타이머 restPaused', S_CD, cd('restPaused', 1000), true, LOCKED],
       ['타이머 finished', S_CD, cd('finished', 1_500_000), true, LOCKED],
       ['타이머 stopped', S_CD, cd('stopped'), false, ''],
       // CR-052: 타이머 모드가 아니면 회색 비활성(inactive) — 안내 줄은 비운다(잠김 안내는 locked 만)

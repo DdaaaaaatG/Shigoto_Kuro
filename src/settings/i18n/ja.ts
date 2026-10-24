@@ -110,7 +110,8 @@ export const ja: Messages = {
   timerStopwatchDesc:
     '吹き出しの中に0から増える時間を表示します。休憩中になると自動で止まり、入力を再開すると続きから進みます。', // CR-052
   timerCountdownEnabled: 'タイマーを使う',
-  timerCountdownDesc: '決めた時間から0まで減ります。休憩中も止まりません',
+  timerCountdownDesc:
+    '決めた時間から0まで減ります。休憩中になると自動で止まり、入力を再開すると続きから減ります', // CR-070
   timerDuration: '開始時間',
   timerDurationHint: '最大 99:59:59',
   timerDurationInvalid: '00:00:01〜99:59:59の範囲で入力してください',

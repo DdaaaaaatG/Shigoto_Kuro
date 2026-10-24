@@ -161,14 +161,14 @@ const SLOT_KEYS = [
   'pen_down',
 ]
 
-/** CR-045(i18n §4.3 imagesNote CR-045 개정·§4.6 asset.canvas_mismatch CR-045 ko 열) — 「뽀모도」가 들어간 새 문구. CR-037 문구 대체 */
+/** CR-045(i18n §4.3 imagesNote CR-045 개정·§4.6 asset.canvas_mismatch CR-045 ko 열) — 「뽀모도로」가 들어간 새 문구(CR-068: 「뽀모도」→「뽀모도로」 정정). CR-037 문구 대체 */
 const KO_IMAGES_NOTE =
-  'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 {w}×{h}·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.'
-const KO_CANVAS_MISMATCH = '배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기여야 합니다.'
+  'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 {w}×{h}·1MB. 배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기로 만드세요.'
+const KO_CANVAS_MISMATCH = '배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기여야 합니다.'
 /** CR-045(i18n §4.9 ko 열) — 단순 키 17개. CR-052: timerCardDesc 키 삭제 → 같은 문장이 timerStopwatchDesc 로 옮겨감(15키 유지) */
 const EXPECTED_KO_TIMER = {
   tabTimer: '타이머',
-  timerCardTitle: '뽀모도 타이머',
+  timerCardTitle: '뽀모도로 타이머',
   // timerCardDesc: CR-052 삭제(확정사항 CR-048 블록 「수정 (CR-052)」) — 부재는 TC-289
   timerStopwatchDesc:
     '말풍선 안에 0부터 올라가는 시간을 보여 줍니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 흐릅니다.', // CR-052(옛 timerCardDesc 문장)
@@ -180,7 +180,7 @@ const EXPECTED_KO_TIMER = {
   timerControlsAria: '타이머 조작',
   timerTextTitle: '시간 글자',
   timerTextDesc:
-    '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
+    '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도로 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
   timerPreviewAria: '시간 글자 위치 미리보기',
   timerTextDragAria: '시간 글자 — 끌어서 옮기기',
   timerRotation: '회전',
@@ -342,8 +342,8 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     // CR-045(i18n §4.9): slots + pomo_char·pomo_bubble, errors + timer.disabled(ko 열 정확 일치)
     expect({ ...ko.slots }).toStrictEqual({
       ...EXPECTED_KO_SLOTS,
-      pomo_char: { title: '뽀모도 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' },
-      pomo_bubble: { title: '뽀모도 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' },
+      pomo_char: { title: '뽀모도로 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' },
+      pomo_bubble: { title: '뽀모도로 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' },
     })
     // CR-050(i18n §4.10): timer.disabled 새 문구(KO_TIMER_DISABLED 는 옛 CR-045 문구 — TC-286 이 부재 확인) + sound.* 3개
     expect({ ...ko.errors }).toStrictEqual({
@@ -555,7 +555,8 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
       timerStopwatchDesc:
         '말풍선 안에 0부터 올라가는 시간을 보여 줍니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 흐릅니다.',
       timerCountdownEnabled: '타이머 사용',
-      timerCountdownDesc: '정한 시간부터 0까지 내려갑니다. 쉬는중에도 계속 줄어듭니다',
+      // CR-070(D-4): 쉬는중 자동 일시정지 — 옛 「쉬는중에도 계속 줄어듭니다」 대체
+      timerCountdownDesc: '정한 시간부터 0까지 내려갑니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 내려갑니다',
       timerDuration: '시작 시간',
       timerDurationHint: '최대 99:59:59',
       timerDurationInvalid: '00:00:01 ~ 99:59:59 사이로 입력해 주세요',
@@ -701,7 +702,7 @@ describe('i18n 함수 (design/i18n.md §3)', () => {
     )
     // CR-045: 옛 기대 「배경·뒷머리·키보드 그림은…」(CR-037) 대체
     expect(format(ko.imagesNote, { w: 900, h: 700 })).toBe(
-      'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.',
+      'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 900×700·1MB. 배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기로 만드세요.',
     )
     expect(format('{name} 그림 지우기', {})).toBe('{name} 그림 지우기')
     expect(format('{a}-{b}', { a: 'x' })).toBe('x-{b}')

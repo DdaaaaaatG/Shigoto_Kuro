@@ -236,7 +236,7 @@ describe('SettingsApp — 「타이머」 탭 (R-44·R-27·R-48, T-1)', () => {
     expect(panel()).toHaveAttribute('id', 'settings-panel-timer')
     expect(panel()).toHaveAttribute('aria-labelledby', 'settings-tab-timer')
     expect(timerTab).toHaveAttribute('aria-selected', 'true')
-    expect(h2Texts()).toEqual(['뽀모도 타이머', '알림음', '시간 글자'])
+    expect(h2Texts()).toEqual(['뽀모도로 타이머', '알림음', '시간 글자'])
     expect(timeText()).toBe('00:00:00')
     // ⓑ 구독 1개(TimerTab) — 구독 먼저 → 조회 1회
     expect(order).toEqual(['sub', 'get'])

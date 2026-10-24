@@ -51,7 +51,7 @@ export const ko: Messages = {
   resetAllDone: '초기화했습니다.',
   // 이미지 설정 탭
   imagesNote:
-    'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 {w}×{h}·1MB. 배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기로 만드세요.', // CR-045: 「뽀모도」 추가
+    'PNG(32비트 RGBA)만 쓸 수 있습니다. 최대 {w}×{h}·1MB. 배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기로 만드세요.', // CR-045: 「뽀모도」 추가 → CR-068: 「뽀모도로」로 정정
   groupBackground: '배경',
   groupKeyboard: '키보드 (본체)',
   groupArm: '팔 (마우스)',
@@ -105,12 +105,13 @@ export const ko: Messages = {
   emptyImageAria: '{name} 그림 비우기',
   // 뽀모도 타이머(CR-045) + 타이머 모드·알림음(CR-050)
   tabTimer: '타이머',
-  timerCardTitle: '뽀모도 타이머',
+  timerCardTitle: '뽀모도로 타이머',
   timerStopwatchEnabled: '스톱워치 사용',
   timerStopwatchDesc:
     '말풍선 안에 0부터 올라가는 시간을 보여 줍니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 흐릅니다.', // CR-052
   timerCountdownEnabled: '타이머 사용',
-  timerCountdownDesc: '정한 시간부터 0까지 내려갑니다. 쉬는중에도 계속 줄어듭니다',
+  timerCountdownDesc:
+    '정한 시간부터 0까지 내려갑니다. 쉬는중이 되면 저절로 멈추고, 다시 입력하면 이어서 내려갑니다', // CR-070
   timerDuration: '시작 시간',
   timerDurationHint: '최대 99:59:59',
   timerDurationInvalid: '00:00:01 ~ 99:59:59 사이로 입력해 주세요',
@@ -136,7 +137,7 @@ export const ko: Messages = {
   alarmPreviewFailed: '이 파일을 재생하지 못했습니다',
   timerTextTitle: '시간 글자',
   timerTextDesc:
-    '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
+    '미리보기에서 글자를 끌어 자리를 옮기고, 아래에서 회전·크기·색을 고릅니다. 뽀모도로 인물·말풍선 그림은 「이미지 설정」 탭의 배경 그룹에서 넣습니다.',
   timerPreviewAria: '시간 글자 위치 미리보기',
   timerTextDragAria: '시간 글자 — 끌어서 옮기기',
   timerRotation: '회전',
@@ -211,8 +212,8 @@ export const ko: Messages = {
     // CR-037 · R-34
     hair: { title: '뒷머리', desc: '장발의 뒷머리처럼 팔 뒤에 보일 부분. 본체와 함께 흔들립니다' },
     // CR-045 · R-42
-    pomo_char: { title: '뽀모도 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' },
-    pomo_bubble: { title: '뽀모도 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' },
+    pomo_char: { title: '뽀모도로 인물', desc: '타이머 옆에 서 있는 두 번째 캐릭터. 배경처럼 고정되어 흔들리지 않습니다' },
+    pomo_bubble: { title: '뽀모도로 말풍선', desc: '시간이 들어갈 말풍선. 배경처럼 고정됩니다' },
     kb_up: { title: '기본', desc: '가만히 있을 때. 캐릭터 전체를 그려도 됩니다' },
     // CR-043(R-40): 「펜 손 사용」이 꺼져 있을 때(키보드만 쓸 때) 동작임을 명시(design/i18n.md §4.4 CR-043)
     kb_down: { title: '타자 입력 {n}', desc: '「펜 손 사용」이 꺼져 있을 때(키보드만 쓸 때) 타자를 치면 나오는 그림(여러 장이면 차례로 바뀜)' },
@@ -244,7 +245,7 @@ export const ko: Messages = {
     'asset.not_rgba': '32비트 RGBA PNG만 쓸 수 있습니다(투명 배경 필요).',
     'asset.too_large': '이미지가 너무 큽니다. 최대 900×700입니다.',
     'asset.too_many_bytes': '파일 용량이 1MB를 넘습니다.',
-    'asset.canvas_mismatch': '배경·뒷머리·뽀모도·키보드 그림은 모두 같은 크기여야 합니다.', // CR-045: 「뽀모도」 추가
+    'asset.canvas_mismatch': '배경·뒷머리·뽀모도로·키보드 그림은 모두 같은 크기여야 합니다.', // CR-045: 「뽀모도」 추가 → CR-068: 「뽀모도로」로 정정
     'asset.not_found': '등록되지 않은 그림입니다.',
     'asset.io': '파일을 처리하지 못했습니다.',
     'asset.manifest': '그림 목록 파일을 읽거나 쓰지 못했습니다.',
