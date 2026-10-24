@@ -1,6 +1,6 @@
 # presets 모듈 설계
 
-- 상태: 초안(범위·결정은 사용자 확정 🔒 2026-09-30 — 확정사항 §6 「프리셋」 PS-01~PS-11, 결정 U-1~U-7 권고안) · 최종 갱신: 2026-10-18(5차 배포 변형 basic — Cargo 피처 `presets-basic`)
+- 상태: 초안(범위·결정은 사용자 확정 🔒 2026-09-30 — 확정사항 §6 「프리셋」 PS-01~PS-11, 결정 U-1~U-7 권고안) · 최종 갱신: 2026-10-25(6차 내장 ② 교체 「먼작기」, 0.6.0)
 - 변경이력:
 
 | 날짜 | 차수 | 내용 | 소스 |
@@ -10,6 +10,7 @@
 | 2026-09-30 | 4차(PS-11 내장 프리셋, 🔒 버전 0.5.0) | 새 파일 `builtin.rs`: 내장 프리셋 표 `builtin_presets() -> [BuiltinPreset; 2]`(①「세바시에-기본」·②「게님드림」), 공개 `seed_builtin(presets_dir) -> Result<SeedOutcome, PresetError>`·`SeedOutcome`·`SeedSkip`(§2·§3.10). 바이트 재사용: ① PNG 6장·② `background.png` = `assets::defaults::DEFAULT_ASSETS` 바이트, 알림음 = `static BUILTIN_ALARM_MP3` 1개(두 프리셋 공용). 시딩 = `presets/`가 **없을 때만** 형제 임시 폴더 `.presets-seed`에 다 쓰고 검증(`load_dir`) 뒤 rename 한 번. `lib.rs` setup에서 기본 이미지 시딩 뒤 1회(실패는 경고). 테스트 7개(§8.1·§8.2). 짝 문서 한 줄: [assets.md](assets.md) 변경이력 17차, [data_reset.md](data_reset.md) §3.4. 결정 D-P9~D-P12, 확인 필요 C-7~C-10. **실물 동기화**: C-7 확정(알림음 원본 `doc/assets/presets/1/alarm.mp3`, ui 기본음과 분리), `parse_preset` `pub(super)`, 내장 증가 약 379KB, §3.1·§8·§10·§11.3 반영 | 적용(실물 대조) |
 | 2026-09-30 | 3차(PS-09 개정, CR-065, 계약 v0.31) | 카드 미리보기: 공개 타입 `PresetPreview`·`PresetPreviewLayer` 신규, `PresetSummary.preview` 필드, `PresetSummary`·`PresetImportReport` derive `Eq` 제거(§2). 비공개 `summary(id, file)` → `summary(preset_dir, id, file)`, 새 비공개 `preview(preset_dir, file)`(§3.9). `list`·`rename`·`save`·`import_from` 반환에 `preview`(§3.7). 테스트 7개(통합 `tests/presets_preview.rs`, §8.2). 공개 함수 시그니처 불변. 새 결정 D-P5~D-P8, 확인 필요 C-5·C-6. 실물 대조 정정: `preview(preset_dir, id, file)`·`read_size`·`HEADER_BYTES`·`PresetPreviewLayer` Eq 없음 | 적용(실물 대조) |
 | 2026-10-18 | 5차(배포 변형 basic, 🔒 2026-10-18 — 확정사항 §6 PS-11 아래) | Cargo 피처 `presets-basic`(`src-tauri/Cargo.toml` `[features]`)이 켜지면 내장 프리셋이 ①「세바시에-기본」 1개만. `builtin_presets()` 반환 `[BuiltinPreset; 2]` → `Vec<BuiltinPreset>`, ② 전용 항목(`PRESET2_JSON`·`preset2_png!`·`defaults_bytes`·`builtin_2`)은 `#[cfg(not(feature = "presets-basic"))]`(§3.1·§3.10.2). basic에서 빠지는 바이트 343 641(§3.10.7). `seed_builtin` 끝 `log::info!` 개수 로그(§3.10.4). 테스트는 `cfg!`로 기대 개수 1/2 분기, 통합 테스트 이름 `seed_creates_two_when_dir_missing` → `seed_creates_builtins_when_dir_missing`, §8.1 `builtin_bytes_match_source_folder` 설명을 실물(`fs::read`)에 맞춤(§8). 공개 API 시그니처·`PresetError`·bridge·`lib.rs` 불변. 결정 D-P13 | 적용(7bca274 실물 대조) |
+| 2026-10-25 | 6차(PS-11 내장 ② 교체, 🔒 2026-10-25 사용자 지시, 버전 0.6.0) | 내장 ② 「게님드림」 → 「먼작기」(`savedAt` 1791075836764, 그림 6장 `background`·`pomo_char`·`kb_up`·`mouse_base`·`pen_up`·`pen_down_0`, `hair` 없음, 알림음 mp3). 원본 `doc/assets/presets/2/`를 새 원본으로 바꾸고 옛 원본은 `doc/assets/presets/archive/2-gaenimdream/`로 보관(D-P14). id `builtin-2`·시딩 규칙 불변. `builtin_2()` = `preset2_png!` 6장(배경도 전용 — `DEFAULT_ASSETS` 재사용 끝, `defaults_bytes` 삭제) + 새 `static PRESET2_ALARM_MP3`(`#[cfg(not(feature = "presets-basic"))]`, ② 전용 118 272바이트) → `BUILTIN_ALARM_MP3`는 ① 전용(§3.10.1·§3.10.2). basic에서 빠지는 바이트 343 641 → 476 363(§3.10.7). 테스트 기대값: ② 6장·이름 「먼작기」·`savedAt`·적용 설정·파일 수 8(§8). 공개 API·`PresetError`·bridge·`lib.rs` 불변. 결정 D-P14, 확인 필요 C-11 | 소스 적용 2026-10-25(core-implementer, 실물 일치) |
 
 - 요구ID 표기: `PS-01`~`PS-10` = 아키텍처 횡단 ID(`doc/000_프로젝트_확정사항.md` §6 「프리셋」, `presets-02-design.md` §6 RTM). `U-1`~`U-7` = 사용자 결정, `A-1`~`A-11` = 아키텍트 결정(02-design §5a). `doc/100_요구조건/`에는 없다.
 - 상대 문서: [assets.md](assets.md) §3.18 · [settings.md](settings.md) §3.12 · [data_reset.md](data_reset.md) §3.4 · 계약 `doc/200_설계/bridge/contract.md` v0.31(§3.11 `PresetPreview`, §9 v0.31 — bridge-designer 소관, 어긋나면 계약이 맞다) · bridge 패킷 `presets-03-packet-bridge.md`
@@ -33,7 +34,7 @@
 | PS-09 (core 부분) | 설정 창 프리셋 탭의 카드 목록 | `list`가 `PresetSummary`(이름·날짜·장수·알림음) 정렬 목록 제공(U-4). 탭·카드는 ui |
 | PS-09 개정 (core 부분, CR-065) | 카드 위쪽에 프리셋 그림 미리보기(오버레이 합성) | `PresetSummary.preview` = 합성 **재료**(그림별 URL·크기, 캔버스, `partPos`·`penPos`) — §3.9. 합성(겹침 순서·슬롯 고르기·축소)은 ui |
 | PS-10 | 적용은 복사 — 이후 변경이 프리셋에 번지지 않음 | `apply`는 프리셋 폴더를 **읽기만**(§3.7.3) |
-| PS-11 (🔒 2026-09-30, 0.5.0) | exe에 프리셋 2개 내장, 앱 시작 때 `presets/`가 **없을 때만** `presets/builtin-1`·`builtin-2`로 시딩. 폴더가 있으면(비어도) 안 건드림. 초기화는 프리셋 불변(U-1) | `builtin_presets`·`seed_builtin`(§3.10). 시딩된 폴더는 일반 프리셋과 같다(목록·적용·이름 바꾸기·삭제·내보내기 그대로) |
+| PS-11 (🔒 2026-09-30, 0.5.0) | exe에 프리셋 2개 내장, 앱 시작 때 `presets/`가 **없을 때만** `presets/builtin-1`·`builtin-2`로 시딩. 폴더가 있으면(비어도) 안 건드림. 초기화는 프리셋 불변(U-1) | `builtin_presets`·`seed_builtin`(§3.10). 시딩된 폴더는 일반 프리셋과 같다(목록·적용·이름 바꾸기·삭제·내보내기 그대로). (6차, 🔒 2026-10-25, 0.6.0) 내장 ② = 「먼작기」(옛 ~~「게님드림」~~은 archive 보관) — §3.10.1, D-P14 |
 
 🔒 사용자 결정(권고안 반영, 02-design §5a) 중 core에 걸리는 것:
 
@@ -201,7 +202,7 @@ impl AppPaths {
 | `src-tauri/src/presets/preview.rs` (v0.31 신규) | 공개 타입 `PresetPreview`·`PresetPreviewLayer`(mod.rs 재노출), `pub(super) preview(preset_dir, id, file)`, 비공개 `read_size(path) -> Option<(u32, u32)>`, 상수 `HEADER_BYTES: u64 = 29`(§3.9). 단위 테스트 없음(통합 `tests/presets_preview.rs`) | 95 (실측) |
 | `src-tauri/tests/presets_preview.rs` (v0.31 신규) | 미리보기 통합 테스트 7개(§8.2) | — |
 | `src-tauri/src/presets/apply.rs` (신규) | `apply`, `FileBackup::{capture, restore}`, `backup_names`, `commit_files`, `build_manifest` | 약 220 |
-| `src-tauri/src/presets/builtin.rs` (4차 신규, **구현됨**) | 내장 프리셋 표 `BuiltinPreset`·`builtin_presets() -> Vec<BuiltinPreset>`, `static BUILTIN_ALARM_MP3`·`PRESET1_JSON`·`PRESET2_JSON`, 매크로 `preset2_png!`, 비공개 `builtin_2`(②. 5차 — `PRESET2_JSON`·`preset2_png!`·`defaults_bytes`와 함께 `presets-basic` 빌드에서 제외, §3.10.7), 공개 `seed_builtin`·`SeedOutcome`·`SeedSkip`(mod.rs 재노출), 비공개 `defaults_bytes`·`alarm_entry`·`prepare_staging`·`write_one`·`remove_best_effort`, 상수 `SEED_STAGING = ".presets-seed"`(임시 폴더 = `presets_dir.with_file_name(SEED_STAGING)`). 단위 테스트 3개(§8.1, 도우미 `expected_names`) | 실물 |
+| `src-tauri/src/presets/builtin.rs` (4차 신규, **구현됨**) | 내장 프리셋 표 `BuiltinPreset`·`builtin_presets() -> Vec<BuiltinPreset>`, `static BUILTIN_ALARM_MP3`·`PRESET1_JSON`·`PRESET2_JSON`·(6차) `PRESET2_ALARM_MP3`, 매크로 `preset2_png!`, 비공개 `builtin_2`(②. 5차 — `PRESET2_JSON`·`preset2_png!`와 함께 `presets-basic` 빌드에서 제외, 6차 `PRESET2_ALARM_MP3`도 같은 cfg, §3.10.7), 공개 `seed_builtin`·`SeedOutcome`·`SeedSkip`(mod.rs 재노출), 비공개 ~~`defaults_bytes`~~(6차 삭제 — D-P14)·`alarm_entry`·`prepare_staging`·`write_one`·`remove_best_effort`, 상수 `SEED_STAGING = ".presets-seed"`(임시 폴더 = `presets_dir.with_file_name(SEED_STAGING)`). 단위 테스트 3개(§8.1, 도우미 `expected_names`) | 실물 |
 | `src-tauri/tests/presets_builtin.rs` (4차 신규, **구현됨**) | 시딩 통합 테스트 4개(§8.2, 이름 설계대로) | 실물 |
 | `src-tauri/src/presets/format.rs` (4차) | `parse_preset` 가시성 `fn` → **`pub(super)`**(builtin 단위 테스트 `expected_names`가 원문 JSON에서 `images`·`alarm`을 읽는다). 동작 불변 | ±0 |
 | `src-tauri/src/lib.rs` | `pub mod presets;`, `//!` [계층]에 `presets` 추가, `AppPaths::presets_dir`(§2) | +10 |
@@ -540,7 +541,7 @@ fn read_size(path: &Path) -> Option<(u32, u32)>;
 
 ### 3.10 내장 프리셋 시딩 (`builtin.rs`, 4차, PS-11 🔒 2026-09-30, 0.5.0)
 
-결론: exe에 프리셋 2개(①「세바시에-기본」 6장·②「게님드림」 7장, 알림음 mp3 둘 다)를 내장하고, 앱 시작 때 **`presets/`가 없을 때만** 형제 임시 폴더에 두 프리셋을 다 써서 검증한 뒤 **rename 한 번**으로 `presets/`를 만든다. 폴더가 있으면(비어도·링크여도) 아무것도 하지 않는다.
+결론: exe에 프리셋 2개(①「세바시에-기본」 6장·~~②「게님드림」 7장, 알림음 mp3 둘 다~~ (🔒 2026-10-25, 6차) ②「먼작기」 6장, 알림음 mp3 각각 — ①은 `BUILTIN_ALARM_MP3`, ②는 전용 `PRESET2_ALARM_MP3`)를 내장하고, 앱 시작 때 **`presets/`가 없을 때만** 형제 임시 폴더에 두 프리셋을 다 써서 검증한 뒤 **rename 한 번**으로 `presets/`를 만든다. 폴더가 있으면(비어도·링크여도) 아무것도 하지 않는다.
 
 - (5차) 배포 변형 basic(Cargo 피처 `presets-basic`)은 ① 1개만 내장·시딩한다. 이 절의 「2개」는 기본 빌드 기준이고, 두 빌드의 차이는 §3.10.7에 모은다.
 
@@ -551,9 +552,10 @@ fn read_size(path: &Path) -> Option<(u32, u32)>;
 | 프리셋 | id(폴더) | 원본 | `preset.json` | PNG | 알림음 |
 |---|---|---|---|---|---|
 | ① 세바시에-기본 (`savedAt` 1790764144068) | `builtin-1` | `doc/assets/presets/1/` | `include_bytes!` 원문 | 6장 = `doc/assets/defaults/`와 **바이트 동일** → `DEFAULT_ASSETS` 바이트 재사용(새 내장 0) | `alarm.mp3` → `BUILTIN_ALARM_MP3`(원본 `doc/assets/presets/1/alarm.mp3`, C-7 확정 — ui 기본음과 분리) |
-| ② 게님드림 (`savedAt` 1790765304848) | `builtin-2` | `doc/assets/presets/2/` | `include_bytes!` 원문 | 7장: `background.png`는 defaults와 동일 → `DEFAULT_ASSETS` 재사용, 나머지 6장(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`, 342 506바이트)만 새 `include_bytes!` | `BUILTIN_ALARM_MP3`(①과 같은 static) |
+| ② 먼작기 (`savedAt` 1791075836764, 6차 🔒 2026-10-25) | `builtin-2` | `doc/assets/presets/2/` | `include_bytes!` 원문(1 119바이트) | 6장 **전부 전용** `preset2_png!`(합계 356 972바이트): `background` 6 814(defaults `background.png` 34 202와 **다름** → `DEFAULT_ASSETS` 재사용 없음)·`pomo_char` 83 443·`kb_up` 251 824·`mouse_base` 2 539·`pen_up` 2 539·`pen_down_0` 9 813. `hair` 없음 | `alarm.mp3` → 전용 `PRESET2_ALARM_MP3`(118 272바이트 — ①의 `BUILTIN_ALARM_MP3` 34 061과 **다름**) |
 
-- exe 증가분 = ② 신규 PNG 6장(약 335KiB) + 알림음 1벌(34 061바이트) + JSON 2개(각 약 1.5KiB). 목록 `doc/assets/presets/_inventory.txt`가 바이트 동일 근거다.
+- (🔒 2026-10-25) ~~② 게님드림 (`savedAt` 1790765304848) — 7장: `background.png`는 defaults와 동일 → `DEFAULT_ASSETS` 재사용, 나머지 6장(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`, 342 506바이트)만 새 `include_bytes!`, 알림음 `BUILTIN_ALARM_MP3`(①과 같은 static)~~ → 6차에서 「먼작기」로 교체(D-P14). 옛 원본은 `doc/assets/presets/archive/2-gaenimdream/`에 보관하고 빌드·테스트는 읽지 않는다.
+- ~~exe 증가분 = ② 신규 PNG 6장(약 335KiB) + 알림음 1벌(34 061바이트) + JSON 2개(각 약 1.5KiB).~~ (🔒 2026-10-25) exe에 실리는 내장 프리셋 전용 바이트 = ① 알림음 34 061 + ① `preset.json` + ② 476 363(PNG 6장 356 972 + 알림음 118 272 + `preset.json` 1 119). ①의 PNG 6장은 `DEFAULT_ASSETS`를 빌리므로 0. 목록 `doc/assets/presets/_inventory.txt`가 바이트 근거다(② 7개 파일 모두 크기가 defaults·①과 달라 `NEW`).
 - id `builtin-1`·`builtin-2`는 `is_valid_id`(`^[0-9a-z][0-9a-z-]{0,39}$`) 통과. 사용자 프리셋 id는 `{now_ms}[-n]`(숫자 시작, 문자 없음)이라 겹치지 않는다.
 - `savedAt`은 원본 값 그대로(시딩 시각 아님) → `list` 정렬(§3.7.4)상 **②가 위, ①이 아래**. 사용자가 새로 저장한 프리셋은 `now_ms`가 더 커서 두 내장보다 위에 온다.
 - 시딩된 폴더는 **일반 프리셋과 구별하지 않는다** — 「내장」 표시·삭제 금지·읽기 전용 없음(요구 밖). 사용자가 이름을 바꾸거나 지워도 다시 생기지 않는다(`presets/`가 이미 있으므로).
@@ -575,15 +577,19 @@ pub(super) struct BuiltinPreset {
 }
 
 /// C-7 확정: doc/assets/presets/1/alarm.mp3(34 061바이트 — 현재 ui 기본음과 바이트 동일이지만 분리,
-/// 내장 프리셋은 「그때 모습 그대로」). ①·② 공용 — static이라 exe에 1벌.
+/// 내장 프리셋은 「그때 모습 그대로」). ① 전용(6차 — 4·5차의 ①·② 공용에서 바뀜, ②는 PRESET2_ALARM_MP3). 두 빌드 공통.
 static BUILTIN_ALARM_MP3: &[u8] =
     include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/1/alarm.mp3"));
 /// preset.json 원문(static). ②는 기본 빌드에만(5차, §3.10.7).
 static PRESET1_JSON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/1/preset.json"));
 #[cfg(not(feature = "presets-basic"))]
 static PRESET2_JSON: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/2/preset.json"));
+/// (6차) ② 전용 알림음 doc/assets/presets/2/alarm.mp3(118 272바이트 — BUILTIN_ALARM_MP3와 다름). basic 빌드에는 없다.
+#[cfg(not(feature = "presets-basic"))]
+static PRESET2_ALARM_MP3: &[u8] =
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../doc/assets/presets/2/alarm.mp3"));
 
-/// ② 신규 그림(doc/assets/presets/2/). defaults.rs `default_png!`와 같은 모양.
+/// ② 그림(doc/assets/presets/2/). 6차: background 포함 6장 전부. defaults.rs `default_png!`와 같은 모양.
 #[cfg(not(feature = "presets-basic"))]
 macro_rules! preset2_png {
     ($name:literal) => {
@@ -591,11 +597,9 @@ macro_rules! preset2_png {
     };
 }
 
-/// DEFAULT_ASSETS에서 file_key가 같은 항목의 바이트. 없으면 None(패닉 금지). ② 전용.
-#[cfg(not(feature = "presets-basic"))]
-fn defaults_bytes(file_key: &str) -> Option<&'static [u8]>;
+// (6차) fn defaults_bytes(file_key) 삭제 — 유일한 사용처(② background)가 전용 바이트로 바뀌었다(남기면 dead_code).
 
-/// ② 「게님드림」. basic 빌드에는 없다.
+/// ② 「먼작기」(6차). basic 빌드에는 없다.
 #[cfg(not(feature = "presets-basic"))]
 fn builtin_2() -> BuiltinPreset;
 
@@ -609,9 +613,10 @@ pub(super) fn builtin_presets() -> Vec<BuiltinPreset>;
 | 프리셋 | `files` 만드는 법 |
 |---|---|
 | ① `builtin-1` (두 빌드 공통) | `DEFAULT_ASSETS.iter().map(\|d\| (stored_file_name(&d.slot), d.bytes))` 6개 + `("alarm.mp3", BUILTIN_ALARM_MP3)` — 파일 이름은 `alarm_file_name(AlarmFormat::Mp3)` |
-| ② `builtin-2` (기본 빌드만) | `builtin_2()`: `("background.png", defaults_bytes("background"))` + `preset2_png!` 6개(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`) + 알림음 |
+| ② `builtin-2` (기본 빌드만) | ~~`builtin_2()`: `("background.png", defaults_bytes("background"))` + `preset2_png!` 6개(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`) + 알림음~~ (🔒 2026-10-25, 6차) `builtin_2()`: `preset2_png!` 6개(`background`·`pomo_char`·`kb_up`·`mouse_base`·`pen_up`·`pen_down_0`) + `("alarm.mp3", PRESET2_ALARM_MP3)` = 파일 7개(시딩 뒤 폴더에는 `preset.json` 더해 8개) |
 
-- `defaults_bytes(file_key)` = `DEFAULT_ASSETS`에서 `slot.file_key() == file_key`인 항목의 `bytes`(② 전용 — basic 빌드에서는 함수째 빠진다). **없으면 그 파일을 `files`에서 뺀다**(패닉 금지) → 시딩 검증(`load_dir`)이 `preset.file_missing`으로 그 프리셋만 실패시킨다. 기본 세트가 나중에 바뀌면 단위 테스트 `builtin_bytes_match_source_folder`가 먼저 깨진다.
+- ~~`defaults_bytes(file_key)` = `DEFAULT_ASSETS`에서 `slot.file_key() == file_key`인 항목의 `bytes`(② 전용 — basic 빌드에서는 함수째 빠진다). **없으면 그 파일을 `files`에서 뺀다**(패닉 금지) → 시딩 검증(`load_dir`)이 `preset.file_missing`으로 그 프리셋만 실패시킨다. 기본 세트가 나중에 바뀌면 단위 테스트 `builtin_bytes_match_source_folder`가 먼저 깨진다.~~ (🔒 2026-10-25) 6차에서 `defaults_bytes` 삭제 — ②가 `DEFAULT_ASSETS`를 빌리지 않는다. `DEFAULT_ASSETS` 재사용은 ①만 남고, 기본 세트가 바뀌면 `builtin_bytes_match_source_folder`가 ① 대조에서 먼저 깨진다(C-8).
+- ② 알림음은 `alarm_file_name(AlarmFormat::Mp3)` 이름에 `PRESET2_ALARM_MP3` 바이트를 짝짓는다(①과 이름은 같고 바이트만 다르다 — 폴더가 달라 충돌 없음).
 - 파일 이름은 코드 상수(`stored_file_name`·`alarm_file_name`·문자열 리터럴)에서만 나온다 — JSON 문자열이 경로 조각이 되지 않는다(§3.6 원칙).
 - `assets/`·`defaults.rs`는 **변경 없음**(`DEFAULT_ASSETS`는 이미 `pub static`, `stored_file_name`은 이미 `pub(crate)`).
 
@@ -691,7 +696,7 @@ fn seed_builtin_presets(presets_dir: &std::path::Path) {
 
 #### 3.10.7 배포 변형 basic (5차, 🔒 2026-10-18 — 확정사항 §6 PS-11 아래 「배포 변형 「basic」」)
 
-결론: 같은 코드에서 Cargo 피처 `presets-basic`을 켜고 빌드하면 내장 프리셋이 ①「세바시에-기본」 **1개만** 들어가고, ②「게님드림」 전용 바이트는 exe에 아예 실리지 않는다. 시딩 규칙(§3.10.4)·공개 API·에러·bridge는 두 빌드가 같다.
+결론: 같은 코드에서 Cargo 피처 `presets-basic`을 켜고 빌드하면 내장 프리셋이 ①「세바시에-기본」 **1개만** 들어가고, ~~②「게님드림」~~ (🔒 2026-10-25) ②「먼작기」 전용 바이트(그림 6장·알림음·`preset.json`)는 exe에 아예 실리지 않는다. 시딩 규칙(§3.10.4)·공개 API·에러·bridge는 두 빌드가 같다.
 
 비유: 같은 옷장 설계도에서 옷걸이 하나를 빼고 찍어 낸 보급판이다. 옷장 크기·여닫는 법은 같고, 빠진 옷은 상자에도 들어가지 않는다.
 
@@ -700,14 +705,14 @@ fn seed_builtin_presets(presets_dir: &std::path::Path) {
 | 피처 정의 | `src-tauri/Cargo.toml` `[features]` `presets-basic = []`. `default` 피처에 넣지 않는다 | 같은 정의, 빌드·테스트 명령에서만 켠다 |
 | `builtin_presets()` | `[builtin-1, builtin-2]` | `[builtin-1]` |
 | 빈 데이터 폴더 시딩 | `Seeded { count: 2, failed: [] }`, `presets/` = `builtin-1`·`builtin-2` | `Seeded { count: 1, failed: [] }`, `presets/` = `builtin-1` |
-| 프리셋 탭 목록 | 「게님드림」(위)·「세바시에-기본」(아래) | 「세바시에-기본」 1장 |
-| exe에 실리는 프리셋 바이트 | ① JSON + 알림음 1벌 + ② JSON + ② 전용 PNG 6장 | ① JSON + 알림음 1벌 |
+| 프리셋 탭 목록 | ~~「게님드림」~~ (🔒 2026-10-25) 「먼작기」(위)·「세바시에-기본」(아래) | 「세바시에-기본」 1장 |
+| exe에 실리는 프리셋 바이트 | ① JSON + ① 알림음 + ② JSON + ② 전용 PNG 6장 + (6차) ② 전용 알림음 | ① JSON + ① 알림음 |
 | 기본 그림 세트(`DEFAULT_ASSETS`)·그 밖의 동작 | — | 기본 빌드와 동일 |
 | 배포 산출물 | `deploy/{version}/` | `deploy/{version}-basic/`, 파일 이름에 `-basic`(배포 절차 소관) |
 
-- **cfg로 빠지는 항목 4개:** `static PRESET2_JSON`, 매크로 `preset2_png!`, `fn defaults_bytes`, `fn builtin_2`. 모두 `#[cfg(not(feature = "presets-basic"))]`이고, `builtin_presets()` 본문의 `presets.push(builtin_2())` 한 줄도 같은 cfg다.
-- **두 빌드 공용으로 남는 것:** `BUILTIN_ALARM_MP3`(①이 씀), `PRESET1_JSON`, `alarm_entry`, ①의 `DEFAULT_ASSETS` 재사용. ② `background.png`는 원래 `DEFAULT_ASSETS` 바이트를 빌리므로 basic에서도 exe 크기가 줄지 않는다.
-- **basic에서 빠지는 바이트 343 641** = ② 전용 PNG 6장 342 506(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`) + ② `preset.json` 1 135.
+- **cfg로 빠지는 항목 4개:** `static PRESET2_JSON`, 매크로 `preset2_png!`, ~~`fn defaults_bytes`~~, `fn builtin_2`, (🔒 2026-10-25, 6차) `static PRESET2_ALARM_MP3`(`defaults_bytes`는 삭제돼 cfg 대상이 아니다). 모두 `#[cfg(not(feature = "presets-basic"))]`이고, `builtin_presets()` 본문의 `presets.push(builtin_2())` 한 줄도 같은 cfg다.
+- **두 빌드 공용으로 남는 것:** `BUILTIN_ALARM_MP3`(①이 씀 — 6차부터 ① 전용), `PRESET1_JSON`, `alarm_entry`, ①의 `DEFAULT_ASSETS` 재사용. ~~② `background.png`는 원래 `DEFAULT_ASSETS` 바이트를 빌리므로 basic에서도 exe 크기가 줄지 않는다.~~ (🔒 2026-10-25) ② 배경도 전용 바이트라 basic에서 함께 빠진다.
+- ~~**basic에서 빠지는 바이트 343 641** = ② 전용 PNG 6장 342 506(`hair`·`kb_up`·`mouse_base`·`pen_down_0`·`pen_up`·`pomo_char`) + ② `preset.json` 1 135.~~ (🔒 2026-10-25) **basic에서 빠지는 바이트 476 363** = ② 전용 PNG 6장 356 972(`background` 6 814·`pomo_char` 83 443·`kb_up` 251 824·`mouse_base` 2 539·`pen_up` 2 539·`pen_down_0` 9 813) + ② 전용 알림음 118 272 + ② `preset.json` 1 119.
 - **빌드 명령.** `--` 뒤 인자가 cargo로 넘어간다. 기본 판은 피처 없이 `yarn tauri build`.
 
 ```
@@ -846,9 +851,9 @@ impl PresetError {
 | `mod.rs` | `preset_error_codes` | 변형 11개 → preset code 10개 + `Settings` 위임 code. `load::CODE_FILE_MISSING`·`CODE_FILE_LINK` 값 확인. `preset.forbidden` 없음 |
 | `mod.rs` | `messages_have_no_path` | 모든 변형(tempdir 경로를 담은 io::Error 포함) `to_string()`에 tempdir 경로 문자열·`\\`·드라이브 문자 없음 |
 | `mod.rs` | `may_have_changed_only_when_rollback_failed` | `Io/Settings{changed: true}`만 참 |
-| `builtin.rs` (4차·5차) | `builtin_presets_parse_and_validate` | 내장 프리셋마다 `files` 이름 집합 = `images`의 `stored_file_name` ∪ `alarm_file_name(alarm)`(더도 덜도 없음). 이어서 tempdir `seed_builtin` → `Seeded { count: EXPECTED_COUNT, failed: [] }`(내부 `write_one` → `load_dir` `Loaded::Ok` = `preset.json` formatVersion 1·이름·설정 검증 + PNG 32bit RGBA·크기 한도·캔버스 일치 + 알림음 mp3 판별). `EXPECTED_COUNT` = basic 1·기본 2. ① 6장·② 7장(`hair` 포함)·둘 다 `alarm == Some(Mp3)` |
+| `builtin.rs` (4차·5차) | `builtin_presets_parse_and_validate` | 내장 프리셋마다 `files` 이름 집합 = `images`의 `stored_file_name` ∪ `alarm_file_name(alarm)`(더도 덜도 없음). 이어서 tempdir `seed_builtin` → `Seeded { count: EXPECTED_COUNT, failed: [] }`(내부 `write_one` → `load_dir` `Loaded::Ok` = `preset.json` formatVersion 1·이름·설정 검증 + PNG 32bit RGBA·크기 한도·캔버스 일치 + 알림음 mp3 판별). `EXPECTED_COUNT` = basic 1·기본 2. ① 6장·~~② 7장(`hair` 포함)~~ (🔒 2026-10-25) ② 6장(`hair` 없음)·둘 다 `alarm == Some(Mp3)` |
 | `builtin.rs` (4차·5차) | `seed_ids_valid` | id가 `is_valid_id` 통과·`.`으로 시작 안 함, `builtin_presets()` 순서 = `["builtin-1", "builtin-2"]`(basic: `["builtin-1"]`), 이웃한 두 프리셋의 `savedAt` 오름차순 ① < ②(목록에서 ②가 위, basic은 비교 쌍 없음) |
-| `builtin.rs` (4차·5차) | `builtin_bytes_match_source_folder` | 각 프리셋의 `preset.json`·`files` 바이트 == 원본 폴더 `doc/assets/presets/{n}/`의 같은 이름 파일(`fs::read` — 테스트 실행 때 읽으므로 exe에는 안 들어간다). ①의 PNG·② `background.png`가 `DEFAULT_ASSETS`를 빌려도 원본 폴더와 같음을 확인 — 기본 세트가 바뀌면 깨진다. `builtin_presets()`를 그대로 돌므로 basic에서는 ①만 대조 |
+| `builtin.rs` (4차·5차) | `builtin_bytes_match_source_folder` | 각 프리셋의 `preset.json`·`files` 바이트 == 원본 폴더 `doc/assets/presets/{n}/`의 같은 이름 파일(`fs::read` — 테스트 실행 때 읽으므로 exe에는 안 들어간다). ①의 PNG~~·② `background.png`~~가 `DEFAULT_ASSETS`를 빌려도 원본 폴더와 같음을 확인 — 기본 세트가 바뀌면 깨진다. (🔒 2026-10-25, 6차) ②는 PNG 6장·알림음(`PRESET2_ALARM_MP3`)이 모두 전용 바이트라 `doc/assets/presets/2/` 새 원본과 그대로 대조된다. `builtin_presets()`를 그대로 돌므로 basic에서는 ①만 대조 |
 | `tests/presets.rs` (통합) | `import_rejects_out_of_range_index` (SEC-001, 작성됨) | `kb_down` index 4000000000·`pen_down` index 64 → 거부(`Format`), index 63 → 허용 |
 
 ### 8.2 통합 (`src-tauri/tests/presets.rs`, tempdir, 공개 API만)
@@ -861,7 +866,7 @@ impl PresetError {
 | 적용 | `apply_replaces_all_and_clears_missing_slots`(옛 hair·kb_down_0 파일·항목 삭제), `apply_sets_ps02_settings_only`, `apply_keeps_pc_local_fields`, `apply_replaces_alarm_or_removes_it`, `apply_damaged_changes_nothing`(프리셋 PNG 하나를 RGB로 → assets·settings 바이트 동일, `Damaged`), `apply_rolls_back_on_settings_failure`(settings.json 경로를 폴더로 막아 `update` 실패 → assets·manifest 바이트 원복, `may_have_changed() == false`), `apply_then_edit_does_not_touch_preset`(PS-10), `apply_canvas_from_preset_not_current`(현재 900×700 → 프리셋 450×350 성공), `apply_unknown_id_not_found`(`../x` 포함) |
 | 이름·삭제·내보내기 | `rename_keeps_id`, `rename_blank_rejected`, `delete_removes_folder`, `delete_unknown_not_found`, `export_copies_listed_files_only`, `export_existing_folder_rejected`(대상 폴더 불변), `export_bad_dir` |
 | 미리보기 (v0.31, PS-09 개정 — 별도 파일 `tests/presets_preview.rs`, 7개) | `preview_layers_have_url_and_size`(저장 반환 `preview.layers`의 슬롯·`width`·`height`가 저장한 그림과 같고 url이 정규 id 폴더, `.staging-` 미포함), `preview_canvas_from_first_canvas_layer`(`canvas` = 첫 캔버스 레이어 크기, 마우스 파츠 크기 아님), `preview_uses_default_mouse_when_none`(`settings.mouse` 없음 → `default_mouse()`의 `partPos`·`penPos`), `preview_skips_unreadable_png`(PNG 1장 손상·삭제 → 목록 성공, 그 슬롯만 빠짐, `imageCount` 불변), `list_summary_includes_preview`(`list` 요약에 `preview` 채워짐), `rename_keeps_preview_urls`(이름 바꾸기 전후 url 같음), `import_summary_has_preview`(가져오기 반환 `preset.preview` url이 새 id 폴더) |
-| 내장 프리셋 시딩 (4차, PS-11 — 별도 파일 `tests/presets_builtin.rs`, 4개. 5차: 상수 `BASIC`·`COUNT`·`IDS`로 두 모드 분기, §3.10.7) | `seed_creates_builtins_when_dir_missing`(5차 개명, 옛 이름 `seed_creates_two_when_dir_missing`. tempdir `data/presets` 없음 → `Seeded { count: COUNT, failed: [] }`, `presets/`에 `IDS`만(기본 `builtin-1`·`builtin-2`, basic `builtin-1`), 각 폴더 파일 = `preset.json` + 목록 파일, `.presets-seed` 남지 않음. 두 번째 호출 → `Skipped(Exists)`, 폴더 불변), `seed_skips_when_dir_exists_even_if_empty`(빈 `presets/` → `Skipped(Exists)`·여전히 빔, 사용자 프리셋 1개가 있는 `presets/` → 그 폴더만 남음), `seed_output_listed_and_applicable`(시딩 → `list` — basic이면 `[builtin-1]` 1개 단언 후 적용 생략, 기본이면 2개, 순서 `[builtin-2, builtin-1]`, 이름 「게님드림」·「세바시에-기본」, `savedAt` 원본 값, `image_count` 7·6, `has_alarm` 참 → `apply(builtin-2)` 성공: 매니페스트 7항목(`hair` 포함), 설정 `timer.textPos` (142,456)·`rotation` 11, PC별 5필드 불변, `assets/alarm.mp3` 생김), `seed_clears_leftover_staging`(`.presets-seed/junk.txt` 잔재 + `presets/` 없음 → 시딩 성공, `junk.txt` 없음) |
+| 내장 프리셋 시딩 (4차, PS-11 — 별도 파일 `tests/presets_builtin.rs`, 4개. 5차: 상수 `BASIC`·`COUNT`·`IDS`로 두 모드 분기, §3.10.7) | `seed_creates_builtins_when_dir_missing`(5차 개명, 옛 이름 `seed_creates_two_when_dir_missing`. tempdir `data/presets` 없음 → `Seeded { count: COUNT, failed: [] }`, `presets/`에 `IDS`만(기본 `builtin-1`·`builtin-2`, basic `builtin-1`), 각 폴더 파일 = `preset.json` + 목록 파일(6차 기대: `builtin-1`·`builtin-2` 모두 8개 = PNG 6 + `alarm.mp3` + `preset.json`), `.presets-seed` 남지 않음. 두 번째 호출 → `Skipped(Exists)`, 폴더 불변), `seed_skips_when_dir_exists_even_if_empty`(빈 `presets/` → `Skipped(Exists)`·여전히 빔, 사용자 프리셋 1개가 있는 `presets/` → 그 폴더만 남음), `seed_output_listed_and_applicable`(시딩 → `list` — basic이면 `[builtin-1]` 1개 단언 후 적용 생략, 기본이면 2개, 순서 `[builtin-2, builtin-1]`, ~~이름 「게님드림」·「세바시에-기본」, `savedAt` 원본 값, `image_count` 7·6, `has_alarm` 참 → `apply(builtin-2)` 성공: 매니페스트 7항목(`hair` 포함), 설정 `timer.textPos` (142,456)·`rotation` 11,~~ (🔒 2026-10-25, 6차) 메타 (id, 이름, `savedAt`, `image_count`, `has_alarm`) = `("builtin-2", "먼작기", 1_791_075_836_764, 6, true)`·`("builtin-1", "세바시에-기본", 1_790_764_144_068, 6, true)` → `apply(builtin-2)` 성공: 매니페스트 6항목(`hair` 없음, `pomo_char`·`background` 있음), 적용 뒤 `assets/kb_up.png` 바이트 == 원본 `doc/assets/presets/2/kb_up.png`, 설정 `timer.textPos` (189,435)·`rotation` 0 단언(~~`timer.fontSize` 47(새 원본 `rotation`은 0이라 기본값과 구별되지 않아 단언하지 않는다)~~ — fontSize는 단언하지 않는다, 실물 테스트 기준), PC별 5필드 불변, `assets/alarm.mp3` 생김), `seed_clears_leftover_staging`(`.presets-seed/junk.txt` 잔재 + `presets/` 없음 → 시딩 성공, `junk.txt` 없음) |
 | 지연(기록용) | `apply_latency_report_15_images` — 15장 프리셋 적용 `Instant` 측정값을 출력(목표 ≤ 300 ms, 실패 조건 아님) |
 
 - **`apply_rolls_back_on_settings_failure` 전제**: 프리셋의 PS-02 설정이 현재 메모리와 **달라야** 한다. 같으면 `update`가 파일을 쓰지 않고 `Ok`를 돌려(store.rs:35) 실패가 주입되지 않는다.
@@ -875,7 +880,7 @@ impl PresetError {
 - [ ] 적용 직후 오버레이가 PNG를 읽는 중에도 실패하지 않는다(실패하면 `preset.io`이고 그림이 옛 상태 그대로인지 — 02-design §7 위험 ①).
 - [ ] 내보내기 → 다른 PC(또는 데이터 폴더를 비운 뒤) 가져오기 → 같은 모습.
 - [ ] 전체 초기화 뒤에도 프리셋 목록이 남아 있다(U-1).
-- [ ] (4차 PS-11) `presets\` 폴더를 지운 뒤 앱 시작 → 프리셋 탭에 「게님드림」(위)·「세바시에-기본」(아래) 두 카드, 미리보기 그림이 보인다. 둘 다 적용 → 오버레이 그림·타이머 글자 위치가 바뀐다.
+- [ ] (4차 PS-11) `presets\` 폴더를 지운 뒤 앱 시작 → 프리셋 탭에 ~~「게님드림」~~ (🔒 2026-10-25) 「먼작기」(위)·「세바시에-기본」(아래) 두 카드, 미리보기 그림이 보인다. 둘 다 적용 → 오버레이 그림·타이머 글자 위치가 바뀐다.
 - [ ] (4차 PS-11) 두 카드를 모두 삭제한 뒤 앱 재시작 → 다시 생기지 않는다(빈 `presets\`가 남아 있음). 전체 초기화 뒤에도 다시 생기지 않는다.
 
 ## 9. bridge 요구 명세 (계약 확정은 bridge-designer)
@@ -917,7 +922,7 @@ impl PresetError {
 | PS-09 (core 부분) | §3.7.4 `list`·`PresetSummary` | `list_sorted_newest_first`·`list_skips_broken_and_staging`·`list_skips_link_dirs` | ✅ 설계 · 소스 미적용 (탭 UI는 ui) |
 | PS-09 개정 (core, CR-065) | §2 `PresetPreview`·`PresetPreviewLayer`·`PresetSummary.preview`, §3.9, §3.7.1·§3.7.2·§3.7.4·§3.7.5 | `tests/presets_preview.rs` 7개(`preview_layers_have_url_and_size`·`preview_canvas_from_first_canvas_layer`·`preview_uses_default_mouse_when_none`·`preview_skips_unreadable_png`·`list_summary_includes_preview`·`rename_keeps_preview_urls`·`import_summary_has_preview`) | ✅ 설계 · 소스 구현됨 (합성은 ui) |
 | PS-10 | §3.7.3 「프리셋 폴더는 읽기만」 | `apply_then_edit_does_not_touch_preset` | ✅ 설계 · 소스 미적용 |
-| PS-11 (4차, 0.5.0) · 배포 변형 basic (5차, 🔒 2026-10-18) | §2 `seed_builtin`·`SeedOutcome`·`SeedSkip`, §3.10(내장 표·시딩·`lib.rs` 호출·초기화 관계), §3.10.7(basic — 피처 `presets-basic`, ① 1개), §3.8 | `builtin_presets_parse_and_validate`·`seed_ids_valid`·`builtin_bytes_match_source_folder`·`seed_creates_builtins_when_dir_missing`·`seed_skips_when_dir_exists_even_if_empty`·`seed_output_listed_and_applicable`·`seed_clears_leftover_staging` — 기본·`--features presets-basic` 두 모드 | ✅ 설계 · 소스 구현됨(basic 포함) |
+| PS-11 (4차, 0.5.0) · 배포 변형 basic (5차, 🔒 2026-10-18) · 내장 ② 교체 「먼작기」 (6차, 🔒 2026-10-25, 0.6.0) | §2 `seed_builtin`·`SeedOutcome`·`SeedSkip`, §3.10(내장 표·시딩·`lib.rs` 호출·초기화 관계), §3.10.1·§3.10.2(6차 ② 원본·`PRESET2_ALARM_MP3`), §3.10.7(basic — 피처 `presets-basic`, ① 1개), §3.8, §11.2 D-P14 | `builtin_presets_parse_and_validate`·`seed_ids_valid`·`builtin_bytes_match_source_folder`·`seed_creates_builtins_when_dir_missing`·`seed_skips_when_dir_exists_even_if_empty`·`seed_output_listed_and_applicable`·`seed_clears_leftover_staging` — 기본·`--features presets-basic` 두 모드 | ✅ 설계 · 소스 구현됨(basic 포함) · 6차 ② 교체는 소스 적용 2026-10-25(core-implementer, 실물 일치) |
 
 ## 11. 설계 결정 노트
 
@@ -950,6 +955,7 @@ impl PresetError {
 - **D-P11 (4차) 시딩 때도 `load_dir`로 검증** — 내장 바이트는 빌드 때 고정이라 테스트가 막지만, 디스크에 쓴 결과를 다시 읽어 검증하면 쓰기 도중 손상(디스크 가득 등)도 그 프리셋의 실패로 드러난다. 첫 실행 1회·약 0.9MB라 비용이 작다.
 - **D-P12 (4차) `preset.json`은 원문 그대로 쓴다** — 가져오기(§3.7.2)는 재직렬화하지만, 내장본은 사용자 원본 파일 자체가 정본이고 `builtin_presets_parse_and_validate`가 형식을 보장한다. 저장 뒤 `load_dir`가 다시 읽으므로 원문이 잘못되면 그 프리셋은 실패로 보고된다.
 - **D-P13 (5차, 🔒 2026-10-18) 배포 변형은 Cargo 피처 `presets-basic`으로 가른다 — 별도 브랜치·설정 파일 아님.** 이유는 코드 하나·검증 한 번이다. 별도 브랜치(basic 브랜치에서 ② 삭제)는 고칠 때마다 두 브랜치에 같은 변경을 옮겨야 해서 어긋나기 쉽다. 실행 시 설정 파일·환경 변수로 개수를 고르면 ② 바이트가 exe에 그대로 남아 확정사항의 「그림 바이트도 미포함」을 지키지 못하고, 요구 밖 설정 필드가 생긴다. 피처는 코드 하나를 유지한 채 `#[cfg]`로 컴파일 단계에서 ② 바이트를 빼고, 같은 테스트가 `cfg!` 분기로 두 모드를 검증한다. 피처를 `default`에 넣지 않아 평소 `cargo test`·`yarn tauri dev`는 기본(2개) 판이다.
+- **D-P14 (6차, 🔒 2026-10-25 사용자 지시, 0.6.0) 0.6.0 내장 ② 교체 — ~~「게님드림」~~ → 「먼작기」, 옛 ②는 archive(`2-gaenimdream/`) 보관.** id `builtin-2`·순서·시딩 규칙(§3.10.4)·공개 API·`PresetError`·bridge·`lib.rs`는 그대로 두고 ②의 내용물만 바꾼다. 원본 폴더 `doc/assets/presets/2/`를 새 원본으로 바꾸고 옛 원본은 `doc/assets/presets/archive/2-gaenimdream/`(빌드·테스트가 읽지 않는 기록)로 옮겼다 — `include_bytes!` 경로와 `builtin_bytes_match_source_folder`의 `presets/{n}/` 규칙이 손대지 않고 맞는다. 새 ②는 배경·알림음까지 전용 바이트라, D-P9의 「② 배경 = `DEFAULT_ASSETS` 빌림」·「알림음 static 하나를 두 프리셋이 공유」가 ②에서 사라진다 → `defaults_bytes` 삭제(사용처 0, 남기면 dead_code), `PRESET2_ALARM_MP3` 신설(같은 cfg). 그 결과 basic 빌드는 ② 바이트 476 363을 전부 뺀다(옛 343 641에는 배경이 빠지지 않았다). `savedAt` 1791075836764 > ① 1790764144068이라 목록 순서(②가 위)도 그대로다. 대안 「새 id `builtin-3`로 추가」는 기존 사용자에게는 어차피 시딩되지 않고(`presets/` 있음) 목록·테스트 상수만 늘어 기각. `mouse_base`·`pen_up`은 크기가 같지만(2 539) 슬롯이 달라 각각 `preset2_png!` — 같은 바이트여도 중복은 약 2.5KB라 공유 장치를 두지 않는다. 기존 사용자 영향은 C-11.
 
 ### 11.3 파급 (Grep 2026-09-30)
 
@@ -961,6 +967,7 @@ impl PresetError {
 - (v0.31) `PresetSummary`·`PresetImportReport` derive `Eq` 제거: `Eq`에 기대는 곳(`assert_eq!`은 `PartialEq`만 필요, `HashSet`·`BTreeSet` 키 사용 없음 — 구현 때 `cargo check`로 확인). bridge `types.rs` 재노출·`commands/presets/tests.rs`, TS `types.ts`·픽스처는 계약 §9 v0.31 인계대로(bridge·ui 소관).
 - (v0.31) `assets`·`settings`: 가시성·동작 변경 없음(§3.8 끝).
 - (4차 PS-11) 기존 공개 API·`PresetError` 변형·code **불변**(새 에러 없음 — 시딩 실패 code는 기존 `preset.*`·`asset.*`·`sound.*`). 바뀌는 곳(실물 반영): `presets/mod.rs`(`mod builtin;`·재노출·`//!`), 새 `builtin.rs`·`tests/presets_builtin.rs`, `format.rs` `parse_preset` → `pub(super)`(가시성만), `lib.rs`(setup 1줄 `seed_builtin_presets(&paths.presets_dir())` + 같은 이름 함수). exe 내장 바이트 증가 약 379KB(② 신규 PNG 6장 + 알림음 1벌 + JSON 2개). `assets/defaults.rs`·`data_reset`·bridge·ui·계약 변경 없음. `mod.rs`의 `//!` [테스트] 줄에 `tests/presets_builtin.rs` 추가.
+- (6차, D-P14) 공개 API·`PresetError`·code·호출자 **불변**. 바뀌는 곳: `presets/builtin.rs`(`builtin_2`·`PRESET2_ALARM_MP3` 신설·`defaults_bytes` 삭제·단위 테스트 ② 장수), `tests/presets_builtin.rs`(② 메타·파일 수 8·적용 단언), 원본 `doc/assets/presets/2/`(교체)·`archive/2-gaenimdream/`(보관). `assets/defaults.rs`·`lib.rs`·`data_reset`·bridge·ui·계약 변경 없음. 버전 문자열(0.6.0) 갱신은 이 모듈 밖.
 
 ### 11.4 확인 필요
 
@@ -969,8 +976,9 @@ impl PresetError {
 - **C-3** 02-design §7 위험 ① — 적용 순간 WebView2가 기존 PNG를 읽는 중이면 `write_atomic`의 rename이 공유 위반으로 실패할 수 있다(되돌림 후 `preset.io`, 데이터 안전). 실측은 verify 단계.
 - **C-4** U-1이 B(초기화 때 프리셋도 삭제)로 바뀌면 [data_reset.md](data_reset.md) §3.4와 이 문서 §3.8을 다시 받는다.
 - **C-5** (v0.31) 미리보기 헤더 읽기로 `list` 30개 ≤ 50 ms 목표가 유지되는지 verify 단계 실측. 넘으면 계약 §9 v0.31 확인 필요 (b)(`layers`를 미리보기 슬롯만으로 줄이기 — 합성 규칙 일부가 core로 들어온다)를 사용자 판단으로 올린다.
-- **C-7 (확정 2026-09-30)** 알림음 원본 = `doc/assets/presets/1/alarm.mp3`. ui 기본음(`src/assets/sounds/default-alarm.mp3`)과 **분리** — 내장 프리셋은 「그때 모습 그대로」이고, ui가 기본음을 바꿔도 내장 프리셋 알림음은 바뀌지 않는다. core가 ui 폴더 파일에 빌드 의존하지 않는다. 실물 `builtin.rs:42-47`.
-- **C-8** (4차) 기본 세트(`DEFAULT_ASSETS`)가 나중에 바뀌면 ①「세바시에-기본」·② 배경도 따라 바뀐다(바이트를 빌리므로). 그때는 `builtin_bytes_match_source_folder`가 깨져 결정을 강제한다 — 원본 폴더 갱신 또는 ①을 독립 `include_bytes!`로 분리.
+- **C-7 (확정 2026-09-30)** 알림음 원본 = `doc/assets/presets/1/alarm.mp3`. ui 기본음(`src/assets/sounds/default-alarm.mp3`)과 **분리** — 내장 프리셋은 「그때 모습 그대로」이고, ui가 기본음을 바꿔도 내장 프리셋 알림음은 바뀌지 않는다. core가 ui 폴더 파일에 빌드 의존하지 않는다. 실물 `builtin.rs:42-47`. (6차) 이 알림음은 ① 전용이 되고, ②는 자기 원본 `doc/assets/presets/2/alarm.mp3`(`PRESET2_ALARM_MP3`)를 쓴다.
+- **C-8** (4차) 기본 세트(`DEFAULT_ASSETS`)가 나중에 바뀌면 ①「세바시에-기본」~~·② 배경~~도 따라 바뀐다(바이트를 빌리므로). (6차) ②는 빌리지 않으므로 영향은 ①뿐이다. 그때는 `builtin_bytes_match_source_folder`가 깨져 결정을 강제한다 — 원본 폴더 갱신 또는 ①을 독립 `include_bytes!`로 분리.
 - **C-9** (4차, 요구 밖 — 만들지 않음) 설정 창 「내장 프리셋 복원」 버튼·내장 표시 배지·삭제 금지는 PS-11에 없다. 두 카드를 지우면 되살릴 방법은 `presets\` 폴더를 지우고 재시작뿐이다. 필요하면 요구로 승격 후 `restore_builtin(presets_dir, id)`(기존 폴더 없을 때만 해당 id 쓰기) 형태가 후보.
 - **C-10** (4차) 사용자 데이터 폴더에 이미 `presets\`가 있는 개발 PC(0.5.0 이전 개발본으로 저장해 봄)에는 내장 프리셋이 나타나지 않는다(규칙대로). 검증 때는 `presets\`를 치운 뒤 확인한다(§8.3).
+- **C-11** (6차, D-P14) `presets\`가 이미 있는 0.5.x 사용자는 0.6.0으로 올려도 「먼작기」가 생기지 않고, 시딩돼 있던 옛 ②(`builtin-2`, 옛 이름 그대로)가 남는다 — PS-11 「없을 때만」 규칙대로다. 기존 사용자에게도 새 ②를 주려면 요구 변경(예: 없는 id만 추가 시딩, 또는 내장 id 내용 교체)이 필요하다 — 요구 밖이라 만들지 않는다. 사용자 판단 대기.
 - **C-6** (v0.31) asset scope는 `$APPDATA/presets/*/*.png`(한 단계 폴더 안 PNG만)로 좁혀졌다. `.staging-*`·`.trash-*`도 한 단계 폴더라 패턴상 열리지만 core가 그 URL을 만들지 않는다(§3.9 정규 폴더 규칙). scope 판단은 메인 세션·bridge 소관.

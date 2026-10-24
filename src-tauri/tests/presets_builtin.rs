@@ -66,7 +66,7 @@ fn seed_creates_builtins_when_dir_missing() {
         ])
     );
     if !BASIC {
-        assert_eq!(names(&dir.join("builtin-2")).len(), 9);
+        assert_eq!(names(&dir.join("builtin-2")).len(), 8);
     }
     assert!(!paths.data_dir.join(".presets-seed").exists());
 
@@ -129,10 +129,7 @@ fn seed_output_listed_and_applicable() {
     } else {
         assert_eq!(
             got,
-            [
-                ("builtin-2", "게님드림", 1_790_765_304_848, 7, true),
-                basic1
-            ]
+            [("builtin-2", "먼작기", 1_791_075_836_764, 6, true), basic1]
         );
     }
 
@@ -151,12 +148,20 @@ fn apply_builtin_2(paths: &AppPaths) {
     let before = cur.clone();
     let state = Mutex::new(cur);
     let applied = presets::apply(paths, "builtin-2", &state).expect("apply");
-    assert_eq!(applied.manifest.entries.len(), 7);
-    assert!(applied
+    assert_eq!(applied.manifest.entries.len(), 6);
+    let keys: Vec<String> = applied
         .manifest
         .entries
         .iter()
-        .any(|e| e.slot.file_key() == "hair"));
+        .map(|e| e.slot.file_key())
+        .collect();
+    assert!(!keys.iter().any(|k| k == "hair"));
+    assert!(keys.iter().any(|k| k == "pomo_char") && keys.iter().any(|k| k == "background"));
+    let src_kb = Path::new(env!("CARGO_MANIFEST_DIR")).join("../doc/assets/presets/2/kb_up.png");
+    assert_eq!(
+        std::fs::read(paths.assets_dir.join("kb_up.png")).expect("kb_up"),
+        std::fs::read(src_kb).expect("src kb_up")
+    );
     let after = state.lock().expect("lock").clone();
     assert_eq!(
         (
@@ -164,7 +169,7 @@ fn apply_builtin_2(paths: &AppPaths) {
             after.timer.text_pos.y,
             after.timer.rotation
         ),
-        (142.0, 456.0, 11.0)
+        (189.0, 435.0, 0.0)
     );
     assert_eq!(after.overlay, before.overlay);
     assert_eq!(after.language, before.language);

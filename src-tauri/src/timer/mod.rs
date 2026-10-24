@@ -9,7 +9,7 @@
 //! [unsafe] 없음.
 //! [에러] `TimerError::Disabled`("timer.disabled") — 꺼져 있을 때 `apply`만. `driver::spawn`은 io.
 //! [설정] `TimerConfig::from_settings`로 `timer.mode`·`countdownSecs`를 받는다. `enabled`는 인자.
-//! [테스트] timer/tests.rs(전이표·경과·직렬화), driver.rs(실제 스레드) — doc/200_설계/core/timer.md §8·§3.8.
+//! [테스트] timer/tests.rs(전이표·경과·직렬화), driver.rs(실제 스레드), timer/rest_tests.rs(rest-display C19~C23) — doc/200_설계/core/timer.md §8·§3.8.
 
 use std::time::{Duration, Instant};
 

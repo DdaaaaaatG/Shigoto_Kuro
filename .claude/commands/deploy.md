@@ -38,7 +38,7 @@ yarn tauri build 2>&1 | tail -40
 
 ## 1-b. 배포 변형 「basic」 (🔒 2026-10-18)
 
-내장 프리셋을 「세바시에-기본」 1개만 넣는 변형. 같은 소스에서 Cargo 피처로 만든다.
+내장 프리셋을 「세바시에-기본」 1개만 넣는 변형(② 프리셋 — 0.5.x 「게님드림」, 0.6.0부터 「먼작기」 — 제외). 같은 소스에서 Cargo 피처로 만든다.
 
 ```bash
 yarn tauri build -- --features presets-basic 2>&1 | tail -20

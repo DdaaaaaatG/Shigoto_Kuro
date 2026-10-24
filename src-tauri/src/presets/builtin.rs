@@ -1,6 +1,6 @@
-//! 내장 프리셋 2개 시딩(PS-11, 0.5.0).
+//! 내장 프리셋 2개 시딩(PS-11, 0.5.0 · ② 먼작기로 교체 0.6.0).
 //!
-//! [목적] exe에 프리셋 2개(①「세바시에-기본」·②「게님드림」)를 담고, 앱 시작 때 `presets/`가 **없을 때만**
+//! [목적] exe에 프리셋 2개(①「세바시에-기본」·②「먼작기」)를 담고, 앱 시작 때 `presets/`가 **없을 때만**
 //!        형제 임시 폴더 `.presets-seed`에 두 프리셋을 다 써서 검증한 뒤 rename 한 번으로 `presets/`를 만든다.
 //!        폴더가 있으면(비어도·링크여도) 아무것도 하지 않는다. 시딩된 폴더는 일반 프리셋과 구별하지 않는다.
 //! [공개 API] `seed_builtin`·`SeedOutcome`·`SeedSkip`(mod.rs 재노출). `builtin_presets`·`BuiltinPreset`은
@@ -10,7 +10,7 @@
 //! [에러] `PresetError::Io`(메타데이터 읽기·임시 폴더 준비·최종 rename 실패). 프리셋 하나의 실패는
 //!        `Ok(Seeded{failed})`에 (id, code)로 담고 나머지를 계속한다.
 //! [설정] 없음. `preset.json` 원문을 그대로 쓴다(재직렬화 없음). Cargo 피처 `presets-basic`이 켜지면
-//!        ②「게님드림」과 전용 PNG·JSON을 exe에서 빼고 ①「세바시에-기본」 1개만 내장한다(배포 변형).
+//!        ②「먼작기」와 전용 PNG·JSON을 exe에서 빼고 ①「세바시에-기본」 1개만 내장한다(배포 변형).
 //! [테스트] 이 파일 `#[cfg(test)]`(형식·id·원본 바이트 대조), 통합 `tests/presets_builtin.rs`.
 
 use std::fs;
@@ -41,7 +41,7 @@ pub(super) struct BuiltinPreset {
 }
 
 // C-7: doc/assets/presets/1/alarm.mp3 사용(ui 기본음 `src/assets/sounds/default-alarm.mp3`와 분리 —
-// 내장 프리셋은 「그때 모습 그대로」). ①·② 공용 — static이라 exe에 1벌.
+// 내장 프리셋은 「그때 모습 그대로」). ①용 — ②는 전용 알림음(PRESET2_ALARM_MP3).
 static BUILTIN_ALARM_MP3: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../doc/assets/presets/1/alarm.mp3"
@@ -50,6 +50,11 @@ static BUILTIN_ALARM_MP3: &[u8] = include_bytes!(concat!(
 static PRESET1_JSON: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../doc/assets/presets/1/preset.json"
+));
+#[cfg(not(feature = "presets-basic"))]
+static PRESET2_ALARM_MP3: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../doc/assets/presets/2/alarm.mp3"
 ));
 #[cfg(not(feature = "presets-basic"))]
 static PRESET2_JSON: &[u8] = include_bytes!(concat!(
@@ -69,15 +74,6 @@ macro_rules! preset2_png {
     };
 }
 
-/// `DEFAULT_ASSETS`에서 file_key가 같은 항목의 바이트. 없으면 `None`(패닉 금지 — 검증이 그 프리셋만 실패시킨다).
-#[cfg(not(feature = "presets-basic"))]
-fn defaults_bytes(file_key: &str) -> Option<&'static [u8]> {
-    DEFAULT_ASSETS
-        .iter()
-        .find(|d| d.slot.file_key() == file_key)
-        .map(|d| d.bytes)
-}
-
 fn alarm_entry() -> BuiltinFile {
     (
         alarm_file_name(AlarmFormat::Mp3).to_string(),
@@ -85,23 +81,22 @@ fn alarm_entry() -> BuiltinFile {
     )
 }
 
-/// ② 「게님드림」. basic 빌드에는 없다.
+/// ② 「먼작기」(0.6.0). 전용 그림 5장 + 배경 + 전용 알림음 = 파일 7개(hair 없음). basic 빌드에는 없다.
 #[cfg(not(feature = "presets-basic"))]
 fn builtin_2() -> BuiltinPreset {
-    let mut files: Vec<BuiltinFile> = Vec::new();
-    if let Some(bytes) = defaults_bytes("background") {
-        files.push(("background.png".to_string(), bytes));
-    }
     let own: [(&str, &'static [u8]); 6] = [
-        ("hair.png", preset2_png!("hair.png")),
+        ("background.png", preset2_png!("background.png")),
         ("kb_up.png", preset2_png!("kb_up.png")),
         ("mouse_base.png", preset2_png!("mouse_base.png")),
         ("pen_down_0.png", preset2_png!("pen_down_0.png")),
         ("pen_up.png", preset2_png!("pen_up.png")),
         ("pomo_char.png", preset2_png!("pomo_char.png")),
     ];
-    files.extend(own.iter().map(|(n, b)| (n.to_string(), *b)));
-    files.push(alarm_entry());
+    let mut files: Vec<BuiltinFile> = own.iter().map(|(n, b)| (n.to_string(), *b)).collect();
+    files.push((
+        alarm_file_name(AlarmFormat::Mp3).to_string(),
+        PRESET2_ALARM_MP3,
+    ));
     BuiltinPreset {
         id: "builtin-2",
         json: PRESET2_JSON,
