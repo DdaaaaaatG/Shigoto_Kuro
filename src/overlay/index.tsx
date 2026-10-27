@@ -16,6 +16,7 @@
  */
 //! CR-051: .hairWrap(뒷머리, 젤리 동기) → BackgroundLayer → PomodoroLayer(고정, CR-045) → .jellyWrap 순으로 그린다
 //! CR-069(R-41): 쉬는중 && rest 등록이면 .canvas에 .restOnly — 배경 + rest만 보이고 나머지는 CSS visibility로 가린다(DOM 유지, §10.17)
+//! CR-071(R-22 개정): 특수 키 전용 그림이 그려지는 동안 .canvas에 .specialShown — 팔·펜 손만 CSS visibility로 가린다(§10.6)
 import {
   useCallback,
   useEffect,
@@ -64,7 +65,12 @@ import {
 } from 'state/inputMachine'
 import BackgroundLayer from './components/BackgroundLayer'
 import HairLayer from './components/HairLayer'
-import LayerStack, { findEntry, isPenMode, kbDownFrameCount } from './components/LayerStack'
+import LayerStack, {
+  findEntry,
+  isPenMode,
+  isSpecialShown,
+  kbDownFrameCount,
+} from './components/LayerStack'
 import MouseArm from './components/MouseArm'
 import PenHand from './components/PenHand'
 import PomodoroLayer from './components/PomodoroLayer'
@@ -228,6 +234,15 @@ const OverlayApp = () => {
   /** 쉬는중 단독 표시(R-41, 🔒 2026-10-24) — rest 그림이 있을 때만(D-1). 배경과 rest만 보이고 나머지는
    *  CSS visibility로 가린다(언마운트 없음 — 구독·알림음·이미지 디코드 유지, design §10.17) */
   const restOnly = machine.layer === 'rest' && hasRest
+  /** 특수 키 전용 그림 표시 중 팔·펜 손 숨김(CR-071, 🔒 2026-10-27) — 미등록 폴백이면 false. 위치 계산은 그대로 돈다 */
+  const specialShown = isSpecialShown(manifest, machine)
+  const canvasClass = [
+    styles.canvas,
+    restOnly && styles.restOnly,
+    specialShown && styles.specialShown,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
@@ -238,7 +253,7 @@ const OverlayApp = () => {
     >
       {canvas && (
         <div
-          className={restOnly ? `${styles.canvas} ${styles.restOnly}` : styles.canvas}
+          className={canvasClass}
           style={{
             width: canvas.width,
             height: canvas.height,

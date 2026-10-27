@@ -239,4 +239,32 @@ describe('overlay.module.css', () => {
       expect(decl(block(sel)).visibility, sel).toBeUndefined()
     }
   })
+
+  // CR-071(R-22 개정, 🔒 2026-10-27): 특수 키 전용 그림 표시 중 팔·펜 손 숨김 — .canvas의 .specialShown 아래
+  //   .armWrap(팔 래퍼)·.hand(팔 img·펜 손 img — 이 클래스는 MouseArm·PenHand만 쓴다)를 visibility: hidden으로만 가린다.
+  //   시나리오: scenarios.md 변경 대기열 Q(CR-071) — TC-355
+  it('TC-355: .specialShown 규칙 = .specialShown .armWrap·.specialShown .hand 각각 { visibility: hidden } 하나, display·opacity·animation·transition·transform 없음, 기본 .armWrap·.hand에 visibility 없음 (CR-071)', () => {
+    const rules = Array.from(norm.matchAll(/([^{}]+)\{([^{}]*)\}/g)).map(m => ({
+      selectors: m[1]
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
+      body: decl(m[2]),
+    }))
+    const spRules = rules.filter(r => r.selectors.some(s => /specialShown/.test(s)))
+    expect(spRules.flatMap(r => r.selectors).sort()).toEqual([
+      '.specialShown .armWrap',
+      '.specialShown .hand',
+    ])
+    for (const sel of ['.specialShown .armWrap', '.specialShown .hand']) {
+      const merged = Object.assign(
+        {},
+        ...spRules.filter(r => r.selectors.includes(sel)).map(r => r.body),
+      )
+      expect(merged, sel).toEqual({ visibility: 'hidden' })
+    }
+    for (const sel of ['.armWrap', '.hand']) {
+      expect(decl(block(sel)).visibility, sel).toBeUndefined()
+    }
+  })
 })

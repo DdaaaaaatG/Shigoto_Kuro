@@ -57,6 +57,26 @@ export const SPECIAL_KEY_SLOT: Readonly<Record<SpecialKey, AssetSlot>> = {
 }
 
 /**
+ * 특수 키 전용 그림(CR-021, R-22) — 키를 누르고 있고 가장 최근 눌린 특수 키의 슬롯이 등록돼 있을 때만 그 항목,
+ * 아니면 undefined. pickKeyboardEntry·pickPenKeyboardEntry·isSpecialShown이 같은 판정을 쓴다(CR-071).
+ */
+const pickSpecialEntry = (
+  manifest: AssetManifest,
+  machine: MachineState,
+): AssetEntry | undefined => {
+  if (!machine.kbDown) return undefined
+  const special = currentSpecial(machine)
+  return special !== null ? findEntry(manifest, SPECIAL_KEY_SLOT[special]) : undefined
+}
+
+/**
+ * 키보드 레이어에 특수 키 전용 그림이 실제로 그려지는가(CR-071, R-22 개정, design.md §10.6) — 펜·비펜 모드 공통.
+ * 미등록이라 kb_down(펜 모드 kb_up)으로 폴백하면 false. OverlayApp이 팔·펜 손 숨김 마커(.specialShown)에 쓴다.
+ */
+export const isSpecialShown = (manifest: AssetManifest, machine: MachineState): boolean =>
+  pickSpecialEntry(manifest, machine) !== undefined
+
+/**
  * 키보드 파츠 그림 선택(design.md §10.6·§10.13, design/functions.md §5.3) — 들림 / 가장 최근 눌린 특수 키의
  * 전용 그림(등록돼 있으면) / 누름 프레임(`kb_down[kbFrame] ?? kb_down[0]`) / `kb_down`이 하나도 없으면
  * `kb_up`(CR-043, R-32 — `kb_down_0` 선택 강등에 따른 폴백. `kb_up`도 없으면 `undefined`) 순.
@@ -64,8 +84,7 @@ export const SPECIAL_KEY_SLOT: Readonly<Record<SpecialKey, AssetSlot>> = {
 export const pickKeyboardEntry = (manifest: AssetManifest, machine: MachineState): AssetEntry | undefined => {
   if (!machine.kbDown) return findEntry(manifest, 'kb_up')
 
-  const special = currentSpecial(machine)
-  const specialEntry = special !== null ? findEntry(manifest, SPECIAL_KEY_SLOT[special]) : undefined
+  const specialEntry = pickSpecialEntry(manifest, machine)
   if (specialEntry) return specialEntry
 
   return (
@@ -83,9 +102,7 @@ export const pickKeyboardEntry = (manifest: AssetManifest, machine: MachineState
 export const pickPenKeyboardEntry = (manifest: AssetManifest, machine: MachineState): AssetEntry | undefined => {
   if (!machine.kbDown) return findEntry(manifest, 'kb_up')
 
-  const special = currentSpecial(machine)
-  const specialEntry = special !== null ? findEntry(manifest, SPECIAL_KEY_SLOT[special]) : undefined
-  return specialEntry ?? findEntry(manifest, 'kb_up')
+  return pickSpecialEntry(manifest, machine) ?? findEntry(manifest, 'kb_up')
 }
 
 const Layer = ({ entry, className }: { entry?: AssetEntry; className?: string }) => {
