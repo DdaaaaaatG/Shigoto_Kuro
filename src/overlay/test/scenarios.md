@@ -1,6 +1,6 @@
 # overlay 테스트 시나리오
 
-- **현행 판: v2.9 (2026-10-24, CR-069 — 쉬는중 단독 표시 R-41·카운트다운 쉬는중 자동 일시정지 표시 R-37·R-35 개정)** · 작성: ui-test-designer · 모드: 증분, 작업 모드 보강(maintain). 현행 기준·상태·수는 문서 끝 「CR-069 쉬는중 단독 표시」 절과 변경이력 최신 행이 정한다. 아래 머리 줄들은 각 판의 기록이다
+- **현행 판: v2.10 (2026-10-27, CR-071 — 특수 키 그림 표시 중 팔·펜 손 숨김, R-22 추가 결정 ④ · 대기열 Q-09 소진)** · 작성: ui-test-designer · 모드: 증분(대기열 소진), 작업 모드 보강(maintain). 현행 기준·상태·수는 문서 끝 「CR-071 특수 키 그림 표시 중 팔·펜 손 숨김」 절과 변경이력 최신 행이 정한다. 바로 앞 판 v2.9(2026-10-24, CR-069 — 쉬는중 단독 표시 R-41·카운트다운 쉬는중 자동 일시정지 표시 R-37·R-35 개정)의 기록은 「CR-069 쉬는중 단독 표시」 절에 있다. 아래 머리 줄들은 각 판의 기록이다
 - 기준: `src/overlay/design.md`(요구 v1.7 기준, CR-017·CR-019 갱신, 분할 `design/components.md`·`design/functions.md`·`design/a11y.md`) / `src/overlay/requirements.md` v1.7 / `doc/200_설계/bridge/contract.md` v0.8(+ CR-019 미확정 계약: `Settings.slam`·`AssetSlot` 값 `'slam'` 삭제 — bridge 인계 필요)(+ CR-017 미확정 계약: `MouseSettings.area: [Point, Point, Point, Point]` 추가·`pad` 삭제, command `get_monitors`·래퍼 `getMonitors(): Promise<ScreenBounds[]>` 신규, 이 화면의 `getScreenBounds` 호출 중단) / `doc/200_설계/core/window.md` §2.2(표시 크기 예시 표, §9.2 UI-5) / `doc/000_프로젝트_확정사항.md` §5(상태 전이표)
 - **기준 추가(v0.8 — CR-021)**: `src/overlay/requirements.md` **v1.9** R-22(+추가 결정 ①~③ 🔒 2026-09-24)·§2 S-7 / `src/overlay/design.md` §6 P-2·§10.1 z3 행·§10.3(`bounceAlt`)·**§10.6 규칙표 1~13행**·입력 내용 비보관 / `design/functions.md` §5.1 키보드 핸들러·§5.2(`SpecialKey`·`SPECIAL_KEYS`·`isSpecialKey`·`currentSpecial`·`MachineState.specialHeld`·`bounceSeq`·`BouncePhase`·`bouncePhase`·`MachineInput` key의 `special`)·§5.3(`SPECIAL_KEY_SLOT`·`pickKeyboardEntry`·`Layer` `bounce?: BouncePhase`)·§5.4 바운스 래퍼 5·6(`MouseArm` `bounce: BouncePhase`) / 미확정 계약(bridge 인계 필요): `KeyboardInputEvent.special`, `AssetSlot` `key_space`·`key_z`·`key_question`·`key_exclamation`·`key_enter`·`key_backspace`·`key_undo` / 분류 규칙 참조 `doc/200_설계/core/hook.md` J2·J3·J7·J9(수동 TC-151 기대값 근거)
 - **기준 추가(v0.9 — CR-022)**: `src/overlay/requirements.md` **v2.0** R-23(젤리 바운스 🔒 2026-09-24)·§1 용어 주·§2 S-1·S-7 / `src/overlay/design.md` §1·§2 `.jellyWrap`·§6 P-2·§10.3 젤리 행·폐기 행·CSS 블록 / `design/components.md` 컴포넌트 표·렌더 조건 `.jellyWrap`·배경 DOM 구조 1~5 / `design/functions.md` §5.1 `jellyClass`·§5.3 `LayerStack` 렌더·§5.4 `.armWrap` 컨테이너 / CR-022(새 계약 없음)
@@ -2629,7 +2629,7 @@ v0.6 변경 요약(2026-09-24, 근거: CR-017 사용자 🔒 · requirements.md 
 | Q-06 | 2026-09-27 | CR-053 | DEFAULT_TIMER_SETTINGS textPos (142,458)·rotation 9 (bridge v0.24) — 오버레이 소스 변경 없음 | (없음 — `src/bridge/types.ts` 인용) | OverlayApp.pomodoro.test.tsx TC-286 ② | 아니오 | 검증됨(2026-09-27) |
 | Q-07 | 2026-09-27 | CR-055 | 끝남 알림음 1회 재생 복원(CR-052 반복 재생 폐기): `useAlarmOnFinish` `start`가 등록 파일·기본음·실패 대체 기본음 모두 `loop` false로 재생. `finished` 이탈·언마운트 시 정지·깜빡임 10초·미리 듣기는 불변 | `src/overlay/hooks/useAlarmOnFinish.ts` · `src/components/utils/alarmSound.ts`(주석만) | TC-300 ①·TC-302 ①·TC-303 ①②③④·TC-304(`loop` true → false 개정), TC-299 ①(공용 `loop` 인자 — 불변 확인), TC-307 등 타이머 통합 TC의 반복 문구 | 아니오(기존 TC 개정으로 커버) | 검증됨(2026-09-27 — 전환됨(개정 TC-300 ①·TC-302 ①·TC-303 ①②③④·TC-304 ①②·TC-307·TC-311(MC-29)·TC-312(MC-30), 재확인 TC-299 ①·TC-301·TC-302 ②③·TC-305·TC-308·TC-309·TC-313 — v2.3 「CR-055」 절)) |
 | Q-08 | 2026-09-30 | CR-066 | 바운스 시작 규칙: 새 키 누름(자동 반복 아님)은 다른 키·펜 모드 클릭을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체). **클릭 포함**: 펜 모드 새 클릭 누름도 키·다른 버튼을 누른 채여도 매번 +1(뗌 불변, 펜 모드 아닌 클릭은 바운스 없음 불변). 자동 반복·부르르 규칙 불변 | `src/state/inputMachine.ts`(`startsBounce` 삭제, `onKey` 단순화, `onMouseButton` 바운스 조건 제거) | 개정(ui-fixer 초안): TC-100·TC-129·TC-130·TC-131·TC-132·TC-133·TC-136·TC-145·TC-146·TC-147·TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208·TC-209·TC-210·TC-211·TC-215·TC-216·TC-217·TC-218·TC-257 / 회귀: TC-161·TC-166·TC-169~TC-173·TC-205·TC-207·TC-219 | 예 — `src/state/inputMachine.test.ts` 5건(TC-FIX66-1~5 임시 ID, TC-ID 부여 필요) | 전환됨(2026-09-30 — 신규 TC-331~TC-335(TC-FIX66-1~5)·TC-336(MC-46), 개정 자동 25건(영향 TC 후보 전부)·수동 TC-151·TC-159·TC-222·TC-258·TC-FLOW-01·07·08·10, 회귀 지정 불변 — v2.7 「CR-066」 절) |
-| Q-09 | 2026-10-27 | CR-071 | 특수 키 전용 그림이 키보드 레이어에 실제로 그려지는 동안(누름 중 + 가장 최근 특수 키 + 슬롯 등록, 펜·비펜 공통) `.canvas`에 `.specialShown` → CSS가 팔(`.armWrap`)·펜 손(`.hand`)을 `visibility: hidden`. 미등록 폴백이면 숨김 없음, 떼면 즉시 복귀, 위치 계산·상태기계 불변 | `src/overlay/components/LayerStack.tsx`(`pickSpecialEntry`·`isSpecialShown`) · `src/overlay/index.tsx`(`specialShown`·`canvasClass`) · `src/overlay/overlay.module.css`(`.specialShown` 규칙) | 회귀: TC-144~TC-150(특수 키 그림·젤리 클래스)·TC-156·TC-157(애니메이션 클래스·`.canvas` className)·TC-338~TC-343(쉬는중 `.canvas` className)·TC-345(`.restOnly` 규칙 목록)·TC-112(`.hand` 블록) — 전부 무수정 통과 | 예 — 자동 TC-351~TC-354(`OverlayApp.specialHide.test.tsx`, 이름에 번호 부여 완료)·TC-355(`overlayStyles.test.ts`)를 본문 정식 TC로 전환, 수동 1건 후보(실제 앱에서 특수 키 누름 중 팔·펜 손이 안 보이는지 스크린샷 — jsdom은 CSS 미적용) | 대기 |
+| Q-09 | 2026-10-27 | CR-071 | 특수 키 전용 그림이 키보드 레이어에 실제로 그려지는 동안(누름 중 + 가장 최근 특수 키 + 슬롯 등록, 펜·비펜 공통) `.canvas`에 `.specialShown` → CSS가 팔(`.armWrap`)·펜 손(`.hand`)을 `visibility: hidden`. 미등록 폴백이면 숨김 없음, 떼면 즉시 복귀, 위치 계산·상태기계 불변 | `src/overlay/components/LayerStack.tsx`(`pickSpecialEntry`·`isSpecialShown`) · `src/overlay/index.tsx`(`specialShown`·`canvasClass`) · `src/overlay/overlay.module.css`(`.specialShown` 규칙) | 회귀: TC-144~TC-150(특수 키 그림·젤리 클래스)·TC-156·TC-157(애니메이션 클래스·`.canvas` className)·TC-338~TC-343(쉬는중 `.canvas` className)·TC-345(`.restOnly` 규칙 목록)·TC-112(`.hand` 블록) — 전부 무수정 통과 | 예 — 자동 TC-351~TC-354(`OverlayApp.specialHide.test.tsx`, 이름에 번호 부여 완료)·TC-355(`overlayStyles.test.ts`)를 본문 정식 TC로 전환, 수동 1건 후보(실제 앱에서 특수 키 누름 중 팔·펜 손이 안 보이는지 스크린샷 — jsdom은 CSS 미적용) | 전환됨(TC-351~TC-356 — 2026-10-27: 자동 TC-351~TC-355 본문 정식 TC, 수동 TC-356(MC-51) 신설, 개정 TC-FLOW-07(Step 6a~6d·8 추가), 회귀 지정 불변 — v2.10 「CR-071」 절. 「검증됨」은 실행 근거 확인 뒤 메인 세션) · 검증됨(자동 2026-10-27, TC-351~TC-355, ui-tester 346/346) · TC-356(MC-51) 수동 대기 |
 
 ## CR-039 초기 조회 재시도 — 추가·개정 TC (2026-09-25)
 
@@ -4423,11 +4423,140 @@ Steps: TC-338 → TC-339 → TC-340 → TC-342 → TC-341 → TC-343 → (환경
 
 CR ↔ TC(추가): CR-069 → 신규 TC-338~TC-350·TC-FLOW-22 / 개정 TC-312·TC-FLOW-19 / 스펙 `OverlayApp.restOnly.test.tsx`(신규)·`layers.test.tsx`·`overlayStyles.test.ts`·`timerClock.test.ts`·`useElapsedText.countdown.test.tsx`(it 추가) / 수동 MC-48~MC-50·MC-30 ④ 개정.
 
+## CR-071 특수 키 그림 표시 중 팔·펜 손 숨김 — 신규 TC (v2.10, 2026-10-27, 증분 · 보강 · 대기열 소진 Q-09)
+
+- **기준(v2.10)**: `src/overlay/requirements.md` v3.6(CR-071 — **R-22 개정** 추가 결정 ④ 🔒 2026-10-27: 특수 키 전용 그림 `key_*`가 키보드 레이어에 실제로 그려지는 동안 팔·펜 손을 가림, 미등록 폴백이면 숨기지 않음, 떼면 즉시 다시 보임, 상태 전이·커서 추종 계산·젤리·부르르·다른 레이어 불변 / **S-7 기능 칸 개정**) / `src/overlay/design.md` §10.6 「특수 키 그림 표시 중 팔·펜 손 숨김」(비유·규칙 1~5·코드 문단)·§10.6 본문 「그 밖의 특수 키 전용 팔 동작은 없다」 취소선 · §10.1 0행(`.specialShown .armWrap`)·pen 행(`.specialShown .hand`) · §13 RTM R-22 행(CR-071) / `design/functions.md` §5.1 `specialShown`·`canvasClass`, §5.3 CR-071 개정표(`pickSpecialEntry` 비공개·`pickKeyboardEntry`·`pickPenKeyboardEntry` 결과 불변·`isSpecialShown` export) / `design/components.md` §3 렌더 조건 `.canvas.specialShown`(클래스 토글 — 마운트 유지) / CR 대장 CR-071 / 대기열 Q-09. **새 command·event·타입 없음**(contract 변경 없음).
+- **v2.10 상태·수**: 신규 자동 TC-351~TC-355(5 — 스펙은 Q-09 등록 때 이미 이름에 번호가 있음, 이 패스에서 본문 정식 TC로 전환), 신규 수동 TC-356(1 — MC-51). 개정 TC-FLOW-07(Step 6a~6d·8 추가 — 아래 3). 기존 TC 기대값 개정 없음(회귀 지정 — 아래 4). 범위 변동 없음(R-22 개정). 356번까지 = 유효 336건(자동 286 + 수동 50) + 폐기 20건. TC-FLOW 유효 21건 + 폐기 1건(변동 없음).
+- **로케이터·환경**: 오버레이 img는 `alt=""`라 role 조회 불가 → `.canvas`·`.jellyWrap`·`.armWrap`·`img.hand`·`img.layer` 클래스와 부모 관계(`closest('.specialShown')`)로 찾는다(기존 layers·restOnly 스펙 방식). 키보드 img = `.jellyWrap` 안 세 번째 `img.layer`(몸통·상태·키보드 순), 팔 img = `.armWrap > img.hand`, 펜 손 = `.jellyWrap` 직계 `img.hand`(래퍼 없음). 스펙 CSS mock에 `specialShown: 'specialShown'` 키를 둔다. **잔여 위험(K-2와 같은 결)**: jsdom은 CSS 모듈 규칙(`visibility`)을 적용하지 않는다 → 「가려짐」은 클래스·부모 관계(TC-352·TC-354)·CSS 원문(TC-355)·스크린샷(TC-356)으로 나눠 증명한다. 시간은 가짜 시계(`setInterval`·`setTimeout`·`Date`, T0 = 1 700 000 000 000), 이벤트 반영은 `act` 안, 실제 sleep 없음.
+- **§0.3 보충 — 구현 전 예상**: 이 절은 소스 적용(09f4cae) 뒤에 정식 전환했다. CR 대장 CR-071의 구현 전 기준선은 TC-351·TC-352·TC-354·TC-355 = red(`isSpecialShown` export·`.specialShown` 마커·CSS 규칙 없음), TC-353 = green(마커가 없어야 하는 경우 — 회귀 가드). 현행 소스에서는 다섯 건 모두 green이 정상이고, red면 회귀다.
+- 실행(보강 모드 — 이 절에 걸리는 자동 TC): `yarn test --run src/overlay/test/OverlayApp.specialHide.test.tsx src/overlay/test/overlayStyles.test.ts`, 회귀 `yarn test --run src/overlay src/state`(특히 아래 4 회귀 지정). 수동: MC-51.
+
+### 1. 정식 번호 매핑 (대기열 Q-09)
+
+| 대기열 후보 | TC | 종류 | 스펙 / 수동 |
+|---|---|---|---|
+| `isSpecialShown` 순수 판정 | TC-351 | 자동 | `OverlayApp.specialHide.test.tsx` |
+| 비펜 · `key_space` 등록 · 스페이스 누름/뗌 | TC-352 | 자동 | `OverlayApp.specialHide.test.tsx` |
+| 비펜 · `key_z` 미등록 · Z/일반 키 | TC-353 | 자동 | `OverlayApp.specialHide.test.tsx` |
+| 펜 모드 · 엔터 · 숨긴 중 마우스 이동 | TC-354 | 자동 | `OverlayApp.specialHide.test.tsx` |
+| CSS `.specialShown` 규칙 원문 | TC-355 | 자동 | `overlayStyles.test.ts` |
+| 수동 후보(실제 앱 스크린샷) | TC-356 | 수동(MC-51) | `manual-checklist.md` |
+
+공통 픽스처(`OverlayApp.specialHide.test.tsx`): `MANIFEST` = background·body·idle·rest·kb_up·mouse_base·mouse_left·mouse_right·**key_space·key_enter**·kb_down 0·1(모두 900×700, url `u:{slotKey}`) — 나머지 특수 키 슬롯(key_z·key_question·key_exclamation·key_backspace·key_undo) **미등록**. `PEN_MANIFEST` = `MANIFEST` + pen_up·pen_down_0(200×150). 설정 `SETTINGS` = `DEFAULT_SETTINGS` + `scale 1`·`idleSeconds 300`·`overlay (100,100) visible`·`mouse` 비펜(어깨 (620,530)·영역 (420,430)(620,430)(620,630)(420,630)·`hand null`·`partPos (0,0)`·`penPos null`·`penMode false`)·`autostart false`, `PEN_SETTINGS` = 같은 설정에 `penMode true`. 모니터 [1920×1080], `getHandAnchor` → (520,530), `getTimer`·`setResting` → `stopped 0`, `getAlarmSound` → `null`, `setSettings`는 받은 값을 그대로 돌려준다.
+
+### 2. 신규 TC
+
+### TC-351 · `isSpecialShown` 순수 판정 — 키보드 레이어가 특수 키 슬롯을 고르는 때와 정확히 같다 · 종류: 자동 · 요구: R-22 · 설계: design.md §10.6 「특수 키 그림 표시 중 팔·펜 손 숨김」 1(숨김 조건 = 실제로 그려지는 때, 펜·비펜 공통, `pickSpecialEntry` 공유)·2(미등록 폴백이면 숨기지 않음), design/functions.md §5.3 CR-071 개정표(`isSpecialShown` 예 6개·`pickKeyboardEntry`·`pickPenKeyboardEntry` 결과 불변) · **신규(CR-071, Q-09)**
+- Given 매니페스트 `MANIFEST`(key_space·key_enter만 등록). 상태 = `createInitialState(T0)`(들림), 또는 거기에 `reduce`로 키 누름 1건(`pressed true`·`heldCount 1`·`repeat false`·`ts T0`, config `idleMs 300000`·`kbFrames 2`)을 흘린 상태 `pressedState(special)`
+- When ① `isSpecialShown(MANIFEST, m)`을 들림·`special null`·`'space'`·`'enter'`·`'z'`로 부른다 ② 분류값 8개(`null` + 7종 space·z·question·exclamation·enter·backspace·undo) 각각에 대해 `isSpecialShown`과, `pickKeyboardEntry`·`pickPenKeyboardEntry`가 그 특수 키 슬롯(url `u:{slotKey(SPECIAL_KEY_SLOT[sp])}`)을 골랐는지를 비교한다
+- Then ⓐ 화면(판정값 = `.canvas` 마커의 근거): ① 들림 false, 일반 키 누름 false, 스페이스 누름 true, 엔터 누름 true, Z 누름(key_z 미등록 — 폴백) false ⓑ 값: ② 8개 분류값 모두 `isSpecialShown(MANIFEST, m)` === 「`pickKeyboardEntry`가 특수 키 슬롯을 고름」 === 「`pickPenKeyboardEntry`가 특수 키 슬롯을 고름」. true는 space·enter 둘뿐이고 null·z·question·exclamation·backspace·undo는 false(펜 모드 여부를 인자로 받지 않아도 두 선택 함수와 어긋나지 않음) ⓒ bridge: 호출 없음(순수 함수 — `bridge`에서 타입·`slotKey`만 쓴다, command·event mock 무관)
+- 스펙: `src/overlay/test/OverlayApp.specialHide.test.tsx`
+
+### TC-352 · `key_space` 등록 + 스페이스 누름 → `.canvas` `'canvas specialShown'`(팔 DOM 유지), 뗌 → 즉시 `'canvas'` · 종류: 자동 · 요구: R-22, R-23, R-18 · 설계: design.md §10.6 숨김 1·3(팔 `.armWrap` 전체만)·4(떼면 즉시 복귀)·코드 문단(`canvasClass`로 `.canvas`에 마커, `.jellyWrap` className은 바꾸지 않음 — TC-144·TC-157 유지), §10.6 본문 「그 밖의 특수 키 전용 팔 동작은 없다」 대체, §10.1 0행, design/functions.md §5.1 `specialShown`·`canvasClass`, design/components.md §3 렌더 조건 `.canvas.specialShown`(클래스 토글 — `MouseArm` 마운트 유지) · **신규(CR-071, Q-09)**
+- Given 공통 픽스처 `SETTINGS`(비펜)·`MANIFEST`로 마운트 직후. `.canvas` className `'canvas'`, `.armWrap` 존재(이 노드를 기억)
+- When `input://keyboard` `{ pressed true, heldCount 1, special 'space' }` → 단언 → `{ pressed false, heldCount 0, special 'space' }`
+- Then ⓐ 화면: 누름 중 키보드 img src `u:key_space`, `.canvas` className **정확히** `'canvas specialShown'`, `.jellyWrap` className `'jellyWrap jellyAlt'`(첫 새 누름의 젤리 — 마커와 무관). 뗌 뒤 키보드 img src `u:kb_up`, `.canvas` className `'canvas'` ⓑ 상태: `.armWrap`은 누름 중·뗌 뒤 모두 마운트 때와 **같은 노드**(언마운트 없음 — 가리기만 함), 팔 img(`.armWrap > img.hand`) className `'hand'` 그대로(컴포넌트 className 변경 없음) ⓒ bridge: `setSettings` 0회(숨김은 저장하지 않음). 입력은 `onKeyboard`에 등록된 핸들러로만 들어온다
+- 스펙: `src/overlay/test/OverlayApp.specialHide.test.tsx`
+
+### TC-353 · `key_z` 미등록 Z 누름(kb_down 폴백)·일반 키 누름 → 마커 없음 · 종류: 자동 · 요구: R-22, R-07 · 설계: design.md §10.6 숨김 2(미등록 → `kb_down` 프레임 폴백이면 숨기지 않음 — 위 규칙표 8·12행 그대로), design/functions.md §5.3 `isSpecialShown` 예(「Z 누름 — key_z 미등록, 폴백 → false」·「일반 키 누름 → false」), design/components.md §3 `.canvas.specialShown`(「미등록 폴백이면 클래스 없음」) · **신규(CR-071, Q-09)**
+- Given 공통 픽스처 `SETTINGS`(비펜)·`MANIFEST`(key_z 미등록)로 마운트 직후
+- When `input://keyboard` Z 누름(`{ pressed true, heldCount 1, special 'z' }`) → Z 뗌 → 일반 키 누름(`special null`) → 뗌
+- Then ⓐ 화면: Z 누름 중 키보드 img src가 `u:kb_down_`로 시작(일반 누름 그림 폴백)하고 `.canvas` className `'canvas'`. 일반 키 누름 중과 뗀 뒤에도 `'canvas'` ⓑ 상태: 네 단계 모두 `.canvas` className이 정확히 `'canvas'`(마커 `specialShown`·`restOnly` 어느 것도 없음 — 팔은 가리지 않는 쪽) ⓒ bridge: 입력은 `onKeyboard` 등록 핸들러로 4건만. 이 TC는 command 호출을 단언하지 않는다(숨김이 저장과 무관함은 TC-352 ⓒ가 대표)
+- 스펙: `src/overlay/test/OverlayApp.specialHide.test.tsx`
+
+### TC-354 · 펜 모드 엔터 누름 → 팔·펜 손 모두 `.specialShown` 아래, 숨긴 중 마우스 이동도 위치 계산 계속, 뗌 → 해제 · 종류: 자동 · 요구: R-22, R-25, R-29, R-31, R-18 · 설계: design.md §10.6 숨김 1(펜·비펜 공통)·3(팔 `.armWrap`·펜 손 img만)·4(숨긴 동안에도 위치 계산 — 다시 보일 때 커서 위치), §10.1 pen 행(`.specialShown .hand`), design/functions.md §5.3 `pickPenKeyboardEntry`(펜 모드에서도 특수 키 그림은 키보드 레이어 `key_*`)·`isSpecialShown`, design/components.md §3 `.canvas.specialShown`(`PenHand` 마운트 유지) · **신규(CR-071, Q-09)**
+- Given `getSettings` → `PEN_SETTINGS`(`penMode true`), `getAssetManifest` → `PEN_MANIFEST`(pen_up·pen_down_0 200×150 추가)로 마운트 직후. 펜 손(`.jellyWrap` 직계 `img.hand`) 존재·src `u:pen_up`(이 노드를 기억), `.canvas` className `'canvas'`
+- When `input://keyboard` 엔터 누름(`{ pressed true, heldCount 1, special 'enter' }`) → 단언 → 팔 img·펜 손의 `style.transform` 기록 → `input://mouse-move` (1900, 1070) → 단언 → 엔터 뗌(`{ pressed false, heldCount 0, special 'enter' }`)
+- Then ⓐ 화면: 누름 중 키보드 img src `u:key_enter`, `.canvas` className `'canvas specialShown'`, 펜 손 img와 팔 img(`.armWrap > img.hand`) 각각의 `closest('.specialShown')`이 그 `.canvas`(= TC-355 규칙이 가릴 부모 관계). 뗀 뒤 `.canvas` className `'canvas'`, 펜 손 src `u:pen_up` ⓑ 상태: 펜 손은 마운트 때와 같은 노드·className `'hand'`. 숨긴 동안의 마우스 이동으로 팔 img transform·펜 손 transform이 둘 다 이동 전 값과 달라진다(커서 추종 계산 계속). 뗀 뒤 팔 img transform은 이동 직후 값 그대로(다시 보일 때 커서 위치) ⓒ bridge: 마운트 때 `getSettings`(→ `penMode true`)·`getAssetManifest`(→ `PEN_MANIFEST`) mock 결과로 펜 모드 진입. 입력은 `onKeyboard`·`onMouseMove` 등록 핸들러로만 들어오고, 숨김 판정에 새 command 호출이 없다(command 추가 호출 단언은 TC-352 ⓒ가 대표)
+- 스펙: `src/overlay/test/OverlayApp.specialHide.test.tsx`
+
+### TC-355 · CSS 원문 — `.specialShown` 규칙 2개, `visibility: hidden`만 · 종류: 자동 · 요구: R-22 · 설계: design.md §10.6 숨김 3(팔·펜 손만)·코드 문단(CSS `.specialShown .armWrap, .specialShown .hand { visibility: hidden }`, `.hand`는 `MouseArm`·`PenHand` img만 쓰는 클래스, 숨김 방식 = §10.17 17.4와 같은 결 — visibility만, 언마운트·`display`·`opacity`·전환 애니메이션 없음), §10.1 0행·pen 행 · **신규(CR-071, Q-09)**
+- Given `src/overlay/overlay.module.css` 원문(기존 `norm`·`decl`·`block` — 주석 제거·공백 정규화)
+- When `specialShown`이 든 규칙을 모두 [선택자 목록, 선언]으로 모은다
+- Then ⓐ 화면(규칙): 선택자 집합 = `.specialShown .armWrap`·`.specialShown .hand` **정확히 2개**(뒷머리·배경·뽀모도·몸통·상태·키보드 선택자 없음) ⓑ 값: 두 선택자 각각의 병합 선언 = `{ visibility: hidden }` 하나뿐(`display`·`opacity`·`animation*`·`transition*`·`transform*` 없음 — 같음 비교로 다른 속성 배제). 기본 `.armWrap`·`.hand` 블록에 `visibility` 없음(평소에는 가리지 않음) ⓒ bridge: 해당 없음(정적 CSS) — 같은 파일의 기존 TC-112(`.hand` 블록)·TC-345(`.restOnly` 규칙 4개) 그대로 통과
+- 스펙: `src/overlay/test/overlayStyles.test.ts`
+
+### TC-356 · 실제 앱 — 특수 키 그림이 보이는 동안 팔·펜 손이 안 보이고, 떼면 커서 자리에 복귀, 미등록 키는 그대로 · 종류: 수동(MC-51) · 요구: R-22, R-23, R-25 · 설계: design.md §10.6 「특수 키 그림 표시 중 팔·펜 손 숨김」 1~4·코드 문단 끝 「실제 가려짐은 수동 확인 대기」, §10.17 17.5 K-2와 같은 결(jsdom CSS 미적용) · **신규(CR-071, Q-09 수동 후보)**
+- Given 실제 앱(CR-071 적용 빌드 — 09f4cae 이후, `/dev-start`), 배경·몸통·대기·`kb_up`·`kb_down_0`·마우스 파츠(`mouse_base`·`mouse_left`·`mouse_right`)·`key_space` 등록, `key_z` 미등록, 펜 손(`pen_up`·`pen_down_0`) 등록·「펜 손 사용」 꺼짐에서 시작
+- When MC-51 절차(① 커서를 움직여 팔이 보이게 둠 → ② 스페이스바를 누른 채 캡처 → ③ 누른 채 마우스를 크게 움직이고 떼자마자 캡처 → ④ Z(ㅋ)를 누른 채 캡처 → ⑤ 「펜 손 사용」 켬 → 스페이스바 누른 채 캡처 → 뗌 → ⑥ `settings.json`·`.dev-tauri.log` 확인)
+- Then ⓐ 화면: ② 스페이스 그림이 보이는 동안 팔이 보이지 않는다(배경·몸통·키보드 레이어의 스페이스 그림은 그대로, 캐릭터는 젤리·꾹 누르면 부르르로 움직여도 팔은 계속 안 보임) ③ 떼는 순간 팔이 누른 동안 움직인 커서 쪽 자리에 바로 다시 보인다(페이드 없음) ④ 미등록 Z는 일반 누름 그림이고 팔이 그대로 보인다 ⑤ 펜 모드에서도 스페이스 그림 동안 팔·펜 손이 안 보이고, 떼면 펜 손이 `pen_up` 그림으로 다시 보인다 ⓑ 상태: 오버레이 문구·안내 없음, `settings.json`은 ⑤의 「펜 손 사용」(`mouse.penMode`)만 바뀌고 숨김·특수 키는 저장되지 않음 ⓒ 증거: 스크린샷 ②③④⑤ 4장 경로 `doc/300_검증/screenshots/{YYYYMMDD-HHMM}/` 기록, `.dev-tauri.log` 오류 없음
+- 자동화 불가: 실제 CSS `visibility` 적용(jsdom 미적용)·실제 전역 키 입력·투명 창
+
+### 3. TC-FLOW 개정 — TC-FLOW-07 (S-7 기능 칸 개정)
+
+requirements v3.6 S-7 기능 칸에 「(CR-071) 전용 그림이 보이는 동안 팔·펜 손 숨김」이 더해졌다. 본문 TC-FLOW-07 표는 그대로 두고(v2.7 개정표 읽기 규칙과 같음) 아래 Step을 끼워 읽는다. Steps 줄: TC-144 → [1a] → TC-145 → [2a] → TC-146 → [3a] → TC-147 → [4a] → TC-148 → TC-149 → **TC-351 → [연결 6b] TC-352 → TC-353 → [연결 6d] TC-354** → (환경 전환) TC-151 → **TC-356**
+
+| Step | TC | Given(= 앞 Step 종료) | 종료 상태 |
+|---|---|---|---|
+| 6a | TC-351 | 단위(마운트 없음 — 같은 `MANIFEST`의 판정 규칙 확인) | 들림·일반 키·미등록 Z = false, 등록된 space·enter = true, 두 선택 함수와 일치 |
+| 6b | TC-352 | 연결: 새 마운트(`MANIFEST` — key_space·key_enter 등록, 비펜) | 스페이스 누름 중 `'canvas specialShown'`·팔 같은 노드 → 뗌 → `'canvas'`·들림 |
+| 6c | TC-353 | Step 6b 종료(들림·`'canvas'` — TC-353은 짝·프레임 값을 단언하지 않는다) | Z 폴백·일반 키 모두 `'canvas'` → 들림 |
+| 6d | TC-354 | 연결: 펜 모드 새 마운트(`PEN_MANIFEST`·`penMode true`) | 엔터 누름 중 팔·펜 손이 `.specialShown` 아래·이동 계산 계속 → 뗌 → `'canvas'`·`u:pen_up` |
+| 7 | TC-151(수동, 불변) | 환경 전환: 실제 앱·메모장 | 실제 키 분류·그림·튐·비보관 실측 |
+| 8 | TC-356(수동) | Step 7 앱 이어서(`key_space` 등록·`key_z` 미등록 확인, 펜 손 그림 등록) | 스페이스 그림 동안 팔·펜 손 안 보임 → 떼면 커서 자리 복귀, 미등록 Z는 팔 그대로(스크린샷 4장) |
+
+### 4. 회귀 지정 (기대 불변 — 무수정 통과 확인 대상)
+
+| TC | 무엇을 지키는가 | 스펙 |
+|---|---|---|
+| TC-144~TC-150 | 특수 키 그림 선택·젤리 래퍼 클래스(`.jellyWrap`만 젤리, `.canvas` 마커와 무관) | `OverlayApp.special*`·`layers` 계열 기존 스펙 |
+| TC-156·TC-157 | 애니메이션 클래스·`.canvas` className 기존 단언(쉬지 않고 특수 키도 없을 때 `'canvas'`) | 기존 스펙 |
+| TC-338~TC-343 | 쉬는중 `.canvas` className `'canvas restOnly'` ↔ `'canvas'` 정확 비교(쉬는중엔 `kbDown` 없음 → 마커 없음) | `OverlayApp.restOnly.test.tsx` |
+| TC-345 | `.restOnly` 선택자 집합 4개 불변(`.specialShown` 규칙이 섞이지 않음) | `overlayStyles.test.ts` |
+| TC-112 | `.hand` 기본 블록 불변 | `overlayStyles.test.ts` |
+
+위 회귀와 신규 TC-351~TC-355를 포함한 vitest 전체 898/898 통과(2026-10-27, 메인 세션 실행 — 위임문 기재). CR 대장 CR-071 기록: `yarn test --run src/overlay src/state` 42 files / 346 tests PASS(ui-fixer). 「검증됨」 마킹은 실행 근거를 확인한 메인 세션 몫이다.
+
+### 5. 설계 확인 필요 (v2.10 — 관리자 전달, TC로 우회하지 않음)
+
+1. **design.md §13 RTM R-22 행 TC 칸**은 「(CR-071) TC-351~TC-355」까지만 있다 — 수동 TC-356(MC-51) 기입은 ui-designer 동기화 몫. §10.6 코드 문단 끝 「TC-351~TC-355(자동, scenarios.md 대기열 Q-09), 실제 가려짐은 수동 확인 대기」도 「TC-356(MC-51)」로 맞출 수 있다.
+2. (정보) design/components.md §3 `.canvas.specialShown` 행은 `.restOnly`와 동시 부착(`'canvas restOnly specialShown'`)이 가능하다고 적는다. 동시 부착 상태를 직접 만드는 자동 TC는 두지 않았다 — 쉬는중이면 `.restOnly .jellyWrap`이 팔·펜 손을 이미 가려 화면 결과가 같고(design.md §10.6 숨김 5), 두 마커의 독립성은 TC-345(`.restOnly` 집합 4개)·TC-355(`.specialShown` 집합 2개)와 회귀 TC-338~TC-343으로 추적한다. 동시 부착 자체를 요구로 검증해야 하면 알려 달라.
+3. (정보) TC-353·TC-354는 스펙에 `setSettings` 등 command 호출 단언이 없다(위임 조건상 스펙 무수정). 두 TC의 ⓒ는 입력 경로(`onKeyboard`·`onMouseMove` 핸들러)와 마운트 조회 결과만 적고, 「숨김은 저장하지 않음」은 TC-352 ⓒ가 대표한다.
+
+### 6. 변경 대기열 점검
+
+Q-09 → 「전환됨(TC-351~TC-356)」. 새 대기열 행 없음. 다른 행 상태 변경 없음(Q-01 대기 유지, Q-03·Q-08 전환됨 유지 — 「검증됨」은 마킹하지 않음).
+
+### 추적표 v2.10 추가분 — 「## 추적표」와 각 절 추가분 표에 더한다
+
+요구 ↔ TC(추가)
+
+| 요구ID | 자동 TC | 수동 TC |
+|---|---|---|
+| R-22(개정 — 추가 결정 ④ 🔒 2026-10-27, 특수 키 그림 표시 중 팔·펜 손 숨김) | TC-351, TC-352, TC-353, TC-354, TC-355 | TC-356 |
+| R-23·R-18·R-07·R-25·R-29·R-31(겸 추적) | R-23 TC-352(젤리 래퍼 클래스 불변) / R-18 TC-352·TC-354(숨긴 중 위치 계산 계속) / R-07 TC-353(폴백 누름 그림) / R-25·R-29·R-31 TC-354(펜 모드) | R-23·R-25 TC-356 |
+
+설계 항목 ↔ TC(추가)
+
+| 설계 항목 | TC |
+|---|---|
+| design.md §10.6 「특수 키 그림 표시 중 팔·펜 손 숨김」 1(숨김 조건·펜·비펜 공통·`pickSpecialEntry` 공유) | TC-351, TC-352, TC-354, TC-356 |
+| §10.6 숨김 2(미등록 폴백이면 숨기지 않음) | TC-351, TC-353, TC-356 ④ |
+| §10.6 숨김 3(팔 `.armWrap`·펜 손 img만, 나머지 레이어 그대로) | TC-355, TC-354(부모 관계), TC-356 |
+| §10.6 숨김 4(떼면 즉시 복귀·상태기계·젤리/부르르·위치 계산 불변) | TC-352, TC-354, TC-356 ③, 회귀 TC-144~TC-150 |
+| §10.6 숨김 5(`.restOnly`와 독립) | 회귀 TC-338~TC-343·TC-345, TC-355(선택자 집합 분리) |
+| §10.6 코드 문단(`specialShown`·`canvasClass`·`.jellyWrap` className 불변·CSS·visibility만) | TC-352, TC-353, TC-354, TC-355, 회귀 TC-144·TC-157 |
+| §10.6 본문 「그 밖의 특수 키 전용 팔 동작은 없다」 대체(CR-071) | TC-352, TC-354 |
+| §10.1 0행(`.specialShown .armWrap`)·pen 행(`.specialShown .hand`) | TC-352, TC-354, TC-355, TC-356 |
+| design/functions.md §5.1 `specialShown`·`canvasClass` | TC-352, TC-353, TC-354 |
+| design/functions.md §5.3 CR-071 개정표(`pickSpecialEntry`·`isSpecialShown`·`pickKeyboardEntry`·`pickPenKeyboardEntry` 결과 불변) | TC-351, 회귀 TC-144~TC-150 |
+| design/components.md §3 렌더 조건 `.canvas.specialShown`(클래스 토글·마운트 유지·미등록 폴백이면 없음) | TC-352, TC-353, TC-354, TC-355 |
+| §13 RTM R-22 행(CR-071) | 위 요구 ↔ TC 표 |
+
+사용자행 ↔ TC-FLOW(개정)
+
+| 사용자행 | TC-FLOW |
+|---|---|
+| S-7(개정 — 기능 칸 「(CR-071) 전용 그림이 보이는 동안 팔·펜 손 숨김」) | TC-FLOW-07(개정 — Step 6a~6d·8 추가, 위 3) |
+
+CR ↔ TC(추가): CR-071 → 신규 TC-351~TC-355(자동)·TC-356(수동 MC-51) / 개정 TC-FLOW-07(Step 6a~6d·8) / 회귀 TC-144~TC-150·TC-156·TC-157·TC-338~TC-343·TC-345·TC-112(기대 불변, 무수정 통과) / 스펙 `OverlayApp.specialHide.test.tsx`(신규)·`overlayStyles.test.ts`(it 추가) / 대기열 Q-09 → 전환됨.
+
 ## 변경이력
 
 | 일자 | 버전 | 내용 | 근거 |
 |---|---|---|---|
-| 2026-10-24 | v2.9 | (최신 행) **CR-069 증분(쉬는중 단독 표시 R-41 · 카운트다운 쉬는중 자동 일시정지 표시 R-37·R-35 개정 · 보강).** 「CR-069 쉬는중 단독 표시」 절 신설(기준·§0.3 보충·정식 번호 매핑·신규 TC·TC-FLOW-22·개정표·설계 확인 필요·추적 추가분). 신규 자동 TC-338~TC-343(`OverlayApp.restOnly.test.tsx` 신규 — 패킷 O-1~O-6, TC-342에 17.3 깨움 클릭 포함), TC-344(`layers.test.tsx` it 추가 — CSS mock `restLayer` 키, 기존 TC-028·030·031·032 무수정), TC-345(`overlayStyles.test.ts`), TC-346(`timerClock.test.ts`), TC-347(`useElapsedText.countdown.test.tsx`). 신규 수동 TC-348~TC-350(MC-48~MC-50 — 패킷 M-R1~M-R3, MC-50 시작 시간 잠정 00:05:00). TC-FLOW-22(S-22) 신설. 개정 TC-312(제목·설계 칸·Then ⓐ ④ 「계속 줄어듦」 → 「쉬는중 동안 멈춤, 복귀 뒤 이어서」, 취소선 보존), TC-FLOW-19(제목·Steps·Step 4·5, Step 4a~4c·6 신설). 머리 「현행 판」 줄 추가. 「설계 확인 필요」 1~4(M-R3 시간 겹침, RTM 번호 기입, O-1 픽스처 보충, D-3 결합 추적). `manual-checklist.md` 같은 패스(MC-48~MC-50 절·MC-30 ④ 개정). 자동 271 → 281, 수동 46 → 49, 폐기 20 불변, TC-FLOW 20 → 21 | CR-069 · requirements.md 2026-10-24(R-41·R-37·R-35·R-30·R-33·S-19·S-22) · design.md §10.17·§10.9.2·§13 RTM · 패킷 rest-display-03-packet-ui.md §A.5 · contract v1.1 |
+| 2026-10-27 | v2.10 | (최신 행) **CR-071 증분 · doc-sync(특수 키 그림 표시 중 팔·펜 손 숨김 — R-22 추가 결정 ④ · 보강 · 대기열 소진 Q-09).** 「CR-071 특수 키 그림 표시 중 팔·펜 손 숨김」 절 신설(기준·§0.3 보충·정식 번호 매핑·공통 픽스처·신규 TC·TC-FLOW-07 개정·회귀 지정·설계 확인 필요·대기열 점검·추적 추가분). 신규 자동 TC-351(`isSpecialShown` 순수 판정 = 두 선택 함수의 특수 키 선택과 일치)·TC-352(key_space 등록 스페이스 → `'canvas specialShown'`, 뗌 → `'canvas'`, 팔 같은 노드·젤리 클래스 불변)·TC-353(key_z 미등록 Z·일반 키 → 마커 없음)·TC-354(펜 모드 엔터 → 팔·펜 손이 `.specialShown` 아래, 숨긴 중 이동 계산 계속, 뗌 → 해제) — `OverlayApp.specialHide.test.tsx`, TC-355(CSS `.specialShown` 선택자 2개 = `{ visibility: hidden }`만) — `overlayStyles.test.ts`. 스펙은 이미 이름에 번호가 있어 무수정(코드·이름·주석 불변). 신규 수동 TC-356(MC-51 — 실제 앱 스크린샷 4장). TC-FLOW-07 Step 6a~6d·8 추가(S-7 기능 칸 개정). 회귀 지정 TC-144~TC-150·TC-156·TC-157·TC-338~TC-343·TC-345·TC-112(기대 불변). 대기열 Q-09 → 전환됨(TC-351~TC-356). 머리 「현행 판」 줄 갱신. 「설계 확인 필요」 1~3(RTM R-22에 TC-356 기입, 두 마커 동시 부착 TC 없음, TC-353·TC-354 command 단언 없음). `manual-checklist.md` 같은 패스(CR-071 절 MC-51·머리 현행 기준). 자동 281 → 286, 수동 49 → 50, 폐기 20·TC-FLOW 21 불변 | CR-071(사용자 🔒 2026-10-27) · requirements.md v3.6 R-22 추가 결정 ④·S-7 · design.md §10.6·§10.1·§13 RTM R-22 · design/functions.md §5.1·§5.3 · design/components.md §3 · Q-09 · 커밋 09f4cae |
+| 2026-10-24 | v2.9 | **CR-069 증분(쉬는중 단독 표시 R-41 · 카운트다운 쉬는중 자동 일시정지 표시 R-37·R-35 개정 · 보강).** 「CR-069 쉬는중 단독 표시」 절 신설(기준·§0.3 보충·정식 번호 매핑·신규 TC·TC-FLOW-22·개정표·설계 확인 필요·추적 추가분). 신규 자동 TC-338~TC-343(`OverlayApp.restOnly.test.tsx` 신규 — 패킷 O-1~O-6, TC-342에 17.3 깨움 클릭 포함), TC-344(`layers.test.tsx` it 추가 — CSS mock `restLayer` 키, 기존 TC-028·030·031·032 무수정), TC-345(`overlayStyles.test.ts`), TC-346(`timerClock.test.ts`), TC-347(`useElapsedText.countdown.test.tsx`). 신규 수동 TC-348~TC-350(MC-48~MC-50 — 패킷 M-R1~M-R3, MC-50 시작 시간 잠정 00:05:00). TC-FLOW-22(S-22) 신설. 개정 TC-312(제목·설계 칸·Then ⓐ ④ 「계속 줄어듦」 → 「쉬는중 동안 멈춤, 복귀 뒤 이어서」, 취소선 보존), TC-FLOW-19(제목·Steps·Step 4·5, Step 4a~4c·6 신설). 머리 「현행 판」 줄 추가. 「설계 확인 필요」 1~4(M-R3 시간 겹침, RTM 번호 기입, O-1 픽스처 보충, D-3 결합 추적). `manual-checklist.md` 같은 패스(MC-48~MC-50 절·MC-30 ④ 개정). 자동 271 → 281, 수동 46 → 49, 폐기 20 불변, TC-FLOW 20 → 21 | CR-069 · requirements.md 2026-10-24(R-41·R-37·R-35·R-30·R-33·S-19·S-22) · design.md §10.17·§10.9.2·§13 RTM · 패킷 rest-display-03-packet-ui.md §A.5 · contract v1.1 |
 | 2026-10-15 | v2.8 | **doc-sync(v2.8) — 요구 v3.4·design.md 2026-10-15 doc-sync 행 대조 · 보강.** ① §0.2 변형 참조표 「기본 영역」 행: 기본 어깨 (558,500) → **(582,484)**(CR-044 🔒, 확정사항 §4), θh 141.71 → 143.43, θt 148.63 / 172.22 → 148.24 / 168.8, 배율 2.976 / 3.815 → 2.239 / 2.733(상한 1.6 유지) — TC-123 스펙 기대와 같은 값(스펙 변경 없음) ② 통합 추적표 R-23·R-24 행을 design.md RTM 칸과 같은 목록으로(CR-066 TC-331~TC-334·TC-333·수동 TC-336 합침, v2.7 R-23 개정 TC 중 RTM R-23 칸에 없는 12건은 「겸 추적」 칸) ③ 신규 수동 **TC-337**(MC-47 — 항상 위 복구, R-01 v3.4 비고, core window.md §3.2 WT·MC-51~MC-62 참조), 자동 TC 없음 ④ 변경 대기열 점검 — Q-01 대기 유지, Q-02 「대기(ui-tester 검증 전)」 보고만, 행 상태 변경 없음 ⑤ 계약 v0.31·요구 v3.4 판 표기 확인(기대 영향 없음), v2.7 「설계 확인 필요」 1·2 해소 표기, CR-066 본문 규칙표 행 번호(§10.6 3·13, §10.8 4·7·9·11·12·13, §10.12 바운스 줄·10)로 설계↔TC 대체 행. 「설계 확인 필요」 v2.8 1~3(RTM R-26·R-09 칸에 TC-332·334·335·336 없음 — TC-335는 RTM 전체에 없음, RTM R-01에 TC-337 없음). `manual-checklist.md` 같은 패스(MC-47 · 공통 준비 기본 `partPos` (389,492) → (411,464) 문구 정정). 자동 271 불변, 수동 45 → 46, 폐기 20·TC-FLOW 20 불변 | requirements v3.4 R-01 비고 · design.md 변경이력 2026-10-15 doc-sync 행·§7·§13 RTM · 확정사항 §4 · core window.md §3.2 · `src/state/mouseMapping.ts` `armTransform` · `OverlayApp.test.tsx` TC-123 |
 | 2026-09-30 | v2.7 | **CR-066 증분(대기열 소진 Q-08 · 보강)** — 바운스 시작 규칙: 새 키 누름·펜 모드 새 클릭 누름은 무엇을 누른 채여도 매번 `bounceSeq + 1`(CR-027 `!isPressing` 조건 대체), 자동 반복·부르르·뗌·중복 누름·비펜 모드 클릭은 불변. 「CR-066 바운스 시작 규칙」 절 신설(기준·규칙·정식 번호 매핑·신규 TC·개정표 2종·설계 확인 필요·추적 추가분). 신규 자동 TC-331~TC-335(임시 `TC-FIX66-1`~`5` → 정식, `src/state/inputMachine.test.ts` it 이름 교체 — 로직 불변), 신규 수동 TC-336(MC-46 게임 상황 실측). 개정 자동 25건(TC-100·TC-129~TC-133·TC-136·TC-145~TC-148·TC-154·TC-155·TC-162·TC-167·TC-206·TC-208~TC-211·TC-215~TC-218·TC-257 — Then 값을 개정·통과된 스펙에 맞춤), 개정 수동 TC-151·TC-159·TC-222·TC-258, TC-FLOW-01·07(연결 2a 신설)·08·10(연결 3a·4a 변경) 종료 값. `inputMachine.special.test.ts` TC-133 주석의 `TC-FIX66-3` → `TC-333`(주석만). `manual-checklist.md` 같은 패스(MC-46·CR-066 개정 주). 대기열 Q-08 → 전환됨. 자동 266 → 271, 수동 44 → 45, 폐기 20·TC-FLOW 20 불변 | 확정사항 §5 바운스 시작 규칙 🔒 · CR 대장 CR-066 · Q-08 · design/functions.md §5.2 · design.md 변경이력 CR-066 · `src/state/inputMachine.ts` |
 | 2026-09-30 | v2.6 | (최신 행) **doc-sync 배치(보강) — design.md 2026-09-30 doc-sync 행·현행 소스 대조.** 「doc-sync 2026-09-30」 절 신설(기준·개정표·픽스처 표현 정정·설계 확인 필요 해소·스펙 변경·추적 추가분). 개정표: TC-043·TC-044·TC-046·TC-054·TC-080·TC-105·TC-143(옛 `bounce` prop·`armWrap bounce`·`.bounce` 기대 → CR-022 현재 동작), TC-045·TC-142 **폐기(CR-022)** 재표기, 설계 참조 「§5.4 바운스 래퍼」·「§3 `bounce` prop」 → 「§5.4 `.armWrap` 컨테이너」(TC-081·TC-100·TC-144·TC-145·TC-147 포함), TC-198·TC-213 설계 칸 `PenHand` Props 8개·`machine` = `isPressing`만, TC-322 `POPUP_OPEN` → `PopupGate`. v1.6 절 「설계 확인 필요」 2건 → 해소 표기. 픽스처 「기본」 표현 = 스펙 픽스처(제품 기본은 CR-044 값). 추적: R-09·R-23~R-25 통합 행(TC-204 이후 포함), `.armWrap` 컨테이너·`PenHand` Props·`PopupGate` 설계 행 대체. 스펙: `OverlayApp.timerMode.test.tsx`·`TimerText.blink.test.tsx` 옛 `URL.createObjectURL` stub 삭제(기대 불변), `timerClock.test.ts` 머리 주석 R-34 현행값. `manual-checklist.md` 같은 패스(머리글 현행 버전·MC-37 선행 조건 `PopupGate`·변경이력). 신규 TC 없음, 수 불변(자동 266 · 수동 44 · 폐기 20 · TC-FLOW 20). CR 「적용·미검증」·대기열 상태 불변 | design.md 변경이력 2026-09-30 doc-sync · design/functions.md §5.4·§5.5 · design.md §10.12·§10.16·RTM · CR-022·CR-042·CR-044·CR-058·CR-062 · `src/components/utils/alarmSound.ts` |

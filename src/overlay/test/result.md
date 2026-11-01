@@ -93,3 +93,13 @@ CR-050 대상 TC 범위:
 - `yarn tsc --noEmit` exit 0 · `yarn lint` exit 0
 - `yarn test --run` → Test Files 65 passed (65) · Tests 771 passed (771)
 - 수정: `src/settings/test/PomoCards.test.tsx` TC-FLOW-25 확정 클릭의 act 감쌈 제거(TC-291과 같은 방식) · `src/settings/test/Hair.test.tsx` 미사용 상수 RESTORE_DESC 삭제
+
+---
+
+## doc-sync 배치 재수행 — 2026-10-27 17:05
+실행: vitest `yarn test --run src/overlay src/state src/components` · E2E 미설치(tauri-driver) · 스크린샷 1장(오버레이)
+판정: 통과(자동) — 42파일 / 346 테스트 전부 PASS, FAIL 0. 기준 scenarios.md v2.10.
+- 신규 TC-351~355(OverlayApp.specialHide·overlayStyles)·TC-338~347(restOnly) 포함 전부 통과(스펙 등록 확인).
+- 수동: TC-356(MC-51) SKIP — 전제 미충족(등록된 프리셋·assets에 key_space 전용 그림 없음). TC-348~350(MC-48~50) SKIP — 유휴 5분 필요, 수동 인계.
+- 스크린샷: doc/300_검증/screenshots/20261027-1710/01-overlay.png (기본 화면, 360x280, 대기 그림·00:00:00 말풍선 정상 표시)
+- 프로세스: 검증용 dev 앱을 띄웠다가 종료함.

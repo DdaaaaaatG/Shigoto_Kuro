@@ -1,7 +1,8 @@
 # data_reset 모듈 설계
 
-- 상태: 감사 반영(범위·정책은 사용자 확정 🔒 2026-09-27, 배포 전 검증 WARN 6건 반영 🔒 2026-09-27) · 최종 갱신: 2026-10-18(7차, 세대 6)
+- 상태: 감사 반영(범위·정책은 사용자 확정 🔒 2026-09-27, 배포 전 검증 WARN 6건 반영 🔒 2026-09-27) · 최종 갱신: 2026-10-18(7차, 세대 6) · doc-sync 대조 2026-10-27
 - 변경이력:
+  - 2026-10-27 doc-sync 대조 — **설계 변경 아님, 소스가 정본**(HEAD 09f4cae). `DATA_GENERATION = 6`·세대 주석·지문 상수·공개 API 9항목·`//!`([테스트] 줄 제외)·§2 코드 조각은 `data_reset/mod.rs`와 같다. 0.6.0(3e7ed9e)은 세대 6 유지 — `data_reset` 코드 변경 없음(버전·세대 독립, §3.9). 고친 곳(3차 SEC-205 테스트 2개가 본문에 빠져 있던 것): ① §3 파일 표 `generation.rs` 「`marker_*` 3건」 → 4건, `attempts.rs` 「단위 테스트 2개」 → 3개. ② §3 `//!` 조각 [테스트] 「attempts.rs 2개」 → 3개(실물 `mod.rs:24`). ③ §8.1에 `marker_over_size_cap_is_none`·`attempts_over_size_cap_is_zero` 행 추가. ④ §8.2 합계 31 → **33**(단위 16 = 1차 7 + 2차 7 + 3차 2, 통합 17). ⑤ §3.9·§8.2 완료 기준에 현재 버전 0.6.0 한 줄(0.1.1은 2차 당시 값).
   - 2026-10-18 (7차, 세대 6 — 🔒 사용자 결정 2026-10-18, 확정사항 §6 PS-11 「세대 6」, **D-8 신설**) `DATA_GENERATION` 5 → **6**(0.5.1, 일반·basic 공통). **기본 세트를 바꾸지 않고 세대만 올린 첫 사례다.** 이번 초기화의 목적은 기본 그림 세트 교체가 아니라 **프리셋 도입 시점 통일**이다. 프리셋이 없던 0.4.0에서 올라오는 사용자를 모두 같은 상태에서 시작시킨다(D-8, §1 결정 표). 따라서 `doc/assets/defaults/`·`DEFAULT_ASSETS`(6장)·`DEFAULT_ASSETS_FINGERPRINT`(`(6, 336_217, 0x4522_7552_5289_deea)`)는 그대로다. 옛 세트 폴더를 `defaults-v5`로 옮기는 절차도 해당 없다. `generation_fingerprint_guard`는 지문만 단언하고 세대 값은 보지 않으므로 그대로 통과한다. 고친 곳: §1 R-A 행 `(=6)`·D-8 행, §2 표 행·코드 조각(`= 6`, 세대 주석 1~6)·지문 설명, §8 표식 확인 문장, §8.2 기대값(표식 = 상수 `DATA_GENERATION` — 통합 테스트는 리터럴이 아니라 상수로 단언), §8.3 수동 M1(옛 값 「→ 4」「기본 그림 7」도 현재 값으로)·M3(세대 6). `presets/` 불변(U-1)·공개 API·`ResetError`·`code()`·화이트리스트·순서 ⓪~⑥ 불변. 소스는 core-implementer가 같은 날 `data_reset/mod.rs`에 반영.
   - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**) §3.7에 현재 소스 순서 한 줄을 더했다. `seed_default_assets`와 `load_manifest` 사이에 내장 프리셋 시딩(PS-11)이 들어갔다(`lib.rs:117-119`, 커밋 7dc31a5). data-reset 순서 규칙은 바뀌지 않는다. data_reset 코드 변경 없음.
   - 2026-09-30 (6차, PS-11 내장 프리셋 — [presets.md](presets.md) §3.10) **data_reset 변경 없음.** §3.4에 한 줄: 세대 초기화·전체 초기화는 `presets/` 불변(U-1)이라 내장 프리셋 재시딩이 없다. 공개 API·화이트리스트·`DATA_GENERATION`(5) 불변.
@@ -136,9 +137,9 @@ pub fn run_startup(paths: &AppPaths, settings: &Mutex<Settings>);
 | 파일 | 책임 | 예상 줄 수 |
 |---|---|---|
 | `src-tauri/src/data_reset/mod.rs` (신규) | 상수·정책·`decide`·`reset_settings`·`reset_data`·`run_startup`·`ResetOutcome`·`ResetError`, 비공개 `seed_fresh`. 단위 테스트(`decide_table`·`reset_settings_keeps_autostart_and_language`·`reset_error_codes`). **2차**: 비공개 `MAX_STARTUP_ATTEMPTS`·`Stage`·`reset_data_staged`·`startup_wipe`·`at`·`io_kind`(§3.3·§3.6), 단위 테스트 `reset_error_io_kind` | 약 200 → 약 290 |
-| `src-tauri/src/data_reset/generation.rs` (신규) | 표식 읽기·쓰기·삭제(`pub(super)`), `#[cfg(test)] fingerprint`. 단위 테스트(`marker_*` 3건·`generation_fingerprint_guard`) | 약 130 |
+| `src-tauri/src/data_reset/generation.rs` (신규) | 표식 읽기·쓰기·삭제(`pub(super)`), `#[cfg(test)] fingerprint`. 단위 테스트(`marker_*` ~~3건~~ 4건 — 3차 `marker_over_size_cap_is_none` 포함·`generation_fingerprint_guard`) | 약 130 |
 | `src-tauri/src/data_reset/wipe.rs` (신규) | 화이트리스트 삭제(`pub(super) fn wipe`), 판정 함수 2개. **2차**: ⓪ 시작 폴더 검사 `pub(super) fn check_start_dirs`·순수 판정 `is_link_like`(§3.4.1), NotFound 건너뜀 `skip_not_found`, `is_assets_target` 확장자 판정 교체, `is_data_target`에 시도 기록 tmp 추가(§3.4). 단위 테스트 4개(§8.1) | 약 90 → 약 170 |
-| `src-tauri/src/data_reset/attempts.rs` (**2차 신규**) | 시작 경로 연속 실패 시도 기록 읽기·쓰기·삭제(`pub(super)`), `ATTEMPTS_FILE`(§3.6.1). 단위 테스트 2개 | 약 80 |
+| `src-tauri/src/data_reset/attempts.rs` (**2차 신규**) | 시작 경로 연속 실패 시도 기록 읽기·쓰기·삭제(`pub(super)`), `ATTEMPTS_FILE`(§3.6.1). 단위 테스트 ~~2개~~ 3개(3차 `attempts_over_size_cap_is_zero` 포함) | 약 80 |
 | `src-tauri/tests/data_reset.rs` (신규) | 통합 테스트(tempdir, §8.2). **2차**: 6개 추가·도우미 `make_dir_link`·`attempts_value`·`snapshot` | 약 300 → 약 480 |
 | `src-tauri/src/lib.rs` | `pub mod data_reset;`, `//!` [계층]에 `data_reset` 추가, 시작 순서(§3.7), 비공개 도우미 `startup_settings`. **2차**: 첫 플러그인 `tauri_plugin_single_instance::init(on_second_instance)`·비공개 `fn on_second_instance`(§3.10) | +10 → +20 |
 | `src-tauri/src/tray/mod.rs` | `fn refresh_overlay` → `pub(crate) fn refresh_overlay`(§3.8) | ±0 |
@@ -175,7 +176,7 @@ pub fn run_startup(paths: &AppPaths, settings: &Mutex<Settings>);
 //!        메시지·로그에 경로를 넣지 않는다. 시작 실패 로그 = 단계(Stage::label)·code·io::ErrorKind.
 //! [테스트] 단위: decide_table·reset_settings_keeps_autostart_and_language·reset_error_codes·
 //!        reset_error_io_kind, generation.rs marker_*·generation_fingerprint_guard, wipe.rs 4개,
-//!        attempts.rs 2개. 통합: tests/data_reset.rs.
+//!        attempts.rs 3개. 통합: tests/data_reset.rs.
 ```
 
 `wipe.rs`의 `//!` [테스트] 줄은 「없음」에서 단위 4개(§8.1)로 바꾼다. `attempts.rs` `//!`는 generation.rs와 같은 항목([목적][공개 API][스레드][unsafe][에러][설정][테스트])을 둔다.
@@ -537,6 +538,7 @@ fn startup_settings(paths: &AppPaths) -> Settings {
 | `src-tauri/Cargo.lock` | `kuro_keyviewer` 항목 | `cargo check`가 자동 갱신(손으로 고치지 않음) |
 
 - `package.json`은 ui 패킷 몫이다. 버전과 세대는 서로 독립이다(버전을 올려도 `DATA_GENERATION`은 그대로).
+- (2026-10-27 doc-sync) 위 표의 0.1.1은 2차 당시 값이다. 현재 버전은 **0.6.0**(`tauri.conf.json`·`Cargo.toml`, 3e7ed9e)이고 세대는 6 그대로다 — 0.5.1에서 세대 6으로 올린 뒤 0.6.0은 올리지 않았다(위 「독립」 규칙의 실례).
 
 ### 3.10 단일 인스턴스 (R-A8, CORE-002 — `lib.rs`, core-implementer)
 
@@ -666,6 +668,7 @@ impl ResetError {
 | `marker_roundtrip` | generation.rs | tempdir에 `write_marker(dir, 4)` → `read_marker(dir) == Some(4)`. 파일에 `"appVersion"` 문자열이 있다 |
 | `marker_missing_is_none` | generation.rs | 파일이 없으면 `None`. `remove_marker`는 파일이 없어도 `Ok` |
 | `marker_corrupt_is_none` | generation.rs | 내용 `{`, `{"x":1}`, `[]`, `{"generation":"4"}`이면 각각 `None` |
+| **`marker_over_size_cap_is_none`** (3차, SEC-205 — 2026-10-27 doc-sync로 표에 추가) | generation.rs | 올바른 `{"generation": 5, "pad": "x…"}`라도 크기가 `settings::MAX_TEXT_FILE_BYTES`(1MiB)를 넘으면 `read_marker == None` |
 | **`reset_settings_keeps_autostart_and_language`** (패킷 `keeps_autostart_only` 대체) | mod.rs | 커스텀 값(language `Ja`, autostart true, scale·overlay·mouse·timer 변경)에 대해 결과 == `Settings { autostart: true, language: Language::Ja, ..Settings::default() }` |
 | `reset_error_codes` | mod.rs | `Io`→`reset.io`, `Seed`→`reset.seed`, `Settings(SettingsError::Io(..))`→`settings.io`, `Settings(StatePoisoned)`→`state.poisoned`. `Io`·`Seed`의 `to_string()`에 `\`·`:`(경로 흔적)이 없다 |
 | `generation_fingerprint_guard` | generation.rs | `fingerprint(&DEFAULT_ASSETS) == DEFAULT_ASSETS_FINGERPRINT`. 실패 메시지: 「기본 그림이 바뀌었습니다. DATA_GENERATION을 올리고 옛 세트를 defaults-v{N}으로 옮긴 뒤 지문을 갱신하세요」 |
@@ -675,6 +678,7 @@ impl ResetError {
 | **`not_found_is_skipped`** (2차, CORE-003) | wipe.rs | `skip_not_found(Ok(1)) == Ok(Some(1))`, `skip_not_found(Err(NotFound))` → `Ok(None)`, `Err(PermissionDenied)` → `Err`이고 kind 유지 |
 | **`attempts_roundtrip_and_clear`** (2차, R-A7) | attempts.rs | tempdir: 없음 → `read_attempts == 0` · `write_attempts(dir, 2)` → 2 · `clear_attempts` → 0 · 파일이 없어도 `clear_attempts`는 `Ok` |
 | **`attempts_missing_or_corrupt_is_zero`** (2차, R-A7) | attempts.rs | 내용 `{`·`[]`·`{"x":1}`·`{"attempts":"2"}`·`{"attempts":-1}`이면 각각 0 |
+| **`attempts_over_size_cap_is_zero`** (3차, SEC-205 — 2026-10-27 doc-sync로 표에 추가) | attempts.rs | 올바른 `{"attempts": 2, "pad": "x…"}`라도 크기가 `settings::MAX_TEXT_FILE_BYTES`(1MiB)를 넘으면 `read_attempts == 0` |
 | **`reset_error_io_kind`** (2차, CORE-005) | mod.rs | `io_kind(Io(NotFound)) == Some(NotFound)` · `io_kind(Settings(SettingsError::Io(PermissionDenied))) == Some(PermissionDenied)` · `Seed`·`Settings(StatePoisoned)` → `None`. `Stage` 7개의 `label()`이 서로 다르고 ASCII다 |
 
 ### 8.2 통합 (`src-tauri/tests/data_reset.rs`, tempdir)
@@ -705,8 +709,8 @@ impl ResetError {
   - `fn snapshot(dir: &Path) -> Vec<(PathBuf, Vec<u8>)>` — 재귀로 일반 파일의 (상대 경로, 바이트)를 정렬해 모은다.
   - tempdir 정리: `remove_dir_all`은 정션을 따라 들어가지 않고 링크만 지운다(Rust std Windows 동작). 링크 대상도 같은 tempdir 안이다.
 - 기존 11개는 그대로 통과해야 한다. `startup_never_panics_on_failure`는 시작 경로에서 ①이 실패하므로 이제 시도 기록 1이 남는다(단언 추가 없음). `seed_failure_leaves_no_marker_and_retries`의 주입 원리(`seed_if_empty`의 `exists()`)는 defaults.rs를 바꾸지 않으므로 유지된다(DR-12).
-- 합계: 단위 14개(1차 7 + 2차 7) + 통합 17개(1차 11 + 2차 6) = **31개**. 패킷 §8의 13행(15개 테스트)에서 `keeps_autostart_only` → `keeps_autostart_and_language`로 바꾸고, 1차 신규 3개(`seed_failure_…`·`language_defaults_…`·`reset_twice_…`), 2차 신규 13개를 더했다. CORE-003의 실제 경합(다른 스레드 rename)은 결정적으로 재현할 수 없어 판정 도우미 단위 테스트로 대신한다. CORE-005 로그 문구는 자동 검사하지 않는다(코드 리뷰 + 수동 M9).
-- 완료 기준: `cd src-tauri && cargo fmt --check` · `cargo clippy --all-targets -- -D warnings` 경고 0 · `cargo test` 전체 PASS, `cargo check` exit 0이고 `Cargo.lock`의 `kuro_keyviewer` 버전이 0.1.1.
+- 합계: ~~단위 14개(1차 7 + 2차 7) + 통합 17개(1차 11 + 2차 6) = **31개**~~ (2026-10-27 doc-sync, 실물 기준) 단위 16개(1차 7 + 2차 7 + 3차 SEC-205 2) + 통합 17개(1차 11 + 2차 6) = **33개** — 파일별 단위: mod.rs 4·generation.rs 5·wipe.rs 4·attempts.rs 3. 패킷 §8의 13행(15개 테스트)에서 `keeps_autostart_only` → `keeps_autostart_and_language`로 바꾸고, 1차 신규 3개(`seed_failure_…`·`language_defaults_…`·`reset_twice_…`), 2차 신규 13개를 더했다. CORE-003의 실제 경합(다른 스레드 rename)은 결정적으로 재현할 수 없어 판정 도우미 단위 테스트로 대신한다. CORE-005 로그 문구는 자동 검사하지 않는다(코드 리뷰 + 수동 M9).
+- 완료 기준: `cd src-tauri && cargo fmt --check` · `cargo clippy --all-targets -- -D warnings` 경고 0 · `cargo test` 전체 PASS, `cargo check` exit 0이고 `Cargo.lock`의 `kuro_keyviewer` 버전이 0.1.1(2차 당시 기준 — 현재 0.6.0, §3.9).
 
 ### 8.3 수동 체크리스트 (앱 실행 — **D-7 백업 뒤에만**, 메인 세션)
 

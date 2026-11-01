@@ -737,7 +737,7 @@ CSS(`ImagesTab.module.css`에 추가):
 - **뽀모도 인물 카드**: §15.2 그대로(「기본값」 = 복원 I-3R, 「비우기」 = I-11, 버튼 3개).
 - **첫 실행**: 6칸(`background`·`pomo_char`·`kb_up`·`mouse_base`·`pen_up`·`pen_down_0`)에 그림. `hair`·`kb_down_0`·`pomo_bubble` 등 나머지는 빈 미리보기(`emptyOptional`). 필수 배지 2칸(`kb_up`·`mouse_base`)은 채워져 `emptyRequired` 없음.
 - **다운로드 설명**: `format(t.downloadDefaultsDesc, { n: DEFAULT_ASSET_SLOTS.length })` → n = **6**(코드·문구 불변 — ko/ja/en 사전은 `{n}` 치환, 장 수를 박아 둔 문구 없음). 결과 줄 `exportDone`의 수는 core `written` 수 그대로.
-- **접근성**: `emptyImage`·`emptyImageAria`(「{name} 그림 비우기」) 사용처 = 뽀모도 인물 카드만(ko 결과 「뽀모도 인물 그림 비우기」 — `{name}` = `slots.pomo_char.title`). 「뒷머리 그림 비우기」 aria-label 사용처 없음. 뒷머리 카드 버튼 aria-label은 기존 clear 칸 규칙(`clearImageAria`, `design/i18n.md` §4.3).
+- **접근성**: `emptyImage`·`emptyImageAria`(「{name} 그림 비우기」) 사용처 = 뽀모도 인물 카드만(ko 결과 「뽀모도로 인물 그림 비우기」 — `{name}` = `slots.pomo_char.title`, CR-068 표기). 「뒷머리 그림 비우기」 aria-label 사용처 없음. 뒷머리 카드 버튼 aria-label은 기존 clear 칸 규칙(`clearImageAria`, `design/i18n.md` §4.3).
 
 ### 16.3 파일 크기·TC
 

@@ -1,24 +1,28 @@
 {
-  "lastSyncedSha": "da6a785",
-  "syncedAt": "2026-10-15",
-  "note": "둘째 /doc-sync. 기준 b5ff65b..da6a785 + 미커밋 작업 트리(항상 위 재적용 WT-01~09 core 소스·설계 3문서). 산출물은 미커밋(/sync 대상). 검증: cargo test 558/558(11 바이너리)·vitest 881/881 전체 + ui-tester overlay 331/331·settings 552/552, 스크린샷 doc/300_검증/screenshots/20261015-{overlay,settings}/. manual.md 두 화면 신규 작성(이미지 4·11장). bridge 감사 .claude/reports/bridge-docsync-20261015.md(불일치 0, 표기 8건 정정 완료). 후속(같은 날): contract v1.0 승격+§5.4 예외, R-41 현행화, CR-067 알림음 문구, settings scenarios v33(Q-09 전환·검증됨). 최종 vitest 883/883·tsc 0.",
+  "lastSyncedSha": "09f4cae",
+  "syncedAt": "2026-10-27",
+  "note": "셋째 /doc-sync. 기준 255d46c(둘째 doc-sync 커밋)..09f4cae(이전 마커 da6a785..255d46c는 둘째 배치가 작업 트리로 이미 덮음). 검증: cargo test 564/564(11 바이너리)·vitest 898/898(74 파일) 전체 + ui-tester overlay 346/346·settings 552/552, 스크린샷 doc/300_검증/screenshots/20261027-1710/ 4장. bridge 감사 .claude/reports/bridge-docsync-20261027.md(런타임 불일치 0, 주석 LOW 4건). 산출물은 미커밋(/sync 대상).",
   "syncedTargets": [
-    "src/overlay (requirements v3.4·design+functions.md·scenarios v2.8·manual-checklist·manual.md 신규)",
-    "src/settings (requirements v1.29 유지·design+presets-tab·i18n·images-tab·scenarios v32(TC-363)·manual-checklist v24·manual.md 신규·CR 대장 상태 비고)",
-    "doc/200_설계/core (assets·settings·tray·hook·window·data_reset — WT 절은 같은 날 core-designer 별도 동기화)",
-    "doc/200_설계/bridge/contract.md v0.31 (표기 정정 D-1~D-8, 계약 변경 없음)",
-    "doc/000_프로젝트_확정사항.md §6 항상 위 재적용 결정, CLAUDE.md §9 정정"
+    "src/overlay (requirements v3.6 R-22 추가 결정 ④ CR-071 · design §10.6·§10.1·RTM R-22 TC-351~356 · design/functions §5.1·§5.3 · design/components §3 · scenarios v2.10 Q-09 전환·TC-351~356·TC-FLOW-07 · manual-checklist MC-51 · manual.md CR-071 문장·FAQ Q12·「뽀모도로」 6건 · CR-069·CR-071 검증됨(자동)+수동 대기)",
+    "src/settings (design/i18n·images-tab·timer-tab CR-068 문구 표 9건 동기화 · design.md 변경이력 · RTM R-51 TC-248 추가 · scenarios 변경 없음(활성 TC 옛 표기 0) · Q-09~Q-11·CR-067·068·070 검증됨)",
+    "doc/200_설계/core timer(4건)·presets(1건)·data_reset(5건) 문서 정정, 코드 위반 0",
+    "doc/200_설계/bridge/contract.md v1.1 ↔ TS ↔ Rust 3자 대조 불일치 0 (문서 수정 없음)"
   ],
   "openItems": {
-    "settings-spec-comments": "Hair.test.tsx·ImagesTab.test.tsx 주석 「설계 확인 AA-4」 잔존(판정 영향 없음, ui-test-designer 예산 소진) / TimerTab.cr052.test.tsx 머리 주석 「CR-052 변경 행」 인용 잔존(AE-2)",
+    "overlay-CR071-manual": "CR-071 TC-356(MC-51) 수동 미확인 — 앱 데이터에 key_space 전용 그림이 없어 판정 불가. key_space 등록 후 스페이스 누름 중 팔·펜 손 숨김·복귀·미등록 Z 그대로를 스크린샷 4장으로 확인(사용자 눈 확인 권고)",
+    "overlay-CR069-manual": "CR-069 MC-48~MC-50(쉬는중 단독 표시·카운트다운 쉬는중 멈춤) 수동 미확인 — 유휴 5분 필요",
+    "bridge-comments": "bridge 소스 머리 주석 낡음 LOW 4건(BRG-001 types.ts:2 v0.29→v1.1 / BRG-002 types.rs:1 v0.28→v1.1 / BRG-003 mod.rs:5 「22개」→30, presets.rs 누락 / BRG-004 commands.ts:3이 없는 commands.rs 경로) + commands/mod.rs:1 「23개」는 파일 내 수로는 맞음(해석 결정) — bridge-implementer 주석 정정. 리포트 .claude/reports/bridge-docsync-20261027.md",
+    "bridge-test-event-literals": "화면 테스트 21파일이 vi.mock('bridge/events') 안에 이벤트 이름 리터럴 재기입 — 계약 §4 금지가 테스트에도 적용되는지 미명시(운영 코드 0건). 사용자 결정 필요",
+    "core-cargo-feature-comment": "src-tauri/Cargo.toml [features] 주석이 아직 「게님드림」 제외라고 적힘(현행 내장 ②는 「먼작기」) — core-implementer 주석 정정",
+    "settings-S24": "settings requirements.md 177행 S-24 사용자 시나리오 행이 「뽀모도 인물」·「뽀모도 말풍선」 4회 인용(현행 노출 문구는 「뽀모도로」). 🔒 원문 전사 문서라 미수정 — 사용자 결정",
+    "settings-spec-comments": "Hair.test.tsx·ImagesTab.test.tsx 주석 「설계 확인 AA-4」 잔존(판정 영향 없음, ui-test-designer 예산 소진) / TimerTab.cr052.test.tsx 머리 주석 「CR-052 변경 행」 인용 잔존(AE-2) / CR-068 뒤 it·describe 이름·주석의 옛 표기 「뽀모도」 잔존(단언은 전부 현행 문구, scenarios 4303행이 결함 아님으로 규정)",
     "core-CR047-gate": "CR-047 실측 게이트 G1~G5 기록이 doc/300_검증/에 없음 — tray SEC-001 추적 「부분」. 수동 확인 기록 필요",
     "window-W1-W2": "window::apply_overlay_settings 호출자 없음 → 삭제(W-1) 가능. window→bridge 에러 타입 역참조(W-2)는 반환 타입 WindowError 전환과 함께 후속(core-manager)",
     "tray-TM11": "tray.md §10 TM-11 2행 「소스 미적용」 — 이번 범위 밖, 다음 core 작업 때 대조",
     "overlay-Q01": "scenarios Q-01(main.tsx 창 라벨 분기 자동화) 대기 유지 — 공용 진입점 작업 때",
-    "manual-pending": "수동 확인 대기: overlay MC-24·27~46·47(항상 위, core MC-51~62와 함께), settings M-27~32·45·50·64a~f·65a~c, CR-062·063·064·065 「적용·미검증」",
+    "manual-pending": "수동 확인 대기: overlay MC-24·27~46·47·48~50·51, settings M-27~32·45·50·64a~f·65a~c, CR-062·063·064·065 「적용·미검증」(2026-10-15 이전 항목 그대로)",
     "tauri-driver": "E2E 미설치 — 설치는 사용자 승인 후 메인 세션",
     "presets-CR001": "리뷰 CR-001 PresetsTab 255줄·PresetCard 150줄 분리 미적용(ui-postprocessor, 옵트인)",
-    "decided-20261015": "사용자 결정 완료(2026-10-15): R-41 문구 현행화(requirements v1.30) · main.tsx 창 라벨 조회는 contract §5.4 예외 명문화(H-1 종결) · contract v1.0 승격(§6.2 묶음 행 유지) · 알림음 카드 문구 1회 재생 CR-067(i18n 3개 국어+스펙, 「적용·미검증」 — 설정 창 실물 확인 대기). asset scope 점 폴더 검증은 미결(계약상 노출 경로 없음)",
-    "code-header-versions": "src/bridge/types.ts:2 「(v0.29)」·src-tauri/src/bridge/types.rs:1 「(v0.28)」 머리 주석 판 번호 낡음(현행 v1.0) / src-tauri/src/bridge/mod.rs:5 「22개」·commands/mod.rs:1 「23개」 핸들러 수 낡음(실제 30) — bridge-implementer 주석 정정"
+    "agent-report-channel": "bridge-analyst가 SendMessage 중간 보고 + 최종 응답으로 같은 내용을 2회 보고(정책 §5-8 위반, 내용 동일·무해). 에이전트 정의 점검 후보"
   }
 }

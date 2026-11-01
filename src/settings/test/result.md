@@ -38,3 +38,12 @@ PASS 552(vitest) / FAIL 0 / SKIP 63(수동, M-01~) / E2E 미실행(tauri-driver 
 ## 4. 프로세스
 
 dev 앱(kuro-keyviewer PID 26752)과 하위 프로세스를 종료했다. 종료 뒤 kuro-keyviewer 잔존 없음. `.dev-tester.log` 끝의 오류 2줄은 종료 신호로 인한 exit code 이며 앱 결함이 아니다.
+
+---
+
+## doc-sync 배치 재수행 — 2026-10-27 17:05
+실행: vitest `yarn test --run src/settings src/bridge src/components` · E2E 미설치(tauri-driver) · 스크린샷 3장
+판정: 통과(자동) — 32파일 / 552 테스트 전부 PASS, FAIL 0. 기준 scenarios.md v34.
+- CR-067(TC-277·286·289)·CR-068·CR-070(TC-269·276·286·248) 개정 TC 포함 전부 통과.
+- 스크린샷: doc/300_검증/screenshots/20261027-1710/02-settings.png (기본), doc/300_검증/screenshots/20261027-1710/img-02-settings.png (이미지), doc/300_검증/screenshots/20261027-1710/timer-02-settings.png (타이머: 스톱워치/타이머/시작 시간 잠금 표시)
+- 프로세스: 검증용 dev 앱을 띄웠다가 종료함.

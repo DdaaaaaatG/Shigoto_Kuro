@@ -1,7 +1,8 @@
 # timer 모듈 설계
 
-- 상태: 확정(사용자) — CR-048 증분(§2.3·§3.5~§3.9·§4)은 인계 패킷 기준 확정(사용자 결정 D-1~D-11 권고안) · rest-display 증분(TM-05 개정)은 🔒 사용자 결정 ① + 02-design §5a D-3 권고안 기준(패킷 `rest-display-03-packet-core.md`) · 최종 갱신: 2026-10-24(rest-display)
+- 상태: 확정(사용자) — CR-048 증분(§2.3·§3.5~§3.9·§4)은 인계 패킷 기준 확정(사용자 결정 D-1~D-11 권고안) · rest-display 증분(TM-05 개정)은 🔒 사용자 결정 ① + 02-design §5a D-3 권고안 기준(패킷 `rest-display-03-packet-core.md`) · 최종 갱신: 2026-10-24(rest-display) · doc-sync 대조 2026-10-27
 - 변경이력:
+  - 2026-10-27 doc-sync 대조 — **설계 변경 아님, 소스가 정본**(HEAD 09f4cae, ba352b4·3e7ed9e 반영분). `timer/mod.rs` 공개 API(`Timer` 10개 메서드·`TimerConfig`·`FINISHED_HOLD`·`TimerStatus`·`TimerAction`·`TimerSnapshot`·`TimerError`)와 `set_resting` 본문은 §2.3·§3.5.2와 같다. 테스트 C4(`tests.rs`)·C19~C23(`rest_tests.rs`)의 이름·조건·기대도 §3.8 표와 같다. 고친 곳: ① §3.5.5 `//!` 조각을 실물 그대로(3e7ed9e CORE-001 — [테스트] 줄에 `timer/rest_tests.rs(rest-display C19~C23)`, [목적] 줄바꿈). ② §3.8·§8의 테스트 위치를 실물로(`timer/tests.rs` + `timer/rest_tests.rs`, `mod.rs` 안 테스트 없음). ③ §3.8 A-5·§11 T-D17·파급 표의 과도 실패를 「해소」로 — bridge `set_resting_countdown_noop`이 `set_resting_countdown_pauses_and_resumes`·`set_resting_countdown_finished_noop`로 교체됨(`src-tauri/src/bridge/commands/tests.rs`, 계약 v1.1 머리말 「소스 반영 완료 2026-10-24」). ④ §11 T-C8(D-3)·T-C9(v1.1 비파괴)를 「해소」로 — 확정사항 §6 「쉬는중 정리」 ①과 계약 v1.1 줄이 근거. 버전 0.6.0(`tauri.conf.json`·`Cargo.toml`)은 timer 동작과 무관(3e7ed9e의 timer 변경은 `//!` 1줄뿐).
   - 2026-10-25 (doc-sync — **설계 변경 아님**) 3차 rest-display 개정분이 소스에 적용됨(ba352b4, 2026-10-24 — `set_resting` 두 모드 공통). §10 표의 TM-05·RD-01~04 상태 칸을 「소스 적용 2026-10-24(ba352b4)」로 바꿨다. 아래 3차 행의 미적용 표기는 당시 기록이라 그대로 둔다.
   - 2026-10-24 (3차, rest-display — **카운트다운 쉬는중 자동 일시정지(TM-05 개정, 🔒 2026-10-24)**, 사용자 결정 ① 「카운트다운도 쉬는중 자동 일시정지·입력 시 자동 재개」가 CR-048 「쉬는중에도 계속 줄어듦」을 대체. 요구 RD-01~04, 정본 패킷 `doc/200_설계/architecture/rest-display-03-packet-core.md` §2~§5, 전이표 정본 `rest-display-02-design.md` §2.2) `Timer::set_resting`의 카운트다운 조기 반환을 지워 두 모드가 같은 규칙 「`Running`만 자동 일시정지, `RestPaused`만 자동 재개」를 쓴다. `set_resting` 시그니처·`TimerStatus` 멤버·`TimerSnapshot` 모양·직렬화 불변, 새 공개 API 없음. `apply`·`disable`·`tick`·`next_wake`·`configure`·드라이버·트레이 보기는 이미 모드 무관이라 코드 불변(테스트로 고정만). 갱신 절: §1 TM-05·RD 표, §2.3(`RestPaused` 주석·`set_resting` 행), §3.5.1(전이표 두 열·`RestPaused` 행), §3.5.2(`set_resting` 본문), §3.5.3-3, §3.5.5(`//!`), §3.8(C4 개정·C19~C23), §3.9(`set_resting` 행), §10, §11. 옛 문장은 취소선으로 남긴다. 과도 실패 1건(A-5, bridge 테스트 `set_resting_countdown_noop`)은 §3.8·§11. **소스 미적용**(core-implementer 진행).
   - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 1·2차의 「소스 미적용」은 모두 소스에 반영됨을 확인했다: `timer/mod.rs`(`FINISHED_HOLD`:79·`with_config`:130·`disable`:224·`configure`:241·`tick`:259·`next_wake`:281·`status`:290), `timer/driver.rs`(`TimerWaker`:18·`spawn`:32), `lib.rs`(`AppState.timer_waker`, 깔때기 `publish_timer_change`:424), bridge 깔때기 경유(`bridge/commands/mod.rs:511-591`). §10 표의 TM-01·05·06·12 상태를 「소스 반영」으로, 「CR-048 과도 상태」 행을 해소로 바꿨다. 아래 1·2차 행의 「소스 미적용」은 당시 기록이라 그대로 둔다.
@@ -366,8 +367,7 @@ pub struct AppState {
 //! 스톱워치·카운트다운 타이머 상태 — 휘발(저장 안 함), 앱 전체에서 하나(`AppState.timer`).
 //!
 //! [목적] CR-045 PT-03·05·06·09 + CR-048 TM-01·05·06·12 + rest-display RD-01~04 — 모드(스톱워치·
-//!        카운트다운), 멈춤/흐름/일시정지/쉬는중 일시정지(두 모드)/끝남(카운트다운, 10초)과 경과.
-//!        쉬는중 판정·표시는 ui.
+//!        카운트다운), 멈춤/흐름/일시정지/쉬는중 일시정지(두 모드)/끝남(카운트다운, 10초)과 경과. 쉬는중 판정·표시는 ui.
 //! [공개 API] `Timer`(`new`·`with_config`·`snapshot`·`apply`·`set_resting`·`disable`·`configure`·
 //!        `tick`·`next_wake`·`status`), `TimerConfig`, `FINISHED_HOLD`, `TimerStatus`, `TimerAction`,
 //!        `TimerSnapshot`, `TimerError`(`code`), `driver`(마감 시각 스레드).
@@ -375,10 +375,11 @@ pub struct AppState {
 //! [unsafe] 없음.
 //! [에러] `TimerError::Disabled`("timer.disabled") — 꺼져 있을 때 `apply`만. `driver::spawn`은 io.
 //! [설정] `TimerConfig::from_settings`로 `timer.mode`·`countdownSecs`를 받는다. `enabled`는 인자.
-//! [테스트] timer/tests.rs(전이표·경과·직렬화), driver.rs(실제 스레드) — doc/200_설계/core/timer.md §8·§3.8.
+//! [테스트] timer/tests.rs(전이표·경과·직렬화), driver.rs(실제 스레드), timer/rest_tests.rs(rest-display C19~C23) — doc/200_설계/core/timer.md §8·§3.8.
 ```
 
 - (🔒 2026-10-24, rest-display — 패킷 §2 주석 교체표) [목적] 줄: ~~쉬는중 일시정지(스톱워치)~~ → 「쉬는중 일시정지(두 모드)」, 출처에 「rest-display RD-01~04」 추가. 줄바꿈 위치는 구현 재량. 나머지 항목 불변. 테스트를 `timer/rest_tests.rs`로 나누면(§3.8) [테스트] 줄에 그 파일을 덧붙인다.
+- (2026-10-27 doc-sync) 위 조각은 실물 `timer/mod.rs:1-12`와 글자까지 같다 — [테스트] 줄의 `rest_tests.rs`는 3e7ed9e(CORE-001)에서 반영됐다.
 
 ### 3.6 CR-048 — 마감 시각 스레드 `timer/driver.rs` (🔒 패킷 §2.3)
 
@@ -505,8 +506,8 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 - 드라이버 공유 상태는 `Arc<Mutex<…>>`/`Arc<AtomicBool>` + 결과 채널. 대기는 `recv_timeout`으로 하고 `sleep`은 D3 관찰에만 쓴다.
 - lib.rs 조립·깔때기는 Tauri 런타임이 필요해 자동 테스트하지 않는다 — 트레이 수동 확인([tray.md](tray.md) §8.3)과 verify에서 확인.
 - 완료 기준(패킷 §4·§6): `cargo fmt --check` exit 0, `cargo clippy -- -D warnings` 경고 0, `cargo test` 전부 PASS, `bridge/commands.rs` 무수정 컴파일, 완료 보고에 「실물 시그니처 차이 목록」·과도 상태(§3.7).
-- (2026-10-24 rest-display, 패킷 §1·§5) C4 개정·C19~C23은 `t0 + Duration` 주입·`sleep` 금지, 도우미 `cd(secs)` 재사용. 위치는 `timer/tests.rs` — 추가가 115줄을 넘으면(800줄 한계) C19~C23을 `timer/rest_tests.rs`로 두고 `mod.rs` 끝에 `#[cfg(test)] mod rest_tests;`. 회귀: T1~T17·C1~C3·C5~C18·D1~D4, `tray::timer_menu` TV1·TV2 전부 PASS.
-- (2026-10-24, A-5) **알려진 과도 실패 1건**: bridge 테스트 `bridge::commands::tests::set_resting_countdown_noop`(`src-tauri/src/bridge/commands/tests.rs`, `assert!(!changed)`)는 RD-01 의도된 의미 변경으로 실패한다. bridge 소유 파일이라 core가 고치지 않는다 — bridge 패킷(`rest-display-03-packet-bridge.md` §3)에서 `set_resting_countdown_pauses_and_resumes`·`set_resting_countdown_finished_noop`으로 교체. core 완료 보고의 실패는 이 1건뿐이어야 하고, 배포 전 두 패킷이 모두 끝나야 한다(§11 T-D17).
+- (2026-10-24 rest-display, 패킷 §1·§5) C4 개정·C19~C23은 `t0 + Duration` 주입·`sleep` 금지, 도우미 `cd(secs)` 재사용. 위치는 `timer/tests.rs` — 추가가 115줄을 넘으면(800줄 한계) C19~C23을 `timer/rest_tests.rs`로 두고 `mod.rs` 끝에 `#[cfg(test)] mod rest_tests;`. 회귀: T1~T17·C1~C3·C5~C18·D1~D4, `tray::timer_menu` TV1·TV2 전부 PASS. **실물(ba352b4, 2026-10-27 doc-sync 확인):** C4는 `timer/tests.rs`(`countdown_resting_pauses_and_resumes`), C19~C23은 `timer/rest_tests.rs`(도우미 `secs`·`cd`·`snap`·`rest_paused` 자체 보유)이고 `mod.rs` 끝에 `#[cfg(test)] mod tests;`·`#[cfg(test)] mod rest_tests;` 두 줄이 있다.
+- (2026-10-24, A-5) **알려진 과도 실패 1건**: bridge 테스트 `bridge::commands::tests::set_resting_countdown_noop`(`src-tauri/src/bridge/commands/tests.rs`, `assert!(!changed)`)는 RD-01 의도된 의미 변경으로 실패한다. bridge 소유 파일이라 core가 고치지 않는다 — bridge 패킷(`rest-display-03-packet-bridge.md` §3)에서 `set_resting_countdown_pauses_and_resumes`·`set_resting_countdown_finished_noop`으로 교체. core 완료 보고의 실패는 이 1건뿐이어야 하고, 배포 전 두 패킷이 모두 끝나야 한다(§11 T-D17). **(2026-10-27 doc-sync) 해소** — bridge 패킷이 적용돼 `src-tauri/src/bridge/commands/tests.rs`에 `set_resting_countdown_pauses_and_resumes`·`set_resting_countdown_finished_noop`가 있고 `set_resting_countdown_noop`은 없다(계약 v1.1 머리말 「소스 반영 완료 2026-10-24」).
 
 ### 3.9 CR-048 bridge 요구 명세 (§9 증분 — 계약 확정은 bridge-designer, bridge 패킷)
 
@@ -587,7 +588,7 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 
 ## 8. 테스트 계획
 
-전부 `timer/mod.rs` `#[cfg(test)] mod tests` 단위 테스트. `sleep` 금지 — `let t0 = Instant::now();` 뒤 `t0 + Duration::from_secs(n)`을 `now`로 주입한다. 상태는 `snapshot(..).status`로 단언한다.
+전부 `timer/mod.rs` `#[cfg(test)] mod tests` 단위 테스트(1차 기록 — 현행 위치는 CR-048 때 옮긴 `timer/tests.rs`, rest-display C19~C23은 `timer/rest_tests.rs`. §3.8, 2026-10-27 doc-sync). `sleep` 금지 — `let t0 = Instant::now();` 뒤 `t0 + Duration::from_secs(n)`을 `now`로 주입한다. 상태는 `snapshot(..).status`로 단언한다.
 
 | # | 테스트 이름 | 조건 | 기대 |
 |---|---|---|---|
@@ -662,20 +663,20 @@ pub(crate) fn publish_timer_change(app: &tauri::AppHandle, snap: &timer::TimerSn
 | T-D14 | (🔒 사용자 결정 ①) 카운트다운도 쉬는중 자동 일시정지·입력 시 자동 재개 — `set_resting`의 모드 분기를 지워 스톱워치와 **같은 `match` 하나**로 합친다 | 카운트다운 전용 분기 유지(새 상태·새 command) | 사용자 결정. 두 모드가 같은 규칙 「`Running`만 자동 일시정지, `RestPaused`만 자동 재개」를 쓰면 분기 1개가 줄고, `apply`·`disable`·`tick`·`next_wake`·`configure`·드라이버·트레이 보기는 이미 모드 무관이라 코드가 바뀌지 않는다. 시그니처·`TimerStatus`·`TimerSnapshot`·직렬화 불변 → bridge 래퍼·overlay 호출부 무수정. 무입력 시간 미차감(U-4)도 두 모드 같음. CR-048 「쉬는중에도 계속」(§1 TM-05 옛 문장)을 대체 |
 | T-D15 | (D-3, 02-design §5a 권고안) `Finished`·`Paused`·`Stopped` 중 쉬는중 = no-op — 깜빡임 10초·`finished_until`·`next_wake` 그대로 | `Finished`를 즉시 `Stopped`로 / 깜빡임을 멈췄다 재개 | `Finished`는 이미 0에 닿은 「알림」 상태라 멈출 시간이 없다. 현행 `_ => false` 그대로라 코드 0줄. 0 도달 뒤 10초 안에 무입력 기준(최소 60초)을 넘길 때만 생긴다 |
 | T-D16 | (A-3) 마감 지난 뒤·`tick` 전 쉬는중 진입 = `RestPaused`(남은 0) → 재개 시 마감 = 재개 시각 → 마감 스레드가 곧바로 `Finished`(감지 시각부터 10초) | `set_resting`에서 마감이 지났으면 `Finished`로 직행 | 일시정지 T-D9와 같은 성질 — `freeze`의 상한(`active`)이 이미 처리한다. 새 분기 없음 |
-| T-D17 | (A-5) core 완료~bridge 완료 사이 bridge 테스트 `set_resting_countdown_noop` 1건 과도 실패 허용(§3.8) | core 패킷에서 bridge 테스트도 고침 | 계층 경계 — bridge 소유 파일. timer-mode §3.7 「알려진 과도 상태」 선례. 배포 전 두 패킷 모두 완료 필수 |
+| T-D17 | (A-5) core 완료~bridge 완료 사이 bridge 테스트 `set_resting_countdown_noop` 1건 과도 실패 허용(§3.8) | core 패킷에서 bridge 테스트도 고침 | 계층 경계 — bridge 소유 파일. timer-mode §3.7 「알려진 과도 상태」 선례. 배포 전 두 패킷 모두 완료 필수. **(2026-10-27 doc-sync) 해소** — bridge 테스트 교체 완료(§3.8 A-5) |
 
 확인 필요 — rest-display:
 
-- **T-C8** D-3(T-D15)은 02-design §5a **권고안** 기준이다(이 문서 작성 시점에 `doc/000_프로젝트_확정사항.md`에는 rest-display 반영 전 — 메인 세션 몫, 02-design §8 문안). 사용자 결정이 권고안과 다르면 아키텍트 세션이 패킷을 먼저 고친 뒤 §3.5.1 `Finished` 행·§3.8 C20을 다시 맞춘다.
-- **T-C9** §3.9 `set_resting` 행의 계약 판(v1.1)·호환성 분류(비파괴)는 bridge-designer가 확정한다(02-design D-5 — `bridge-design-strategy` §5 문구를 글자대로 읽으면 파괴라는 차이를 계약 §8에 남긴다).
+- **T-C8** D-3(T-D15)은 02-design §5a **권고안** 기준이다(이 문서 작성 시점에 `doc/000_프로젝트_확정사항.md`에는 rest-display 반영 전 — 메인 세션 몫, 02-design §8 문안). 사용자 결정이 권고안과 다르면 아키텍트 세션이 패킷을 먼저 고친 뒤 §3.5.1 `Finished` 행·§3.8 C20을 다시 맞춘다. **(2026-10-27 doc-sync) 해소** — 확정사항 §6 「쉬는중 정리 (🔒 2026-10-24)」 ①에 「끝남(깜빡임 10초) 중 쉬는중은 영향 없음」이 들어가 권고안대로 확정됐다. §3.5.1·C20 변경 없음.
+- **T-C9** §3.9 `set_resting` 행의 계약 판(v1.1)·호환성 분류(비파괴)는 bridge-designer가 확정한다(02-design D-5 — `bridge-design-strategy` §5 문구를 글자대로 읽으면 파괴라는 차이를 계약 §8에 남긴다). **(2026-10-27 doc-sync) 해소** — 계약 머리말 「버전 v1.1 (2026-10-24 … **비파괴**)」로 확정, 근거는 계약 §8 v1.1 행 각주.
 
 파급 — rest-display (Grep 2026-10-24):
 
 | 파일 | 변경 | 담당 | 깨짐 여부 |
 |---|---|---|---|
 | `src-tauri/src/timer/mod.rs` | `set_resting` 본문(모드 분기 삭제, 현재 `:330` `if self.mode == TimerMode::Countdown`)·문서주석, `TimerStatus::RestPaused` 문서주석, `//!` [목적] | core-implementer | — |
-| `src-tauri/src/timer/tests.rs`(넘치면 `timer/rest_tests.rs`) | C4 개정, C19~C23 신규 | core-implementer | — |
-| `src-tauri/src/bridge/commands/tests.rs:240` `set_resting_countdown_noop` | 교체(bridge 패킷 §3) | bridge-implementer | **깨짐(의도된 과도 실패, T-D17)** |
+| `src-tauri/src/timer/tests.rs`(넘치면 `timer/rest_tests.rs`) | C4 개정, C19~C23 신규. **실물: C4 `tests.rs`, C19~C23 `rest_tests.rs`(2026-10-27 doc-sync)** | core-implementer | — |
+| `src-tauri/src/bridge/commands/tests.rs:240` `set_resting_countdown_noop` | 교체(bridge 패킷 §3) | bridge-implementer | ~~**깨짐(의도된 과도 실패, T-D17)**~~ 해소 — `set_resting_countdown_pauses_and_resumes`·`set_resting_countdown_finished_noop`로 교체됨(2026-10-27 doc-sync 확인) |
 | `src-tauri/src/timer/driver.rs`·`tray/timer_menu.rs`·`tray/mod.rs`·`lib.rs` | 없음(모드 무관, TV1·TV2 그대로) | — | 안 깨짐 |
 | `doc/200_설계/core/tray.md` | 없음 — `RestPaused` 서술(364·413·435행)이 모드 무관, 「스톱워치 전용」·「카운트다운에서는 생기지」 0건 | — | — |
 | `contract.md`·`src/bridge/types.ts` 주석·§5.8 | §3.9 요구 | bridge-designer·bridge-implementer | 비파괴(타입·시그니처 불변) |
