@@ -118,6 +118,7 @@ const TIMER_ON: TimerSettings = { ...TIMER_OFF, enabled: true }
 const T2: TimerSettings = { enabled: true, textPos: { x: 100, y: 200 }, rotation: -10, fontSize: 48, color: '#ff0000' }
 const base: Settings = {
   ...DEFAULT_SETTINGS,
+  keyHoldMs: 0, // key-hold(R-42): 기존 TC는 유지 0 = 현행 동작 기준
   scale: 1,
   idleSeconds: 300,
   overlay: { x: 100, y: 100, visible: true },

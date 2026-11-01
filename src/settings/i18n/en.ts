@@ -25,6 +25,11 @@ export const en: Messages = {
   idleUnit: 'min',
   idleDesc: 'If there is no input for this long, the resting image is shown ({min}–{max} min).',
   idleRangeHint: 'Enter a whole number from {min} to {max} (minutes). Not saved.',
+  // Key image hold (CR-073 · R-69 · key-hold D-8) — needs review
+  keyHoldLabel: 'Key image hold',
+  keyHoldDesc:
+    'Keeps the pressed-key image on screen at least this long, even for quick taps. At 0 it returns as soon as you release ({min}–{max} ms).',
+  keyHoldValue: '{ms} ms',
   cardWindow: 'Window',
   resetPosition: 'Reset position',
   lockLabel: 'Lock position (click-through)',
@@ -173,7 +178,7 @@ export const en: Messages = {
   // ─── §4.12 CR-064 프리셋(36키) — ja·en 초안, 검수 필요
   tabPresets: 'Presets',
   cardPresetSave: 'Save current setup as a preset',
-  presetSaveDesc: 'Saves all current images, the alarm sound, scale, rest time, the "Shoulder & hand" tab settings (shoulder axis, movement area, arm position, hand position, pen hand) and timer settings as one set. Window position, language, autostart, taskbar and position lock are not included.',
+  presetSaveDesc: 'Saves all current images, the alarm sound, scale, rest time, key image hold, the "Shoulder & hand" tab settings (shoulder axis, movement area, arm position, hand position, pen hand) and timer settings as one set. Window position, language, autostart, taskbar and position lock are not included.',
   presetNameLabel: 'Preset name',
   presetNamePlaceholder: 'e.g. Cat A',
   presetSave: 'Save',

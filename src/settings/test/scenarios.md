@@ -1,6 +1,7 @@
 # settings 테스트 시나리오
 
-- **v34 기준(2026-10-24 CR-068 · CR-070 — 이 줄이 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-068(🔒 「뽀모도로」 표기 정정) · CR-070(🔒 rest-display 결정 ① — 카운트다운 쉬는중 자동 일시정지 문구 · `restPaused` 잠금 A-1) · `doc/200_설계/architecture/rest-display-03-packet-ui.md` §B.4 S-5 행 · `design/timer-tab.md` §14.5 · `design/i18n.md` `timerCountdownDesc` CR-070 행 · 현행 사전 `src/settings/i18n/ko.ts` · 현행 스펙(ui-implementer 선개정). 상태: **개정 v34**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v34 개정 — CR-068 · CR-070」 절. 수: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) 불변 · 수동 63 → **64**(M-68 추가)
+- **v35 기준(2026-11-01 CR-073 — 이 줄이 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-073(🔒 사용자 결정 2026-11-01 「키 그림 유지 시간」 — key-hold D-1 · D-3 · D-8) · `src/settings/requirements.md` **v1.32**(R-69 신설 · R-59 개정 · S-2 확장) · `design/general-tab.md` §1 · §2 · §3.3 ~ §3.6 · §5 G-9 · §6 · `design/i18n.md` §4.2 CR-073 추가분(3키) · §4.12 `presetSaveDesc` · `design.md` §13 RTM R-69 · R-59 · contract v1.2 §3.3(`Settings.keyHoldMs` 0 ~ 500 정수, 기본 150) · `doc/200_설계/architecture/key-hold-03-packet-ui.md` §B.2 · §B.3 · §B.5 · 현행 스펙(ui-implementer 선작성 — `ScaleIdleCard.keyHold.test.tsx` 신규 · `i18n.test.ts` · `GeneralTab.test.tsx` · 픽스처 12파일). 상태: **개정 v35**(대기열 Q-12 소진 — 증분 모드, 추가 · 수정만, 번호 보존). 개정 내용은 끝 「v35 개정 — CR-073」 절. 수: 자동 TC 번호 363 → **370**(유효 350 → 357 · 폐기 8 · 결번 5) · TC-FLOW 34 → **35**(유효 33 → 34 · 폐기 1) · 수동 64 → **65**(M-69 추가)
+- **v34 기준(2026-10-24 CR-068 · CR-070 — v35 줄 다음으로 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-068(🔒 「뽀모도로」 표기 정정) · CR-070(🔒 rest-display 결정 ① — 카운트다운 쉬는중 자동 일시정지 문구 · `restPaused` 잠금 A-1) · `doc/200_설계/architecture/rest-display-03-packet-ui.md` §B.4 S-5 행 · `design/timer-tab.md` §14.5 · `design/i18n.md` `timerCountdownDesc` CR-070 행 · 현행 사전 `src/settings/i18n/ko.ts` · 현행 스펙(ui-implementer 선개정). 상태: **개정 v34**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v34 개정 — CR-068 · CR-070」 절. 수: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) 불변 · 수동 63 → **64**(M-68 추가)
 - **v33 기준(2026-10-15 CR-067 — v34 줄 다음으로 아래 모든 기준 줄·절보다 우선)**: CR 대장 CR-067 🔒 · `design/i18n.md` `alarmCardDesc` CR-067 변경 행 · `src/settings/design.md` 변경이력 CR-067 행 · 현행 사전 `src/settings/i18n/{ko,ja,en}.ts`. requirements v1.29 불변. 상태: **개정 v33**(증분 모드 — 개정만, 번호 보존). 개정 내용은 끝 「v33 개정 — CR-067」 절. 수 불변: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
 - **v32 기준(2026-10-15 doc-sync — v33 줄 다음으로 아래 모든 기준 줄·절보다 우선)**: `src/settings/requirements.md` **v1.29**(요구 증감 없음) · `src/settings/design.md` 변경이력 2026-10-15 doc-sync 행 · `design/presets-tab.md`(§1.2 내장 프리셋 · §2 실측 · §5.1 구현 형태 표 · §11.8 ≤ 9장) · `design/i18n.md`(§4.3 11키 · §4.12 키 위치) · `design/images-tab.md` 머리(계약 v0.31) · 현행 소스. 상태: **개정 v32**(증분 모드 — 추가·수정만, 번호 보존). 개정 내용은 끝 「v32 doc-sync」 절. 수: 자동 TC 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63
 - **v28 기준(2026-09-30 doc-sync — v32 이전 기준 줄)**: `src/settings/requirements.md` **v1.26** · `src/settings/design.md` 변경이력 2026-09-30 doc-sync 행 · contract v0.27 · 현행 소스. 상태: **개정 v28**(증분 모드, 대기열 Q-02 전환). 개정 내용·수·제외 범위는 TC 목록 끝 「doc-sync 개정(v28)」 절. 수: 자동 TC 번호 310개(TC-001 ~ TC-310) 중 유효 301 · 폐기 8 · 결번 1(TC-307) · TC-FLOW 32 · 수동 54
@@ -682,8 +683,9 @@
 ### TC-093 · 세 사전 키 집합 동일·빈 문자열 없음·errors = 계약 code 20개 · 종류: 자동 · 요구: R-20 · 설계: i18n.md §1(`: Messages` 선언)·§2 `Messages`·§4.4 `SlotMessageKey`·§4.6 `ERROR_CODES` · U-4 · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)**
 - Given `ko`·`ja`·`en`·`ERROR_CODES` · When 키를 비교 · Then ⓐ 화면: 해당 없음(문구 원천) — 단순 키·`slots` 24키·`errors` 20키 집합이 세 사전 모두 같고 모든 문자열(슬롯 제목·설명 포함)이 공백 아닌 값 ⓑ 상태: `ERROR_CODES` = §4.6 표 순서 20개(`asset.not_png` … `unknown`) = contract v0.14 §6 정본 ⓒ bridge: 호출 없음(상수)
 
-### TC-094 · ko 새 문구·슬롯·오류 문구 정확 일치, 「(같음)」은 문장으로 · 종류: 자동 · 요구: R-20, R-19, R-25, R-03, R-04, R-21 ~ R-24 · 설계: i18n.md §4.1 ~ §4.4·§4.6 ko 열, §4.4 표 아래 주 · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)**
+### TC-094 · ko 새 문구·슬롯·오류 문구 정확 일치, 「(같음)」은 문장으로 · 종류: 자동 · 요구: R-20, R-19, R-25, R-03, R-04, R-21 ~ R-24, R-69 · 설계: i18n.md §4.1 ~ §4.4·§4.6 ko 열, §4.4 표 아래 주 · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)** · **개정(CR-073 — 단순 키 177, v35)** · 스펙: `test/i18n.test.ts`
 - Given `ko` · When 조회 · Then ⓐ 화면(문구 원천): 새 키 43개가 §4.1 ~ §4.3 ko 열과 정확히 같다(예: `autostartPending` = `Windows 권한 확인을 기다리는 중입니다…`, `confirmClearMessage` = `‘{name}’ 그림을 지울까요? 되돌릴 수 없습니다.`), `slots` 24개 제목/설명·`errors` 20개가 §4.4·§4.6 ko 열과 같다 ⓑ 상태: 단순 키 69개(이관 26 + 새 43), 세 사전 모두 특수 키 설명이 `(같음)`·`(同上)`·`(same)`이 아니라 `key_space`(펜은 `pen_key_space`) 설명과 같은 문장 ⓒ bridge: 호출 없음
+- **현행 개수(v35 · CR-073 — 이 줄이 위 Then ⓑ의 개수와 각 개정 표의 옛 개수보다 우선)**: ⓑ `simpleKeys(ko)` **177**(CR-065까지 174 + CR-073 `keyHoldLabel` · `keyHoldDesc` · `keyHoldValue` 3 — i18n §4.2 CR-073 추가분). 세 키의 값 단언은 TC-370이 한다. ⓐ · ⓒ는 불변(문구 원천 · 호출 없음)
 
 ### TC-095 · ja·en 공통 문구(§4.1)·언어 목록·이름·사전 선택 · 종류: 자동 · 요구: R-20 · 설계: i18n.md §3 `LANGUAGES`·`LANGUAGE_NAMES`·`MESSAGES`·`messagesFor`, §4.1 ja·en 열
 - Given 세 사전 · When `messagesFor('ko'|'ja'|'en'|'fr'|'')` · Then ⓐ 화면(문구 원천): ja §4.1 7키(`kuro_keyviewer 設定`·`PNG画像を選択`·`設定タブ`·`基本設定`·`画像設定`·`肩の軸・手の位置`·`エラー:`), en §4.1 7키(`kuro_keyviewer Settings`·`Select a PNG image`·`Settings tabs`·`General`·`Images`·`Shoulder & Hand`·`Error:`) ⓑ 상태: `LANGUAGES` = `['ko','ja','en']`, `LANGUAGE_NAMES` = `{ko:'한국어', ja:'日本語', en:'English'}`, `MESSAGES.x`·`messagesFor(x)` = 해당 사전(같은 객체), `'fr'`·`''` → `ko` ⓒ bridge: 호출 없음
@@ -801,8 +803,9 @@
 ### TC-129 · 유휴 시간 저장 실패 · 종류: 자동 · 요구: R-04 · 설계: general-tab.md §3.5 `commitIdle` 예외, G-3 오류
 - Given reject `SAVE_ERR` · When `10` + Enter · Then ⓐ 화면: 입력 칸 `2`, 범위 안내 없음 ⓑ 상태: `onError(SAVE_ERR)` ⓒ bridge: 인자 `{...SETTINGS, idleSeconds:600}` 1회
 
-### TC-130 · 기본 설정 탭 접근성·포커스 순서 · 종류: 자동 · 요구: R-19, R-20 ~ R-24 · 설계: general-tab.md §6, §3.2 id 목록 · **개정(CR-054 — 기대 개수·목록은 「CR-054 개정 TC」 표가 대체)**
-- Given `GeneralTab` · When DOM의 `select, input, button` 순서를 읽는다 · Then ⓐ 화면: 순서 `language-select → scale-slider → idle-input → 「위치 초기화」 → lock-toggle → taskbar-toggle → autostart-toggle`, `tabindex` 없음, 모든 `button` `type="button"`, `switch` 3개, 안내 줄 `role=status` ⓑ 상태: 해당 없음(속성 검사) ⓒ bridge: 호출 없음
+### TC-130 · 기본 설정 탭 접근성·포커스 순서(키 그림 유지 시간 슬라이더 포함) · 종류: 자동 · 요구: R-19, R-20 ~ R-24, R-56, R-69 · 설계: general-tab.md §6(CR-054 · CR-073 포커스 순서), §3.2 id 목록, §3.6-4 `key-hold-slider` · **개정(CR-054)** · **개정(CR-073 — `key-hold-slider` 추가, v35)** · 스펙: `test/GeneralTab.test.tsx`
+- Given `GeneralTab`(`SETTINGS` — `keyHoldMs` 150, 확인창 닫힘) · When DOM의 `select, input, button` 순서를 읽는다 · Then ⓐ 화면: 순서 `language-select → scale-slider → idle-input → key-hold-slider(CR-073 — 유휴 시간 바로 다음, 같은 「크기 · 반응」 카드) → 「위치 초기화」 → lock-toggle → taskbar-toggle → autostart-toggle → 「전체 초기화」(CR-054 — 마지막)`(정확히 9개 — 카드 안에 숫자 칸·「기본값으로」 버튼이 더 없다), `tabindex` 없음, 모든 `button` `type="button"`, `switch` 3개, `p[role=status]` 2개(자동 실행 안내 · 초기화 상태 줄 — 둘 다 `aria-live="polite"` · 빈 내용) ⓑ 상태: 해당 없음(속성 검사) ⓒ bridge: 호출 없음(렌더 · 속성 읽기만 — 조작이 없어 호출 경로가 없다. 스펙은 호출 횟수를 따로 단언하지 않는다)
+- (v35) 위 Then ⓐ가 「CR-054 개정 TC」 표 TC-130 행(끝에 「전체 초기화」 · 상태 줄 2개)을 합친 현행 기대다
 - 실제 Tab 이동·Enter/Space 토글·낭독은 수동 M-09·M-22
 
 ### TC-131 · generalValues 순수 모듈 · 종류: 자동 · 요구: R-03, R-04 · 설계: general-tab.md §3.3 전 행 · 스펙: `test/generalValues.test.ts`
@@ -3305,6 +3308,7 @@ TC-244(말풍선 「기본값」 = 비우기)·TC-203 ~ TC-205는 본문 불변(
 | CR-006 | 레이어 이동 모드 패드 박스·손 점 숨김 — **CR-016이 「항상 숨김」으로 대체** | TC-008·TC-012 폐기, TC-011·TC-035·TC-037 개정(CR-016 행 참조) |
 | CR-016 | 손 그림 끌어다 놓기(R-11)·미리보기 바탕/손 그림/패드 박스(R-12)·리셋 기대값(R-13)·`previewNoBody`·`markerPart` | 폐기: TC-008, TC-012 / 개정: TC-005, TC-006, TC-009, TC-010, TC-011, TC-013, TC-014, TC-015, TC-025, TC-026, TC-027, TC-030, TC-034, TC-035, TC-036, TC-037, TC-040, TC-FLOW-02, TC-FLOW-04 / 신규: TC-045~TC-058, TC-FLOW-05 / 수동: M-03, M-07, M-11, M-12 |
 | CR-018 | 이동 영역 설정(R-15)·영역 상시 표시·값 목록(R-16)·리셋 기대값(R-17, R-13 폐기)·`MouseSettings.area` 추가·`pad` 삭제·라벨 11키 | 개정: TC-001~TC-005, TC-009, TC-013, TC-016, TC-019(스펙), TC-020, TC-022, TC-024~TC-028, TC-049, TC-FLOW-02, TC-FLOW-04 / 신규: TC-059~TC-077, TC-FLOW-06 / 수동: M-03, M-07, M-08, M-09 개정 · M-13, M-14, M-15 신설 |
+| CR-073 (v35) | 「크기 · 반응」 카드 「키 그림 유지 시간」 슬라이더(R-69 — 0 ~ 500ms · 10ms · 기본 150, 저장 규칙 = R-03) · 프리셋 저장 설명 `presetSaveDesc` 3개 국어 구절 삽입(R-59 개정) · 단순 키 174 → 177 · `Settings.keyHoldMs` 픽스처 12파일. CR-018 뒤의 CR들은 각 개정 절 「CR ↔ TC」 줄에 있다 — 이 행은 Q-12 위임 지시로 이 표에도 둔다. 상세 「v35 개정」 절 | 신규: TC-364 ~ TC-370, TC-FLOW-35 / 개정: TC-094, TC-130, TC-352, TC-362 / 회귀: TC-104, TC-119 ~ TC-129, TC-131, TC-255 ~ TC-257, TC-319, TC-346, TC-FLOW-08 / 수동: M-69 신설 |
 
 ### 설계 항목 ↔ TC
 
@@ -3658,6 +3662,7 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | Q-09 | 2026-10-15 | CR-067 | `alarmCardDesc` 1회 재생 문구로 정정(ko 「타이머가 0이 되면 깜빡이는 동안 한 번 울립니다」·ja·en) — CR-052 반복 문구 대체 | `src/settings/i18n/{ko,ja,en}.ts` | TC-277(AlarmSoundCard 문구 — ui-fixer가 새 문구로 개정)·TC-286(i18n KO_NEW — 개정)·TC-289(REPEAT_ALARM 부재 단언 추가)·TimerTab.test.tsx ko 문구 단언(개정) — 시나리오 본문 「반복 재생 문구」 서술 개정 필요 | 아니오 | 전환됨(개정 TC-277·TC-286·TC-289) · TC-248은 스펙만 개정(본문 불변) · 「v33 개정 — CR-067」 절(2026-10-15). 「검증됨」 마킹은 실행 근거 확인 뒤 메인 세션 · 검증됨(2026-10-15 — 메인 세션 vitest 전체 883/883·tsc 0) · 검증됨(2026-10-27, ui-tester 552/552, doc-sync 셋째 배치) |
 | Q-10 | 2026-10-24 | CR-068 | ko 화면 문구 ~~뽀모도~~ → 「뽀모도로」 정정(값 6개 — `imagesNote` · `errors['asset.canvas_mismatch']` · `timerCardTitle` · `timerTextDesc` · `slots.pomo_char.title` · `slots.pomo_bubble.title`). 키 · 동작 · ja · en 불변 | `src/settings/i18n/ko.ts` | TC-094 · TC-096 · TC-197 · TC-246(i18n) · TC-136 · TC-142 · TC-179 · TC-234 · TC-FLOW-15(ImagesTab) · TC-242 · TC-243 · TC-244 · TC-291 · TC-292 · TC-FLOW-25(PomoCards) · TC-201(Hair) · TC-248 · TC-285(TimerTab) · TC-247(SettingsApp.timer) — 스펙 기대값 개정 완료(ui-implementer) | 아니오(수동 M-68 추가) | 전환됨(개정 — 「v34 개정」 절 CR-068 표, 2026-10-24). 「검증됨」은 실행 근거 확인 뒤 메인 세션 · 검증됨(2026-10-27, ui-tester 552/552, doc-sync 셋째 배치) |
 | Q-11 | 2026-10-24 | CR-070 | 「타이머 사용」 설명 `timerCountdownDesc` = 쉬는중 자동 일시정지 문구(D-4), `isDurationLocked`에 `restPaused` 추가(A-1 — 카운트다운 쉬는중에도 시작 시간 잠김) | `src/settings/i18n/{ko,ja,en}.ts` · `src/settings/timerValues.ts` | TC-269(timerValues) · TC-276(탭)(TimerTab) · TC-248(225행 스위치 설명) · TC-286(i18n `KO_NEW`) · 회귀 TC-268 · TC-252 · TC-284 — 스펙 개정 완료(ui-implementer) | 아니오(기존 TC 개정 + 수동 M-45b ⑦) | 전환됨(개정 TC-269 · TC-276 · TC-286 · TC-248, Z-3 ③ 대체 — 「v34 개정」 절, 2026-10-24). 「검증됨」은 실행 근거 확인 뒤 메인 세션 · 검증됨(2026-10-27, ui-tester 552/552, doc-sync 셋째 배치) |
+| Q-12 | 2026-11-01 | CR-073 | 「크기 · 반응」 카드에 「키 그림 유지 시간」 슬라이더 신설(R-69 — 0~500ms·10ms 단위·기본 150, 값 「150ms」/en 「150 ms」, 저장 규칙 = 배율 슬라이더, 3개 국어 D-8), 프리셋 저장 설명 `presetSaveDesc` 3개 국어에 「키 그림 유지 시간」 삽입(R-59 개정, D-3), `Settings` 픽스처 12개 파일에 `keyHoldMs` 필수 필드(contract v1.2) | `src/settings/components/ScaleIdleCard.tsx` · `src/settings/generalValues.ts` · `src/settings/i18n/{types,ko,ja,en}.ts` · 테스트 `ScaleIdleCard.keyHold.test.tsx`(신규)·`i18n.test.ts`·`GeneralTab.test.tsx`·픽스처 12파일 | TC-094(단순 키 177) · TC-352(프리셋 사전 + 단순 키 177) · TC-362(단순 키 177) · TC-130(포커스 순서에 `key-hold-slider`) · 회귀 TC-104 · TC-119 ~ TC-129(배율·유휴 시간) · TC-FLOW-08 · PresetsTab 저장 카드 설명 단언(`ko.presetSaveDesc` 경유라 자동 추종) — 스펙 개정 완료(ui-implementer) | 예 — 임시 번호 KH-B-01 ~ KH-B-06(`ScaleIdleCard.keyHold.test.tsx`)과 KH-B-07(`i18n.test.ts`)을 정식 TC로 전환(R-69 묶음 6건 + R-59 개정 사전 1건) + 수동 체크리스트 1항목(슬라이더 조절 → 오버레이에 반영, `/run-app`) | 전환됨(TC-364 ~ TC-370 — 옛 KH-B-01 ~ KH-B-07, TC-FLOW-35, 개정 TC-094 · TC-130 · TC-352 · TC-362, 수동 M-69 — 「v35 개정」 절, 2026-11-01). 스펙 it 이름에 정식 번호 부여(로직 불변). 「검증됨」은 실행 근거 확인 뒤 메인 세션 · 검증됨(자동 2026-11-01, ui-tester 561/561) · M-69 수동 대기 |
 
 ## v29 개정 — 뒷머리 내장 기본 없음 (🔒 사용자 결정 2026-09-30 「0.4.0 유지」, contract v0.29, 증분 모드 — 개정만)
 
@@ -3958,10 +3963,10 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 
 #### 사전 — `test/i18n.test.ts`
 
-### TC-352 · 프리셋 사전 36키 · errors 12 · preset.forbidden 없음 · 종류: 자동 · 요구: R-66, R-63, R-20 · 설계: i18n §4.12 · §4.6 CR-064 추가분 · 스펙: `test/i18n.test.ts`
+### TC-352 · 프리셋 사전 36키(`presetSaveDesc` CR-073 문구) · errors 12 · preset.forbidden 없음 · 단순 키 177 · 종류: 자동 · 요구: R-66, R-63, R-20, R-59 · 설계: i18n §4.12(CR-073 `presetSaveDesc` 개정 포함) · §4.6 CR-064 추가분 · 스펙: `test/i18n.test.ts` · **개정(CR-073, v35)**
 - Given 세 사전 실물
 - When 키·값 대조
-- Then ⓐ ko 36키 §4.12 ko 열 정확, ja·en 36키 존재·비어 있지 않음·자리표시자(`{name}`·`{date}`·`{count}`·`{folder}`·`{action}`) 유지, `ja.tabPresets` 「プリセット」·`en.tabPresets` 「Presets」, `format(presetActionAria)` = 「적용: 고양이 A」 ⓑ `ERROR_CODES` 39·`preset.forbidden` 없음(배열·세 사전), 세 사전 단순 키 173, ko errors 12개 정확, `errorText` ko 빈 message → 사전·core message 우선·en forbidden → unknown ⓒ bridge 호출 없음
+- Then ⓐ ko 36키 §4.12 ko 열 정확 — (CR-073) `presetSaveDesc` = `지금 등록한 그림 전부·알림음·배율·휴식 시간·키 그림 유지 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.`, ja·en 36키 존재·비어 있지 않음·자리표시자(`{name}`·`{date}`·`{count}`·`{folder}`·`{action}`) 유지, `ja.tabPresets` 「プリセット」·`en.tabPresets` 「Presets」, `format(presetActionAria)` = 「적용: 고양이 A」 ⓑ `ERROR_CODES` 39·`preset.forbidden` 없음(배열·세 사전), 세 사전 단순 키 **177**(v30 173 → v31 CR-065 174 → v35 CR-073 177), ko errors 12개 정확, `errorText` ko 빈 message → 사전·core message 우선·en forbidden → unknown ⓒ bridge 호출 없음
 - 개정: TC-093(제목 39 — `EXPECTED_ERROR_CODES` +12, `reset.seed` 뒤·`unknown` 앞) · TC-094(단순 키 137 → 173, ko errors + 12) · TC-246 · TC-286(`ERROR_CODES` 27 → 39, 슬라이스 `… reset.seed, preset.* 12, unknown`)
 
 #### 이름 중복 — `test/PresetsTab.test.tsx` (v30 정정 추가)
@@ -3982,7 +3987,7 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 | 요구ID | TC | TC-FLOW | 수동 |
 |---|---|---|---|
 | R-58 저장 | TC-316, TC-321, TC-322, TC-323, TC-324, TC-325 | TC-FLOW-33 | M-64a |
-| R-59 들어가는 것(표시) | TC-319, TC-347 | — | M-64a |
+| R-59 들어가는 것(표시) | TC-319, TC-347 · (v35 CR-073 개정) TC-370 · TC-352 · 회귀 TC-346 | — | M-64a |
 | R-60 안 들어가는 것(안내) | TC-319, TC-330 | — | M-64a |
 | R-61 적용 | TC-330, TC-331, TC-332, TC-333 | TC-FLOW-33 | M-64a · M-64e |
 | R-62 내보내기 | TC-318, TC-334, TC-335, TC-336 | TC-FLOW-33 | M-64b |
@@ -4112,10 +4117,10 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 
 #### 사전 — `test/i18n.test.ts`
 
-### TC-362 · presetPreviewUnavailable · 단순 키 174 · 종류: 자동 · 요구: R-68, R-20 · 설계: i18n §4.12 CR-065 추가분 · 스펙: `test/i18n.test.ts`
+### TC-362 · presetPreviewUnavailable · 단순 키 177 · 종류: 자동 · 요구: R-68, R-20 · 설계: i18n §4.12 CR-065 추가분 · i18n 머리 CR-073 줄(174 → 177) · 스펙: `test/i18n.test.ts` · **개정(CR-073 — 단순 키 174 → 177, v35)**
 - Given 세 사전 실물
 - When 대조
-- Then ⓐ ko 「미리보기를 표시할 수 없습니다.」 · ja 「プレビューを表示できません。」 · en 「Preview unavailable.」(§4.12 표 — ja · en 검수 필요) ⓑ 세 사전 키 집합 동일 · 단순 키 174, `ERROR_CODES` 39 불변 ⓒ 없음
+- Then ⓐ ko 「미리보기를 표시할 수 없습니다.」 · ja 「プレビューを表示できません。」 · en 「Preview unavailable.」(§4.12 표 — ja · en 검수 필요) ⓑ 세 사전 키 집합 동일 · 단순 키 **177**(CR-073 `keyHold*` 3키 추가 — 옛 174), `ERROR_CODES` 39 불변 ⓒ 없음
 
 ### TC-FLOW-34 · S-35: 이름이 헷갈리는 프리셋 두 개를 카드 위 미리보기로 구분해 방송용 캐릭터를 골라 적용 · 종류: 자동 · 요구: R-66, R-68, R-61 · Steps: **Step 1** TC-361(카드별 미리보기 부분) → **Step 2** TC-330(적용 — 확인창 · `applyPreset` 부분) → **Step 3** 적용 뒤 목록 · 미리보기 불변(FLOW 자체 판정) → M-65a(실물 모양) · 스펙: `test/PresetsTab.test.tsx` · **신규(CR-065)**
 - 상태 전달: Given 목록 [방송용(x1), 방송용 2(y1)] → Step 1 두 카드 url 목록이 다름 → Step 2 「적용: 방송용 2」 → `applyPreset('y1')` · 상태 줄 적용 문구 → Step 3 `listPresets` 1회 · 「방송용」 미리보기 url 그대로, 다른 bridge 0회
@@ -4355,10 +4360,138 @@ CR ↔ TC: CR-028 → 폐기 TC-040 ~ TC-043 / 개정 TC-009, TC-030, TC-031, TC
 - **AF-1. `design/i18n.md` 옛 표기 잔존.** 「로」가 빠진 표기가 9줄 남아 있다(CR 대장 CR-068이 §4.9 307 · 317 · 323 · 324행 · 103 · 237행 문구 표 미갱신을 기록 — 일부는 정정 기록 문구일 수 있음). 이 문서는 현행 `ko.ts` · CR 대장을 기준으로 삼았다. ui-designer 확인 필요.
 - **AF-2. `manual.md` 옛 문구.** CR 대장 CR-070이 `manual.md` 203행(카운트다운 쉬는중 계속) 미갱신을 기록한다. ui-manual-writer 위임 필요(이 문서 판정에는 영향 없음).
 
+## v35 개정 — CR-073 「키 그림 유지 시간」 (R-69 신설 · R-59 개정, 대기열 Q-12 정식 TC 전환 · 증분 모드 — 추가 · 수정만, 번호 보존)
+
+비유: 액자 사진을 바꿔 끼우는 다이얼을 하나 더 달았다. 손님이 문을 톡 두드리고 바로 손을 떼도 「두드림」 사진이 최소 얼마 동안은 걸려 있게 하는 다이얼이다. 검사표는 다이얼의 눈금, 돌리는 법, 손을 뗄 때만 기록되는지, 기록이 실패하면 원래 눈금으로 돌아가는지를 본다.
+
+- **기준**: 머리 「v35 기준」 줄과 같다 — CR 대장 CR-073 🔒 · requirements v1.32(R-69 · R-59 · S-2) · `design/general-tab.md` §1 · §2 · §3.3 ~ §3.6 · §5 G-9 · §6 · `design/i18n.md` §4.2 CR-073 추가분 · §4.12 `presetSaveDesc` · `design.md` §13 RTM · contract v1.2 §3.3 · 패킷 `key-hold-03-packet-ui.md` §B.5 · 대기열 Q-12
+- **CR-ID**: CR-073 — 새 요구 R-69(「크기 · 반응」 카드 셋째 행 슬라이더), R-59 개정(프리셋 저장 설명에 구절 1개 삽입, D-3). 다른 CR과 겹치는 키 없음. 유지 시간의 오버레이 쪽 의미(표시 · 다음 새 누름부터 적용, A-4)는 overlay 문서 몫이라 이 문서는 수동 M-69의 체감 확인만 둔다
+- **번호**: 신규 자동 TC-364 ~ TC-370(7개 — 옛 임시 번호 KH-B-01 ~ KH-B-07 = 패킷 S1 ~ S7) · TC-FLOW-35(1개) · 수동 M-69(1개). 개정 TC-094 · TC-130 · TC-352 · TC-362. 수: 자동 번호 370(유효 357 · 폐기 8 · 결번 5) · TC-FLOW 35(유효 34 · 폐기 1) · 수동 65
+- **스펙**: ui-implementer가 먼저 작성 · 개정했다(위임문 근거: vitest settings 561/561 통과, 2026-11-01 — 이 에이전트는 실행하지 않았다). 이 패스는 it 이름과 머리 주석만 바꿨다(KH-B-nn → TC-nnn, TC-094 · TC-130 · TC-362 이름의 옛 수). 단언 · 픽스처 · 도우미는 불변
+- **mock · 시간 규약**: `vi.mock('bridge/commands')`(`setSettings`만 mock — 기본 응답은 받은 값 그대로 resolve, `toBridgeError` 실물), `@tauri-apps/api/core` · `/event` · `/window` · `plugin-dialog` mock — 실제 Tauri 호출 없음. 언어는 `MessagesProvider language=…`(기본 ko). 「수신」 = props 재렌더(`settings://changed`를 받은 `SettingsApp`이 내려주는 값 흉내). **시간 의존 = 키보드 저장 지연 300ms뿐** — TC-366만 `vi.useFakeTimers({ toFake: ['setTimeout','clearTimeout'] })` + `vi.advanceTimersByTime`, 그 TC 안에서는 `waitFor` 금지(실제 sleep 없음). 픽스처 `SETTINGS` = `{ scale 1.5 · idleSeconds 120 · keyHoldMs 150 · overlay (30, 40, visible) · mouse null · autostart false · language 'ko' · positionLock false · showInTaskbar false · timer DEFAULT_TIMER_SETTINGS }`. 기대값 0 · 500 · 10 · 150은 리터럴(화면은 bridge 상수를 쓰므로 독립 대조)
+
+#### 신규 TC — `test/ScaleIdleCard.keyHold.test.tsx` (R-69)
+
+### TC-364 · 키 그림 유지 시간 슬라이더 렌더 — 저장값 · 범위 0 ~ 500 · 단계 10 · 옆 표시 · aria-valuetext · 설명 · 같은 카드 셋째 행 · 경계 0 · 500 · 렌더만으로 저장 없음 · 종류: 자동 · 요구: R-69 · 설계: general-tab §1 셋째 행 · §2 `ScaleIdleCard` · §3.3 `KEY_HOLD_STEP_MS` · §3.4 `keyHold`(초기 `shown`) · `keyHoldText` · §3.6-4 · §6 역할 · 이름 · 스펙: `test/ScaleIdleCard.keyHold.test.tsx` · **신규(v35 — 옛 KH-B-01 · S1)**
+- Given `SETTINGS`(`keyHoldMs` 150) · ko · `ScaleIdleCard` 단독 렌더
+- When 렌더 → props `keyHoldMs` 0으로 재렌더 → 500으로 재렌더
+- Then ⓐ 화면: `region` 「크기 · 반응」 안에 `slider` 「키 그림 유지 시간」(`getByLabelText`로도 같은 원소), `value` `150` · `min` `0` · `max` `500` · `step` `10` · `aria-valuetext` `150ms` · 접근 설명 = `키를 짧게 눌러도 바뀐 키보드 그림을 최소 이 시간만큼 보여 줍니다. 0이면 떼는 즉시 돌아갑니다(0~500ms).` · `output[for="key-hold-slider"]` `150ms`. 카드 안 `input` id 순서 = `[scale-slider, idle-input, key-hold-slider]`(숫자 칸 없음). 0 재렌더 → `value` `0` · 옆 표시 `0ms` · `aria-valuetext` `0ms`, 500 재렌더 → `value` `500` · 옆 표시 `500ms` ⓑ 상태: 초안 없음 — `shown` = 받은 `keyHoldMs`(150 → 0 → 500) ⓒ bridge: `setSettings` 0회, `onError` 0회
+
+### TC-365 · 끄는 동안 표시만 · 놓을 때 1회 저장(`keyHoldMs`만 바뀐 사본) · 성공 onError(null) · 수신 전 저장값 · 수신 뒤 새 값 · 종류: 자동 · 요구: R-69 · 설계: §3.5 `keyHold.onChange` · `keyHold.onPointerUp` · `commitKeyHold`(성공) · §3.5 주(저장 규칙 = R-03) · §5 G-9 정상 · 스펙: 같음 · **신규(v35 — 옛 KH-B-02 · S2)**
+- Given `SETTINGS`(150) · ko
+- When 슬라이더 값 160 → 180 → 200 변경(끌기) → `pointerUp` → 응답 처리 → props `{ ...SETTINGS, keyHoldMs: 200 }` 재렌더(수신)
+- Then ⓐ 화면: 끄는 동안 옆 표시 `200ms` · `aria-valuetext` `200ms`. 놓고 응답이 끝난 뒤(수신 전) 옆 표시 `150ms`(저장값). 수신 뒤 옆 표시 `200ms` · `value` `200` ⓑ 상태: 끄는 동안 초안 200, 놓은 뒤 초안 버림 → `shown` = props 값 ⓒ bridge: 끄는 동안 `setSettings` 0회, `pointerUp`에서 정확히 1회 · 인자 `toStrictEqual({ ...SETTINGS, keyHoldMs: 200 })`(다른 필드 그대로), 성공 뒤 `onError(null)`
+
+### TC-366 · 키보드 — 이동 키를 뗀 뒤 300ms에 1회 저장, 299ms까지 저장 없음(가짜 시계) · 종류: 자동 · 요구: R-69 · 설계: §3.5 `keyHold.onKeyUp`(`SCALE_KEY_COMMIT_MS` 300) · §6 키보드 · §5 G-9 정상(키보드 경로) · 스펙: 같음 · **신규(v35 — 옛 KH-B-03 · S3)**
+- Given `SETTINGS`(150) · ko · 가짜 시계(`setTimeout` · `clearTimeout`만)
+- When 값 160으로 변경 → `keyUp`(`ArrowRight`) → 299ms 진행 → 1ms 더 진행 → 마이크로태스크 비움
+- Then ⓐ 화면: 해당 없음(저장 시점 판정 — 초안 표시는 TC-365) ⓑ 상태: 300ms 예약 1개, 299ms 시점 미실행 → 300ms에 `flush` 실행 ⓒ bridge: 299ms까지 `setSettings` 0회, 300ms 뒤 정확히 1회 · 인자 `toStrictEqual({ ...SETTINGS, keyHoldMs: 160 })`
+- 비고: 이동 키 8종 목록 · 이동 키가 아닌 키 무시 · 연속 키마다 예약 재설정은 공용 훅 `useSliderDraft` 공통 동작으로 TC-256(타이머 회전 슬라이더)이 판정한다. 이 슬라이더 고유 단언은 `ArrowRight` 1종이다
+
+### TC-367 · 같은 값 · 바꾸지 않은 놓기 · 초안 없는 blur → 저장 0회 · 종류: 자동 · 요구: R-69 · 설계: §3.5 `commitKeyHold` 주(같은 값 생략은 훅 — `draft === saved`면 0회) · `keyHold.onPointerUp` · `keyHold.onBlur`(초안 없음) · §5 G-9 오류 열 「같은 값 → 저장 0회」 · 스펙: 같음 · **신규(v35 — 옛 KH-B-04 · S4)**
+- Given `SETTINGS`(150) · ko
+- When ① 바꾸지 않고 `pointerUp` ② `blur` ③ 170 → 150으로 되돌린 뒤 `pointerUp`
+- Then ⓐ 화면: 옆 표시 `150ms` ⓑ 상태: ③ 놓은 값 150 = 저장값 → 초안만 버림 ⓒ bridge: `setSettings` 0회, `onError` 0회
+- 비고: 초안이 **있는** 상태의 blur → 즉시 1회 저장은 공용 훅 공통 동작으로 TC-256이 판정한다(이 슬라이더 고유 단언 없음 — 아래 AG-2)
+
+### TC-368 · 저장 실패(`settings.invalid`) → onError(BridgeError) 1회 · 슬라이더 · 표시가 저장값으로 복귀 · 종류: 자동 · 요구: R-69 · 설계: §3.5 `commitKeyHold` 예외(reject → `onError(toBridgeError(e))`, 밖으로 던지지 않음 — 훅 `flush`가 초안을 지움) · §5 G-9 오류 · 스펙: 같음 · **신규(v35 — 옛 KH-B-05 · S5)**
+- Given `SETTINGS`(150) · ko · `setSettings` reject `{ code: 'settings.invalid', message: '설정값이 올바르지 않습니다: 키 그림 유지 시간은 0 ~ 500ms 사이여야 합니다.' }`
+- When 값 300으로 변경 → `pointerUp` → 응답 처리
+- Then ⓐ 화면: 변경 직후 `value` `300`, 실패 뒤 `value` `150` · 옆 표시 `150ms` · `aria-valuetext` `150ms`(탭 오류 줄 표시는 상위 `SettingsApp` 몫 — 이 카드는 `onError` 전달까지) ⓑ 상태: 초안 버림 → `shown` = 저장값 150 ⓒ bridge: `setSettings` 1회 · 인자 `toStrictEqual({ ...SETTINGS, keyHoldMs: 300 })`, `onError` 정확히 1회 · 인자 = 위 BridgeError 그대로, `onError(null)` 호출 없음
+
+### TC-369 · 언어 ja · en — 라벨 · 옆 표시 · aria-valuetext · 설명 범위 치환 · 종류: 자동 · 요구: R-69, R-20 · 설계: i18n §4.2 `keyHoldLabel` · `keyHoldDesc` · `keyHoldValue` ja · en 열 · §3.4 `keyHoldText` · §3.6-4 `p#key-hold-desc`(`format(keyHoldDesc, { min, max })`) · §6 `aria-describedby` · 스펙: 같음 · **신규(v35 — 옛 KH-B-06 · S6)**
+- Given `SETTINGS`(150) · `MessagesProvider language` = ja, 다음 en(사례마다 새로 렌더 · 언마운트)
+- When 렌더
+- Then ⓐ 화면: ja — `slider` 「キー画像の表示時間」 · `aria-valuetext` `150ms` · 옆 표시 `150ms` · `aria-describedby`가 가리키는 설명에 `(0〜500ms)` 포함 · `{` `}` 없음 / en — `slider` 「Key image hold」 · `aria-valuetext` `150 ms` · 옆 표시 `150 ms` · 설명에 `(0–500 ms)` 포함 · `{` `}` 없음. 두 언어 모두 ko 이름 「키 그림 유지 시간」 슬라이더 없음 ⓑ 상태: `keyHoldText` = `format(t.keyHoldValue, { ms: 150 })`(언어별 사전) ⓒ bridge: 호출 없음(렌더만 — 스펙은 호출 횟수를 따로 단언하지 않는다)
+
+#### 신규 TC — `test/i18n.test.ts` (R-69 · R-59 개정)
+
+### TC-370 · 사전 새 3키(`keyHoldLabel` · `keyHoldDesc` · `keyHoldValue`) 세 사전 존재 · 자리표시자 · ko 확정 문구 · `presetSaveDesc` 3개 국어 「키 그림 유지 시간」 구절 삽입(나머지 글자 그대로) · 종류: 자동 · 요구: R-69, R-59, R-20 · 설계: i18n §4.2 CR-073 추가분(3행 · D-8) · §4.12 `presetSaveDesc` CR-073 개정(D-3) · 스펙: `test/i18n.test.ts` · **신규(v35 — 옛 KH-B-07 · S7)**
+- Given 세 사전 실물(`ko` · `ja` · `en`) · `format`
+- When 키 · 값 대조, `format(keyHoldDesc, { min: 0, max: 500 })` · `format(keyHoldValue, { ms: 150 })`, `presetSaveDesc`에서 삽입 구절을 뺀 문자열을 옛 문구(CR-064 ~ CR-072 시기)와 비교
+- Then ⓐ 화면(문구 원천): ko `keyHoldLabel` = `키 그림 유지 시간`, `keyHoldDesc` = `키를 짧게 눌러도 바뀐 키보드 그림을 최소 이 시간만큼 보여 줍니다. 0이면 떼는 즉시 돌아갑니다({min}~{max}ms).`, `keyHoldValue` = `{ms}ms` / ja `keyHoldLabel` = `キー画像の表示時間` · `format(keyHoldValue, { ms: 150 })` = `150ms` · 설명 치환에 `(0〜500ms)` / en `keyHoldLabel` = `Key image hold` · 값 `150 ms` · 설명 치환에 `(0–500 ms)`(ja · en 설명 전체 문장은 검수 필요 — 모양만 비교). `presetSaveDesc`: ko에 `키 그림 유지 시간·`, ja에 `キー画像の表示時間・`, en에 `key image hold, `가 들어 있고, 그 구절을 빼면 옛 문구와 글자 하나까지 같다 ⓑ 상태: 세 사전 모두 세 키가 비어 있지 않은 문자열, `keyHoldDesc`에 `{min}` · `{max}`, `keyHoldValue`에 `{ms}`, 치환 뒤 `{` `}` 없음 · `500` 포함 ⓒ bridge: 호출 없음(사전 모듈만)
+
+#### TC-FLOW
+
+### TC-FLOW-35 · S-2(CR-073 확장): 타자를 빨리 치면 키 그림이 안 보여서 「키 그림 유지 시간」을 늘리고, 필요하면 0으로 줄인다 · 종류: 자동+수동(조합 — 자동 Step은 각 TC 스펙이 판정, 이 FLOW 전용 스펙 없음) · 요구: R-69 · Steps: **Step 1** TC-364(현재 값 표시 부분) → **Step 2** TC-365(끌기 · 놓기 · 저장 인자 · 수신 부분) → **Step 3** M-69 ② ~ ④(실물 — settings.json 저장 · 오버레이 체감 · 0으로 줄이기) · **신규(v35)**
+- 상태 전달: Step 1 Given `SETTINGS`(`keyHoldMs` 150) → 표시 `150ms` → Step 2도 같은 `SETTINGS`로 시작(Step 1 표시가 Given) → 끌기 200 → 놓기 → 인자 `{ ...SETTINGS, keyHoldMs: 200 }` → 수신 props → 표시 `200ms` → Step 3 실물 앱에서 같은 조작으로 저장한 값이 settings.json `keyHoldMs`와 오버레이 키 그림 체감으로 이어지고, 0으로 내리면 떼는 즉시 돌아간다
+- 판정: Step 1 · 2는 해당 TC의 Then, Step 3은 M-69 기대. 키보드 경로(TC-366)와 실패 분기(TC-368)는 이 FLOW의 대안 경로로 각 TC가 판정한다
+- 조합으로 둔 이유: S-2의 R-03 · R-04 부분은 TC-FLOW-08(`SettingsApp.test.tsx` 통합 스펙)이 맡는다. 이번 위임은 스펙 로직 수정 금지라 새 통합 스펙을 만들지 않았고, 오버레이 반영은 jsdom으로 재현할 수 없어 어차피 수동이다
+
+#### CR-073 개정 TC (번호 유지, 스펙 개정 완료 — ui-implementer)
+
+| TC | 스펙 | 처리(CR-073) | 본문 |
+|---|---|---|---|
+| TC-094 | `i18n.test.ts` 333 · 373 ~ 374행 | ⓑ `simpleKeys(ko)` 174 → **177**(주석 「CR-073: + 3」). it 이름의 단순 키 수 갱신(이 패스) | 요구 R-69 · 「현행 개수」 줄 추가 |
+| TC-352 | `i18n.test.ts` 88 ~ 89 · 651행 | ⓐ `EXPECTED_KO_PRESET.presetSaveDesc` = CR-073 ko 문구(「휴식 시간·」 뒤 「키 그림 유지 시간·」) ⓑ 세 사전 단순 키 **177** | 제목 · 요구 R-59 · Then ⓐ ⓑ |
+| TC-362 | `i18n.test.ts` 685 · 693행 | ⓑ 세 사전 단순 키 **177**. it 이름 「174」 → 「177(옛 174)」(이 패스) | 제목 「단순 키 174」 → 「177」 · Then ⓑ |
+| TC-130 | `GeneralTab.test.tsx` 595 ~ 620행 | ⓐ 포커스 순서 넷째 `key-hold-slider`(모두 9개). it 이름에 「키 그림 유지 시간」(이 패스) | 제목 · 요구 R-56 · R-69 · Then ⓐ 현행 순서 전체 |
+| 픽스처 12파일 | `DragHit` · `Hair` · `GeneralTab` · `ImagesTab` · `MousePartsTab` · `PenMode` · `PomoCards` · `ResetAllCard` · `SettingsApp` · `SettingsApp.timer` · `TimerTab` · `TimerTab.cr052` | `Settings` 리터럴에 `keyHoldMs: 150`(contract v1.2 필수 필드 — `tsc` 통과용) | 불변(판정 변화 없음) |
+
+회귀만(CR-073): TC-104 · TC-119 ~ TC-129(같은 카드의 배율 · 유휴 시간 — 새 행이 끼어도 기존 단언 불변), TC-131(`generalValues` — `KEY_HOLD_STEP_MS`는 이 TC가 아니라 TC-364의 `step` 속성이 판정), TC-255 ~ TC-257(공용 훅 `useSliderDraft` — 변경 없음, 셋째 사용처 추가), TC-319 · TC-346(프리셋 저장 카드 설명 = `ko.presetSaveDesc` · `t.presetSaveDesc` 사전 경유 — 자동 추종), TC-FLOW-08 · TC-FLOW-33(새 슬라이더 · 설명 문구를 단언하지 않음 — 불변).
+
+옛 임시 번호 대응: KH-B-01 → TC-364 · KH-B-02 → TC-365 · KH-B-03 → TC-366 · KH-B-04 → TC-367 · KH-B-05 → TC-368 · KH-B-06 → TC-369 · KH-B-07 → TC-370(패킷 S1 ~ S7 순서 그대로).
+
+추적(CR-073) — 요구 ↔ TC
+
+| 요구ID | 자동 TC | 수동 | TC-FLOW |
+|---|---|---|---|
+| R-69 | 신규 TC-364 · TC-365 · TC-366 · TC-367 · TC-368 · TC-369 · TC-370, 개정 TC-094 · TC-130, 회귀 TC-256(공용 훅 — 초안 있는 blur · 언마운트 예약 해제 · 이동 키 8종) | M-69 | TC-FLOW-35 |
+| R-59(개정 — 설명 문구) | 신규 TC-370(3개 국어 구절 삽입 · 나머지 불변), 개정 TC-352(ko 정확), 회귀 TC-319 · TC-346(화면 표시) | M-64a(기존 — 담는 내용 판정은 core) | —(TC-FLOW-33은 설명 문구를 단언하지 않음 — v30 추적표와 같음) |
+| R-20(언어) | TC-369(ja · en 화면), TC-370(세 사전), 개정 TC-094 · TC-352 · TC-362(단순 키 177 · 키 집합 동일) | M-69 ⑥ | — |
+| R-03 · R-04(같은 카드) | 회귀 TC-104 · TC-119 ~ TC-129 · TC-131 | — | TC-FLOW-08(불변) |
+| R-56(포커스 순서 끝) | 개정 TC-130(마지막 「전체 초기화」 유지) | — | — |
+
+추적(CR-073) — 설계 항목 ↔ TC
+
+| 설계 항목 | TC |
+|---|---|
+| general-tab §1 `cardScale` 셋째 행(유휴 시간 아래 · 같은 카드 · 옆 값 `{keyHoldValue}` · 새 CSS 없음) | TC-364(카드 안 · input 순서 · 옆 표시), TC-130 / 실물 정렬 M-69 ① |
+| §2 `ScaleIdleCard` R-69 추가 · `useSliderDraft` 재사용(변경 없음) | TC-364 ~ TC-368 / 훅 자체 회귀 TC-255 ~ TC-257 |
+| §3.3 `KEY_HOLD_STEP_MS` 10 · 범위 = bridge `KEY_HOLD_MS_MIN` · `KEY_HOLD_MS_MAX`(화면에 숫자 직접 금지) | TC-364(`step` 10 · `min` 0 · `max` 500 — 기대는 리터럴, 화면은 상수), TC-369 · TC-370(설명 `{min}` · `{max}` 치환) |
+| §3.4 `keyHold`(초기 초안 null · `shown` = `settings.keyHoldMs`) | TC-364(150 · 0 · 500), TC-365(끄는 동안 초안 · 놓은 뒤 저장값) |
+| §3.4 `keyHoldText` = `format(t.keyHoldValue, { ms })` | TC-364(`150ms` · `0ms` · `500ms`), TC-365(`200ms`), TC-369(ja `150ms` · en `150 ms`) |
+| §3.5 `commitKeyHold` 정상(인자 `{ ...settings, keyHoldMs: v }` · 성공 `onError(null)`) | TC-365, TC-366 |
+| §3.5 `commitKeyHold` 예외(reject → `onError(toBridgeError(e))` · 던지지 않음 · 저장값 복귀) | TC-368 |
+| §3.5 `keyHold.onChange`(초안만 · 저장 0회) | TC-365, TC-367 |
+| §3.5 `keyHold.onPointerUp`(`flush` · 같은 값 0회) | TC-365, TC-367 |
+| §3.5 `keyHold.onKeyUp`(이동 키 → 300ms 뒤 1회) | TC-366(`ArrowRight`) · 이동 키 8종과 비이동 키 무시는 훅 회귀 TC-256 |
+| §3.5 `keyHold.onBlur`(초안 있으면 즉시) | TC-367(초안 없음 → 0회) · 초안 있음 → 즉시 1회는 훅 회귀 TC-256(AG-2) |
+| §3.5 주 — 저장 규칙 = R-03 · 언마운트 예약 해제 · 새 값은 다음 새 누름부터(A-4) | TC-365 ~ TC-367 · 언마운트 해제는 훅 회귀 TC-256(AG-2) · 오버레이 쪽 적용은 실물 M-69 |
+| §3.6-4 렌더(`label htmlFor` · `input#key-hold-slider` range · `min` · `max` · `step` · `value` · `aria-describedby="key-hold-desc"` · `aria-valuetext` · `output` · `p#key-hold-desc` · 숫자 칸 · 「기본값으로」 버튼 · 미리보기 없음) | TC-364(라벨 연결 · 속성 · 설명 · 카드 input 3개), TC-130(탭 전체 포커스 대상 9개 — 추가 버튼 없음), TC-369(`aria-describedby` 대상) |
+| §5 G-9 정상(끌기 → 놓기 · 키보드 · blur → 1회 저장 → 수신 → 표시) | TC-365, TC-366, TC-FLOW-35 / 오버레이 반영 M-69 |
+| §5 G-9 오류(같은 값 0회 · 실패 → 오류 전달 · 저장값 복귀) | TC-367, TC-368 |
+| §6 포커스 순서(CR-073 — 유휴 시간 다음) | TC-130, TC-364(카드 안 DOM 순서) / 실제 Tab M-69 ⑤ |
+| §6 역할 · 이름(라벨 이름 · `aria-valuetext` ko `150ms` · en `150 ms` · `aria-describedby`) · 키보드(±10ms · Home · End · PageUp · PageDown) | TC-364, TC-369 / 키 이동 실물 · 낭독 M-69 ⑤ |
+| i18n §4.2 `keyHoldLabel` · `keyHoldDesc` · `keyHoldValue`(ko 확정 · ja · en 검수 필요) | TC-370(사전), TC-364 · TC-369(화면) / ja · en 검수 M-69 ⑥ |
+| i18n §4.2 CR-073 추가분 — 사전 파일 안 위치(`idleRangeHint` 뒤 · `cardWindow` 앞, as-built) | TC-370(존재) · TC-362(세 사전 키 집합 동일). 파일 안 줄 순서는 동작에 영향이 없어 자동 판정 대상이 아니다(정적 배치 — 리뷰 몫) |
+| i18n §4.12 `presetSaveDesc` CR-073 개정(구절 1개 삽입 · 나머지 불변) | TC-370(3개 국어), TC-352(ko 정확), 회귀 TC-319 · TC-346(화면) |
+| i18n 머리 — 단순 키 174 → 177 | TC-094, TC-352, TC-362 |
+| design.md §13 RTM R-69 · R-59 · 계약 사용표 `set_settings` `commitKeyHold` 행 | 위 요구 표 · TC-365 · TC-368 |
+
+추적(CR-073) — 사용자행 ↔ TC-FLOW
+
+| 사용자행 | 요구 | TC-FLOW | 비고 |
+|---|---|---|---|
+| S-2(CR-073 확장 — 키 그림 유지 시간 늘리기 · 0으로 줄이기) | R-03, R-04, R-69 | TC-FLOW-08(R-03 · R-04 부분, 불변) · **TC-FLOW-35**(R-69 부분, 신규) | 오버레이 체감은 M-69 |
+| S-31(프리셋 저장 — R-59 설명 문구) | R-58, R-59 등 | TC-FLOW-33(불변) | 설명 문구는 TC-370 · TC-352 · TC-319가 판정 |
+
+CR ↔ TC(CR-073)
+
+| CR-ID | 신규 | 개정 | 회귀 | 수동 | 대기열 |
+|---|---|---|---|---|---|
+| CR-073 | TC-364 ~ TC-370 · TC-FLOW-35 | TC-094 · TC-130 · TC-352 · TC-362 | TC-104 · TC-119 ~ TC-129 · TC-131 · TC-255 ~ TC-257 · TC-319 · TC-346 · TC-FLOW-08 · TC-FLOW-33 | M-69 | Q-12 → 전환됨 |
+
+### v35 설계 확인 필요
+
+- **AG-1. 임시 번호 잔존(문서 소유자 몫).** `design.md` §13 RTM R-69 · R-59 행의 TC 열, `design/i18n.md` §4.2 CR-073 추가분의 「스펙 영향」 줄, CR 대장 CR-073에 `KH-B-01 ~ KH-B-07(전환 대기)`가 남아 있다. 위 대응표의 정식 번호 TC-364 ~ TC-370으로 갱신 필요 — ui-designer(design · i18n) · CR 대장 소유자. 이 문서 판정에는 영향 없음.
+- **AG-2. 이 슬라이더 고유 단언이 없는 훅 동작 2가지(참고 — 결함 아님).** 초안이 있는 상태의 blur → 즉시 1회 저장, 언마운트 시 300ms 예약 해제(저장 0회)는 공용 훅 `useSliderDraft`가 하며 TC-256(타이머 회전 슬라이더)이 판정한다. general-tab §2가 「훅 변경 없음」이라 회귀 추적으로 두었다. 키 그림 유지 시간 슬라이더에서도 직접 확인하길 원하면 `ScaleIdleCard.keyHold.test.tsx`에 사례를 더할지(배율 TC-123과 같은 모양) 관리자가 정한다 — 이번 위임은 스펙 로직 수정 금지.
+
 ## 변경이력
 
 | 일자 | 내용 |
 |---|---|
+| 2026-11-01 | v35 — **CR-073 「키 그림 유지 시간」 반영(R-69 신설 · R-59 개정, requirements v1.32 · general-tab §1 · §3.3 ~ §3.6 · §5 G-9 · §6 · i18n §4.2 · §4.12 · contract v1.2), 대기열 Q-12 정식 TC 전환, 증분 모드 — 추가 · 수정만.** 머리 「v35 기준」 줄 · 끝 「v35 개정」 절 신설(신규 TC 7 · TC-FLOW 1 · 개정 표 · 옛 임시 번호 대응 · 추적 4종 · 설계 확인 AG-1 · AG-2). 신규 TC-364 ~ TC-369(`ScaleIdleCard.keyHold.test.tsx` — 옛 KH-B-01 ~ KH-B-06) · TC-370(`i18n.test.ts` — 옛 KH-B-07) · TC-FLOW-35(S-2 확장, 조합). 개정 TC-094(현행 개수 줄 — 단순 키 177) · TC-130(포커스 순서 `key-hold-slider` · 현행 9개 순서 전체) · TC-352(`presetSaveDesc` ko · 단순 키 177) · TC-362(제목 · Then 단순 키 174 → 177). 기존 표: 「CR ↔ TC」 표에 CR-073 행, v30 추적표 R-59 행에 TC-370 · TC-352 · TC-346. 스펙: it 이름 · 머리 주석만(KH-B → TC 번호, TC-094 · TC-130 · TC-362 이름의 옛 수) — 단언 불변. `manual-checklist.md` v26(M-69). 대기열 Q-12 → 전환됨. 수: 자동 번호 370(유효 357 · 폐기 8 · 결번 5) · TC-FLOW 35(유효 34 · 폐기 1) · 수동 65 |
 | 2026-10-24 | v34 — **CR-068(「뽀모도로」 표기 정정) · CR-070(카운트다운 쉬는중 자동 일시정지 문구 · `restPaused` 잠금 A-1) 반영, 대기열 Q-10 · Q-11 정식 TC 전환, 증분 모드 — 개정만.** 머리 「v34 기준」 줄 · 끝 「v34 개정」 절 신설(개정 표 2 · 추적 3종 · 설계 확인 AF-1 · AF-2). CR-068: 본문 전체의 화면 문구 인용 · 설명어를 「뽀모도로」로 통일(TC-094 · 096 · 136 · 142 · 179 · 201 · 234 · 241 ~ 245 · 247 · 248 · 285 · 291 · 292 · FLOW-15 · FLOW-25 계열 제목 · 기대, CR-051 인용 행, 옛 개정 절 제목 · 추적표), 변경이력 행은 기록 보존. CR-070: TC-269 Then ⓑ(`restPaused` 잠김 true · 스톱워치 · 꺼진 타이머 `restPaused` false), TC-276 Then ⓐ(타이머 `restPaused` 잠김 · 9사례), TC-286 Then ⓑ(`timerCountdownDesc` 새 ko 문구), 「CR-050 개정」 절 Z-3 ③ 취소선 + 「(CR-070) 카운트다운 `restPaused`는 잠긴다(A-1)」. `manual-checklist.md` v25(M-45b ⑦ 「타이머 모드도 같음」 · M-68 신규). 스펙 변경 없음(ui-implementer 선개정과 일치). 수: 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 64 |
 | 2026-10-15 | v33 — **CR-067 반영(알림음 카드 문구 1회 재생, 대기열 Q-09 정식 TC 전환, 증분 모드 — 개정만)**. 기준 CR 대장 CR-067 🔒 · i18n `alarmCardDesc` CR-067 변경 행 · 현행 사전. 끝에 「v33 개정 — CR-067」 절 신설(개정 표 · 추적 · 설계 확인 필요 AE-1 · AE-2). 개정 TC-277(Then ⓐ 새 ko 문구 + 반복 · 옛 문구 부재) · TC-286(Then ⓑ `alarmCardDesc` 새 ko 값) · TC-289(Given 반복 문구 표 · Then ⓐ ⓑ 반복 문구 부재) · TC-248(스펙만, 본문 불변). 「CR-052 개정 TC」 표 TC-286 · TC-248 · TC-277 행, CR-052 추적 R-44 · R-53 · R-55 행과 설계 항목 행, CR-050 요구 표 R-44 · R-53 · R-55 행에 CR-067 표기. Q-09 → 전환됨. 스펙 변경 없음(ui-fixer 선개정과 일치). 수 불변: 자동 번호 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34(유효 33 · 폐기 1) · 수동 63 |
 | 2026-10-15 | v32 — **doc-sync 배치(requirements v1.29 · design 2026-10-15 행 · presets-tab · i18n · images-tab 머리)**, 증분 모드. 문서 머리 「v32 기준」 줄 신설. 닫음: AA-1 · AA-2 · AA-5(설계 · 스펙 일치), AA-4 · AB-3(CR-063 「현 동작 유지」 — 응답 직후 포커스 = 누른 「기본값」, 수신 뒤 판정 없음), AD-1(`PREVIEW_ORDER` 9키 · ≤ 9장). TC-207 결과 기록(v29 스펙 정정으로 해소). 대기열 Q-01 · Q-02 「검증됨(2026-10-15, vitest 881/881)」(메인 세션 근거 · 위임 지시). 신규 **TC-363**(`PresetsTab.test.tsx` — 이름 바꾸기 저장 대기 중 Esc 무시 · 편집 · problems 유지, reject · resolve) + presets-tab §1.2 · §2 · §2.3 · §5.1 구현 형태 표 · §11.8 설계↔TC 덧붙임. v30 · v31 절 번호 어긋남 없음. 수: 자동 363(유효 350 · 폐기 8 · 결번 5) · TC-FLOW 34 · 수동 63 |

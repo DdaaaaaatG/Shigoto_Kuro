@@ -86,7 +86,7 @@ const EXPECTED_KO_PRESET = {
   tabPresets: '프리셋',
   cardPresetSave: '현재 상태를 프리셋으로 저장',
   presetSaveDesc:
-    '지금 등록한 그림 전부·알림음·배율·휴식 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.',
+    '지금 등록한 그림 전부·알림음·배율·휴식 시간·키 그림 유지 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.',
   presetNameLabel: '프리셋 이름',
   presetNamePlaceholder: '예: 고양이 A',
   presetSave: '저장',
@@ -330,7 +330,7 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     }
   })
 
-  it('TC-094 (CR-049 · CR-050 · CR-054 · CR-057 개정): ko 사전 — 새 키 41개·슬롯 20개·오류 27개 문구가 i18n.md §4 ko 열과 정확히 같다, 단순 키 137개(CR-057 areaDesc +1), autostartCancelled 없음, 표 줄임 「(같음)」은 문장으로 채운다', () => {
+  it('TC-094 (CR-049 · CR-050 · CR-054 · CR-057 · CR-073 개정): ko 사전 — 새 키 41개·슬롯 20개·오류 27개 문구가 i18n.md §4 ko 열과 정확히 같다, 단순 키 177개(CR-073 keyHold +3 — 옛 137은 CR-057 기록), autostartCancelled 없음, 표 줄임 「(같음)」은 문장으로 채운다', () => {
     // CR-049(i18n §4.2·§4.6): Messages.autostartCancelled·errors['autostart.cancelled'] 삭제 — 세 사전 모두 부재
     for (const dict of [ko, ja, en]) {
       expect('autostartCancelled' in dict).toBe(false)
@@ -370,7 +370,8 @@ describe('i18n 사전 (design/i18n.md §2·§4, U-4)', () => {
     // CR-057: + 1(areaDesc — 값 단언은 MousePartsTab.test.tsx TC-305, 3개 국어) — 옛 136
     // CR-064: + 36(i18n §4.12 tabPresets ~ presetRenameInputAria — 값 단언은 TC-352) — 옛 137
     // CR-065: + 1(i18n §4.12 CR-065 추가분 presetPreviewUnavailable — 값 단언은 TC-362) — 옛 173
-    expect(simpleKeys(ko)).toHaveLength(174) // CR-035: + 12(i18n §4.7) — 옛 80
+    // CR-073: + 3(i18n §4.2 keyHoldLabel·keyHoldDesc·keyHoldValue — 값 단언은 TC-370, key-hold D-8) — 옛 174
+    expect(simpleKeys(ko)).toHaveLength(177) // CR-035: + 12(i18n §4.7) — 옛 80
     for (const dict of [ko, ja, en]) {
       expect('areaDesc' in dict, 'CR-057 areaDesc').toBe(true)
     }
@@ -647,7 +648,7 @@ describe('i18n 사전 — 프리셋 (CR-064)', () => {
     expect(ERROR_CODES).not.toContain('preset.forbidden')
     for (const dict of [ko, ja, en]) {
       expect('preset.forbidden' in dict.errors).toBe(false)
-      expect(simpleKeys(dict)).toHaveLength(174) // CR-065: + presetPreviewUnavailable(TC-362) — 옛 173
+      expect(simpleKeys(dict)).toHaveLength(177) // CR-065: + presetPreviewUnavailable(TC-362) — 옛 173 · CR-073: + 3(TC-370) — 옛 174
     }
     for (const dict of [ja, en]) {
       const rec = dict as unknown as Record<string, string>
@@ -681,7 +682,7 @@ describe('i18n 사전 — 프리셋 (CR-064)', () => {
 
 // CR-065 · R-68 · R-20 (i18n §4.12 CR-065 추가분) — scenarios.md 「v31 개정」 절
 describe('i18n 사전 — 프리셋 미리보기 (CR-065)', () => {
-  it('TC-362: presetPreviewUnavailable — ko 「미리보기를 표시할 수 없습니다.」, ja·en = §4.12 표 값(검수 필요)·ko 와 다름, 세 사전 단순 키 174·키 집합 동일', () => {
+  it('TC-362 (CR-073 개정): presetPreviewUnavailable — ko 「미리보기를 표시할 수 없습니다.」, ja·en = §4.12 표 값(검수 필요)·ko 와 다름, 세 사전 단순 키 177(옛 174)·키 집합 동일', () => {
     expect(ko.presetPreviewUnavailable).toBe('미리보기를 표시할 수 없습니다.')
     expect(ja.presetPreviewUnavailable).toBe('プレビューを表示できません。')
     expect(en.presetPreviewUnavailable).toBe('Preview unavailable.')
@@ -689,8 +690,60 @@ describe('i18n 사전 — 프리셋 미리보기 (CR-065)', () => {
       expect(dict.presetPreviewUnavailable).not.toBe(ko.presetPreviewUnavailable)
       expect(simpleKeys(dict)).toEqual(simpleKeys(ko))
     }
-    for (const dict of [ko, ja, en]) expect(simpleKeys(dict)).toHaveLength(174)
+    for (const dict of [ko, ja, en]) expect(simpleKeys(dict)).toHaveLength(177) // CR-073: + 3(TC-370) — 옛 174
     expect(ERROR_CODES).toHaveLength(39) // 에러 code 는 늘지 않는다(새 command 없음)
+  })
+})
+
+// CR-073 · R-69 · R-59 개정 · R-20 (key-hold-02-design §5a D-3·D-8 문구 · i18n §4.2) — scenarios.md 「v35 개정」 절 TC-370(옛 임시 KH-B-07)
+describe('i18n 사전 — 키 그림 유지 시간 (CR-073)', () => {
+  /** presetSaveDesc 의 옛 문구(CR-064~CR-072) — D-3 은 「삽입 위치만 바뀌고 나머지 글자 그대로」 */
+  const OLD_PRESET_SAVE_DESC = {
+    ko: '지금 등록한 그림 전부·알림음·배율·휴식 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.',
+    ja: '現在登録している画像すべて・通知音・倍率・休憩時間・「肩の軸・手の位置」タブの設定(肩軸・移動範囲・腕の位置・手の位置・ペンの手の使用)・タイマー設定をまとめて保存します。ウィンドウ位置・言語・自動起動・タスクバー・位置ロックは含まれません。',
+    en: 'Saves all current images, the alarm sound, scale, rest time, the "Shoulder & hand" tab settings (shoulder axis, movement area, arm position, hand position, pen hand) and timer settings as one set. Window position, language, autostart, taskbar and position lock are not included.',
+  }
+  /** 삽입된 구절(바로 앞 「휴식 시간·」 뒤) — 이것을 빼면 옛 문구와 같아야 한다 */
+  const INSERTED = { ko: '키 그림 유지 시간·', ja: 'キー画像の表示時間・', en: 'key image hold, ' }
+
+  it('TC-370 (S7): 새 키 3개(keyHoldLabel·keyHoldDesc·keyHoldValue)가 세 사전에 있고 D-8 문구와 자리표시자가 맞다, presetSaveDesc 에 키 그림 유지 시간 구절이 들어가고 나머지 글자는 그대로', () => {
+    const KEYS = ['keyHoldLabel', 'keyHoldDesc', 'keyHoldValue'] as const
+    for (const dict of [ko, ja, en]) {
+      for (const k of KEYS) {
+        expect(k in dict, k).toBe(true)
+        expect(typeof dict[k], k).toBe('string')
+        expect(dict[k].trim().length, k).toBeGreaterThan(0)
+      }
+      // 자리표시자: 범위는 {min}·{max}, 값은 {ms} (화면에 숫자를 적지 않는다)
+      expect(dict.keyHoldDesc).toContain('{min}')
+      expect(dict.keyHoldDesc).toContain('{max}')
+      expect(dict.keyHoldValue).toContain('{ms}')
+      const desc = format(dict.keyHoldDesc, { min: 0, max: 500 })
+      expect(desc).not.toMatch(/[{}]/)
+      expect(desc).toContain('500')
+    }
+    // ko 확정 문구(D-8 표) — 정확 일치
+    expect(ko.keyHoldLabel).toBe('키 그림 유지 시간')
+    expect(ko.keyHoldDesc).toBe(
+      '키를 짧게 눌러도 바뀐 키보드 그림을 최소 이 시간만큼 보여 줍니다. 0이면 떼는 즉시 돌아갑니다({min}~{max}ms).',
+    )
+    expect(ko.keyHoldValue).toBe('{ms}ms')
+    // ja·en 은 검수 필요(사용자) — 라벨·값 표기만 정확 비교, 설명은 범위 치환 모양만
+    expect(ja.keyHoldLabel).toBe('キー画像の表示時間')
+    expect(en.keyHoldLabel).toBe('Key image hold')
+    expect(format(ja.keyHoldValue, { ms: 150 })).toBe('150ms')
+    expect(format(en.keyHoldValue, { ms: 150 })).toBe('150 ms')
+    expect(format(ja.keyHoldDesc, { min: 0, max: 500 })).toContain('(0〜500ms)')
+    expect(format(en.keyHoldDesc, { min: 0, max: 500 })).toContain('(0–500 ms)')
+    // R-59 개정(D-3): 프리셋 저장 설명에 키 그림 유지 시간 — 삽입 위치만 바뀌고 나머지 글자 그대로
+    for (const lang of ['ko', 'ja', 'en'] as const) {
+      const dict = { ko, ja, en }[lang]
+      expect(dict.presetSaveDesc, lang).toContain(INSERTED[lang])
+      expect(dict.presetSaveDesc.replace(INSERTED[lang], ''), lang).toBe(OLD_PRESET_SAVE_DESC[lang])
+    }
+    expect(ko.presetSaveDesc).toContain('키 그림 유지 시간')
+    expect(ja.presetSaveDesc).toContain('キー画像の表示時間')
+    expect(en.presetSaveDesc).toContain('key image hold')
   })
 })
 

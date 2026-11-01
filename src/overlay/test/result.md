@@ -103,3 +103,12 @@ CR-050 대상 TC 범위:
 - 수동: TC-356(MC-51) SKIP — 전제 미충족(등록된 프리셋·assets에 key_space 전용 그림 없음). TC-348~350(MC-48~50) SKIP — 유휴 5분 필요, 수동 인계.
 - 스크린샷: doc/300_검증/screenshots/20261027-1710/01-overlay.png (기본 화면, 360x280, 대기 그림·00:00:00 말풍선 정상 표시)
 - 프로세스: 검증용 dev 앱을 띄웠다가 종료함.
+
+## 키 그림 최소 유지 시간 (CR-072) 검증 — 2026-11-01 19:59
+실행: vitest `yarn test --run src/overlay src/state src/components` · E2E 미설치 · 스크린샷 1장
+판정: 통과(자동) — 44파일 / 371 테스트 PASS, FAIL 0, SKIP(수동) 2. 기준 scenarios v2.11.
+- 신규 TC-357~378: 스펙 등록 22/22 확인(keyHold.test.ts 14건 + OverlayApp.keyHold.test.tsx). 전부 통과.
+- 개정 TC-169·170·352·354 통과. 픽스처 19파일 keyHoldMs=0 회귀 통과.
+- 증거: doc/300_검증/screenshots/20261101-1959-key-hold-test/keyhold01-overlay.png (대기 그림·00:00:00 말풍선 정상 표시, 시간 경과 동작은 정지 캡처로 판정 불가)
+- SKIP(수동): TC-379(MC-52), M-69 — 시간 경과 동작, 사용자 눈 확인 인계. 키 입력 시뮬레이션 안 함.
+- 프로세스: 기존 dev 앱 그대로 유지(종료 안 함).

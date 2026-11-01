@@ -64,6 +64,7 @@ const TF: TimerSettings = {
 const SETTINGS: Settings = {
   scale: 1.5,
   idleSeconds: 120,
+  keyHoldMs: 150, // contract v1.2(key-hold) 필수 필드
   overlay: { x: 30, y: 40, visible: true },
   mouse: null,
   autostart: false,

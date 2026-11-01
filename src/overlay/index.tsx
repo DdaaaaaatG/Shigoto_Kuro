@@ -17,6 +17,7 @@
 //! CR-051: .hairWrap(뒷머리, 젤리 동기) → BackgroundLayer → PomodoroLayer(고정, CR-045) → .jellyWrap 순으로 그린다
 //! CR-069(R-41): 쉬는중 && rest 등록이면 .canvas에 .restOnly — 배경 + rest만 보이고 나머지는 CSS visibility로 가린다(DOM 유지, §10.17)
 //! CR-071(R-22 개정): 특수 키 전용 그림이 그려지는 동안 .canvas에 .specialShown — 팔·펜 손만 CSS visibility로 가린다(§10.6)
+//! CR-072(R-42): 새 누름마다 유지 스냅숏(state/keyHold) — view(보이는 키 상태)를 키 그림·특수 키 숨김·펜 손·젤리에 쓴다
 import {
   useCallback,
   useEffect,
@@ -53,16 +54,15 @@ import {
 } from 'bridge'
 import { useBridgeEvent } from 'components/hooks/useBridgeEvent'
 import { fetchWithRetry } from 'components/utils/fetchWithRetry'
+import { isSpecialKey, wrapMotion, type MachineConfig, type WrapMotion } from 'state/inputMachine'
 import {
-  createInitialState,
-  isSpecialKey,
-  reduce,
-  wrapMotion,
-  type MachineConfig,
-  type MachineInput,
-  type MachineState,
-  type WrapMotion,
-} from 'state/inputMachine'
+  createOverlayState,
+  holdDelay,
+  reduceOverlay,
+  visibleMachine,
+  type OverlayInput,
+  type OverlayState,
+} from 'state/keyHold'
 import BackgroundLayer from './components/BackgroundLayer'
 import HairLayer from './components/HairLayer'
 import LayerStack, {
@@ -123,12 +123,26 @@ const OverlayApp = () => {
 
   const configRef = useRef(config)
   configRef.current = config
+  // 키 그림 최소 유지 시간(R-42, CR-072) — 리듀서가 ref로 읽는다(configRef와 같은 방식). 바뀌면 다음 새 누름부터 적용(A-4)
+  const holdMsRef = useRef(settings.keyHoldMs)
+  holdMsRef.current = settings.keyHoldMs
 
   const reducer = useCallback(
-    (state: MachineState, input: MachineInput) => reduce(state, input, configRef.current),
+    (state: OverlayState, input: OverlayInput) =>
+      reduceOverlay(state, input, configRef.current, holdMsRef.current),
     [],
   )
-  const [machine, dispatch] = useReducer(reducer, Date.now(), createInitialState)
+  const [{ machine, hold }, dispatch] = useReducer(reducer, Date.now(), createOverlayState)
+
+  // 키 그림 최소 유지 만료(R-42) — 유지 스냅숏마다 setTimeout 1개. 새 누름(hold 교체)·언마운트 때 해제(누수 없음)
+  useEffect(() => {
+    if (hold === null) return
+    const id = window.setTimeout(
+      () => dispatch({ type: 'holdEnd', seq: hold.seq }),
+      holdDelay(hold, Date.now()),
+    )
+    return () => window.clearTimeout(id)
+  }, [hold])
 
   // 초기 로드 — CR-039: core 준비 전 실패에 대비해 200·500·1000ms 간격으로 최대 3회 재시도(끝내 실패하면 문구 없음)
   useEffect(() => {
@@ -227,15 +241,17 @@ const OverlayApp = () => {
   const canvas = manifest.canvas
   const fit = canvas ? Math.min(BASE_BOX.width / canvas.width, BASE_BOX.height / canvas.height) : 1
   const scale = fit * settings.scale
+  /** 보이는 키 상태(R-42) — 키 그림·특수 키 숨김·펜 손·젤리 전용. layer·mouse·쉬는중 보고는 machine(입력 상태) */
+  const view = useMemo(() => visibleMachine(machine, hold), [machine, hold])
   /** 본체 래퍼와 뒷머리 래퍼가 같은 커밋에서 같은 클래스를 받도록 한 번만 계산(CR-051) */
-  const motion = wrapMotion(machine)
+  const motion = wrapMotion(view)
   const hasHair = useMemo(() => findEntry(manifest, 'hair') !== undefined, [manifest])
   const hasRest = useMemo(() => findEntry(manifest, 'rest') !== undefined, [manifest])
   /** 쉬는중 단독 표시(R-41, 🔒 2026-10-24) — rest 그림이 있을 때만(D-1). 배경과 rest만 보이고 나머지는
    *  CSS visibility로 가린다(언마운트 없음 — 구독·알림음·이미지 디코드 유지, design §10.17) */
   const restOnly = machine.layer === 'rest' && hasRest
   /** 특수 키 전용 그림 표시 중 팔·펜 손 숨김(CR-071, 🔒 2026-10-27) — 미등록 폴백이면 false. 위치 계산은 그대로 돈다 */
-  const specialShown = isSpecialShown(manifest, machine)
+  const specialShown = isSpecialShown(manifest, view)
   const canvasClass = [
     styles.canvas,
     restOnly && styles.restOnly,
@@ -279,11 +295,11 @@ const OverlayApp = () => {
                 atRest={armAtRest}
               />
             )}
-            <LayerStack manifest={manifest} machine={machine} penMode={penMode} />
+            <LayerStack manifest={manifest} machine={view} penMode={penMode} />
             {settings.mouse && (
               <PenHand
                 manifest={manifest}
-                machine={machine}
+                machine={view}
                 mouse={settings.mouse}
                 monitors={monitors}
                 cursor={machine.mouse}

@@ -145,6 +145,9 @@ export interface Messages {
   idleUnit: string
   idleDesc: string
   idleRangeHint: string
+  keyHoldLabel: string // CR-073 · R-69 (key-hold D-8)
+  keyHoldDesc: string // {min}·{max} 자리표시자
+  keyHoldValue: string // {ms} 자리표시자 — 슬라이더 옆 표시·aria-valuetext
   cardWindow: string
   resetPosition: string
   lockLabel: string

@@ -4,6 +4,7 @@
 
 - 상위 문서: `src/settings/design.md`(탭 목록·bridge 사용표 §7·RTM §13). 문구는 `design/i18n.md` §4.12(키 이름으로만 인용), 에러 문구는 §4.6.
 - 요구: `src/settings/requirements.md` **v1.28** — **R-58**(저장, PS-01) · **R-59**(들어가는 것, PS-02) · **R-60**(안 들어가는 것, PS-03) · **R-61**(적용, PS-04) · **R-62**(내보내기, PS-05) · **R-63**(가져오기, PS-06) · **R-64**(이름 바꾸기·삭제, PS-07) · **R-65**(저장 조건, PS-08) · **R-66**(화면, PS-09) · **R-67**(적용 후 상태, PS-10) · R-20(3개 국어) · R-27(세로 메뉴 — 항목 5개로 확장, requirements 용어 주).
+- **(CR-073, 2026-11-01 — requirements v1.32 R-59 개정, key-hold D-3)** 프리셋 「들어가는 것」에 키 그림 유지 시간(`keyHoldMs`)이 더해졌다(PS-02 설정 5필드 — contract v1.2 §5.11, 담기·적용·옛 프리셋 150은 core 소관). 이 탭의 변경은 **저장 카드 설명 `presetSaveDesc` 문구뿐**이다 — 문구는 `design/i18n.md` §4.12 개정 행(「배율·휴식 시간·키 그림 유지 시간·…」). 컴포넌트·상태·기능·계약 호출·레이아웃 불변.
 - 근거: 확정사항 §6 「프리셋 (🔒 2026-09-30, PS-01~PS-10)」·결정 줄(U-1~U-7), `doc/200_설계/architecture/presets-02-design.md`(A-10·A-11), 인계 패킷 `presets-03-packet-ui.md` §1~§6.
 - 계약: contract **v0.30 확정**(§3.11 타입 4·`PRESET_NAME_MAX`, §5 표 7행, §5.11 command 규칙·`apply_preset` 뒤처리, §6 code 13). 이름은 계약 그대로 인용한다(재정의 금지). **`src/bridge` 반영 완료(2026-09-30, contract v0.30)** — `src/bridge/commands.ts` 래퍼 7개·`types.ts` 타입 4·`PRESET_NAME_MAX`, `yarn tsc --noEmit` 0, vitest `src/bridge` 94 통과(커밋 e8850c7). 구현 선행 조건 충족.
 - 레이아웃 확정 상태: **확정**. ui-layout-designer 구성안 없음 — 패킷 §1 구조와 확정사항 PS-09(위 = 저장·가져오기, 아래 = 카드 목록)를 수용했다.

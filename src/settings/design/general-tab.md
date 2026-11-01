@@ -1,7 +1,8 @@
 # settings 상세 설계 — 「기본 설정」 탭 (CR-028)
 
 - 상위 문서: `src/settings/design.md`(RTM·전체 구조·공통 상태). 문구는 `design/i18n.md` §4.2(키 이름으로만 인용한다).
-- 요구: R-03(배율), R-04(유휴 시간), R-20(언어), R-21(위치 잠금), R-22(작업표시줄 표시), R-23(자동 실행), R-24(위치 초기화), R-19(카드 양식), **R-56(전체 초기화 — CR-054, §7)**.
+- 요구: R-03(배율), R-04(유휴 시간), R-20(언어), R-21(위치 잠금), R-22(작업표시줄 표시), R-23(자동 실행), R-24(위치 초기화), R-19(카드 양식), **R-56(전체 초기화 — CR-054, §7)**, **R-69(키 그림 유지 시간 — CR-073, §3.3~§3.6·§5 G-9·§6)**.
+- (CR-073) 계약 추가: contract **v1.2** §3.3 `Settings.keyHoldMs`(필수 정수 0~500, 기본 150)·상수 `KEY_HOLD_MS_MIN`·`KEY_HOLD_MS_MAX`(`src/bridge`). 저장은 기존 §5 `set_settings`(범위 밖 = `settings.invalid`) — 새 command·event·에러 code 없음.
 - (CR-054) 계약 추가: contract **v0.25** §5.10 `reset_app_data`(래퍼 `resetAppData(): Promise<void>`), §4 이벤트 순서 주석, §6 `reset.io`·`reset.seed`. 상세는 §7.
 - 계약: `doc/200_설계/bridge/contract.md` v0.14 — §3.3 `Settings`(`scale`·`idleSeconds`·`language`·`positionLock`·`showInTaskbar`·`autostart`), §5 `set_settings`·`set_autostart`·`reset_overlay_position`, §5.5, §5.6, §6. 래퍼: `setSettings`·`setAutostart`·`resetOverlayPosition`·`toBridgeError`, 상수 `SCALE_MIN`·`SCALE_MAX`(`src/bridge`).
 - 저장 방식(확정): **항목별 즉시 저장**. 「저장」 버튼 없음. 값은 낙관적으로 바꾸지 않고 `settings://changed`로 돌아온 `Settings`로만 바뀐다(기존 설정 창 규칙). 예외: 배율 슬라이더·유휴 시간 입력의 「편집 중 표시값」(§3 draft)만 로컬.
@@ -21,6 +22,8 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 | | idleLabel   [  5 ] idleUnit                              |   |
 | |             idleDesc                                     |   |
 | |             idleRangeHint (only when idleInvalid)        |   |
+| | keyHoldLabel [=====o==============]  {keyHoldValue}      |   |
+| |             keyHoldDesc                                  |   |
 | +----------------------------------------------------------+   |
 | +-- card: cardWindow ------------------- [resetPosition] --+   |
 | | (o ) lockLabel                                           |   |
@@ -41,6 +44,7 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 ```
 
 - 확정 상태: **확정**. 참고 화면의 크기 4단 버튼·흔들림·항상 위에 고정·「변경한 설정은 바로 적용…」 줄·설명서·닫기 버튼은 **없다**(R-19 금지 조건).
+- (CR-073, R-69) `cardScale` 셋째 행 = 「키 그림 유지 시간」 슬라이더(유휴 시간 행 아래, 같은 카드). 모양은 배율 행과 같은 `.field`·`.slider`·`.fieldDesc`(새 CSS 없음), 옆 값 표시 = `{keyHoldValue}`(ko 「150ms」). 확정 상태: **확정**(패킷 `key-hold-03-packet-ui.md` §B.2 수용, 소스 반영됨).
 - `(o )` = `ToggleSwitch`. 켜짐 = 포인트 컬러(`var(--st-accent)` #BE72AD, CR-032) 채움 트랙 + 오른쪽 손잡이.
 - (CR-054, R-56) `cardReset` 카드는 **탭 맨 아래**(cardStartup 뒤) 한 장이다. 머리 오른쪽 `[resetAll]` = 위험 조작 외곽선 버튼(§7.4), 본문 = 설명 `resetAllDesc` 한 단락 + 상태 줄 1개(`role="status"`, 내용 = pending이면 `resetAllPending`, done이면 `resetAllDone`, 그 밖에는 빈 문자열 — 줄은 항상 렌더). 머리 버튼 자리 규칙은 cardWindow의 `[resetPosition]`과 같다(`SettingsCard action=`). 확인창(`ConfirmDialog`)은 모달이라 이 그림에 넣지 않는다(§7.5). 확정 상태: **확정**(패킷 `data-reset-03-packet-ui.md` §2 수용).
 
@@ -49,7 +53,8 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 | 컴포넌트 | 파일 | 분류 | props | 요구ID |
 |---|---|---|---|---|
 | `GeneralTab` (default) | `src/settings/components/GeneralTab.tsx` (+`GeneralTab.module.css`) | 화면 로컬 | `settings: Settings`, `onError: (e: BridgeError \| null) => void` | R-19~R-24 |
-| `ScaleIdleCard` (default) | `src/settings/components/ScaleIdleCard.tsx` (+`GeneralTab.module.css` 공유) | 화면 로컬(400줄 분리) | `settings: Settings`, `onError: (e: BridgeError \| null) => void` | R-03, R-04 |
+| `ScaleIdleCard` (default) | `src/settings/components/ScaleIdleCard.tsx` (+`GeneralTab.module.css` 공유) | 화면 로컬(400줄 분리 — CR-073 뒤 약 220줄, 한계 400) | `settings: Settings`, `onError: (e: BridgeError \| null) => void` | R-03, R-04, R-69 |
+| `useSliderDraft` (재사용, CR-073) | `src/settings/components/useSliderDraft.ts` | 화면 로컬 훅(타이머 탭 소유 — `design/timer-tab.md` §5.2). **변경 없음**, 3번째 사용처(키 그림 유지 시간). `src/components` 이동은 후작업 후보로만(패킷 §B.7 A-11, design.md §12) | `(saved: number, commit: (v: number) => Promise<void>)` → `{ shown, onChange, onPointerUp, onKeyUp, onBlur }` | R-69 |
 | `ToggleSwitch` (default) | `src/settings/components/ToggleSwitch.tsx` (+`ToggleSwitch.module.css`) | 화면 로컬 · **공용 승격 후보**(design.md §12) | `id: string`, `label: string`, `description: string`, `checked: boolean`, `disabled?: boolean`(기본 false), `busy?: boolean`(기본 false), `onToggle: () => void` | R-19, R-21~R-23 |
 | `SettingsCard` (default) | `src/settings/components/SettingsCard.tsx` (+`SettingsCard.module.css`) | 화면 로컬 · 공용 승격 후보 | `title: string`, `action?: ReactNode`(카드 머리 오른쪽), `children: ReactNode` | R-19 |
 | `generalValues` | `src/settings/generalValues.ts` | 화면 로컬 순수 모듈 | §3.3 | R-03, R-04 |
@@ -100,6 +105,7 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 | `SCALE_STEP_PERCENT` | `5` | 슬라이더 단계 폭(%) | — | R-03 |
 | `SCALE_KEY_COMMIT_MS` | `300` | 키보드 조작 후 저장까지 지연(ms) | — | R-03 |
 | `IDLE_MIN_MINUTES` / `IDLE_MAX_MINUTES` | `1` / `60` | 유휴 시간 허용 범위(분). 저장 범위 = 60~3600초 | — | R-04 |
+| `KEY_HOLD_STEP_MS` (CR-073) | `10` | 키 그림 유지 시간 슬라이더 단계 폭(ms). 범위(0~500)는 bridge `KEY_HOLD_MS_MIN`·`KEY_HOLD_MS_MAX`, 기본값(150)은 `settings.keyHoldMs`에서 온다 — 화면에 0·500·150을 직접 적지 않는다(`percentBounds` 관례) | — | R-69 |
 | `scaleToPercent` | `(scale: number) => number` | `Math.round(scale × 100)` | 없음 | R-03 |
 | `percentBounds` | `() => { min: number; max: number }` | `{ min: scaleToPercent(SCALE_MIN), max: scaleToPercent(SCALE_MAX) }` = `{25, 200}`. 화면에 25·200을 직접 적지 않는다 | 없음 | R-03 |
 | `idleSecondsToMinutes` | `(seconds: number) => number` | `Math.max(1, Math.round(seconds / 60))` — 60의 배수가 아니면 **반올림 표시**(예: 90초 → 2분, 30초 → 1분). 표시만 하고 저장값은 바꾸지 않는다 | 없음 | R-04 |
@@ -116,6 +122,8 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 | (파생) `percent` | 저장된 배율(%) | `number` | `scaleToPercent(settings.scale)` | 파생 |
 | (파생) `shownPercent` | 슬라이더 값·옆 표시 `{n}%` | `number` | `scaleDraft ?? percent` | 파생 |
 | (파생) `shownIdle` | 입력 칸 값 | `string` | `idleDraft ?? String(idleSecondsToMinutes(settings.idleSeconds))` | 파생 |
+| `keyHold` (CR-073) | 키 그림 유지 시간 슬라이더 초안·지연 저장. `keyHold.shown` = 초안이 있으면 초안(ms), 없으면 저장값 | `ReturnType<typeof useSliderDraft>` | `useSliderDraft(settings.keyHoldMs, commitKeyHold)` — 초안 `null`, `shown` = `settings.keyHoldMs`(기본 150) | `useSliderDraft` 내부 `useState`·`useRef` |
+| (파생) `keyHoldText` (CR-073) | 슬라이더 옆 `<output>`·`aria-valuetext` 문자열 | `string` | `format(t.keyHoldValue, { ms: keyHold.shown })` — ko 「150ms」 | 파생 |
 
 ### 3.5 `ScaleIdleCard` 기능
 
@@ -131,6 +139,13 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 | `commitIdle` | `() => Promise<void>` | `idleDraft === null`이면 끝 → `n = parseIdleMinutes(idleDraft)` → `setIdleDraft(null)` → `n === null`이면 `setIdleInvalid(true)` 후 끝(저장 없음, 입력 칸은 저장값으로 돌아감) → `n × 60 === settings.idleSeconds`면 끝 → `await setSettings({ ...settings, idleSeconds: n × 60 })` → 성공 `onError(null)` | reject → `onError(toBridgeError(e))`, 입력 칸은 저장값 | R-04 |
 | `onIdleKeyDown` | `(e: KeyboardEvent<HTMLInputElement>) => void` | `e.key === 'Enter'`면 `commitIdle()` | 없음 | R-04 |
 | `onIdleBlur` | `() => void` | `commitIdle()` | 없음 | R-04 |
+| `commitKeyHold` (CR-073) | `(v: number) => Promise<void>` | `await setSettings({ ...settings, keyHoldMs: v })` → 성공 `onError(null)`. `useSliderDraft`의 `commit`으로만 불린다 — 같은 값 생략·초안 지우기는 훅이 한다(`draft === saved`면 저장 0회) | reject → `onError(toBridgeError(e))`(탭 오류 줄, 범위 밖이면 `settings.invalid`). **예외를 밖으로 던지지 않는다** — 훅의 `flush`가 끝까지 돌아 초안을 지우므로 슬라이더는 저장값으로 돌아간다 | R-69 |
+| `keyHold.onChange` (훅) | `(e: ChangeEvent<HTMLInputElement>) => void` | 초안 = `Number(e.currentTarget.value)`. 저장하지 않는다(끄는 동안 `setSettings` 0회, 옆 표시만 바뀜) | 없음 | R-69 |
+| `keyHold.onPointerUp` (훅) | `() => void` | `flush()` — 놓을 때 1회 저장 | 없음 | R-69 |
+| `keyHold.onKeyUp` (훅) | `(e: KeyboardEvent<HTMLInputElement>) => void` | `ArrowLeft`·`ArrowRight`·`ArrowUp`·`ArrowDown`·`Home`·`End`·`PageUp`·`PageDown`이면 타이머를 새로 걸어 `SCALE_KEY_COMMIT_MS`(300ms) 뒤 `flush()`(마지막 키 후 1회) | 없음 | R-69 |
+| `keyHold.onBlur` (훅) | `() => void` | 초안이 있으면 즉시 `flush()` | 없음 | R-69 |
+
+- (CR-073) 저장 규칙은 배율 슬라이더(R-03)와 같다: 끄는 동안 초안만, 놓을 때 1회, 키보드 이동 키는 300ms 뒤 1회, blur 즉시, 같은 값이면 저장 없음. 언마운트 시 예약 해제(저장하지 않음 — 훅 정리 effect). 유지 시간 의미(오버레이 표시)는 overlay 몫이며 새 값은 다음 새 누름부터 적용된다(contract v1.2 §3.3 「의미」, A-4).
 
 - 끌기 중 `settings://changed`(예: 오버레이 Ctrl+휠)가 와도 `scaleDraft`가 있는 동안 슬라이더는 draft를 보이고, 놓은 뒤(`scaleDraft = null`) 새 저장값을 보인다. 오버레이 Ctrl+휠 값이 5의 배수가 아니면 옆 표시 `{n}%`는 실제 값(예: 103%)이고 슬라이더 손잡이는 브라우저가 가까운 단계로 그린다.
 
@@ -139,7 +154,8 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 1. `<SettingsCard title={t.cardScale}>`.
 2. 배율 행: `<label htmlFor="scale-slider">{t.scaleLabel}</label>` · `<input id="scale-slider" type="range" min={min} max={max} step={SCALE_STEP_PERCENT} value={shownPercent} aria-describedby="scale-desc" aria-valuetext={`${shownPercent}%`} onChange={onScaleInput} onPointerUp={onScalePointerUp} onKeyUp={onScaleKeyUp} onBlur={onScaleBlur}/>` · `<output htmlFor="scale-slider">{shownPercent}%</output>` · `<p id="scale-desc">{format(t.scaleDesc, { min, max })}</p>`.
 3. 유휴 시간 행: `<label htmlFor="idle-input">{t.idleLabel}</label>` · `<input id="idle-input" type="number" inputMode="numeric" min={IDLE_MIN_MINUTES} max={IDLE_MAX_MINUTES} step={1} value={shownIdle} aria-describedby="idle-desc" aria-invalid={idleInvalid \|\| undefined} onChange={onIdleInput} onKeyDown={onIdleKeyDown} onBlur={onIdleBlur}/>` · `<span>{t.idleUnit}</span>` · `<p id="idle-desc">{format(t.idleDesc, { min: IDLE_MIN_MINUTES, max: IDLE_MAX_MINUTES })}</p>` · `idleInvalid`이면 `<p className=hint role="alert">{format(t.idleRangeHint, { min: IDLE_MIN_MINUTES, max: IDLE_MAX_MINUTES })}</p>`(경고색 `var(--st-warn)`).
-4. 슬라이더 색: 채움·손잡이 `accent-color: var(--st-accent)`.
+4. (CR-073, R-69) 키 그림 유지 시간 행 — 유휴 시간 `<div className=field>` **바로 뒤, 같은 카드 안**: `<div className=field>` → `<label htmlFor="key-hold-slider">{t.keyHoldLabel}</label>` · `<input id="key-hold-slider" type="range" min={KEY_HOLD_MS_MIN} max={KEY_HOLD_MS_MAX} step={KEY_HOLD_STEP_MS} value={keyHold.shown} aria-describedby="key-hold-desc" aria-valuetext={keyHoldText} onChange={keyHold.onChange} onPointerUp={keyHold.onPointerUp} onKeyUp={keyHold.onKeyUp} onBlur={keyHold.onBlur} className=slider/>` · `<output htmlFor="key-hold-slider">{keyHoldText}</output>` · `<p id="key-hold-desc" className=fieldDesc>{format(t.keyHoldDesc, { min: KEY_HOLD_MS_MIN, max: KEY_HOLD_MS_MAX })}</p>`. 스타일은 기존 `.field`·`.slider`·`.fieldDesc` 재사용(새 CSS 없음). 숫자 입력 칸·「기본값으로」 버튼·미리보기는 두지 않는다(요구 범위).
+5. 슬라이더 색: 채움·손잡이 `accent-color: var(--st-accent)`.
 
 ## 4. `GeneralTab` 렌더
 
@@ -165,13 +181,15 @@ ui-layout-designer 구성안 대신 아키텍처 패킷(`settings-v2-03-packet-u
 | G-7 | 위치 초기화 | 버튼 → 비활성 → `resetOverlayPosition()` → core가 오버레이를 기본 위치로 옮기고 저장·emit → 버튼 다시 활성 | 실패(`window.not_found` 등) → 오류 줄 |
 | G-8 | (CR-054) 전체 초기화 | 「전체 초기화」 → 확인창(첫 포커스 취소) → 「초기화」 → 확인창 닫힘 · 버튼 비활성+`aria-busy` · 상태 줄 `resetAllPending` → `resetAppData()` 1회 → resolve → 상태 줄 `resetAllDone`, `onError(null)`, 버튼 다시 활성·포커스 복귀. 화면 값(언어 카드·배율·토글·이미지 탭 카드 등)은 **`settings://changed`·`assets://changed` 구독으로만** 기본값이 된다(§7.6) | 취소·Esc → 확인창 닫힘, 호출 0회, 상태 불변, 포커스 버튼. reject(`reset.io`·`reset.seed`·`settings.io`·`state.poisoned`) → 상태 줄 빈 문자열, 버튼 다시 활성, 창 공통 오류 줄(`errorText`, §7.7). 실패해도 core가 두 이벤트를 보내므로 화면은 디스크에 실제로 남은 상태로 맞춰진다(계약 §5.10) |
 
+| G-9 | (CR-073) 키 그림 유지 시간 | 슬라이더 끌기(옆 표시 `{keyHoldValue}`만 바뀜, 저장 0회) → 놓기(또는 키보드 이동 키 후 300ms·blur) → 값이 저장값과 다르면 `setSettings({...settings, keyHoldMs: v})` 1회 → `settings://changed` → 슬라이더·표시 = 수신 값, 오버레이는 다음 새 누름부터 새 유지 시간 | 같은 값 → 저장 0회. 실패(`settings.invalid` 등) → 탭 오류 줄, 슬라이더는 저장값으로 돌아감 |
+
 파괴 조작 confirm: ~~이 탭에는 없다~~ **(CR-054) 「전체 초기화」 1건**(ui-design-strategy §11 「전체 설정 초기화 — 필수, 되돌릴 수 없음 명시」). 확인창 문구는 `design/i18n.md` §4.11 `confirmResetAllTitle`·`confirmResetAllMessage`(「되돌릴 수 없습니다」 포함)·`confirmResetAllOk`·`confirmCancel`. 위치 초기화(G-7)는 드래그로 되돌릴 수 있는 이동이라 여전히 대상 아님.
 
 ## 6. 접근성
 
-- 포커스 순서: 언어 `select` → 배율 슬라이더 → 유휴 시간 입력 → 「위치 초기화」 → 위치 잠금 스위치 → 작업표시줄 스위치 → 자동 실행 스위치 → (CR-054) 「전체 초기화」(마지막). 확인창이 열리면 포커스는 확인창 안(취소 → 초기화 순, 기존 `ConfirmDialog` Tab 순환)에 머문다. 초기화 버튼 접근성 상세 §7.8.
+- 포커스 순서: 언어 `select` → 배율 슬라이더 → 유휴 시간 입력 → (CR-073) 키 그림 유지 시간 슬라이더 → 「위치 초기화」 → 위치 잠금 스위치 → 작업표시줄 스위치 → 자동 실행 스위치 → (CR-054) 「전체 초기화」(마지막). 확인창이 열리면 포커스는 확인창 안(취소 → 초기화 순, 기존 `ConfirmDialog` Tab 순환)에 머문다. 초기화 버튼 접근성 상세 §7.8.
 - 키보드: 스위치는 네이티브 `<button>`이라 Enter·Space로 토글. 슬라이더는 화살표(±5%)·Home·End·PageUp·PageDown, 마지막 키 후 300ms에 저장. 유휴 시간은 Enter로 확정.
-- 역할·이름: 스위치 `role="switch"` + `aria-checked` + `aria-labelledby`(보이는 라벨) + `aria-describedby`(설명). 자동 실행 대기 중 `aria-busy="true"`·`disabled`. 슬라이더 `aria-valuetext="{n}%"`.
+- 역할·이름: 스위치 `role="switch"` + `aria-checked` + `aria-labelledby`(보이는 라벨) + `aria-describedby`(설명). 자동 실행 대기 중 `aria-busy="true"`·`disabled`. 슬라이더 `aria-valuetext="{n}%"`. (CR-073) 키 그림 유지 시간 슬라이더 = `<label htmlFor>`로 이름 「키 그림 유지 시간」, `aria-valuetext={keyHoldText}`(ko 「150ms」·en 「150 ms」), `aria-describedby="key-hold-desc"`(범위 포함 설명). 키보드는 화살표 ±10ms·Home(0)·End(500)·PageUp·PageDown, 마지막 키 후 300ms에 저장.
 - 상태 알림: 자동 실행 대기 안내 = `role="status" aria-live="polite"` 한 줄(CR-049 — 취소 안내 삭제). 유휴 시간 범위 안내 = `role="alert"`. 저장 실패 = 창 공통 오류 줄(`role="alert"`, design.md §5.3). (CR-054) 초기화 진행·완료 안내 = 초기화 카드 상태 줄 `role="status" aria-live="polite"`(§7.8).
 
 ## 7. 초기화 카드 `ResetAllCard` (CR-054, R-56 🔒 베타 전용)

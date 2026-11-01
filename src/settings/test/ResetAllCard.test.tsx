@@ -122,6 +122,7 @@ const SETTINGS_IO_MSG = '설정 파일을 읽거나 쓸 수 없습니다: 거부
 const CUSTOM: Settings = {
   scale: 1.5,
   idleSeconds: 120,
+  keyHoldMs: 150, // contract v1.2(key-hold) 필수 필드
   overlay: { x: 30, y: 40, visible: true },
   mouse: null,
   autostart: true,

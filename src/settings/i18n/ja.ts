@@ -25,6 +25,11 @@ export const ja: Messages = {
   idleUnit: '分',
   idleDesc: 'この時間入力がないと、休憩中の画像に切り替わります({min}〜{max}分)。',
   idleRangeHint: '{min}〜{max}の整数(分)を入力してください。保存されていません。',
+  // 키 그림 유지 시간(CR-073 · R-69 · key-hold D-8) — 검수 필요
+  keyHoldLabel: 'キー画像の表示時間',
+  keyHoldDesc:
+    'キーを短く押しても、切り替わったキーボード画像を最低この時間は表示します。0にすると離した瞬間に戻ります({min}〜{max}ms)。',
+  keyHoldValue: '{ms}ms',
   cardWindow: 'ウィンドウ',
   resetPosition: '位置をリセット',
   lockLabel: '位置ロック(マウスクリックを透過)',
@@ -172,7 +177,7 @@ export const ja: Messages = {
   // ─── §4.12 CR-064 프리셋(36키) — ja·en 초안, 검수 필요
   tabPresets: 'プリセット',
   cardPresetSave: '現在の状態をプリセットとして保存',
-  presetSaveDesc: '現在登録している画像すべて・通知音・倍率・休憩時間・「肩の軸・手の位置」タブの設定(肩軸・移動範囲・腕の位置・手の位置・ペンの手の使用)・タイマー設定をまとめて保存します。ウィンドウ位置・言語・自動起動・タスクバー・位置ロックは含まれません。',
+  presetSaveDesc: '現在登録している画像すべて・通知音・倍率・休憩時間・キー画像の表示時間・「肩の軸・手の位置」タブの設定(肩軸・移動範囲・腕の位置・手の位置・ペンの手の使用)・タイマー設定をまとめて保存します。ウィンドウ位置・言語・自動起動・タスクバー・位置ロックは含まれません。',
   presetNameLabel: 'プリセット名',
   presetNamePlaceholder: '例: ねこ A',
   presetSave: '保存',

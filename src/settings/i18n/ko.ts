@@ -26,6 +26,11 @@ export const ko: Messages = {
   idleUnit: '분',
   idleDesc: '이 시간 동안 입력이 없으면 쉬는중 그림으로 바뀝니다({min}~{max}분).',
   idleRangeHint: '{min}~{max} 사이의 정수(분)를 입력하세요. 저장되지 않았습니다.',
+  // 키 그림 유지 시간(CR-073 · R-69 · key-hold D-8)
+  keyHoldLabel: '키 그림 유지 시간',
+  keyHoldDesc:
+    '키를 짧게 눌러도 바뀐 키보드 그림을 최소 이 시간만큼 보여 줍니다. 0이면 떼는 즉시 돌아갑니다({min}~{max}ms).',
+  keyHoldValue: '{ms}ms',
   cardWindow: '창',
   resetPosition: '위치 초기화',
   lockLabel: '위치 잠금 (마우스 클릭 통과)',
@@ -172,7 +177,7 @@ export const ko: Messages = {
   // ─── §4.12 CR-064 프리셋(36키)
   tabPresets: '프리셋',
   cardPresetSave: '현재 상태를 프리셋으로 저장',
-  presetSaveDesc: '지금 등록한 그림 전부·알림음·배율·휴식 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.',
+  presetSaveDesc: '지금 등록한 그림 전부·알림음·배율·휴식 시간·키 그림 유지 시간·「어깨축·손 위치」 탭 설정(어깨축·이동 영역·팔 위치·손 위치·펜 손 사용)·타이머 설정을 한 벌로 저장합니다. 창 위치·언어·자동 실행·작업표시줄·위치 잠금은 들어가지 않습니다.',
   presetNameLabel: '프리셋 이름',
   presetNamePlaceholder: '예: 고양이 A',
   presetSave: '저장',

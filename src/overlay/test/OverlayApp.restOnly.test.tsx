@@ -142,6 +142,7 @@ const DOWN = 'rotate(135deg) scaleX(1.414) rotate(-180deg)' // 커서 (960,1080)
 /** 유휴 60초(패킷 O-1 `idleSeconds` 60) — 61초 진행이면 쉬는중 */
 const SETTINGS: Settings = {
   ...DEFAULT_SETTINGS,
+  keyHoldMs: 0, // key-hold(R-42): 기존 TC는 유지 0 = 현행 동작 기준
   scale: 1,
   idleSeconds: 60,
   overlay: { x: 100, y: 100, visible: true },

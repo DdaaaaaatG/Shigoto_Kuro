@@ -43,6 +43,7 @@ vi.mock('bridge/commands', async importOriginal => {
 const SETTINGS: Settings = {
   scale: 1.5,
   idleSeconds: 120,
+  keyHoldMs: 150, // contract v1.2(key-hold) 필수 필드
   overlay: { x: 30, y: 40, visible: true },
   mouse: null,
   autostart: false,
@@ -591,13 +592,14 @@ describe('ScaleIdleCard — 유휴 시간 (R-04, G-3, U-13)', () => {
 
 // ─── 접근성 (general-tab.md §6) ─────────────────────────────────────────────
 describe('GeneralTab — 접근성 (§6)', () => {
-  it('TC-130 (CR-054 개정): 포커스 순서 = DOM 순서(언어 → 배율 → 유휴 → 위치 초기화 → 잠금 → 작업표시줄 → 자동 실행 → 전체 초기화), tabindex 조작 없음, 버튼은 type=button, 상태 줄 2개', () => {
+  it('TC-130 (CR-054 · CR-073 개정): 포커스 순서 = DOM 순서(언어 → 배율 → 유휴 → 키 그림 유지 시간 → 위치 초기화 → 잠금 → 작업표시줄 → 자동 실행 → 전체 초기화), tabindex 조작 없음, 버튼은 type=button, 상태 줄 2개', () => {
     const { container } = renderTab()
     const focusables = Array.from(container.querySelectorAll<HTMLElement>('select, input, button'))
     expect(focusables.map(e => e.id || e.textContent)).toEqual([
       'language-select',
       'scale-slider',
       'idle-input',
+      'key-hold-slider', // CR-073(R-69): 유휴 시간 바로 다음, 같은 「크기 · 반응」 카드
       L.reset,
       'lock-toggle',
       'taskbar-toggle',

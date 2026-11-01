@@ -47,3 +47,12 @@ dev 앱(kuro-keyviewer PID 26752)과 하위 프로세스를 종료했다. 종료
 - CR-067(TC-277·286·289)·CR-068·CR-070(TC-269·276·286·248) 개정 TC 포함 전부 통과.
 - 스크린샷: doc/300_검증/screenshots/20261027-1710/02-settings.png (기본), doc/300_검증/screenshots/20261027-1710/img-02-settings.png (이미지), doc/300_검증/screenshots/20261027-1710/timer-02-settings.png (타이머: 스톱워치/타이머/시작 시간 잠금 표시)
 - 프로세스: 검증용 dev 앱을 띄웠다가 종료함.
+
+## 키 그림 최소 유지 시간 (CR-073) 검증 — 2026-11-01 19:59
+실행: vitest `yarn test --run src/settings src/bridge src/components` · E2E 미설치 · 스크린샷 1장
+판정: 통과(자동) — 33파일 / 561 테스트 PASS, FAIL 0, SKIP(수동) 2. 기준 scenarios v35.
+- 신규 TC-364~370: 스펙 등록 7/7 확인(ScaleIdleCard.keyHold.test.tsx 6건 + i18n.test.ts). 전부 통과.
+- 개정 TC-094·130·352·362 통과.
+- 증거: doc/300_검증/screenshots/20261101-1959-key-hold-test/keyhold02-settings.png (기본 탭 「키 그림 유지 시간」 슬라이더 150ms, 설명 문구 0~500ms 표시)
+- SKIP(수동): TC-379(MC-52), M-69 — 사용자 눈 확인 인계.
+- 프로세스: 기존 dev 앱 그대로 유지(종료 안 함).

@@ -1,5 +1,5 @@
 /**
- * 「기본 설정」 탭 순수 모듈 — design/general-tab.md §3.3. 배율(R-03)·유휴 시간(R-04) 변환·범위.
+ * 「기본 설정」 탭 순수 모듈 — design/general-tab.md §3.3. 배율(R-03)·유휴 시간(R-04)·키 그림 유지 시간(R-69) 변환·범위.
  */
 import { SCALE_MAX, SCALE_MIN } from 'bridge/types'
 
@@ -10,6 +10,8 @@ export const SCALE_KEY_COMMIT_MS = 300
 /** 유휴 시간 허용 범위(분). 저장 범위는 60~3600초 */
 export const IDLE_MIN_MINUTES = 1
 export const IDLE_MAX_MINUTES = 60
+/** 키 그림 유지 시간 슬라이더 단계 폭(ms, R-69). 범위(0~500)는 bridge KEY_HOLD_MS_MIN/MAX — 화면에 숫자를 적지 않는다 */
+export const KEY_HOLD_STEP_MS = 10
 
 export const scaleToPercent = (scale: number): number => Math.round(scale * 100)
 
