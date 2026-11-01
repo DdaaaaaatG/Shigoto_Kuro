@@ -1,5 +1,5 @@
 /**
- * bridge 계약 타입 (v0.29) — doc/200_설계/bridge/contract.md 와 src-tauri/src/bridge/types.rs 의 TS 쪽 거울.
+ * bridge 계약 타입 (v1.2) — doc/200_설계/bridge/contract.md 와 src-tauri/src/bridge/types.rs 의 TS 쪽 거울.
  * 셋 중 하나가 바뀌면 나머지도 같은 패스에서 맞춘다(bridge-implementer 소관).
  * Rust 쪽은 #[serde(rename_all = "camelCase")] 이므로 여기 필드명은 전부 camelCase.
  */
@@ -225,6 +225,11 @@ export interface Settings {
   scale: number
   /** 무입력 후 쉬는중 전환까지의 초 */
   idleSeconds: number
+  /**
+   * (v1.2, key-hold KH-06) 키 그림 최소 유지 시간(ms 정수) KEY_HOLD_MS_MIN ~ KEY_HOLD_MS_MAX, 기본 150.
+   * 0 = 떼는 즉시 복귀. 의미(보이는 키 상태)는 overlay `state/keyHold.ts`가 만든다
+   */
+  keyHoldMs: number
   overlay: OverlaySettings
   /** 마우스 파츠를 쓰지 않으면 null */
   mouse: MouseSettings | null
@@ -399,6 +404,9 @@ export const PRESET_NAME_MAX = 50
 // ─── 규격 상수 (doc/000_프로젝트_확정사항.md §3) ───────────────────────────
 export const SCALE_MIN = 0.25
 export const SCALE_MAX = 2
+/** (v1.2, key-hold) 키 그림 최소 유지 시간 범위(ms). Rust settings::KEY_HOLD_MS_MIN/MAX와 1:1 */
+export const KEY_HOLD_MS_MIN = 0
+export const KEY_HOLD_MS_MAX = 500
 export const CANVAS_MAX_WIDTH = 900
 export const CANVAS_MAX_HEIGHT = 700
 export const ASSET_MAX_BYTES = 1024 * 1024
@@ -450,6 +458,8 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
 export const DEFAULT_SETTINGS: Settings = {
   scale: 1,
   idleSeconds: 300,
+  // (v1.2, key-hold) Rust KEY_HOLD_MS_DEFAULT와 1:1
+  keyHoldMs: 150,
   overlay: { x: 100, y: 100, visible: true },
   mouse: DEFAULT_MOUSE_SETTINGS,
   autostart: false,

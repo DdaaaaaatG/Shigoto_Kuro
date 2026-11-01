@@ -1,6 +1,6 @@
 /**
  * bridge 명령(invoke) 래퍼. 화면 코드는 @tauri-apps/api/core 를 직접 쓰지 않고 이 함수들만 쓴다.
- * 명령 이름·인자는 src-tauri/src/bridge/commands.rs 와 1:1 (Rust snake_case 인자 → JS camelCase).
+ * 명령 이름·인자는 src-tauri/src/bridge/commands/mod.rs·commands/presets.rs 와 1:1 (Rust snake_case 인자 → JS camelCase).
  * 모든 실패는 BridgeError 형태로 정규화해 던진다.
  */
 import { invoke } from '@tauri-apps/api/core'

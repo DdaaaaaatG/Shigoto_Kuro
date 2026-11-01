@@ -9,6 +9,8 @@ import {
   isMousePartSlot,
   isPenDownSlot,
   isRequiredSlot,
+  KEY_HOLD_MS_MAX,
+  KEY_HOLD_MS_MIN,
   PRESET_NAME_MAX,
   slotKey,
   TIMER_ALARM_VOLUME_MAX,
@@ -252,6 +254,23 @@ describe('TimerSettings · DEFAULT_TIMER_SETTINGS (v0.21, CR-045 / v0.23, CR-048
 
   it('DEFAULT_SETTINGS.timer는 DEFAULT_TIMER_SETTINGS와 같다(필수 필드)', () => {
     expect(DEFAULT_SETTINGS.timer).toEqual(DEFAULT_TIMER_SETTINGS)
+  })
+})
+
+// contract.md §3.3 v1.2(key-hold KH-06) — Settings.keyHoldMs 필수 필드·범위 상수.
+describe('Settings.keyHoldMs (v1.2, key-hold)', () => {
+  it('DEFAULT_SETTINGS.keyHoldMs는 150이고 KEY_HOLD_MS_MIN~MAX 안이다(v1.2, key-hold)', () => {
+    expect(DEFAULT_SETTINGS.keyHoldMs).toBe(150)
+    expect(Number.isInteger(DEFAULT_SETTINGS.keyHoldMs)).toBe(true)
+    expect(KEY_HOLD_MS_MIN).toBe(0)
+    expect(KEY_HOLD_MS_MAX).toBe(500)
+    expect(DEFAULT_SETTINGS.keyHoldMs).toBeGreaterThanOrEqual(KEY_HOLD_MS_MIN)
+    expect(DEFAULT_SETTINGS.keyHoldMs).toBeLessThanOrEqual(KEY_HOLD_MS_MAX)
+  })
+
+  it('keyHoldMs는 필수 필드다(v1.2)', () => {
+    expect('keyHoldMs' in DEFAULT_SETTINGS).toBe(true)
+    expect(Object.keys(DEFAULT_SETTINGS)).toContain('keyHoldMs')
   })
 })
 
