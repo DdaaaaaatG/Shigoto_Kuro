@@ -16,7 +16,7 @@
 //! [unsafe] 없음. 링크 판정은 `std::os::windows::fs::MetadataExt`(안전한 std API).
 //! [에러] `PresetError::{NotFound, InvalidName, MissingRequired, NotPreset, Format, InvalidSettings, Damaged,
 //!        BadDir, ExportExists, Io, Settings}`.
-//! [설정] 읽기/쓰기 대상은 `Settings`의 `scale`·`idle_seconds`·`mouse`·`timer`뿐. `settings.json` 스키마 불변.
+//! [설정] 읽기/쓰기 대상은 `Settings`의 `scale`·`idle_seconds`·`key_hold_ms`·`mouse`·`timer`뿐. `settings.json` 스키마 불변.
 //! [테스트] 단위: 이 파일(에러 3개)·`format.rs`·`scan.rs`. 통합: `tests/presets.rs`·`tests/presets_apply.rs`·`tests/presets_preview.rs`·`tests/presets_builtin.rs`.
 
 use std::path::{Path, PathBuf};

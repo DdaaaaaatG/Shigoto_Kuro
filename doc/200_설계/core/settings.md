@@ -1,10 +1,11 @@
 # settings 모듈 설계
 
-- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · §3.12(presets 사용처)는 인계 패킷 기준 초안 · **소스 반영**(커밋 8ffb3a9) · 최종 갱신 2026-10-15(doc-sync)
+- 상태: 확정(사용자) — §3.9(CR-047)는 초안(범위는 사용자 확정, 설계 세부는 위임 범위 안에서 작성) · §3.10(CR-048)은 인계 패킷 기준 확정 · §3.12(presets 사용처)는 인계 패킷 기준 초안 · **소스 반영**(커밋 8ffb3a9) · §3.13(key-hold `keyHoldMs`)은 인계 패킷 기준 확정(🔒 사용자 결정 2026-11-01 D-1~D-3) · 최종 갱신 2026-11-01(key-hold)
 - 변경이력:
+  - 2026-11-01 (key-hold — `keyHoldMs` 추가(KH-01·03·06·08), 🔒 사용자 결정 D-1~D-8 권고안 확정, 정본 패킷 `doc/200_설계/architecture/key-hold-03-packet-core.md` §2·§3·§5, 근거 `key-hold-02-design.md` §4·§5a·§6) **`Settings.key_hold_ms: u32`(JSON `keyHoldMs`, 0~500ms, 기본 150) 추가.** 새 자식 파일 **`settings/key_hold.rs`**(상수 `KEY_HOLD_MS_MIN/MAX/DEFAULT`·`validate`(쓰기 거부 `settings.invalid`)·`normalize`(읽기 clamp + 경고 로그)·테스트 KC1~KC7). `mod.rs`는 15줄 이하 연결(`pub mod key_hold;`·재노출·필드·기본값·`validate` 1줄·`load` 보정 1줄, 777줄 → 실물 786줄, 한계 800 이하). 옛 파일(키 없음) = 150(컨테이너 `#[serde(default)]`, D-2 — 마이그레이션 없음, `version` 부재 D19 유지). 전체 초기화 = 150(`..Settings::default()`, 코드 불변). 프리셋 **PS-02 5필드**(D-3, [presets.md](presets.md) 7차). **ui 소유 필드** — `keep_core_owned` 불변. 값의 의미(표시 유지)는 ui `src/state/keyHold.ts` 몫이고 core는 저장·검증만 한다. 새 command·event·에러 code·스레드 없음. 갱신 위치: 머리 상태, §1·§2·§3·§3.1·§3.3·§3.12·**§3.13(신설)**·§6·**§8.5(신설)**·§9.3·**§9.5(신설)**·§10·§11 「key-hold 결정」. **적용됨(2026-11-01, core-implementer)** — 실물 `settings/key_hold.rs` 143줄(신규)·`settings/mod.rs` 786줄·`presets/format.rs` 511줄·`data_reset/mod.rs` 테스트 KC8(`wc -l`·Grep 2026-11-01 확인). `cargo test` lib 472 + 통합 101 통과(매니저 보고 기준 — 이 문서 작성자는 실행하지 않음).
   - 2026-10-15 (doc-sync — **설계 변경 아님, 소스가 정본**, 마커 b5ff65b 이후 커밋 ca50864·8ffb3a9 대조) ① `MouseSettings.pen_pos` 문서주석이 소스에서 현재 값으로 고쳐졌다(`mod.rs:84-86`: 기본값 (372, 476) = 배포용 기본 세트 pen_up의 기본 자리, CR-044). 2026-09-30 행이 적은 주석 불일치는 해소됐다. §3.7 문서주석 조각에 「CR-035 당시 문안」 표시와 현재 문안을 붙였다. ② §3.7·§3.8 코드 조각과 S-T 표의 기본값은 2026-09-30 행에서 이미 현재 값((372, 476)·(268, 402)·7)이다. 이번 대조에서 소스(`mod.rs:197`, `timer.rs:88`)와 맞음을 다시 확인했다. ③ §3.12(presets 사용처)는 소스 반영이다. `presets/apply.rs:26`이 `update`·`write_atomic`을 쓰고, `presets/format.rs:98` `merge_into`가 `update` 클로저 안에서 돈다. settings 코드 변경은 주석 1곳뿐이다. 공개 API·스키마·기본값 불변.
   - 2026-09-30 (presets — 🔒 확정사항 §6 「프리셋」 PS-01~PS-10, 새 모듈 문서 [presets.md](presets.md), 패킷 `doc/200_설계/architecture/presets-03-packet-core.md` §6) **settings 변경 없음 — 호출자만 늘어난다.** 새 모듈 `presets`가 `update`(프리셋 적용의 설정 병합 — 쓰기 유일 창구 CR-047 그대로)·`write_atomic`·`read_capped_string`·`MAX_TEXT_FILE_BYTES`(`preset.json` 쓰기·읽기)·`IDLE_SECONDS_MIN/MAX`·`timer::normalize`·`Settings::validate`(프리셋 설정 보정·검사)를 부른다. `Settings` 필드는 PS-02(`scale`·`idle_seconds`·`mouse`·`timer` — 프리셋에 담김)와 PS-03(`overlay`·`autostart`·`language`·`position_lock`·`show_in_taskbar` — PC별 유지)으로 나뉘고, 분류 가드는 `presets::format::PresetSettings::from_settings`의 구조 분해다(**`Settings`에 필드를 더하면 presets가 컴파일되지 않는다** — 분류를 정하라는 신호). 스키마·공개 API·검증 규칙·`version` 부재(D19) 불변. 증분 **§3.12**. **소스 미적용.**
-  - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 2026-09-29 행 ②에서 「옛 기록」으로 남긴 코드 조각·테스트 기대값을 현재 소스 값으로 고쳤다. §3.7: `default_mouse().pen_pos` 조각 (380, 496) → **(372, 476)**(CR-044, `mod.rs:196-198`), 동작 표 첫 두 행, 현재 값 안내(N1′ 현재 이름 `default_pen_pos_is_372_476`). §3.8.1 `impl Default`: `text_pos` (142, 458) → **(268, 402)**, `rotation` 9 → **7**(주석 = `timer.rs:87-90`). §3.8.4 S-T1·S-T10·S-T12 기대값. §3.10.1 `DEFAULT_ALARM_VOLUME` 80 → **44**. §3.10.2·§3.10.4·§3.10.5(S-T13·S-T14·S-T18·S-T12 갱신) 음량 기본 80 → **44**, 좌표·회전 (268, 402)·7. 공개 API·스키마·검증 규칙 불변. **코드 주석 불일치 발견(수정 안 함)**: `settings/mod.rs:84-87` `MouseSettings.pen_pos` 문서주석이 「기본값 (356, 504) = pen_up(136×196, CR-038)」로 남아 있다 — 실제 기본은 (372, 476)(CR-044, `:198`). **추가(같은 날 2차):** §3.7 동작 표 「기본값으로 리셋」 행과 N1′ 행(`default_pen_pos_is_372_476`, (372, 476))·안내 줄, §8 N1 대체 표기, §10 TM-10(기본 44)을 고쳤다. §10·§3.7 요구 추적의 「✅ 설계 · 소스 미적용」 전부와 §3.9 추적 줄을 「소스 반영」으로 바꿨다. 근거는 2026-09-29 행 ③의 확인과 이번 대조다: `SlamSettings`·`slam` 필드 없음, `pen_pos_tests.rs`·`pen_mode_tests.rs`, `Language`·`position_lock`·`show_in_taskbar` 필드, `window/placement.rs:256` `keep_core_owned`, `timer.rs` CR-048 필드, `store.rs:28` `update`, `atomic.rs:39` `write_atomic`. DA-07 첫 행에는 값 대체 이력을 붙였다.
+  - 2026-09-30 (doc-sync — **설계 변경 아님, 소스가 정본**, 커밋 2be41ce 기준) 2026-09-29 행 ②에서 「옛 기록」으로 남긴 코드 조각·테스트 기대값을 현재 소스 값으로 고쳤다. §3.7: `default_mouse().pen_pos` 조각 (380, 496) → **(372, 476)**(CR-044, `mod.rs:196-198`), 동작 표 첫 두 행, 현재 값 안내(N1′ 현재 이름 `default_pen_pos_is_372_476`). §3.8.1 `impl Default`: `text_pos` (142, 458) → **(268, 402)**, `rotation` 9 → **7**(주석 = `timer.rs:87-90`). §3.8.4 S-T1·S-T10·S-T12 기대값. §3.10.1 `DEFAULT_ALARM_VOLUME` 80 → **44**. §3.10.2·§3.10.4·§3.10.5(S-T13·S-T14·S-T18·S-T12 갱신) 음량 기본 80 → **44**, 좌표·회전 (268, 402)·7. 공개 API·스키마·검증 규칙 불변. **코드 주석 불일치 발견(수정 안 함)**: `settings/mod.rs:84-87` `MouseSettings.pen_pos` 문서주석이 「기본값 (356, 504) = pen_up(136×196, CR-038)」로 남아 있다 — 실제 기본은 (372, 476)(CR-044, `:198`). **추가(같은 날 2차):** §3.7 동작 표 「기본값으로 리셋」 행과 N1′ 행(`default_pen_pos_is_372_476`, (372, 476))·안내 줄, §8 N1 대체 표기, §10 TM-10(기본 44)을 고쳤다. §10·§3.7 요구 추적의 「✅ 설계 · 적용됨(2026-11-01, core-implementer)」 전부와 §3.9 추적 줄을 「소스 반영」으로 바꿨다. 근거는 2026-09-29 행 ③의 확인과 이번 대조다: `SlamSettings`·`slam` 필드 없음, `pen_pos_tests.rs`·`pen_mode_tests.rs`, `Language`·`position_lock`·`show_in_taskbar` 필드, `window/placement.rs:256` `keep_core_owned`, `timer.rs` CR-048 필드, `store.rs:28` `update`, `atomic.rs:39` `write_atomic`. DA-07 첫 행에는 값 대체 이력을 붙였다.
   - 2026-09-29 (소스 동기화 — **설계 변경 아님, 소스가 정본**: 0.4.0 + 2026-09-29 보강, 근거 `doc/300_검증/verify-20260929-1928.md`) ① **SEC-205 텍스트 크기 상한**: `settings/atomic.rs`에 `pub fn read_capped_string(path: &Path, max_bytes: u64) -> std::io::Result<String>`·`pub const MAX_TEXT_FILE_BYTES: u64 = 1024 * 1024`(1MiB), `mod.rs`가 `pub use atomic::{read_capped_string, write_atomic, MAX_TEXT_FILE_BYTES};`로 재노출. `load`는 이 함수로 읽는다 — `fs::metadata` 길이가 상한을 넘으면 읽지 않고 `ErrorKind::InvalidData` → `SettingsError::Io` → `load_or_default`가 기존 손상 파일 경로(기본값 대체 + 경고, 로그에는 파일 이름만)를 그대로 탄다. 같은 상한을 assets `load_manifest`·data_reset `read_marker`·`read_attempts`가 공유한다. 테스트: atomic.rs AW7(`aw7_read_capped_string_rejects_oversized_file`), `mod.rs` 1MiB 초과 settings.json → 기본값. §2 표 반영. ② **0.4.0 기본값**(`settings/timer.rs:80-96`, 계약 v0.27 §3.3과 일치): `timer.textPos` (142, 458) → **(268, 402)**, `timer.rotation` 9 → **7**, `timer.alarmVolume` 80 → **44**(`DEFAULT_ALARM_VOLUME`), `fontSize` 36·`countdownSecs` 1500(`DEFAULT_COUNTDOWN_SECS`)·`color` `"#333333"`·`enabled` false·`mode` Stopwatch 불변. `default_mouse()` 좌표(CR-044, §11 확인 필요 14): `shoulder` (582, 484)·`partPos` (411, 464)(키 없음 serde 기본은 여전히 (389, 492))·`penPos` (372, 476)·`penMode` **true**. §2·§3.1 표 반영. §3.7·§3.8·§3.10의 코드 조각과 테스트 기대값(S-T1·S-T10·S-T12·S-T13·S-T14·S-T17·S-T18의 (142, 458)·9·80, N1′의 (380, 496))은 **옛 기록** — 현재 값은 §3.1·소스. ③ **표기 정리**: 아래 변경이력·§3.x·§10의 「소스 미적용」(CR-017·019·024·033·035·045·047·048, SV2, data-reset, CR-053)은 모두 소스에 반영됨(`settings/{mod,timer,atomic,store,pen_mode_tests,pen_pos_tests}.rs`). CR-053 값은 0.4.0에서 다시 바뀌었다(②). `save`는 CR-047 ③단계대로 **비공개**(§2 행 정정). `idleSeconds` 검증은 60~3600(`IDLE_SECONDS_MIN/MAX`, 읽기는 보정 — §3.1 행 정정).
   - 2026-09-27 (data-reset, 🔒 사용자 결정 R-A·R-B·D-2(언어 유지)·D-3, 새 모듈 문서 [data_reset.md](data_reset.md)) **앱 시작 순서 변경**: settings `load_or_default`가 시딩보다 **앞으로** 오고, 그 값을 담은 `Mutex<Settings>`로 `data_reset::run_startup`이 돈다. 세대가 다르거나 없으면 `settings::update` 한 번으로 설정 전체를 `Settings::default()`로 바꾸되 `autostart`·`language`만 유지한다. 세대 표식은 settings 스키마 밖의 별도 파일 `data-generation.json`(`version` 필드 추가 없음 — D19 유지). **settings 공개 API·스키마·검증 불변**(호출자만 늘어남). 증분 **§3.11**. **소스 미적용.**
   - 2026-09-27 (CR-053 배포용 기본 세트 3차 — CR-044 대체, 🔒 사용자 지정, 확정사항 §6 CR-053 줄) **타이머 기본값 `timer.textPos` (268, 403) → (142, 458), `timer.rotation` 5 → 9.** 나머지 타이머 기본값(`enabled` 꺼짐·`fontSize` 36·`color` `"#333333"`·`countdownSecs` 1500(25분)·`alarmVolume` 80 등)과 범위·보정 규칙, 좌표 기본값(`shoulder`·`partPos`·`penPos`·`penMode`, CR-044 그대로)은 불변. 공개 API 시그니처·JSON 키 불변. 이미 저장된 `settings.json`의 값은 그대로 읽힌다(기본값은 키가 없을 때만 쓰인다). 갱신 위치: §2 `TimerSettings` 행, §3 필드 표 `timer.textPos`·`timer.rotation`, §3.8.1 `impl Default`, 테스트 S-T1·S-T10·S-T12(§3.8·§3.10 갱신본). 짝 문서 [assets.md](assets.md) §3.16(기본 그림 7장). **소스 미적용**(`settings/timer.rs:88·90`, 단위 테스트 `:241`·`:465`).
@@ -45,6 +46,10 @@
 | OV-R-14 (CR-007) | 기본 `hand` 없음(폴백 전용) | `default_mouse().hand = None`(기존). 폴백 ③이 「패드 중심」 → 「영역 중심」(§9.1-6) |
 | OV-R-13 | 창 위치 저장 | `overlay.x/y`, `save`(기존. 호출자 window) |
 | **PT-04·07·08·09 (CR-045, 🔒 2026-09-26, 확정사항 §6 「뽀모도 타이머」 — 아키텍처 ID, 화면 ID는 ui-designer 확정 예정)** | 타이머 on/off, 시간 글자 위치(끌기)·회전·크기·색 조정, 재시작 후에도 이 값들은 유지(경과는 저장 안 함) | **`Settings.timer: TimerSettings`**(§3.8) — 기본값·검증·읽기 보정. on/off의 상태 효과(끄면 일시정지)는 [timer.md](timer.md) `Timer::disable`, 연결은 bridge |
+| **KH-06 (key-hold, 🔒 2026-11-01 D-1·D-2 — 아키텍처 ID, 화면 ID ST-R-69 신설 예정)** | 키 그림 최소 유지 시간 저장, 기본 150, 범위 0~500ms, 쓰기 거부·읽기 보정, 옛 파일 150, 초기화 150 | **`Settings.key_hold_ms: u32`**(JSON `keyHoldMs`), `settings/key_hold.rs` `validate`·`normalize`·상수(§3.13) |
+| **KH-03 (key-hold)** | N = 0이면 지금(v1.1) 동작과 같다 | 범위에 0 포함(`KEY_HOLD_MS_MIN = 0`). 0의 의미 해석은 ui |
+| **KH-01 (key-hold, overlay OV-R-42 신설 예정)** | 키 그림을 누른 시점부터 최소 N ms 유지 | **저장값 제공만**(N). 표시 파생(유지 스냅숏·만료 타이머)은 ui — core는 키 입력·타이밍을 다루지 않는다(확정사항 §5) |
+| **KH-08 (key-hold, 🔒 D-3, settings ST-R-59 개정 예정)** | 프리셋 PS-02에 포함, 키 없는 옛·내장 프리셋 = 150 | PS-02 5필드(§3.12, 정본 [presets.md](presets.md) §3.2·§7) |
 
 ## 2. 공개 API
 
@@ -72,13 +77,18 @@
 | **`pub fn timer::validate(t: &TimerSettings) -> Result<(), SettingsError>`** | 타이머 설정 | () — `Settings::validate` 끝에서 호출 | `Invalid`(범위 밖·비유한수·색 형식) | **PT-07·08** |
 | **`pub fn timer::normalize(t: TimerSettings) -> TimerSettings`** | 타이머 설정 | 범위로 자르고 비유한수·색 형식 오류는 기본값, 색 소문자 — `load`에서만 호출 | 없음 | **PT-07·08·09** |
 | **`pub const timer::{TEXT_POS_MAX_X, TEXT_POS_MAX_Y, ROTATION_MIN, ROTATION_MAX, FONT_SIZE_MIN, FONT_SIZE_MAX}: f64`, `pub const timer::DEFAULT_COLOR: &str`** | — | 900·700·−180·180·12·200, `"#333333"` | — | **PT-07·08** |
+| **`pub const KEY_HOLD_MS_MIN: u32 = 0` / `KEY_HOLD_MS_MAX: u32 = 500` / `KEY_HOLD_MS_DEFAULT: u32 = 150`** (`settings::key_hold`, `mod.rs`에서 `pub use key_hold::{KEY_HOLD_MS_DEFAULT, KEY_HOLD_MS_MAX, KEY_HOLD_MS_MIN};`) | — | 0·500·150. `DEFAULT`는 TS `DEFAULT_SETTINGS.keyHoldMs`와 1:1 | — | **KH-06·KH-03** (§3.13) |
+| **`Settings.key_hold_ms: u32`** (JSON `keyHoldMs`) | — | 키 없음 → 150(컨테이너 `#[serde(default)]`) | — | **KH-06** |
+| **`pub(crate) fn key_hold::normalize(ms: u32) -> u32`** | ms | 0~500으로 clamp. 바뀌면 `log::warn!`(값만) — `load`·`PresetSettings::normalized`에서 호출 | 없음 | **KH-06·KH-08** |
+| `pub(super) fn key_hold::validate(ms: u32) -> Result<(), SettingsError>` (모듈 비공개 — 표에는 호출 관계 기록용) | ms | () — `Settings::validate`의 유휴 시간 검사 바로 다음에서 호출 | `Invalid("키 그림 유지 시간은 0 ~ 500ms 사이여야 합니다.")` | **KH-06** |
 
 - 비공개: `fn default_part_pos() -> Point`, `fn default_area() -> [Point; 4]` — 둘 다 serde `default` 속성과 `default_mouse`가 함께 쓴다(값 한 곳). **CR-045 `timer.rs` 비공개: `fn clamp_or(v: f64, min: f64, max: f64, fallback: f64) -> f64`, `fn in_range(v: f64, min: f64, max: f64) -> bool`, `fn is_hex_color(s: &str) -> bool`**(§3.8.1).
-- **CR-045 `Settings::validate`의 남은 규칙**: 배율·유휴·`area` 유한수 + **`timer` 4규칙**(위치·회전·크기·색).
+- **CR-045 `Settings::validate`의 남은 규칙**: 배율·유휴·`area` 유한수 + **`timer` 4규칙**(위치·회전·크기·색). **(key-hold)** 유휴 시간 검사 다음에 `key_hold::validate` 1규칙(0~500).
 
 ## 3. 내부 구조
 
 - 파일: `src-tauri/src/settings/mod.rs` 1개(현재 471줄, CR-019 적용 후 약 460줄 예상 — 삭제 약 15줄, 테스트 추가 약 25줄). 분리 불필요.
+- **(2026-11-01 갱신 — 위 줄은 CR-019 당시 기록)** 현재 파일: `mod.rs`(777줄, `wc -l` 2026-11-01 — 한계 800)·`atomic.rs`(CR-047·SEC-205)·`store.rs`(CR-047)·`timer.rs`(CR-045·048)·`pen_mode_tests.rs`·`pen_pos_tests.rs`, 그리고 **신규 `key_hold.rs`**(key-hold — 상수 3개·`validate`·`normalize`·`#[cfg(test)] mod tests` KC1~KC7, §3.13). `mod.rs` 추가는 15줄 이하이고 테스트는 넣지 않는다(A-7).
 
 ### 3.1 스키마 (camelCase, TS `Settings`와 1:1)
 
@@ -86,6 +96,7 @@
 |---|---|---|---|
 | `scale` | `f64` | 1.0 | 0.25 ≤ x ≤ 2, 유한 |
 | `idleSeconds` | `u32` | 300 | 60 ≤ x ≤ 3600(`IDLE_SECONDS_MIN/MAX`, 읽기는 보정 — SV2-12) |
+| **`keyHoldMs`** (key-hold, KH-06) | **`u32`**(ms) | **150**(`KEY_HOLD_MS_DEFAULT`). 키 없음 → 150 | **0 ≤ x ≤ 500**(`KEY_HOLD_MS_MIN/MAX`). 쓰기는 거부(`settings.invalid`), 읽기는 clamp + 경고. **ui 소유**(`set_settings`가 그대로 바꿈, `keep_core_owned` 불변) — §3.13 |
 | ~~`slam.keys`~~ | — | — | **삭제(CR-019)** |
 | ~~`slam.durationMs`~~ | — | — | **삭제(CR-019)** |
 | `overlay.x`, `overlay.y` | `i32` | 100, 100 | 없음 |
@@ -205,7 +216,10 @@ pub fn default_mouse() -> MouseSettings {
 | `mouse`에 `armWidth`·`armColor`가 남아 있음 | 무시(기존) | 같음 |
 | `mouse`에 `partPos`·`hand`가 없음 | (389, 492) / `None`(기존) | 같음 |
 | `area`가 배열이 아니거나 길이 ≠ 4, 원소에 `x`/`y` 누락 | `Format` 오류 → `load_or_default`가 파일 전체를 기본값으로 대체(경고 로그) | 다른 필드의 형식 오류와 같은 기존 동작(§11 D11) |
-| 다음 `save` | 파일에서 **`slam`**·`pad`·`armWidth`·`armColor` 키가 사라지고 `area`가 생긴다 | 직렬화는 구조체 필드만 쓴다. 마이그레이션 코드 불필요 |
+| **`keyHoldMs`가 없음**(key-hold 이전 파일 전부) | **150**(D-2 — 새 기본값이 바로 적용, 마이그레이션 없음) | 컨테이너 `#[serde(default)]` |
+| **`keyHoldMs`가 501 이상** | 500으로 보정 + 경고 로그(값만), 다른 필드 그대로 | `load`의 `key_hold::normalize`(§3.13, `idleSeconds`와 같은 규칙 — A-8) |
+| **`keyHoldMs`가 음수·소수·문자열·`null`** | `Format` 오류 → `load_or_default`가 파일 전체를 기본값으로 대체(경고 로그) — **기존 경로 그대로, 관용 읽기 추가 안 함**(A-8) | `u32` serde 형식 오류. `idleSeconds`와 같은 기존 위험 |
+| 다음 `save` | 파일에서 **`slam`**·`pad`·`armWidth`·`armColor` 키가 사라지고 `area`가 생긴다. **(key-hold) `keyHoldMs`가 항상 쓰인다**(skip 없음) | 직렬화는 구조체 필드만 쓴다. 마이그레이션 코드 불필요 |
 
 - `version` 필드는 여전히 없다(§11 확인 필요 1). CR-019도 serde 기본 동작(모르는 키 무시)만으로 호환된다.
 
@@ -1102,23 +1116,117 @@ pub struct TimerSettings {
 
 ### 3.12 presets — 사용처와 PS-02/PS-03 분류 (🔒 2026-09-30 확정사항 §6 「프리셋」, 정본 [presets.md](presets.md) §3.2·§7)
 
-비유: 장부(settings)는 그대로이고, 장부의 네 칸만 베껴 두었다가 다시 옮겨 적는 옷장 관리인(`presets`)이 생긴다. 옮겨 적을 때도 기존 「장부 고치기 창구」(`update`)만 쓴다.
+비유: 장부(settings)는 그대로이고, 장부의 다섯 칸(key-hold 전에는 네 칸)만 베껴 두었다가 다시 옮겨 적는 옷장 관리인(`presets`)이 생긴다. 옮겨 적을 때도 기존 「장부 고치기 창구」(`update`)만 쓴다.
 
 | settings 항목 | presets 사용처 |
 |---|---|
-| `update(state, path, f)` | `presets::apply` 5단계 — `\|cur\| preset.settings.merge_into(cur)`(PS-02 4필드 대입만). **새 저장 경로 없음**(CR-047) |
+| `update(state, path, f)` | `presets::apply` 5단계 — `\|cur\| preset.settings.merge_into(cur)`(**PS-02 5필드** 대입만 — key-hold D-3로 4 → 5). **새 저장 경로 없음**(CR-047) |
 | `write_atomic`·`read_capped_string`·`MAX_TEXT_FILE_BYTES` | `preset.json` 쓰기·읽기(1MiB 상한), 적용 백업의 되돌림 쓰기 |
-| `IDLE_SECONDS_MIN/MAX`·`timer::normalize`·`Settings::validate` | `preset.json`의 설정 읽기 보정·검사(`load`와 같은 규칙) |
+| `IDLE_SECONDS_MIN/MAX`·`timer::normalize`·**`key_hold::normalize`**(key-hold)·`Settings::validate` | `preset.json`의 설정 읽기 보정·검사(`load`와 같은 규칙) |
 | `Settings`·`MouseSettings`·`TimerSettings`·`SettingsError` | 타입 재사용. `SettingsError`는 `PresetError::Settings`로 감싸 code 그대로 전달 |
 
 | 분류 | 필드 | 프리셋 적용 때 |
 |---|---|---|
-| PS-02 (프리셋에 담김) | `scale`·`idle_seconds`·`mouse`·`timer` | 프리셋 값으로 바뀜 |
+| PS-02 (프리셋에 담김) | `scale`·`idle_seconds`·**`key_hold_ms`**(key-hold D-3, 2026-11-01)·`mouse`·`timer` — **5필드** | 프리셋 값으로 바뀜. 키 없는 옛·내장 프리셋은 150 |
 | PS-03 (PC별) | `overlay`·`autostart`·`language`·`position_lock`·`show_in_taskbar` | 그대로 |
 
 - **분류 가드**: `presets::format::PresetSettings::from_settings`가 `Settings`를 `..` 없이 구조 분해한다. 이 문서에서 `Settings`에 필드를 더하는 설계를 하면 [presets.md](presets.md) §7 표에 그 필드의 분류(PS-02/PS-03)를 함께 적는다.
 - **settings 쪽 변경 없음.** 공개 API·스키마·검증·기본값 불변. 잠금 규칙(§3.9)도 그대로 — `presets::save`는 잠금을 한 문장으로만 잡고, `apply`는 `update` 안에서만 잡는다.
 - 테스트: [presets.md](presets.md) §8(`merge_into_keeps_pc_local_fields`·`apply_keeps_pc_local_fields`·`apply_rolls_back_on_settings_failure`). store.rs SU1~SU7 영향 없음.
+- **(key-hold, 2026-11-01)** `Settings.key_hold_ms` 추가로 분류 가드가 컴파일을 깨는 것은 의도된 신호다 — **PS-02로 분류**(D-3). 정본 [presets.md](presets.md) §3.2·§7(7차), 테스트 KP1~KP4.
+
+### 3.13 key-hold — `keyHoldMs` (KH-01·03·06·08, 🔒 사용자 결정 2026-11-01 D-1·D-2·D-3 — 이름·타입·기본값, 구현자가 그대로 옮길 것)
+
+비유: 장부에 「키 그림을 최소 몇 ms 보여 줄지」 칸 하나를 더한다. 장부는 그 숫자가 0~500 사이인지만 보고, 숫자로 화면을 어떻게 그릴지는 화가(ui)가 정한다.
+
+결론: `Settings`에 `key_hold_ms: u32`(0~500, 기본 150)를 더하고, `idle_seconds`와 같은 규칙(쓰기 거부·읽기 보정)을 새 파일 `settings/key_hold.rs`에 둔다. **core는 저장·검증만 한다** — 키 입력·누른 시각·유지 판정은 ui(`src/state/keyHold.ts`) 몫이고, hook·window는 바뀌지 않는다. 새 command·event·에러 code·스레드·채널 없음.
+
+#### 3.13.1 `settings/key_hold.rs` (신규, 정본 = 패킷 §2)
+
+```rust
+//! 키 그림 최소 유지 시간 `keyHoldMs`(🔒 2026-11-01 사용자 지정, key-hold KH-01·03·06·08).
+//!
+//! [목적] 오버레이가 키 그림(누름·특수 키·펜 손 누름)을 누른 시점부터 최소 이만큼 보이게 하는 ms 값의
+//!        범위·기본값·쓰기 검증·읽기 보정. 표시 파생은 ui(`src/state/keyHold.ts`) 몫 — core는 저장·검증만.
+//! [규칙] 0 ~ 500 정수 ms, 기본 150. 0 = 떼는 즉시 복귀(v1.1까지 동작). 쓰기(set_settings·프리셋 검증)는 범위 밖
+//!        거부(`settings.invalid`), 파일·프리셋 읽기는 clamp(옛 파일이 이 한 필드 때문에 통째로 기본값이 되지
+//!        않게 — idle_seconds D24와 같은 이유). 음수·소수는 u32 형식 오류(기존 경로, 관용 읽기 없음 — A-8).
+//! [unsafe] 없음.
+//! [테스트] 이 파일 `tests` — KC1~KC7(key-hold-03-packet-core §5).
+
+use super::SettingsError;
+
+pub const KEY_HOLD_MS_MIN: u32 = 0;
+pub const KEY_HOLD_MS_MAX: u32 = 500;
+/// TS `DEFAULT_SETTINGS.keyHoldMs`와 1:1.
+pub const KEY_HOLD_MS_DEFAULT: u32 = 150;
+
+/// 쓰기 검증 — `Settings::validate`가 부른다.
+pub(super) fn validate(ms: u32) -> Result<(), SettingsError> {
+    if !(KEY_HOLD_MS_MIN..=KEY_HOLD_MS_MAX).contains(&ms) {
+        return Err(SettingsError::Invalid(
+            "키 그림 유지 시간은 0 ~ 500ms 사이여야 합니다.".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+/// 읽기 보정 — `settings::load`·`PresetSettings::normalized`가 부른다. 범위 밖이면 clamp + 경고 로그(값만).
+pub(crate) fn normalize(ms: u32) -> u32 {
+    let clamped = ms.clamp(KEY_HOLD_MS_MIN, KEY_HOLD_MS_MAX);
+    if clamped != ms {
+        log::warn!("키 그림 유지 시간 {ms}ms가 범위 밖이라 {clamped}ms로 읽습니다");
+    }
+    clamped
+}
+```
+
+- 하한 비교는 `contains`로 쓴다 — `ms >= 0`은 `u32`라 rustc `unused_comparisons` 경고 → `clippy -D warnings` 실패. `KEY_HOLD_MS_MIN`이 쓰이므로 dead_code 경고도 없다.
+
+#### 3.13.2 `settings/mod.rs` 변경 (15줄 이하 — 현재 777줄, 한계 800)
+
+```rust
+pub mod key_hold;                                                    // pub mod timer; 아래
+pub use key_hold::{KEY_HOLD_MS_DEFAULT, KEY_HOLD_MS_MAX, KEY_HOLD_MS_MIN};
+
+pub struct Settings {
+    pub scale: f64,
+    pub idle_seconds: u32,
+    /// 키 그림 최소 유지 시간 ms(0~500, 기본 150 — key-hold KH-06). ui 소유 — set_settings가 그대로 바꾼다.
+    pub key_hold_ms: u32,
+    // … 나머지 필드·순서 불변
+}
+// Default: idle_seconds: 300, 다음 줄
+            key_hold_ms: KEY_HOLD_MS_DEFAULT,
+// Settings::validate — idle_seconds 검사 바로 다음 줄
+        key_hold::validate(self.key_hold_ms)?;
+// load — idle_seconds 보정 블록과 timer::normalize 사이
+    // 키 그림 유지 시간도 거부 대신 보정한다(key-hold, 유휴 시간 보정과 같은 이유).
+    settings.key_hold_ms = key_hold::normalize(settings.key_hold_ms);
+```
+
+`//!` 머리 — 줄 수를 늘리지 말고 기존 줄 끝에 덧붙인다: [공개 API] `KEY_HOLD_MS_MIN`·`KEY_HOLD_MS_MAX`·`KEY_HOLD_MS_DEFAULT`(key_hold.rs) / [규칙] ` / keyHoldMs 0~500(읽기는 보정, key_hold.rs)` / [호환] 누락 키 목록 `keyHoldMs`(→ 150) / [테스트] `키 그림 유지 시간(key_hold.rs, key-hold)`.
+
+#### 3.13.3 동작 (🔒 패킷 §3)
+
+| # | 상황 | 동작 |
+|---|---|---|
+| 1 | 새 설치·키 없는 옛 `settings.json` | `key_hold_ms = 150`(컨테이너 `#[serde(default)]`). 직렬화는 항상 `"keyHoldMs": <n>`(skip 없음) |
+| 2 | `set_settings`(→ `settings::update`) 입력 0~500 | 그대로 저장·반환·`settings://changed`. 부수 효과 없음(창 적용·손 기준점·타이머와 무관 — 계약 §5.3 4~6단계 해당 없음) |
+| 3 | `set_settings` 입력 501 이상 | `SettingsError::Invalid` → `settings.invalid`. 파일·메모리 불변 |
+| 4 | 파일 읽기 `load` — 501 이상 | 500으로 보정 + 경고 로그, 다른 필드 그대로 |
+| 5 | 파일 읽기 — 음수·소수·문자열 | 기존 serde 형식 오류 → `load_or_default`가 파일 전체를 기본값으로 대체(`idle_seconds`와 같은 기존 경로, 바꾸지 않는다 — A-8) |
+| 6 | 프리셋 저장·내보내기 / 적용 | `from_settings`가 현재 값을 담는다 / `merge_into`가 덮어쓴다(PS-03 5필드 유지). 키 없는 프리셋(옛 내보내기·내장 ①②) = 150, 범위 밖 = `normalized`에서 clamp — [presets.md](presets.md) §3.2 |
+| 7 | 전체 초기화 `reset_settings` | 150(`..Settings::default()`, 코드 변경 없음 — [data_reset.md](data_reset.md) §3) |
+| 8 | 창 위치 저장 등 core 병합 `keep_core_owned` | `..incoming`이라 ui 입력값 그대로(코드 변경 없음) |
+
+#### 3.13.4 하지 말 것 (패킷 §6)
+
+- `idle_seconds`·`scale`·`timer` 등 기존 필드의 규칙·순서·직렬화 변경 금지. 새 command·event·에러 code 금지.
+- 관용 읽기(음수·소수·문자열을 값으로 살리기) 추가 금지(A-8). 10ms 단계 검증 추가 금지(화면 몫 — 설정 창 슬라이더 단위).
+- 내장 프리셋 원문(`doc/assets/presets/*/preset.json`) 수정 금지 — 키 없음 = 150으로 충분(D-3).
+- 키 입력·특수 키·타이밍 정보를 core가 다루지 않는다(hook·window 변경 없음). 새 크레이트 금지.
+- `settings/mod.rs`에 테스트를 넣지 않는다(줄 수 한계) — `key_hold.rs`의 `tests`에 둔다(§8.5).
 
 ## 4. 스레드·채널
 
@@ -1134,7 +1242,7 @@ pub struct TimerSettings {
 
 | 변형 | 한국어 메시지 | 원인 | `code()` |
 |---|---|---|---|
-| `Invalid(String)` | 설정값이 올바르지 않습니다: {0} | 검증 규칙 위반(배율·유휴·`area` 유한수) | `settings.invalid` |
+| `Invalid(String)` | 설정값이 올바르지 않습니다: {0} | 검증 규칙 위반(배율·유휴·`area` 유한수·타이머·**키 그림 유지 시간**). (key-hold) 문구 추가: 「키 그림 유지 시간은 0 ~ 500ms 사이여야 합니다.」 — 새 변형·code 없음 | `settings.invalid` |
 | `Io(#[from] std::io::Error)` | 설정 파일을 읽거나 쓸 수 없습니다: {0} | 파일 IO | `settings.io` |
 | `Format(#[from] serde_json::Error)` | 설정 파일 형식이 올바르지 않습니다: {0} | JSON 형식(`area` 길이 ≠ 4 포함. 옛 `slam` 형식은 원인이 되지 않음) | `settings.format` |
 
@@ -1195,7 +1303,49 @@ pub struct TimerSettings {
 
 - 기존 U1~U12·C1~C5 전건 PASS(구조체 리터럴 `:233`에 `pen_pos: None,` 추가 외 수정 없음). `cargo check --examples` 통과(`import_sample.rs:69` 수리 증명).
 
+### 8.5 key-hold — `keyHoldMs` (단위·tempdir, `settings/key_hold.rs` `#[cfg(test)] mod tests`, 패킷 §5 이름 그대로, `sleep` 금지)
+
+신규 10건(KC1~KC7·KP2~KP4), **개정 3건(KC8·KP1·KP1b)**. KP1b는 패킷 누락분(리터럴 컴파일 수리, §11 key-hold Δ1)이고 core-implementer가 `key_hold_ms: 320`으로 반영했다(실물 `presets/format.rs:339`, KP4는 `:417`). **적용됨(2026-11-01)**. KP는 [presets.md](presets.md) §8.1에도 같은 이름으로 적는다.
+
+| # | 위치 · 이름 | 조건 | 기대 |
+|---|---|---|---|
+| KC1 | `key_hold.rs` `default_is_150_and_serialized` | `Settings::default()` | `key_hold_ms == 150`, `validate()` Ok, JSON에 `"keyHoldMs":150` |
+| KC2 | `old_file_without_key_reads_default` | 파일 `{"idleSeconds":60}` → `load` | `Some`, `key_hold_ms == 150`, `idle_seconds == 60` |
+| KC3 | `validate_range` | `key_hold_ms` = 0·150·500 / 501·`u32::MAX` | 앞 셋 Ok / 뒤 둘 `Err(Invalid)`, `code() == "settings.invalid"`, 문구에 「0 ~ 500ms」 |
+| KC4 | `load_clamps_out_of_range` | 파일 `{"keyHoldMs": 9999, "scale": 1.5}` | `key_hold_ms == 500`, `scale == 1.5`(다른 필드 보존) |
+| KC5 | `round_trip` | `update`로 0 저장 → `load`, 320 저장 → `load` | 0 / 320 그대로 |
+| KC6 | `bad_type_is_format_error` | 파일 `{"keyHoldMs": -1}` | `load` → `Err(Format)`, `load_or_default` → `Settings::default()`(기존 경로 고정) |
+| KC7 | `update_rejects_out_of_range` | 메모리·파일 150 상태에서 `update(\|s\| s.key_hold_ms = 501)` | `Err(Invalid)`, 메모리·파일 모두 150 그대로 |
+| KC8 | `data_reset/mod.rs` `reset_settings_keeps_autostart_and_language`(**개정**) | `current`에 `key_hold_ms: 400,` 1줄 | 결과 == 기대(`..Settings::default()` → 150). 본문 코드 변경 없음 |
+| KP1 | `presets/format.rs` `preset_settings_has_exactly_ps02_fields`(**개정**, 312행) | 직렬화 키 | `["idleSeconds", "keyHoldMs", "mouse", "scale", "timer"]` |
+| KP1b | `presets/format.rs` `merge_into_keeps_pc_local_fields`(**컴파일 수리**, 326행) | `PresetSettings { … }` 리터럴에 `..` 꼬리가 없다 → 필드 추가 시 E0063 | 리터럴에 `key_hold_ms` 1줄(예: 320). 단언 불변(341행 `from_settings(&cur) == ps`가 새 필드까지 덮는다) |
+| KP2 | `preset_without_key_hold_reads_default` | `settings`에 `keyHoldMs` 없는 preset JSON 파싱 | `key_hold_ms == 150` |
+| KP3 | `preset_key_hold_normalized` | `keyHoldMs: 9999` → `normalized()` | 500 |
+| KP4 | `merge_into_sets_key_hold_keeps_pc_fields` | `cur`(언어 ja·위치 999·key_hold 0)에 `key_hold_ms 320` 프리셋 `merge_into` | `cur.key_hold_ms == 320`, 언어·위치·autostart·positionLock·showInTaskbar 그대로 |
+| 회귀 | 기존 settings·presets·data_reset·window·bridge 테스트, `src-tauri/tests/*`, 내장 프리셋 파싱 테스트 | 변경 없음 | 전부 PASS |
+
+- 완료 기준: `cd src-tauri && cargo fmt --check` exit 0 · `cargo clippy -- -D warnings` 경고 0 · `cargo test` **실패 0**(bridge Rust는 core `Settings`를 재노출만 하고, TS는 새 필드를 아직 모르는 채 무시한다). `src-tauri/src/settings/mod.rs` ≤ 800줄(`wc -l`), `key_hold.rs`·`format.rs` 800 이하.
+- 컴파일 파급 점검(Grep 2026-11-01): `Settings { … }` 리터럴은 모두 `..` 꼬리가 있다(`data_reset/mod.rs:112·275·283`, `window/placement.rs:247·259·474·630`, `presets/format.rs:121·322`, `store.rs:155`, `pen_pos_tests.rs:53`, `timer.rs:486·620`, `tests/data_reset.rs:80`, `tests/presets_apply.rs:91·147`) → 깨지는 곳은 의도된 분류 가드 `presets/format.rs:78` 구조 분해와 KP1b 리터럴뿐. bridge Rust에 `Settings` 리터럴 없음.
+
 ## 9. bridge 요구 명세
+
+### 9.5 key-hold — `Settings.keyHoldMs` 추가 (계약 §3.3·§5.3·§5.11, v1.1 → **v1.2**) — **호환성: 추가, 저장 데이터 비파괴**
+
+계약 확정은 bridge-designer(`key-hold-03-packet-bridge.md`). core가 요구하는 것만 적는다.
+
+| # | 계약 위치 | 요구 | 호환성 분류 |
+|---|---|---|---|
+| 1 | TS `Settings` | 추가 `keyHoldMs: number  // 키 그림 최소 유지 시간 ms, 0~500 정수, 기본 150. 0 = 떼는 즉시 복귀` — **필수 필드**(D-7, Rust가 항상 보낸다) | 추가 — TS 필수라 ui 테스트 픽스처 갱신 동반(과도 상태 K-2) |
+| 2 | TS 상수 | `KEY_HOLD_MS_MIN = 0`·`KEY_HOLD_MS_MAX = 500`, `DEFAULT_SETTINGS.keyHoldMs = 150`(Rust `KEY_HOLD_MS_DEFAULT`와 1:1) | 추가 |
+| 3 | Rust 계약 블록 `Settings` | `pub key_hold_ms: u32`(`idle_seconds` 다음, 컨테이너 `#[serde(default)]`) | 추가 |
+| 4 | §3.3 기본값 표·JSON 예시·검증 규칙 | `keyHoldMs` 행 / `"keyHoldMs": 150` / 「0 ≤ keyHoldMs ≤ 500 — 범위 밖은 `settings.invalid`(문구 「키 그림 유지 시간은 0 ~ 500ms 사이여야 합니다.」), 파일 읽기는 보정」 | 추가 |
+| 5 | §5.3 `set_settings` 부수 효과 | 해당 없음(창 적용·손 기준점·타이머 재계산 없음) — 설명만 | 설명 |
+| 6 | §5.11 프리셋 | PS-02 「설정 4필드」 → **5필드**(`keyHoldMs`). 키 없는 옛·내장 프리셋은 150 | 추가(D-3) |
+| 7 | 런타임 호환 | ① 옛 settings.json → 150 ② 새 ui + 옛 Rust: 모르는 키 무시(오류 없음, 값은 저장 안 됨) ③ 옛 ui + 새 Rust: `set_settings`에 키가 없으면 컨테이너 default 150으로 저장 — 사용자가 고른 값이 150으로 돌아간다 → **core·bridge·ui 한 반영 묶음**(배포 전 ui 0단계까지) | 비파괴(순서 의존) |
+| 8 | 새 command·event·에러 code | 없음 — 기존 `set_settings`·`get_settings`·`settings://changed`·`settings.invalid` | — |
+| 9 | 변경 이력 | "v1.2 Settings: `keyHoldMs` 추가(key-hold — 추가, 저장 데이터 비파괴). PS-02 5필드" | — |
+
+- 빈도: 설정 창 슬라이더 조작 때만(기존 `set_settings` 빈도와 같음). 실패 사유: 범위 밖 → `settings.invalid` 1종.
 
 ### 9.4 CR-024 — `Settings.mouse.penPos` 추가 (계약 §3.3·§5.1) — **호환성: 추가, 저장 데이터 비파괴**
 
@@ -1247,6 +1397,7 @@ pub struct TimerSettings {
 ### 9.3 새 command·event
 
 - 없음(CR-017·CR-019 모두). CR-019는 삭제만 있다.
+- 없음(key-hold, 2026-11-01) — `Settings` 필드 1개 추가뿐, 기존 `get_settings`·`set_settings`·`settings://changed`로 흐른다(§9.5).
 
 ## 10. 요구 추적표
 
@@ -1282,8 +1433,47 @@ pub struct TimerSettings {
 | **TM-10 — `alarmVolume` 0~100, 기본 44(0.4.0 — 옛 D-10 80)** | §3.10.1~§3.10.3, S-T18 | ✅ 설계 · 소스 반영 |
 | **TM-13 — core 검증 문구 2개(원문 ko)** | §3.10.3 | ✅ 설계 (3개 국어는 ui) |
 | **CR-048 — 새 필드 직렬화·왕복** | §3.10.5 S-T12 갱신·S-T12b 갱신·S-T19 | ✅ 설계 · 소스 반영 |
+| **KH-06 (key-hold → ST-R-69 신설 예정) — `keyHoldMs` 저장·기본 150·범위 0~500·쓰기 거부** | §2, §3.1, §3.13.1·§3.13.2·§3.13.3-1~3, §6, §8.5 KC1·KC3·KC5·KC7 | ✅ 설계 · 적용됨(2026-11-01, core-implementer) |
+| **KH-06 — 읽기 보정·옛 파일 150·형식 오류 기존 경로·초기화 150** | §3.3, §3.13.3-1·4·5·7, §8.5 KC2·KC4·KC6·KC8 | ✅ 설계 · 적용됨(2026-11-01, core-implementer) |
+| **KH-03 — N = 0 허용(현행과 같음)** | §3.13.1 `KEY_HOLD_MS_MIN = 0`, §8.5 KC3·KC5 | ✅ 설계 · 적용됨(2026-11-01, core-implementer)(0의 표시 의미는 ui) |
+| **KH-01 (→ OV-R-42 신설 예정) — 누른 시점부터 최소 N ms 유지** | §1(저장값 제공만), §9.5 | 부분(core 몫은 값 저장 — 표시 파생은 ui `src/state/keyHold.ts`) |
+| **KH-08 (→ ST-R-59 개정 예정) — 프리셋 PS-02 5필드, 옛·내장 프리셋 150** | §3.12, §3.13.3-6, §8.5 KP1·KP1b·KP2~KP4, 정본 [presets.md](presets.md) §3.2·§7 | ✅ 설계 · 적용됨(2026-11-01, core-implementer) |
+| **key-hold — bridge 요구(계약 v1.2, 추가·비파괴)** | §9.3, §9.5 | ✅ 요구 명세(계약 확정은 bridge-designer) |
 
 ## 11. 설계 결정 노트
+
+### key-hold 결정 (2026-11-01)
+
+| # | 결정 | 대안 | 근거 |
+|---|---|---|---|
+| **D-1** (🔒 사용자) | 키 `keyHoldMs`, `u32` ms, 0~500, 기본 150 | 범위 0~1000 / 기본 100 | 짧은 키 누름 70~120ms보다 길어 뗀 뒤에도 그림이 한 번 확실히 보인다. 500 초과면 `kb_up`이 거의 안 보여 멈춘 것처럼 보인다(02-design §5a). 10ms 단계는 화면 몫 — core는 정수 범위만 본다 |
+| **D-2** (🔒 사용자) | 옛 파일(키 없음) = 150 | 옛 파일만 0 — 「키 없음」과 새 설치를 가르는 별도 읽기 규칙 | 요구 자체가 「지금은 너무 순식간」이다. 컨테이너 default 한 줄로 끝나고 마이그레이션·`version`이 필요 없다(D19 유지) |
+| **D-3** (🔒 사용자) | 프리셋 PS-02 포함, 키 없는 옛·내장 프리셋 = 150 | A. PS-03(PC별) · B. `Option` 필드로 키 없으면 현재값 유지 | `idle_seconds`·`scale`과 같은 묶음. 컨테이너 default라 기존 PS-02 필드와 같은 규칙. 내장 프리셋 원문은 고치지 않는다 |
+| **A-7** (아키텍트) | 상수·검증·보정·테스트는 새 파일 `settings/key_hold.rs`, `mod.rs`는 15줄 이하 | `mod.rs`에 직접 | `mod.rs` 777줄(한계 800). `timer.rs` 선례 |
+| **A-8** (아키텍트) | 쓰기 = 범위 밖 거부(`settings.invalid`), 읽기 = clamp. 음수·소수의 관용 읽기는 없다 | 관용 역직렬화(CR-048 `timer` 3필드처럼) | `idleSeconds` D24와 같은 규칙. 관용 읽기는 요구 밖(형식 오류는 기존 경로 그대로 — 위험은 `idleSeconds`와 같은 크기) |
+| **KH-a** | `normalize`는 `pub(crate)`, `validate`는 `pub(super)` | 둘 다 `pub` | `normalize`는 presets가 쓰고(crate 안), `validate`는 `Settings::validate`만 부른다. 밖으로 넓힐 이유가 없다 |
+| **KH-b** | ui 소유 필드 — `keep_core_owned` 불변 | core 소유(병합 때 현재값 유지) | 바꾸는 주체는 설정 창 슬라이더뿐. core에 쓰는 경로가 없다(D28과 같은 판단) |
+
+**패킷 대비 델타**
+
+- **Δ1 (패킷 누락 — 컴파일 수리)**: 패킷 §1·§5는 `presets/format.rs`의 개정 테스트로 312행 키 단언(KP1)만 적었다. 같은 파일 326행 `merge_into_keeps_pc_local_fields`도 `PresetSettings { scale, idle_seconds, mouse, timer }`를 `..` 꼬리 없이 만든다(Read 2026-11-01). 필드를 더하면 E0063으로 테스트 빌드가 깨지므로 `key_hold_ms` 1줄이 필요하다 → §8.5 KP1b. 개정 테스트는 2건이 아니라 3건이다. 동작·단언은 불변. **해소(2026-11-01)** — core-implementer가 `key_hold_ms: 320`을 넣었다(실물 `presets/format.rs:339`).
+- §8의 패킷 표기 「§8.x」 → **§8.5**, 「§9.5」는 그대로.
+
+**파급 (Grep 2026-11-01)**
+
+| 파일 | 변경 | 담당 |
+|---|---|---|
+| `src-tauri/src/settings/key_hold.rs`(신규)·`settings/mod.rs` | §3.13.1·§3.13.2 | core-implementer |
+| `src-tauri/src/presets/format.rs`·`presets/mod.rs` | PS-02 5필드, KP1·KP1b·KP2~KP4 — [presets.md](presets.md) 7차 | core-implementer |
+| `src-tauri/src/data_reset/mod.rs` | 테스트 `current`에 1줄(KC8). 본문 불변 | core-implementer |
+| `src-tauri/src/window/placement.rs`·`settings/store.rs`·`presets/builtin.rs`·`doc/assets/presets/*/preset.json`·`lib.rs`·`bridge/**` | 변경 없음(`..` 꼬리·재노출) | — |
+| `doc/200_설계/bridge/contract.md` v1.2, `src/bridge/types.ts` | §9.5 | bridge-designer · bridge-implementer |
+| `src/state/keyHold.ts`·설정 창 슬라이더·i18n | 표시 파생·조절 UI(D-4~D-8) | ui |
+
+**확인 필요**
+
+- **KH-c 화면 요구ID 미부여**: 2026-11-01 Grep 기준 `src/overlay/requirements.md`에 OV-R-42가 없고 `src/settings/requirements.md`에 ST-R-69가 없다(ST-R-42는 뽀모도 카드로 이미 쓰임 — 표기 때 화면 접두어 필수). ST-R-59 「들어가는 것」 문구에 키 그림 유지 시간이 아직 없다. 신설·개정은 ui-designer 소관.
+- **KH-d 옛 ui + 새 Rust 순서 위험**(§9.5-7): ui가 `keyHoldMs`를 모르는 채 `set_settings`를 부르면 저장값이 150으로 돌아간다. 데이터 손상은 아니지만 배포 전 ui 0단계까지 한 묶음으로 넣어야 한다(02-design K-2와 같은 묶음).
 
 ### CR-033 결정 (2026-09-24)
 

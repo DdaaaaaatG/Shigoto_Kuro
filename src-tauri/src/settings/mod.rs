@@ -3,10 +3,10 @@
 //! [목적] 확정사항 §3·§5·§6 의 사용자 설정을 `%APPDATA%/com.kuro.keyviewer/settings.json` 에 보관.
 //! [공개 API] `Settings`(+하위 구조체), `Language`, `TimerSettings`(timer.rs), `load_or_default`,
 //!        `load`, `Settings::validate`, `SettingsError`, `IDLE_SECONDS_MIN`, `IDLE_SECONDS_MAX`,
-//!        `update`·`SaveOutcome`(store.rs, CR-047 저장 단일 창구), `write_atomic`(atomic.rs, CR-047
+//!        `KEY_HOLD_MS_MIN`·`KEY_HOLD_MS_MAX`·`KEY_HOLD_MS_DEFAULT`(key_hold.rs), `update`·`SaveOutcome`(store.rs, CR-047 저장 단일 창구), `write_atomic`(atomic.rs, CR-047
 //!        공용 원자적 쓰기 — assets 매니페스트도 재사용), `read_capped_string`·`MAX_TEXT_FILE_BYTES`
 //!        (atomic.rs, 텍스트 파일 상한 읽기). `save`는 비공개(CR-047 ③단계) — 밖에서는 `update`를 쓴다.
-//! [규칙] scale 0.25~2 / idleSeconds 60~3600(읽기는 보정) / mouse 가 있으면 area 네 점이
+//! [규칙] scale 0.25~2 / idleSeconds 60~3600(읽기는 보정) / keyHoldMs 0~500(읽기는 보정, key_hold.rs) / mouse 가 있으면 area 네 점이
 //!        유한수(볼록성·순서는 검사 안 함). language·positionLock·showInTaskbar 는 검증 없음(SV2).
 //!        timer 위치·회전·크기·색(읽기는 보정, CR-045).
 //! [저장] `update`가 설정 잠금 안에서 검증·원자적 교체·메모리 대입을 한 번에 하는 유일한
@@ -14,7 +14,7 @@
 //!        손상된 파일은 기본값으로 대체하고 로그를 남긴다.
 //! [직렬화] camelCase — TS `Settings` 와 1:1.
 //! [호환] 모르는 키(옛 slam·armWidth·armColor·pad)는 값·형식과 무관하게 무시, 누락 키
-//!        (area·partPos·hand·penPos·penMode·language·positionLock·showInTaskbar·timer)는 기본값으로 채운다.
+//!        (area·partPos·hand·penPos·penMode·language·positionLock·showInTaskbar·timer·keyHoldMs→150)는 기본값으로 채운다.
 //!        모르는 language 값(다른 문자열·null·숫자·객체)은 ko 로 읽는다(SV2-02).
 //!        penMode 는 bool 이 아니면(null·문자열·숫자) Format 오류(관용 읽기 아님, D27).
 //! [unsafe] 없음.
@@ -24,6 +24,7 @@
 //!          penMode 기본·옛 파일·왕복(CR-033, pen_mode_tests.rs),
 //!          penPos 기본·null 유지(pen_pos_tests.rs N1′~N6, CR-035),
 //!          타이머 설정(timer.rs, CR-045),
+//!          키 그림 유지 시간(key_hold.rs, key-hold),
 //!          1MiB 상한 초과 파일 → 기본값 대체(SEC-205, atomic.rs AW7과 함께).
 
 use std::path::Path;
@@ -33,7 +34,9 @@ use std::fs;
 
 use serde::{Deserialize, Deserializer, Serialize};
 
+pub mod key_hold;
 pub mod timer;
+pub use key_hold::{KEY_HOLD_MS_DEFAULT, KEY_HOLD_MS_MAX, KEY_HOLD_MS_MIN};
 pub use timer::TimerSettings;
 
 mod atomic;
@@ -157,6 +160,8 @@ pub struct Settings {
     pub scale: f64,
     /// 무입력 후 쉬는중 전환까지의 초
     pub idle_seconds: u32,
+    /// 키 그림 최소 유지 시간 ms(0~500, 기본 150 — key-hold KH-06). ui 소유 — set_settings가 그대로 바꾼다.
+    pub key_hold_ms: u32,
     pub overlay: OverlaySettings,
     /// 마우스 파츠를 쓰지 않으면 None
     pub mouse: Option<MouseSettings>,
@@ -205,6 +210,7 @@ impl Default for Settings {
         Self {
             scale: 1.0,
             idle_seconds: 300,
+            key_hold_ms: KEY_HOLD_MS_DEFAULT,
             overlay: OverlaySettings {
                 x: 100,
                 y: 100,
@@ -252,6 +258,7 @@ impl Settings {
         if !(IDLE_SECONDS_MIN..=IDLE_SECONDS_MAX).contains(&self.idle_seconds) {
             return bad("유휴 시간은 60 ~ 3600초(1 ~ 60분) 사이여야 합니다.");
         }
+        key_hold::validate(self.key_hold_ms)?;
         if let Some(m) = &self.mouse {
             if m.area.iter().any(|p| !p.x.is_finite() || !p.y.is_finite()) {
                 return bad("이동 영역의 네 꼭짓점 좌표는 유한한 수여야 합니다.");
@@ -301,6 +308,8 @@ pub fn load(path: &Path) -> Result<Option<Settings>, SettingsError> {
         );
         settings.idle_seconds = clamped;
     }
+    // 키 그림 유지 시간도 거부 대신 보정한다(key-hold, 유휴 시간 보정과 같은 이유).
+    settings.key_hold_ms = key_hold::normalize(settings.key_hold_ms);
     // 타이머 글자 설정도 거부 대신 보정한다(CR-045, 유휴 시간 보정과 같은 이유).
     settings.timer = timer::normalize(settings.timer);
     settings.validate()?;

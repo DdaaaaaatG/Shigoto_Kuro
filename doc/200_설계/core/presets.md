@@ -12,21 +12,23 @@
 | 2026-10-18 | 5차(배포 변형 basic, 🔒 2026-10-18 — 확정사항 §6 PS-11 아래) | Cargo 피처 `presets-basic`(`src-tauri/Cargo.toml` `[features]`)이 켜지면 내장 프리셋이 ①「세바시에-기본」 1개만. `builtin_presets()` 반환 `[BuiltinPreset; 2]` → `Vec<BuiltinPreset>`, ② 전용 항목(`PRESET2_JSON`·`preset2_png!`·`defaults_bytes`·`builtin_2`)은 `#[cfg(not(feature = "presets-basic"))]`(§3.1·§3.10.2). basic에서 빠지는 바이트 343 641(§3.10.7). `seed_builtin` 끝 `log::info!` 개수 로그(§3.10.4). 테스트는 `cfg!`로 기대 개수 1/2 분기, 통합 테스트 이름 `seed_creates_two_when_dir_missing` → `seed_creates_builtins_when_dir_missing`, §8.1 `builtin_bytes_match_source_folder` 설명을 실물(`fs::read`)에 맞춤(§8). 공개 API 시그니처·`PresetError`·bridge·`lib.rs` 불변. 결정 D-P13 | 적용(7bca274 실물 대조) |
 | 2026-10-25 | 6차(PS-11 내장 ② 교체, 🔒 2026-10-25 사용자 지시, 버전 0.6.0) | 내장 ② 「게님드림」 → 「먼작기」(`savedAt` 1791075836764, 그림 6장 `background`·`pomo_char`·`kb_up`·`mouse_base`·`pen_up`·`pen_down_0`, `hair` 없음, 알림음 mp3). 원본 `doc/assets/presets/2/`를 새 원본으로 바꾸고 옛 원본은 `doc/assets/presets/archive/2-gaenimdream/`로 보관(D-P14). id `builtin-2`·시딩 규칙 불변. `builtin_2()` = `preset2_png!` 6장(배경도 전용 — `DEFAULT_ASSETS` 재사용 끝, `defaults_bytes` 삭제) + 새 `static PRESET2_ALARM_MP3`(`#[cfg(not(feature = "presets-basic"))]`, ② 전용 118 272바이트) → `BUILTIN_ALARM_MP3`는 ① 전용(§3.10.1·§3.10.2). basic에서 빠지는 바이트 343 641 → 476 363(§3.10.7). 테스트 기대값: ② 6장·이름 「먼작기」·`savedAt`·적용 설정·파일 수 8(§8). 공개 API·`PresetError`·bridge·`lib.rs` 불변. 결정 D-P14, 확인 필요 C-11 | 소스 적용 2026-10-25(core-implementer, 실물 일치) |
 | 2026-10-27 | doc-sync 대조(**설계 변경 아님**, HEAD 09f4cae 기준) | 2026-10-27 doc-sync 대조 — `builtin.rs`(`//!`·`builtin_presets() -> Vec`·`PRESET2_ALARM_MP3`·`builtin_2` 파일 7개·cfg 4항목·단위 테스트 3개)와 `tests/presets_builtin.rs`(4개·`BASIC`/`COUNT`/`IDS`·② 메타 `("builtin-2", "먼작기", 1_791_075_836_764, 6, true)`·파일 수 8·적용 단언 (189,435,0))가 §3.1·§3.10·§8과 일치, ② 원본 바이트(PNG 6장 356 972·알림음 118 272·`preset.json` 1 119 = 476 363)도 실측 일치. 고친 곳: §11.4 C-7의 낡은 줄 번호 `builtin.rs:42-47` → 이름(`static BUILTIN_ALARM_MP3`, 실물은 :45). 코드 쪽 낡은 표기 1건 — `src-tauri/Cargo.toml` `[features]` 주석이 아직 「게님드림」 제외라고 적혀 있다(6차 이후 ②는 「먼작기」). 설계 위반 아님, 주석 정정은 core-implementer 몫(확인 필요로 보고) | 대조 완료 |
+| 2026-11-01 | 7차(key-hold KH-08, 🔒 사용자 결정 D-3 2026-11-01 — 최종 갱신) | `PresetSettings`에 `key_hold_ms: u32`(JSON `keyHoldMs`) — **PS-02 4필드 → 5필드**. `from_settings` 구조 분해 가드에 `key_hold_ms` 추가(PS-02 분류), `merge_into` 대입 1줄, `normalized`는 `crate::settings::key_hold::normalize`(0~500 clamp), `validate`는 `Settings { …, key_hold_ms, ..Settings::default() }`. 키 없는 옛 내보내기·내장 ①② = **150**(컨테이너 default — 내장 원문 `preset.json` 수정 없음). `formatVersion` 1 유지(필드 추가 — 옛 앱은 모르는 키로 무시, SEC-005). 테스트 개정 3건 KP1(키 단언)·KP1b(`merge_into_keeps_pc_local_fields` 리터럴 컴파일 수리 — 패킷 누락, 실물 `format.rs:339` `key_hold_ms: 320`), 신규 KP2~KP4(§8.1). 공개 API·`PresetError`·code·bridge 불변. 정본 패킷 `doc/200_설계/architecture/key-hold-03-packet-core.md` §2·§5, 짝 [settings.md](settings.md) §3.12·§3.13. 결정 D-P15(§11.0) | 적용됨(2026-11-01, core-implementer — `format.rs` 511줄, `cargo test` lib 472 + 통합 101 통과, 매니저 보고 기준) |
 
 - 요구ID 표기: `PS-01`~`PS-10` = 아키텍처 횡단 ID(`doc/000_프로젝트_확정사항.md` §6 「프리셋」, `presets-02-design.md` §6 RTM). `U-1`~`U-7` = 사용자 결정, `A-1`~`A-11` = 아키텍트 결정(02-design §5a). `doc/100_요구조건/`에는 없다.
 - 상대 문서: [assets.md](assets.md) §3.18 · [settings.md](settings.md) §3.12 · [data_reset.md](data_reset.md) §3.4 · 계약 `doc/200_설계/bridge/contract.md` v0.31(§3.11 `PresetPreview`, §9 v0.31 — bridge-designer 소관, 어긋나면 계약이 맞다) · bridge 패킷 `presets-03-packet-bridge.md`
 
 ## 1. 목적
 
-결론: `presets`는 **지금의 그림·알림음·설정(PS-02 4필드) 한 벌을 `presets/{id}/` 폴더에 복사해 두고, 목록·적용·내보내기·가져오기·이름 바꾸기·삭제를 하는 단일 소유자**다. 적용은 「검증 → 백업 → 교체 → 설정 병합 → 실패 시 되돌림」이고, 설정 쓰기는 `settings::update` 하나만 쓴다.
+결론: `presets`는 **지금의 그림·알림음·설정(PS-02 5필드 — 7차 key-hold로 4 → 5) 한 벌을 `presets/{id}/` 폴더에 복사해 두고, 목록·적용·내보내기·가져오기·이름 바꾸기·삭제를 하는 단일 소유자**다. 적용은 「검증 → 백업 → 교체 → 설정 병합 → 실패 시 되돌림」이고, 설정 쓰기는 `settings::update` 하나만 쓴다.
 
 비유: 옷장 관리인이다. 옷걸이(폴더)에 이름표(`preset.json`)를 붙여 걸고, 꺼낼 때는 옷을 전부 살핀 다음 지금 옷을 사진 찍어 두고 갈아입힌다. 도중에 문제가 생기면 사진대로 되돌린다. 신발장(창 위치·언어 같은 PC별 설정)은 건드리지 않는다.
 
 | 요구ID | 내용 | 이 모듈의 몫 |
 |---|---|---|
 | PS-01 | 이름 붙여 저장 → 목록 | `save`·`list`(§3.7.1·§3.7.4) |
-| PS-02 | 그림 전부·알림음·배율·휴식 시간·`mouse` 전체·`timer` 전체를 담는다 | `PresetSettings`(4필드)·`PresetFile.images`·`alarm`(§3.2) |
-| PS-03 | PC별 설정 5개(`overlay`·`autostart`·`language`·`positionLock`·`showInTaskbar`)는 적용해도 그대로 | `merge_into`(4필드만 대입)·`from_settings` 구조 분해 가드(§3.2, §7) |
+| PS-02 | 그림 전부·알림음·배율·휴식 시간·**키 그림 유지 시간**(7차)·`mouse` 전체·`timer` 전체를 담는다 | `PresetSettings`(**5필드** — 7차 key-hold로 4 → 5)·`PresetFile.images`·`alarm`(§3.2) |
+| PS-03 | PC별 설정 5개(`overlay`·`autostart`·`language`·`positionLock`·`showInTaskbar`)는 적용해도 그대로 | `merge_into`(**PS-02 5필드**만 대입)·`from_settings` 구조 분해 가드(§3.2, §7) |
+| KH-08 (7차 key-hold, 🔒 D-3 2026-11-01) | 프리셋 PS-02에 `keyHoldMs` 포함, 키 없는 옛 내보내기·내장 ①② = 150 | `PresetSettings.key_hold_ms`(컨테이너 default 150)·`normalized`의 0~500 clamp(§3.2·§7, D-P15) |
 | PS-04 (core 부분) | 적용 = 통째 교체(없는 슬롯 비움), 실패하면 되돌림, 자동 백업 없음 | `apply`(§3.7.3). 확인창·화면 반영은 ui·bridge |
 | PS-05 | 폴더째 내보내기, 새 의존성 없음 | `export_to`·`export_folder_name`(§3.5·§3.7.7) |
 | PS-06 | 폴더 가져오기, 규격 검사, 파일별 사유, 부분 등록 없음, 경로 탈출 금지 | `load_dir`(§3.6)·`import_from`(§3.7.2) |
@@ -244,6 +246,7 @@ pub(crate) struct PresetFile {
 pub(crate) struct PresetSettings {
     pub scale: f64,
     pub idle_seconds: u32,
+    pub key_hold_ms: u32,            // (7차 key-hold D-3) PS-02. 키 없는 옛·내장 프리셋 = 150(컨테이너 default)
     pub mouse: Option<MouseSettings>,
     pub timer: TimerSettings,
 }
@@ -253,18 +256,23 @@ impl PresetSettings {
     /// PS-02/PS-03 분류 가드 — Settings를 **구조 분해**로 읽는다. Settings에 필드가 늘면 컴파일이 깨져
     /// 분류를 강제한다(02-design §5).
     pub fn from_settings(s: &Settings) -> Self {
-        let Settings { scale, idle_seconds, overlay: _, mouse, autostart: _, language: _,
+        let Settings { scale, idle_seconds, key_hold_ms, overlay: _, mouse, autostart: _, language: _,
                        position_lock: _, show_in_taskbar: _, timer } = s;
-        Self { scale: *scale, idle_seconds: *idle_seconds, mouse: mouse.clone(), timer: timer.clone() }
+        Self { scale: *scale, idle_seconds: *idle_seconds, key_hold_ms: *key_hold_ms,
+               mouse: mouse.clone(), timer: timer.clone() }
     }
-    /// PS-02 4필드만 대입(PS-03 5필드 유지). settings::update 클로저 안에서 부른다 — 순수 대입만.
-    pub fn merge_into(&self, cur: &mut Settings) { /* scale·idle_seconds·mouse·timer */ }
-    /// 읽기 보정(settings::load와 같은 규칙): idle_seconds clamp(IDLE_SECONDS_MIN..=MAX), timer::normalize.
+    /// PS-02 5필드만 대입(PS-03 5필드 유지). settings::update 클로저 안에서 부른다 — 순수 대입만.
+    pub fn merge_into(&self, cur: &mut Settings) { /* scale·idle_seconds·key_hold_ms·mouse·timer */ }
+    /// 읽기 보정(settings::load와 같은 규칙): idle_seconds clamp(IDLE_SECONDS_MIN..=MAX), timer::normalize,
+    /// key_hold_ms: crate::settings::key_hold::normalize(0~500 clamp, 7차). `..self` 꼬리가 있어 이 줄을
+    /// 빠뜨려도 컴파일은 되므로 KP3이 지킨다.
     pub fn normalized(self) -> Self;
-    /// Settings { 4필드, ..Settings::default() }.validate() — 실패는 PresetError::InvalidSettings(SettingsError 문구).
+    /// Settings { 5필드, ..Settings::default() }.validate() — 실패는 PresetError::InvalidSettings(SettingsError 문구).
     pub fn validate(&self) -> Result<(), PresetError>;
 }
 ```
+
+- (7차) 파일 머리 `//! [설정]`(10행)·`presets/mod.rs` `//! [설정]`(19행)에 `key_hold_ms` 추가, 문서주석 「PS-02 4필드」 → 「5필드」.
 
 | 필드 | 타입 | 규칙 |
 |---|---|---|
@@ -815,6 +823,7 @@ impl PresetError {
 |---|---|---|---|
 | `scale` | PS-02 | 복사 | 프리셋 값 |
 | `idle_seconds` | PS-02 | 복사 | 프리셋 값(읽을 때 60~3600 clamp) |
+| **`key_hold_ms`** (7차 key-hold, 🔒 D-3 2026-11-01) | **PS-02** | 복사 | 프리셋 값(읽을 때 0~500 clamp — `settings::key_hold::normalize`). **키 없는 옛 내보내기·내장 ①② = 150**(컨테이너 default, 내장 원문 불변). 테스트 KP1·KP1b·KP2~KP4(§8.1) |
 | `mouse`(shoulder·area·partPos·hand·penPos·penMode) | PS-02 | 복사 | 프리셋 값(`null` 포함 통째로) |
 | `timer`(enabled·mode·countdownSecs·alarmVolume·textPos·rotation·fontSize·color) | PS-02 | 복사 | 프리셋 값(통째로, 읽을 때 `timer::normalize`) |
 | `overlay`(x·y·visible) | PS-03 | 안 읽음 | 유지 |
@@ -835,8 +844,11 @@ impl PresetError {
 
 | 파일 | 테스트 | 조건 → 기대 |
 |---|---|---|
-| `format.rs` | `preset_settings_has_exactly_ps02_fields` | `PresetSettings::default()` JSON 키 = `scale`·`idleSeconds`·`mouse`·`timer` 4개 |
-| `format.rs` | `merge_into_keeps_pc_local_fields` | overlay·autostart·language·positionLock·showInTaskbar를 기본과 다르게 둔 `Settings`에 병합 → 5필드 불변, 4필드 = 프리셋 값 |
+| `format.rs` | `preset_settings_has_exactly_ps02_fields` (**KP1 — 7차 개정**, 312행) | `PresetSettings::default()` JSON 키 = ~~4개~~ **5개** `["idleSeconds", "keyHoldMs", "mouse", "scale", "timer"]` |
+| `format.rs` | `merge_into_keeps_pc_local_fields` (**KP1b — 7차 컴파일 수리**, 326행) | overlay·autostart·language·positionLock·showInTaskbar를 기본과 다르게 둔 `Settings`에 병합 → 5필드 불변, PS-02 필드 = 프리셋 값. `PresetSettings { … }` 리터럴에 `..` 꼬리가 없어 `key_hold_ms` 1줄(예: 320)이 필요하다(패킷 누락). 단언 불변 |
+| `format.rs` | `preset_without_key_hold_reads_default` (**KP2 — 7차 신규**) | `settings`에 `keyHoldMs` 없는 preset JSON 파싱 → `key_hold_ms == 150` |
+| `format.rs` | `preset_key_hold_normalized` (**KP3 — 7차 신규**) | `keyHoldMs: 9999` → `normalized()` → 500 |
+| `format.rs` | `merge_into_sets_key_hold_keeps_pc_fields` (**KP4 — 7차 신규**) | `cur`(언어 ja·위치 999·key_hold 0)에 `key_hold_ms 320` 프리셋 `merge_into` → `cur.key_hold_ms == 320`, 언어·위치·autostart·positionLock·showInTaskbar 그대로 |
 | `format.rs` | `preset_file_round_trip` | 직렬화 → 역직렬화 같음 |
 | `format.rs` | `unknown_format_version_rejected` | `formatVersion: 2` → `Format` |
 | `format.rs` | `unknown_slot_rejected` | `images: ["nope"]` → `Format` |
@@ -924,8 +936,15 @@ impl PresetError {
 | PS-09 개정 (core, CR-065) | §2 `PresetPreview`·`PresetPreviewLayer`·`PresetSummary.preview`, §3.9, §3.7.1·§3.7.2·§3.7.4·§3.7.5 | `tests/presets_preview.rs` 7개(`preview_layers_have_url_and_size`·`preview_canvas_from_first_canvas_layer`·`preview_uses_default_mouse_when_none`·`preview_skips_unreadable_png`·`list_summary_includes_preview`·`rename_keeps_preview_urls`·`import_summary_has_preview`) | ✅ 설계 · 소스 구현됨 (합성은 ui) |
 | PS-10 | §3.7.3 「프리셋 폴더는 읽기만」 | `apply_then_edit_does_not_touch_preset` | ✅ 설계 · 소스 미적용 |
 | PS-11 (4차, 0.5.0) · 배포 변형 basic (5차, 🔒 2026-10-18) · 내장 ② 교체 「먼작기」 (6차, 🔒 2026-10-25, 0.6.0) | §2 `seed_builtin`·`SeedOutcome`·`SeedSkip`, §3.10(내장 표·시딩·`lib.rs` 호출·초기화 관계), §3.10.1·§3.10.2(6차 ② 원본·`PRESET2_ALARM_MP3`), §3.10.7(basic — 피처 `presets-basic`, ① 1개), §3.8, §11.2 D-P14 | `builtin_presets_parse_and_validate`·`seed_ids_valid`·`builtin_bytes_match_source_folder`·`seed_creates_builtins_when_dir_missing`·`seed_skips_when_dir_exists_even_if_empty`·`seed_output_listed_and_applicable`·`seed_clears_leftover_staging` — 기본·`--features presets-basic` 두 모드 | ✅ 설계 · 소스 구현됨(basic 포함) · 6차 ② 교체는 소스 적용 2026-10-25(core-implementer, 실물 일치) |
+| KH-08 (7차 key-hold, 🔒 D-3 2026-11-01) | §1, §3.2 `PresetSettings.key_hold_ms`·`from_settings`·`merge_into`·`normalized`·`validate`, §7 분류 표, §11.0 D-P15 | KP1 `preset_settings_has_exactly_ps02_fields`(개정)·KP1b `merge_into_keeps_pc_local_fields`(리터럴 수리)·KP2 `preset_without_key_hold_reads_default`·KP3 `preset_key_hold_normalized`·KP4 `merge_into_sets_key_hold_keeps_pc_fields` | ✅ 설계 · 적용됨(2026-11-01, core-implementer) |
 
 ## 11. 설계 결정 노트
+
+### 11.0 7차 key-hold (2026-11-01, 🔒 사용자 결정 D-3, 짝 [settings.md](settings.md) §3.13·§11 「key-hold 결정」)
+
+- **D-P15 `key_hold_ms`는 PS-02, 키 없으면 150(컨테이너 default)** — 대안 A 「PS-03(PC별, 적용해도 그대로)」는 `idle_seconds`·`scale` 같은 반응·크기 묶음과 갈라져 기각. 대안 B 「`Option<u32>` — 키 없으면 현재값 유지」는 기존 PS-02 필드와 규칙이 달라지고 `merge_into`에 분기가 생겨 기각(사용자 결정 D-3). 결과: 옛 내보내기·내장 ①②를 적용하면 150이 된다. 내장 원문 `doc/assets/presets/*/preset.json`은 고치지 않는다(150 = 기본값이라 원문에 쓸 이유가 없다). `formatVersion`은 1 그대로 — 필드 추가는 옛 앱이 모르는 키로 무시한다(D-P8·SEC-005). 읽기 보정은 `settings::key_hold::normalize`를 재사용해 `settings::load`와 같은 규칙을 지킨다(값 한 곳).
+- **패킷 대비 델타 Δ8**: 패킷은 개정 테스트로 KP1(312행 키 단언)만 적었다. `merge_into_keeps_pc_local_fields`도 `PresetSettings { … }`를 `..` 꼬리 없이 만들어 필드 추가 때 E0063이 난다 → KP1b로 1줄 수리. **해소** — core-implementer가 `key_hold_ms: 320`을 넣었다(실물 `format.rs:339`, 2026-11-01 Grep). 단언은 불변(`from_settings(&cur) == ps`가 새 필드까지 덮는다).
+- **파급(Grep 2026-11-01)**: 바뀐 곳은 `presets/format.rs`(필드·구조 분해·`merge_into`·`normalized`·`validate`·문서주석·KP1~KP4)와 `presets/mod.rs` `//! [설정]` 줄뿐. `builtin.rs`·`apply.rs`·`write.rs`·`scan.rs`·`load.rs`·`tests/presets*.rs`(`Settings` 리터럴은 `..Settings::default()`)·bridge·`PresetError`·code 불변.
 
 ### 11.1 패킷(`presets-03-packet-core.md`) 대비 델타
 

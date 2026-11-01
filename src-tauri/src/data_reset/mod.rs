@@ -271,6 +271,7 @@ mod tests {
             language: crate::settings::Language::Ja,
             autostart: true,
             scale: 1.75,
+            key_hold_ms: 400,
             mouse: None,
             ..Settings::default()
         };

@@ -1,13 +1,13 @@
 //! `preset.json` 형식·이름·id·내보내기 폴더 이름(PS-02·PS-06·PS-07).
 //!
-//! [목적] `PresetFile`·`PresetSettings`(PS-02 4필드) 직렬화·읽기 보정·검사, 이름 규칙(U-7), id 규칙(A-3)과
+//! [목적] `PresetFile`·`PresetSettings`(PS-02 5필드) 직렬화·읽기 보정·검사, 이름 규칙(U-7), id 규칙(A-3)과
 //!        자리 선점(`claim_staging`), 내보내기 폴더 이름 정화(PS-05).
 //! [공개 API] 모듈 밖 공개 없음. `pub(super)` 항목만: `PresetFile`·`PresetSettings`·`read_preset_file`·
 //!        `write_preset_file`·`normalize_name`·`is_valid_id`·`claim_staging`·`export_folder_name`.
 //! [스레드] 없음. 호출자 스레드에서 동기 실행.
 //! [unsafe] 없음.
 //! [에러] `PresetError::{NotPreset, Format, InvalidName, InvalidSettings, Io}`. `Format` 사유는 고정 문구.
-//! [설정] `PresetSettings`가 `Settings`의 PS-02 필드(`scale`·`idle_seconds`·`mouse`·`timer`)만 담는다.
+//! [설정] `PresetSettings`가 `Settings`의 PS-02 필드(`scale`·`idle_seconds`·`key_hold_ms`·`mouse`·`timer`)만 담는다.
 //! [테스트] 이 파일 `#[cfg(test)]` — 설계 §8.1 `format.rs` 13개.
 
 use std::io::ErrorKind;
@@ -61,6 +61,8 @@ pub(super) struct PresetFile {
 pub(super) struct PresetSettings {
     pub scale: f64,
     pub idle_seconds: u32,
+    /// (key-hold D-3) PS-02. 키 없는 옛·내장 프리셋 = 150(컨테이너 default).
+    pub key_hold_ms: u32,
     pub mouse: Option<MouseSettings>,
     pub timer: TimerSettings,
 }
@@ -78,6 +80,7 @@ impl PresetSettings {
         let Settings {
             scale,
             idle_seconds,
+            key_hold_ms,
             overlay: _,
             mouse,
             autostart: _,
@@ -89,33 +92,37 @@ impl PresetSettings {
         Self {
             scale: *scale,
             idle_seconds: *idle_seconds,
+            key_hold_ms: *key_hold_ms,
             mouse: mouse.clone(),
             timer: timer.clone(),
         }
     }
 
-    /// PS-02 4필드만 대입(PS-03 5필드 유지). `settings::update` 클로저 안에서 부른다 — 순수 대입만.
+    /// PS-02 5필드만 대입(PS-03 5필드 유지). `settings::update` 클로저 안에서 부른다 — 순수 대입만.
     pub fn merge_into(&self, cur: &mut Settings) {
         cur.scale = self.scale;
         cur.idle_seconds = self.idle_seconds;
+        cur.key_hold_ms = self.key_hold_ms;
         cur.mouse = self.mouse.clone();
         cur.timer = self.timer.clone();
     }
 
-    /// 읽기 보정(`settings::load`와 같은 규칙): idle_seconds clamp, `timer::normalize`.
+    /// 읽기 보정(`settings::load`와 같은 규칙): idle_seconds·key_hold_ms clamp, `timer::normalize`.
     pub fn normalized(self) -> Self {
         Self {
             idle_seconds: self.idle_seconds.clamp(IDLE_SECONDS_MIN, IDLE_SECONDS_MAX),
+            key_hold_ms: crate::settings::key_hold::normalize(self.key_hold_ms),
             timer: timer::normalize(self.timer),
             ..self
         }
     }
 
-    /// `Settings { 4필드, ..Settings::default() }.validate()` — 실패는 `InvalidSettings`.
+    /// `Settings { 5필드, ..Settings::default() }.validate()` — 실패는 `InvalidSettings`.
     pub fn validate(&self) -> Result<(), PresetError> {
         let full = Settings {
             scale: self.scale,
             idle_seconds: self.idle_seconds,
+            key_hold_ms: self.key_hold_ms,
             mouse: self.mouse.clone(),
             timer: self.timer.clone(),
             ..Settings::default()
@@ -309,7 +316,10 @@ mod tests {
         let v = serde_json::to_value(PresetSettings::default()).expect("json");
         let mut keys: Vec<&String> = v.as_object().expect("obj").keys().collect();
         keys.sort();
-        assert_eq!(keys, ["idleSeconds", "mouse", "scale", "timer"]);
+        assert_eq!(
+            keys,
+            ["idleSeconds", "keyHoldMs", "mouse", "scale", "timer"]
+        );
     }
 
     #[test]
@@ -326,6 +336,7 @@ mod tests {
         let ps = PresetSettings {
             scale: 1.5,
             idle_seconds: 600,
+            key_hold_ms: 320,
             mouse: None,
             timer: TimerSettings {
                 enabled: true,
@@ -373,6 +384,46 @@ mod tests {
         assert_eq!(file.images.len(), 65);
         let text = serde_json::to_string(&file).expect("ser");
         assert!(is_format(parse_preset(&text)));
+    }
+
+    /// KP2
+    #[test]
+    fn preset_without_key_hold_reads_default() {
+        let file = parse_preset(&json(r#","settings":{"scale":1.5}"#)).expect("parse");
+        assert_eq!(file.settings.key_hold_ms, 150);
+    }
+
+    /// KP3
+    #[test]
+    fn preset_key_hold_normalized() {
+        let file = parse_preset(&json(r#","settings":{"keyHoldMs":9999}"#)).expect("parse");
+        assert_eq!(file.settings.key_hold_ms, 500);
+    }
+
+    /// KP4
+    #[test]
+    fn merge_into_sets_key_hold_keeps_pc_fields() {
+        let mut cur = Settings {
+            language: crate::settings::Language::Ja,
+            autostart: true,
+            position_lock: true,
+            show_in_taskbar: true,
+            key_hold_ms: 0,
+            ..Settings::default()
+        };
+        cur.overlay.x = 999;
+        let before = cur.clone();
+        let ps = PresetSettings {
+            key_hold_ms: 320,
+            ..PresetSettings::default()
+        };
+        ps.merge_into(&mut cur);
+        assert_eq!(cur.key_hold_ms, 320);
+        assert_eq!(cur.overlay, before.overlay);
+        assert_eq!(cur.language, before.language);
+        assert_eq!(cur.autostart, before.autostart);
+        assert_eq!(cur.position_lock, before.position_lock);
+        assert_eq!(cur.show_in_taskbar, before.show_in_taskbar);
     }
 
     #[test]
